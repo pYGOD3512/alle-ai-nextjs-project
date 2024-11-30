@@ -6,7 +6,7 @@ import { ModelSelector } from './ModelSelector';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ModelResponse } from './ModelResponse';
-import { useSidebarStore } from '@/lib/stores/sidebar-store';
+import { useSidebarStore } from '@/lib/constants';
 
 const MODELS = [
   {
