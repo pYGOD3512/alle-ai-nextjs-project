@@ -1,18 +1,25 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ContextMenu, ContextMenuTrigger, ContextMenuItem, ContextMenuContent } from "@/components/ui/context-menu";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuItem,
+  ContextMenuContent,
+} from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  LayoutGrid, 
-  Plus,
-  EllipsisVertical ,
-} from 'lucide-react';
-import Image from 'next/image';
-import { useSidebarStore, sidebarMenuItems, chatHistory, dropdownMenuItems } from '@/lib/constants';
-import { 
+import { LayoutGrid, Plus, EllipsisVertical } from "lucide-react";
+import Image from "next/image";
+import {
+  useSidebarStore,
+  sidebarMenuItems,
+  chatHistory,
+  dropdownMenuItems,
+} from "@/lib/constants";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -26,13 +33,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Sidebar() {
-  const { isOpen, currentPage, setCurrentPage } = useSidebarStore();
+  const { isOpen } = useSidebarStore();
+  const pathname = usePathname();
 
   return (
-    <div className={`fixed left-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
-      isOpen ? 'w-60' : 'w-16'
-    } border-r bg-sideBarBackground`}>
-
+    <div
+      className={`fixed left-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
+        isOpen ? "w-60" : "w-16"
+      } border-r bg-sideBarBackground`}
+    >
       <div className="p-2">
         {isOpen ? (
           <>
@@ -48,39 +57,36 @@ export function Sidebar() {
 
             <div className="mt-4 space-y-1">
               {sidebarMenuItems.map((item, i) => (
-                <Button
-                  key={i}
-                  variant="ghost"
-                  className={`w-full justify-start h-8 text-sm ${
-                    currentPage === item.label ? 'bg-secondary' : ''
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`w-full flex items-center justify-start h-8 text-sm ${
+                    pathname === item.href ? "bg-secondary" : ""
                   }`}
-                  onClick={() => setCurrentPage(item.label)}
                 >
                   <item.icon className="mr-2 h-4 w-4" />
                   {item.label}
                   {item.beta && (
-                    <span className="ml-2 text-xs bg-primary/10 px-1.5 py-0.5 rounded">
+                    <span className="ml-2 text-xs bg-primary/10 px-0.5 py-0.5 rounded">
                       Soon
                     </span>
                   )}
-                </Button>
+                </Link>
               ))}
             </div>
           </>
         ) : (
           <div className="space-y-2">
             {sidebarMenuItems.map((item, i) => (
-              <Button
-                key={i}
-                variant="ghost"
-                size="icon"
-                className={`w-full ${
-                  currentPage === item.label ? 'bg-secondary' : ''
-                }`}
-                onClick={() => setCurrentPage(item.label)}
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`w-full h-9 inline-flex items-center justify-center rounded-md ${
+                  pathname === item.href ? "bg-secondary" : ""
+                } hover:bg-accent hover:text-accent-foreground`}
               >
                 <item.icon className="h-4 w-4" />
-              </Button>
+              </Link>
             ))}
           </div>
         )}
@@ -99,53 +105,68 @@ export function Sidebar() {
                     <ContextMenuTrigger>
                       <div className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md">
                         <div className="relative flex-1 min-w-0">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="relative text-sm text-left cursor-pointer">
-                              <div className="whitespace-nowrap overflow-hidden">
-                                {chat.length > 26 ? `${chat.substring(0, 26)}` : chat}
-                                <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
-                              </div>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[300px] break-words">
-                            {chat}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="relative text-sm text-left cursor-pointer">
+                                  <div className="whitespace-nowrap overflow-hidden">
+                                    {chat.length > 26
+                                      ? `${chat.substring(0, 26)}`
+                                      : chat}
+                                    <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
+                                  </div>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="top"
+                                className="max-w-[300px] break-words"
+                              >
+                                {chat}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
 
-                    <div className="absolute right-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
-                          >
-                            <EllipsisVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[160px]">
-                          {dropdownMenuItems.historyDropdownMenuItems.map((item, i) => (
-                            <DropdownMenuItem key={i} className={item.className}>
-                              <item.icon className="mr-2 h-4 w-4" />
-                              <span>{item.label}</span>
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        <div className="absolute right-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
+                              >
+                                <EllipsisVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-[160px]"
+                            >
+                              {dropdownMenuItems.historyDropdownMenuItems.map(
+                                (item, i) => (
+                                  <DropdownMenuItem
+                                    key={i}
+                                    className={item.className}
+                                  >
+                                    <item.icon className="mr-2 h-4 w-4" />
+                                    <span>{item.label}</span>
+                                  </DropdownMenuItem>
+                                )
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                    </div>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
-                      {dropdownMenuItems.historyDropdownMenuItems.map((item, i) => (
-                        <ContextMenuItem key={i} className={item.className}>
-                          <item.icon className="mr-2 h-4 w-4" />
-                          <span>{item.label}</span>
-                        </ContextMenuItem>
-                      ))}
+                      {dropdownMenuItems.historyDropdownMenuItems.map(
+                        (item, i) => (
+                          <ContextMenuItem key={i} className={item.className}>
+                            <item.icon className="mr-2 h-4 w-4" />
+                            <span>{item.label}</span>
+                          </ContextMenuItem>
+                        )
+                      )}
                     </ContextMenuContent>
                   </ContextMenu>
                 ))}
