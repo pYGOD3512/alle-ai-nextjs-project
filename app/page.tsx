@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { ChatArea } from '@/components/features/ChatArea';
+import { useSidebarStore } from '@/lib/stores/sidebar-store';
 
 export default function Home() {
   return (

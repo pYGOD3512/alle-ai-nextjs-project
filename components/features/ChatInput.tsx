@@ -7,7 +7,7 @@ import {
   Paperclip,
   Mic
 } from 'lucide-react';
-import { useSidebarStore } from '@/lib/constants';
+import { useSidebarStore } from '@/lib/stores/sidebar-store';
 
 interface ChatInputProps {
   value: string;
