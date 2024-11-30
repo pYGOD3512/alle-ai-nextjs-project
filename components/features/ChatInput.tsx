@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
-  Send,
+  ArrowUp ,
   Paperclip,
   Mic
 } from 'lucide-react';
@@ -18,11 +18,13 @@ interface ChatInputProps {
 export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
   const { isOpen } = useSidebarStore();
 
+  const isInputEmpty = value.trim() === '';
+
   return (
-    <div className={`border-t p-4 bg-background/95 backdrop-blur transition-all duration-300 ${
-      isOpen ? 'pl-60' : 'pl-16'
+    <div className={` p-2 bg-background/95 backdrop-blur transition-all duration-300 ${
+      isOpen ? '' : 'pl-16'
     }`}>
-      <div className="max-w-3xl mx-auto flex items-center gap-2">
+      <div className="max-w-3xl mx-auto flex items-center gap-1 border-2 rounded-2xl p-2">
         <Button variant="ghost" size="icon" className="flex-shrink-0">
           <Paperclip className="h-4 w-4" />
         </Button>
@@ -30,16 +32,24 @@ export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Message multiple models..."
-          className="flex-1"
-          onKeyPress={(e) => e.key === 'Enter' && onSend()}
+          className="flex-1 border-none focus-visible:outline-none"
+          onKeyPress={(e) => e.key === 'Enter' && !isInputEmpty && onSend()}
         />
         <Button variant="ghost" size="icon" className="flex-shrink-0">
           <Mic className="h-4 w-4" />
         </Button>
-        <Button onClick={onSend} size="icon" className="flex-shrink-0">
-          <Send className="h-4 w-4" />
+        <Button
+          onClick={onSend}
+          size="icon"
+          className={`flex-shrink-0 rounded-full h-8 w-8 ${
+            isInputEmpty ? 'bg-gray-300 text-gray-500 hover:bg-gray-300' : 'bg-black text-white hover:bg-black-300'
+          }`}
+          disabled={isInputEmpty}
+        >
+          <ArrowUp className="h-4 w-4" />
         </Button>
       </div>
+      <p className="text-center text-xs mt-2">Your all-in-one AI Platform</p>
     </div>
   );
 }

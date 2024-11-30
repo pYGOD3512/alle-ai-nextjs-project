@@ -31,7 +31,7 @@ export function Sidebar() {
   return (
     <div className={`fixed left-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
       isOpen ? 'w-60' : 'w-16'
-    } border-r bg-background`}>
+    } border-r bg-sideBarBackground`}>
 
       <div className="p-2">
         {isOpen ? (
@@ -105,7 +105,7 @@ export function Sidebar() {
                             <div className="relative text-sm text-left cursor-pointer">
                               <div className="whitespace-nowrap overflow-hidden">
                                 {chat.length > 26 ? `${chat.substring(0, 26)}` : chat}
-                                <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-background group-hover:to-secondary/80" />
+                                <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
                               </div>
                             </div>
                           </TooltipTrigger>
@@ -153,7 +153,7 @@ export function Sidebar() {
             </ScrollArea>
           </div>
 
-          <div className="absolute bottom-14 left-0 right-0 p-4 rounded-md bg-secondary m-2">
+          <div className="absolute bottom-12 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-backgroundSecondary transition-colors duration-200">
             <div className="flex items-center gap-3 mb-4">
               <Image
                 src="/user.jpg"
@@ -172,7 +172,7 @@ export function Sidebar() {
                 </div>
               </div>
             </div>
-            <Button size="sm" variant="default" className="w-full text-xs">
+            <Button size="sm" variant="outline" className="w-full text-xs">
               MANAGE SUBSCRIPTION
             </Button>
           </div>

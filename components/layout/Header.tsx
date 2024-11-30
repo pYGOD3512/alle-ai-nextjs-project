@@ -1,44 +1,57 @@
 'use client';
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
+import { useTheme } from 'next-themes';
 import { 
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 import { useSidebarStore, navItems, models } from '@/lib/constants';
+import { ThemeToggle } from "../ui/theme-toggle";
 
 export function Header() {
   const { isOpen, toggle } = useSidebarStore();
-  
+  const { theme, setTheme } = useTheme();
+
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className={`absolute left-0 h-14 flex items-center justify-center transition-all duration-200 ${
         isOpen ? 'w-60' : 'w-16'
-      } border-r px-4`}>
+      } border-r px-4 bg-sideBarBackground`}>
         {isOpen ? (
-          <Image 
-            src="/svgs/logo-desktop-dark-full.png"
-            alt="Logo"
-            width={100}
-            height={100}
-            className="rounded mx-auto"
-          />
+          mounted && (
+            <Image 
+              src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+              alt="Logo"
+              width={100}
+              height={100}
+              className="rounded mx-auto"
+            />
+          )
         ) : (
-          <Image 
-            src="/svgs/logo-desktop-mini-dark.png"
-            alt="Logo"
-            width={100}
-            height={100}
-            className="rounded mx-auto"
-          />
+          mounted && (
+            <Image 
+              src={theme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+              alt="Logo"
+              width={100}
+              height={100}
+              className="rounded mx-auto"
+            />
+          )
         )}
         
         <Button 
           variant="secondary" 
           size="icon" 
           onClick={toggle}
-          className="h-6 w-6 absolute -right-4"
+          className="h-6 w-6 absolute -right-3"
         >
           {isOpen ? (
             <ChevronLeft className="h-4 w-4" />
@@ -68,8 +81,11 @@ export function Header() {
         )}
         
         <div className="flex items-center gap-2 ml-auto mr-8">
+          <ThemeToggle />
           {navItems.map((item, index) => (
-            <Button key={index} variant="ghost" size="icon" className="w-7 h-7 p-1 rounded-full border border-gray-200 " onClick={item.onClick}>
+            <Button key={index} variant="ghost" size="icon" className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary " 
+            onClick={() => { item.onClick(); }}
+            >
               <item.type className="h-5 w-5" />
             </Button>
           ))}

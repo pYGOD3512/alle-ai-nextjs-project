@@ -9,6 +9,8 @@ interface SidebarState {
   setCurrentPage: (page: string) => void;
 }
 
+// SIDEBAR & HEADER CONSTANTS
+
 export const useSidebarStore = create<SidebarState>()(
   persist(
     (set) => ({
@@ -44,13 +46,6 @@ export const navItems = [
         label: 'Help',
         onClick: () => {
           console.log('Help');
-        }
-    },
-    {
-        type: Sun,
-        label: 'Theme',
-        onClick: () => {
-          console.log('Theme');
         }
     },
     {
@@ -97,7 +92,7 @@ export const dropdownMenuItems = {
       },
       {
         label: 'Delete',
-        className: 'text-destructive',
+        className: 'text-red-500',
         icon: Trash2,
       }
     ],
@@ -108,3 +103,87 @@ export const dropdownMenuItems = {
       },
     ]
 };
+
+
+// CHAT AREA CONSTANTS
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+  responses?: {
+    model: string;
+    content: string;
+    icon: string;
+  }[];
+}
+
+export const MODELS = [
+  {
+    id: 'gpt4',
+    name: 'GPT-4o',
+    icon: '/models/gpt-4o.png',
+    preview: 'Making one million dollars in just five...'
+  },
+  {
+    id: 'claude',
+    name: 'Claude 3.5 Sonnet',
+    icon: '/models/claude-3.png',
+    preview: 'Making $1 million in just 5 days is...'
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini 1.5 Pro',
+    icon: '/models/gemini.png',
+    preview: 'Making a million dollars in 5 days is...'
+  },
+  {
+    id: 'llama',
+    name: 'Llama 3 70B Instruct',
+    icon: '/models/meta.png',
+    preview: 'The elusive goal of making $1 million in...'
+  },
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    icon: '/models/gpt-3-5.png',
+    preview: 'Making $1 million in just 5 days is an...'
+  }
+];
+
+export const initialMessages = [
+  {
+    id: '1',
+    content: 'How do I make 1 million dollars in 5 days?',
+    sender: 'user',
+    timestamp: new Date(),
+    responses: [
+      {
+        model: 'GPT-4o',
+        content: 'Making one million dollars in just five days is an extremely ambitious goal...',
+        icon: '/models/gpt-4o.png',
+      },
+      {
+        model: 'Claude 3.5 Sonnet',
+        content: 'Making $1 million in just 5 days requires careful consideration...',
+        icon: '/models/claude-3.png',
+      },
+      {
+        model: 'Gemini 1.5 Pro',
+        content: 'While achieving this goal is challenging, here are some potential approaches...',
+        icon: '/models/gemini.png',
+      },
+      {
+        model: 'Llama 3 70B Instruct',
+        content: 'This is a complex goal that requires analyzing multiple factors...',
+        icon: '/models/meta.png',
+      },
+      {
+        model: 'ChatGPT',
+        content: `Generative AI, powered by advanced machine learning algorithms, has emerged as a transformative technology with immense potential to shape various industries and applications. Here's an overview of its potential future`,
+        icon: '/models/gpt-3-5.png',
+      },
+    ],
+  }
+]

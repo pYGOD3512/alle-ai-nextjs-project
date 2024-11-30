@@ -18,7 +18,7 @@ interface ModelSelectorProps {
 
 export function ModelSelector({ models, activeModel, onSelect }: ModelSelectorProps) {
   return (
-    <div className="grid grid-cols-5 gap-4 w-full">
+    <div className="grid grid-cols-5 gap-4 max-w-[90%] mx-auto">
       {models.map((model) => (
         <Button
           key={model.id}
@@ -29,7 +29,7 @@ export function ModelSelector({ models, activeModel, onSelect }: ModelSelectorPr
           <p className="text-xs text-left text-muted-foreground line-clamp-2 mb-auto">
             {model.preview}
           </p>
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2 w-full overflow-hidden whitespace-nowrap">
             <Image
               src={model.icon}
               alt={model.name}
