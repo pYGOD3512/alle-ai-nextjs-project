@@ -9,7 +9,6 @@ export default function ImageGenerationPage() {
         isOpen ? "pl-60" : "pl-16"
       }`}
     >
-     
       Image page{" "}
     </div>
   );

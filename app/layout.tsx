@@ -26,10 +26,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative min-h-screen">
-            <Header />
+          <div className="flex min-h-screen">
             <Sidebar />
-            <main className="absolute left-16 top-14 right-0 min-h-[calc(100vh-3.5rem)] transition-all duration-300">
+            <main className="flex-1 flex flex-col transition-all duration-300">
+              <Header />
               {children}
             </main>
           </div>
