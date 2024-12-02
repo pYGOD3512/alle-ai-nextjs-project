@@ -1,7 +1,6 @@
 import {
   ALargeSmall,
   Settings,
-  Sun,
   HelpCircle,
   User,
   MessageSquare,
@@ -12,7 +11,9 @@ import {
   Trash2,
   Pencil,
   Bell,
-  BellDot,
+  Handshake,
+  LogOut,
+  Braces,
 } from "lucide-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -24,7 +25,7 @@ interface SidebarState {
   setCurrentPage: (page: string) => void;
 }
 
-// SIDEBAR & HEADER CONSTANTS
+// SIDEBAR & HEADER CONSTANTS ----- START
 
 export const useSidebarStore = create<SidebarState>()(
   persist(
@@ -51,32 +52,62 @@ export const models = [
 export const navItems = [
   {
     type: ALargeSmall,
-    label: "AI Tools",
+    label: "Text size",
+    interactionType: "modal",
     onClick: () => {
-      console.log("AI Tools");
+      console.log("Opening Text Size Modal");
     },
   },
   {
     type: HelpCircle,
     label: "Help",
-    onClick: () => {
-      console.log("Help");
-    },
+    interactionType: "function",
   },
   {
     type: MessagesSquare,
     label: "Feedback",
+    interactionType: "modal",
     onClick: () => {
-      console.log("Feedback");
+      console.log("Opening Feedback Modal");
     },
   },
   {
-    type: BellDot,
+    type: Bell,
     label: "Notifications",
-    onClick: () => {
-      console.log("Notifications");
-    },
+    interactionType: "dropdown",
+    dropdownItems: [
+      {
+        label: "All Notifications",
+        icon: Bell,
+        onClick: () => console.log("All Notifications")
+      },
+    ]
   },
+];
+
+type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+};
+
+export const notifications: Notification[] = [
+  {
+    id: '1',
+    title: 'New Model Available',
+    message: 'Claude 3 Opus is now available for all users',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+    read: false,
+  },
+  {
+    id: '2',
+    title: 'Welcome!',
+    message: 'Thanks for joining our AI platform. Take a tour to get started.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    read: true,
+  }
 ];
 
 export const sidebarMenuItems = [
@@ -119,7 +150,47 @@ export const dropdownMenuItems = {
   ],
 };
 
-// CHAT AREA CONSTANTS
+export const userMenuItems = [
+  {
+    label: 'Profile',
+    icon: User,
+    onClick: () => {
+      console.log('Profile');
+    },
+  },
+  {
+    label: 'Developer',
+    icon: Braces,
+    onClick: () => {
+      console.log('Developer');
+    },
+  },
+  {
+    label: 'Refer',
+    icon: Handshake,
+    onClick: () => {
+      console.log('Refer');
+    },
+  },
+  {
+    label: 'Settings',
+    icon: Settings,
+    onClick: () => {
+      console.log('Settings');
+    },
+  },
+  {
+    label: 'Log Out',
+    icon: LogOut,
+    onClick: () => {
+      console.log('Log Out');
+    },
+  },
+]
+// SIDEBAR & HEADER CONSTANTS ----- END
+
+
+// CHAT AREA CONSTANTS ----- START
 
 export interface Message {
   id: string;
@@ -205,3 +276,5 @@ export const initialMessages = [
     ],
   },
 ];
+
+// CHAT AREA CONSTANTS ----- END
