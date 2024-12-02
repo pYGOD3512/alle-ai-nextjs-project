@@ -60,11 +60,6 @@ export function Sidebar() {
                   <Plus className="mr-2 h-4 w-4" />
                   NEW CHAT
                 </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setModelSelectionModalOpen(true)}
-                >
                   <Button variant="outline" size="icon" onClick={() => setModelSelectionModalOpen(true)}>
                   <LayoutGrid className="h-4 w-4" />
                 </Button>

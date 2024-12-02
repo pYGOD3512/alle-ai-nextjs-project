@@ -7,7 +7,7 @@ import {
   Paperclip,
   Mic
 } from 'lucide-react';
-import { useSidebarStore } from '@/lib/constants';
+// import { useSidebarStore } from '@/lib/constants';
 
 interface ChatInputProps {
   value: string;
@@ -17,7 +17,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ value, onChange, onSend, inputRef }: ChatInputProps) {
-  const { isOpen } = useSidebarStore();
+  // const { isOpen } = useSidebarStore();
 
   const isInputEmpty = value.trim() === '';
 
