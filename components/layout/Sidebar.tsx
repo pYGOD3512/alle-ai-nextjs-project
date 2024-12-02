@@ -51,7 +51,7 @@ export function Sidebar() {
         {isOpen ? (
           <>
             <div className="flex gap-2 px-2">
-              <Button className="flex-1">
+              <Button variant="outline" className="flex-1">
                 <Plus className="mr-2 h-4 w-4" />
                 NEW CHAT
               </Button>

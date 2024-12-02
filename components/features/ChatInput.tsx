@@ -13,9 +13,10 @@ interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
-export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
+export function ChatInput({ value, onChange, onSend, inputRef }: ChatInputProps) {
   const { isOpen } = useSidebarStore();
 
   const isInputEmpty = value.trim() === '';
@@ -29,6 +30,7 @@ export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
           <Paperclip className="h-4 w-4" />
         </Button>
         <Input
+          ref={inputRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Message multiple models..."

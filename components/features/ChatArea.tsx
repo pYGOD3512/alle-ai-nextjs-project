@@ -1,7 +1,7 @@
 //@ts-nocheck
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSelector } from './ModelSelector';
 import { ChatMessage } from './ChatMessage';
@@ -9,7 +9,7 @@ import { ChatInput } from './ChatInput';
 import { ModelResponse } from './ModelResponse';
 import { CHAT_MODELS as MODELS, Message, initialMessages, useSidebarStore } from '@/lib/constants';
         
-        import GreetingMessage from "./GreetingMessage";
+import GreetingMessage from "./GreetingMessage";
 
 // static options
 const options = [
@@ -23,6 +23,7 @@ const options = [
 
 
 export function ChatArea() {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { isOpen } = useSidebarStore();
   const [messages, setMessages] = useState<Message[]>(
     initialMessages.map((message) => ({
@@ -37,25 +38,28 @@ export function ChatArea() {
   const handleSend = () => {
     if (!input.trim()) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: input,
-      sender: "user",
-      timestamp: new Date(),
-      responses: [
-        {
-          model: "GPT-4o",
-          content: "Sample response from GPT-4o...",
-          icon: "/models/gpt-4o.png",
-        },
-      ],
-    };
+    // const newMessage: Message = {
+    //   id: Date.now().toString(),
+    //   content: input,
+    //   sender: "user",
+    //   timestamp: new Date(),
+    //   responses: [
+    //     {
+    //       model: "GPT-4o",
+    //       content: "Sample response from GPT-4o...",
+    //       icon: "/models/gpt-4o.png",
+    //     },
+    //   ],
+    // };
 
-    setMessages([...messages, newMessage]);
+    setChatStarted(true);
+
+    setMessages([...messages]);
     setInput("");
   };
   const handleClicked = (opt: { label: String }) => {
     setInput(opt.label as String);
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
   return (
     <div
@@ -113,7 +117,7 @@ export function ChatArea() {
         </div>
       </ScrollArea>
 
-      <ChatInput value={input} onChange={setInput} onSend={handleSend} />
+      <ChatInput value={input} onChange={setInput} onSend={handleSend} inputRef={inputRef} />
     </div>
   );
 }
