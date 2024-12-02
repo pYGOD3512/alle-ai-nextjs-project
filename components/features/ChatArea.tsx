@@ -6,7 +6,7 @@ import { ModelSelector } from './ModelSelector';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ModelResponse } from './ModelResponse';
-import {MODELS, Message, initialMessages, useSidebarStore } from '@/lib/constants';
+import { CHAT_MODELS as MODELS, Message, initialMessages, useSidebarStore } from '@/lib/constants';
 
 export function ChatArea() {
   const { isOpen } = useSidebarStore();

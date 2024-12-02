@@ -12,20 +12,25 @@ import {
   ALargeSmall,
   MessagesSquare,
   HelpCircle,
+  LogOut,
 } from 'lucide-react';
 import { useSidebarStore, navItems, models, userMenuItems, notifications as notificationData } from '@/lib/constants';
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { TextSizeModal, FeedbackModal } from "../ui/modals";
+import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
 
 export function Header() {
   const { isOpen, toggle } = useSidebarStore();
   const { theme, setTheme } = useTheme();
 
   const [mounted, setMounted] = React.useState(false);
+  const [notifications, setNotifications] = React.useState(notificationData);
   const [textSizeModalOpen, setTextSizeModalOpen] = React.useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(notificationData);
+  const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
+  const [userProfileModalOpen, setUserProfileModalOpen] = React.useState(false);
+  const [referModalOpen, setReferModalOpen] = React.useState(false);
+
 
   React.useEffect(() => {
     setMounted(true);
@@ -51,7 +56,7 @@ export function Header() {
           variant="ghost" 
           size="icon" 
           onClick={handleClick}
-          className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary"
+          className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
         >
           <item.type className="h-5 w-5" />
         </Button>
@@ -74,7 +79,7 @@ export function Header() {
           variant="ghost" 
           size="icon" 
           onClick={openModal}
-          className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary"
+          className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
         >
           <item.type className="h-5 w-5" />
         </Button>
@@ -88,7 +93,7 @@ export function Header() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="relative w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary"
+            className="relative w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
           >
             <item.type className="h-5 w-5" />
             {notifications.some(n => !n.read) && (
@@ -147,6 +152,36 @@ export function Header() {
     );
   };
 
+  const handleUserMenuItemClick = (item: any) => {
+    switch (item.interactionType) {
+      case 'modal':
+        if (item.label === 'Profile') {
+          setUserProfileModalOpen(true);
+        } else if (item.label === 'Settings') {
+          setSettingsModalOpen(true);
+        } else if (item.label === 'Refer') {
+          setReferModalOpen(true);
+        }
+        break;
+      case 'link':
+        window.open(item.href, '_blank');
+        break;
+      case 'function':
+        const functionMap = {
+          [LogOut.name]: handleLogOut,
+        };
+  
+        const handleMenuItemClick = () => {
+          const handler = functionMap[item.label.name];
+          if (handler) {
+            handler();
+          }
+        };
+        handleMenuItemClick();
+        break;
+    }
+  };
+
   // Mark as read
   const markAsRead = (notificationId: string) => {
     setNotifications(notifications.map(notification => 
@@ -158,7 +193,10 @@ export function Header() {
   
 
   const handleTour = () => {
-    console.log("I'll implement the tour later");
+    console.log("Starting tour...");
+  };
+  const handleLogOut = () => {
+    console.log("Logging out...");
   };
 
 
@@ -233,7 +271,7 @@ export function Header() {
                 alt="User Image"
                 width={35}
                 height={35}
-                className="rounded-full mx-auto cursor-pointer"
+                className="rounded-full mx-auto cursor-pointer select-none"
               />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-backgroundSecondary">
@@ -252,7 +290,7 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>
                 {userMenuItems.map((item, index) => (
-                  <DropdownMenuItem key={index} onClick={item.onClick} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
+                  <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </DropdownMenuItem>
@@ -269,6 +307,18 @@ export function Header() {
       <FeedbackModal 
         isOpen={feedbackModalOpen} 
         onClose={() => setFeedbackModalOpen(false)} 
+      />
+      <SettingsModal 
+        isOpen={settingsModalOpen} 
+        onClose={() => setSettingsModalOpen(false)} 
+      />
+      <UserProfileModal 
+        isOpen={userProfileModalOpen} 
+        onClose={() => setUserProfileModalOpen(false)} 
+      />
+      <ReferModal 
+        isOpen={referModalOpen} 
+        onClose={() => setReferModalOpen(false)} 
       />
     </>
   );

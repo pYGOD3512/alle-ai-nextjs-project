@@ -154,39 +154,42 @@ export const userMenuItems = [
   {
     label: 'Profile',
     icon: User,
+    interactionType: 'modal',
     onClick: () => {
-      console.log('Profile');
+      console.log('Opening Profile Modal');
     },
   },
   {
     label: 'Developer',
     icon: Braces,
-    onClick: () => {
-      console.log('Developer');
-    },
+    interactionType: 'link',
+    href: 'https://alle-ai.com/developer',
   },
   {
     label: 'Refer',
     icon: Handshake,
+    interactionType: 'modal',
     onClick: () => {
-      console.log('Refer');
+      console.log('Opening Refer Modal');
     },
   },
   {
     label: 'Settings',
     icon: Settings,
+    interactionType: 'modal',
     onClick: () => {
-      console.log('Settings');
+      console.log('Opening Settings Modal');
     },
   },
   {
-    label: 'Log Out',
+    label: 'LogOut',
     icon: LogOut,
+    interactionType: 'function',
     onClick: () => {
-      console.log('Log Out');
+      console.log('Logging out...');
     },
   },
-]
+];
 // SIDEBAR & HEADER CONSTANTS ----- END
 
 
@@ -204,7 +207,7 @@ export interface Message {
   }[];
 }
 
-export const MODELS = [
+export const CHAT_MODELS = [
   {
     id: "gpt4",
     name: "GPT-4o",
@@ -234,6 +237,51 @@ export const MODELS = [
     name: "ChatGPT",
     icon: "/models/gpt-3-5.png",
     preview: "Making $1 million in just 5 days is an...",
+  },
+];
+
+export const IMAGE_MODELS = [
+  {
+    id: "dall-e-3",
+    name: "DALL-E 3",
+    icon: "/models/dall-e.png",
+    preview: "Create stunning, photorealistic images with OpenAI's latest model",
+  },
+  {
+    id: "midjourney",
+    name: "Midjourney",
+    icon: "/models/midjourney.png",
+    preview: "Generate artistic and creative visuals with fine control",
+  },
+];
+
+export const AUDIO_MODELS = [
+  {
+    id: "whisper",
+    name: "Whisper",
+    icon: "/models/palm-2.png",
+    preview: "State-of-the-art speech recognition and transcription",
+  },
+  {
+    id: "musicgen",
+    name: "MusicGen",
+    icon: "/models/dream.png",
+    preview: "Generate original music and sound effects",
+  },
+];
+
+export const VIDEO_MODELS = [
+  {
+    id: "sora",
+    name: "Sora",
+    icon: "/models/sora.webp",
+    preview: "Create realistic and imaginative videos with OpenAI's latest",
+  },
+  {
+    id: "runway",
+    name: "Runway Gen-2",
+    icon: "/models/runway.png",
+    preview: "Professional video generation and editing capabilities",
   },
 ];
 
