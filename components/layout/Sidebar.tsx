@@ -56,11 +56,19 @@ export function Sidebar() {
           {isOpen ? (
             <>
               <div className="flex gap-2 px-2">
-                <Button onClick={handleNewChat} variant="outline" className="flex-1">
+                <Button
+                  onClick={handleNewChat}
+                  variant="outline"
+                  className="flex-1"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   NEW CHAT
                 </Button>
-                  <Button variant="outline" size="icon" onClick={() => setModelSelectionModalOpen(true)}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setModelSelectionModalOpen(true)}
+                >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
               </div>
@@ -72,7 +80,13 @@ export function Sidebar() {
                     href={item.href}
                     onClick={() => setCurrentPage(item.label)}
                     className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                      pathname === item.href ? "bg-secondary" : ""
+                      item.href === "/"
+                        ? pathname === "/" || pathname.startsWith("/chat/res")
+                          ? "bg-secondary"
+                          : ""
+                        : pathname === item.href
+                        ? "bg-secondary"
+                        : ""
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />

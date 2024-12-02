@@ -40,7 +40,6 @@ export default function Home() {
     
     */
     const chatId = crypto.randomUUID();
-    setInput("");
     router.push(`/chat/res/${chatId}`);
   };
 
