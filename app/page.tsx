@@ -22,21 +22,21 @@ export default function Home() {
   const router = useRouter();
   const handleSend = () => {
     if (!input.trim()) return;
-    // implement test navigation to chatpage with id
+    //  to chatpage with id
     // static id for test
 
     /*
     get a chatId 
     
-    user a global FirstChart to get user input 
-    at /chatPage 
-
-    logic to use the this content and selected models to make request
-
-    render the response and append it to the messages 
-    and we use 
+    user a global state  to set content(message) of user input 
     
-    
+    access this inside chatpage and make a request 
+
+    keep this first message as initial message state inside 
+    chatpage 
+
+    all new messages will now be appended to this to sync conversation
+    with models
     
     */
     const chatId = crypto.randomUUID();
