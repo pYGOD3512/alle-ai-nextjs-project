@@ -9,7 +9,7 @@ import { ChatInput } from './ChatInput';
 import { ModelResponse } from './ModelResponse';
 import { CHAT_MODELS as MODELS, Message, initialMessages, useSidebarStore } from '@/lib/constants';
         
-        import GreetingMessage from "./GreetingMessage";
+import GreetingMessage from "./GreetingMessage";
 
 // static options
 const options = [
@@ -20,7 +20,6 @@ const options = [
     label: "How do I stay motivated to work out?",
   },
 ];
-
 
 export function ChatArea() {
   const { isOpen } = useSidebarStore();
