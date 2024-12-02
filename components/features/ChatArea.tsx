@@ -1,4 +1,3 @@
-//@ts-nocheck
 "use client";
 
 import { useState, useRef } from "react";
@@ -92,7 +91,6 @@ export function ChatArea() {
           ))}
         </div>
       </ScrollArea>
-
       <ChatInput
         value={input}
         onChange={setInput}
