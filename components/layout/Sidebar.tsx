@@ -78,7 +78,7 @@ export function Sidebar() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    onClick={() => setCurrentPage(item.label)}
+                    // onClick={() => setCurrentPage(item.label)}
                     className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
                       item.href === "/"
                         ? pathname === "/" || pathname.startsWith("/chat/res")
