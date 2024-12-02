@@ -104,7 +104,13 @@ export function Sidebar() {
                   key={item.label}
                   href={item.href}
                   className={`w-full h-9 inline-flex items-center justify-center rounded-md ${
-                    pathname === item.href ? "bg-secondary" : ""
+                     item.href === "/"
+                    ? pathname === "/" || pathname.startsWith("/chat/res")
+                        ? "bg-secondary"
+                        : ""
+                    : pathname === item.href
+                    ? "bg-secondary"
+                    : ""
                   } hover:bg-accent hover:text-accent-foreground`}
                 >
                   <item.icon className="h-4 w-4" />
