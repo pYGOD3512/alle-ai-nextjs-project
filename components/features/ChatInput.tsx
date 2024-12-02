@@ -22,10 +22,8 @@ export function ChatInput({ value, onChange, onSend, inputRef }: ChatInputProps)
   const isInputEmpty = value.trim() === '';
 
   return (
-    <div className={` p-2 bg-background/95 backdrop-blur transition-all duration-300 ${
-      isOpen ? '' : 'pl-16'
-    }`}>
-      <div className="max-w-3xl mx-auto flex items-center gap-1 border-2 rounded-2xl p-2">
+    <div className={` p-2 bg-background/95 backdrop-blur transition-all duration-300`}>
+      <div className="max-w-lg md:max-w-2xl mx-auto flex items-center gap-1 border-2 rounded-2xl p-2">
         <Button variant="ghost" size="icon" className="flex-shrink-0">
           <Paperclip className="h-4 w-4" />
         </Button>
