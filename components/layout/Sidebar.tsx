@@ -43,7 +43,7 @@ export function Sidebar() {
   return (
     <>
     <div
-      className={`fixed left-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
+      className={`fixed left-0 bottom-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
         isOpen ? "w-60" : "w-16"
       } border-r bg-sideBarBackground`}
     >

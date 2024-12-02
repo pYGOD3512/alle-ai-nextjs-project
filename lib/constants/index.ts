@@ -55,7 +55,7 @@ export const navItems = [
     label: "Text size",
     interactionType: "modal",
     onClick: () => {
-      console.log("Opening Text Size Modal");
+      // console.log("Opening Text Size Modal");
     },
   },
   {
@@ -68,7 +68,7 @@ export const navItems = [
     label: "Feedback",
     interactionType: "modal",
     onClick: () => {
-      console.log("Opening Feedback Modal");
+      // console.log("Opening Feedback Modal");
     },
   },
   {
@@ -79,7 +79,7 @@ export const navItems = [
       {
         label: "All Notifications",
         icon: Bell,
-        onClick: () => console.log("All Notifications")
+        // onClick: () => console.log("All Notifications")
       },
     ]
   },
@@ -105,7 +105,7 @@ export const notifications: Notification[] = [
     id: '2',
     title: 'Welcome!',
     message: 'Thanks for joining our AI platform. Take a tour to get started.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    timestamp: new Date(Date.now() - 1000 * 60 * 24), // 1 day ago
     read: true,
   }
 ];
@@ -156,7 +156,7 @@ export const userMenuItems = [
     icon: User,
     interactionType: 'modal',
     onClick: () => {
-      console.log('Opening Profile Modal');
+      // console.log('Opening Profile Modal');
     },
   },
   {
@@ -170,7 +170,7 @@ export const userMenuItems = [
     icon: Handshake,
     interactionType: 'modal',
     onClick: () => {
-      console.log('Opening Refer Modal');
+      // console.log('Opening Refer Modal');
     },
   },
   {
@@ -178,7 +178,7 @@ export const userMenuItems = [
     icon: Settings,
     interactionType: 'modal',
     onClick: () => {
-      console.log('Opening Settings Modal');
+      // console.log('Opening Settings Modal');
     },
   },
   {
@@ -186,7 +186,7 @@ export const userMenuItems = [
     icon: LogOut,
     interactionType: 'function',
     onClick: () => {
-      console.log('Logging out...');
+      // console.log('Logging out...');
     },
   },
 ];

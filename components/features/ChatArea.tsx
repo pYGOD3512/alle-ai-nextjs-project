@@ -115,7 +115,6 @@ export function ChatArea() {
           )}
         </div>
       </ScrollArea>
-
       <ChatInput value={input} onChange={setInput} onSend={handleSend} inputRef={inputRef} />
     </div>
   );
