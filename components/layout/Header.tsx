@@ -56,7 +56,7 @@ export function Header() {
           variant="ghost" 
           size="icon" 
           onClick={handleClick}
-          className="hidden md:flex w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
+          className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
         >
           <item.type className="h-5 w-5" />
         </Button>
@@ -79,7 +79,7 @@ export function Header() {
           variant="ghost" 
           size="icon" 
           onClick={openModal}
-          className={`${item.type !== MessagesSquare ? 'hidden' : ''} md:flex w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none`}
+          className="w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
         >
           <item.type className="h-5 w-5" />
         </Button>
@@ -101,11 +101,11 @@ export function Header() {
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className={`${notifications.length === 0 ? 'w-fit' : 'w-64 md:w-80'} mr-20 rounded-xl p-1 md:p-2 bg-backgroundSecondary`}>
+        <DropdownMenuContent className="max-w-sm mr-20 rounded-xl p-2 bg-backgroundSecondary">
           {notifications.length > 0 && (
             <>
-              <div className="flex justify-between items-center px-3 border-b border-borderColorPrimary">
-                <h4 className="font-small text-sm">Notifications</h4>
+              <div className="flex justify-between items-center px-3 py-2 border-b border-borderColorPrimary">
+                <h4 className="font-medium">Notifications</h4>
               <Button 
               variant="ghost" 
               size="sm" 
@@ -118,7 +118,7 @@ export function Header() {
             </>
           )}
           {notifications.length === 0 ? (
-            <div className=" p-4 text-center text-muted-foreground">
+            <div className="p-4 text-center text-muted-foreground">
               <Bell className="h-6 w-6 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No new notifications</p>
             </div>
@@ -126,19 +126,19 @@ export function Header() {
             notifications.map((notification) => (
               <DropdownMenuItem 
                 key={notification.id}
-                className={`flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 ${
+                className={`flex flex-col items-start p-3 cursor-pointer hover:bg-hoverColorPrimary gap-1 ${
                   !notification.read ? 'bg-primary/5' : ''
                 }`}
                 onClick={() => markAsRead(notification.id)}
               >
                 <div className="flex items-center gap-2">
-                  <div className="font-small text-xs">{notification.title}</div>
+                  <div className="font-medium">{notification.title}</div>
                   {!notification.read && (
                     <span className="w-2 h-2 bg-primary rounded-full" />
                   )}
                 </div>
-                <div className="text-xs text-muted-foreground">{notification.message}</div>
-                <div className="text-[0.6rem] text-muted-foreground">
+                <div className="text-sm text-muted-foreground">{notification.message}</div>
+                <div className="text-xs text-muted-foreground">
                 {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
                   Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
                   'minute'
@@ -193,10 +193,10 @@ export function Header() {
   
 
   const handleTour = () => {
-    // console.log("Starting tour...");
+    console.log("Starting tour...");
   };
   const handleLogOut = () => {
-    // console.log("Logging out...");
+    console.log("Logging out...");
   };
 
 
@@ -246,7 +246,7 @@ export function Header() {
           isOpen ? 'ml-60' : 'ml-16'
         }`}>
           {models.length > 0 ? (
-            <div className="w-1/2 overflow-auto whitespace-nowrap md:w-fit flex items-center ml-8 border border-muted-foreground rounded-md py-1">
+            <div className="flex items-center ml-8 border border-muted-foreground rounded-md py-1">
               {models.map((model, index) => (
               <span key={index} className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none">
                 {model}
