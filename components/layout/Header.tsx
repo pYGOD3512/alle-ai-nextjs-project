@@ -248,7 +248,7 @@ export function Header() {
           {models.length > 0 ? (
             <div className="flex items-center ml-8 border border-muted-foreground rounded-md py-1">
               {models.map((model, index) => (
-              <span key={index} className="text-xs text-muted-foreground border-r px-1 border-muted-foreground last:border-none">
+              <span key={index} className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none">
                 {model}
               </span>
               ))}
