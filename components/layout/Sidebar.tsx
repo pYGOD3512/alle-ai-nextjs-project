@@ -11,7 +11,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -31,12 +31,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ModelSelectionModal } from "../ui/modals";
+import { useState } from "react";
 
 export function Sidebar() {
-  const { isOpen } = useSidebarStore();
+  const { isOpen, setCurrentPage } = useSidebarStore();
   const pathname = usePathname();
 
+  const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
+
   return (
+    <>
     <div
       className={`fixed left-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
         isOpen ? "w-60" : "w-16"
@@ -50,17 +55,18 @@ export function Sidebar() {
                 <Plus className="mr-2 h-4 w-4" />
                 NEW CHAT
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => setModelSelectionModalOpen(true)}>
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="mt-4 space-y-1">
+            <div className="mt-4 px-2 space-y-1">
               {sidebarMenuItems.map((item, i) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`w-full flex items-center justify-start h-8 text-sm ${
+                  onClick={() => setCurrentPage(item.label)}
+                  className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
                     pathname === item.href ? "bg-secondary" : ""
                   }`}
                 >
@@ -92,13 +98,13 @@ export function Sidebar() {
         )}
       </div>
 
-      {isOpen && (
+      {isOpen ? (
         <>
           <div className="px-4 mt-5">
             <div className="text-xs font-medium text-muted-foreground mb-2">
               CHAT HISTORY
             </div>
-            <ScrollArea className="h-[15rem]">
+            <ScrollArea className="h-[16rem]">
               <div className="space-y-0.5">
                 {chatHistory.map((chat, i) => (
                   <ContextMenu key={i}>
@@ -174,7 +180,7 @@ export function Sidebar() {
             </ScrollArea>
           </div>
 
-          <div className="absolute bottom-12 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-backgroundSecondary transition-colors duration-200">
+          <div className="absolute bottom-12 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
             <div className="flex items-center gap-3 mb-4">
               <Image
                 src="/user.jpg"
@@ -198,7 +204,15 @@ export function Sidebar() {
             </Button>
           </div>
         </>
+      ) : (
+        <div className="absolute bottom-16 left-0 right-0 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
+          <Button size="sm" variant="outline" className="w-full text-xs">
+            <Gem className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
+    <ModelSelectionModal isOpen={modelSelectionModalOpen} onClose={() => setModelSelectionModalOpen(false)} />
+    </>
   );
 }
