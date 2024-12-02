@@ -24,6 +24,8 @@ const config: Config = {
         backgroundSecondary: 'var(--backgroundSecondary)',
         sideBarBackground: 'var(--sideBarBackground)',
         borderColorPrimary: 'var(--borderColorPrimary)',
+        bodyColor: 'var(--bodyColor)',
+        hoverColorPrimary: 'var(--hoverColorPrimary)',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',

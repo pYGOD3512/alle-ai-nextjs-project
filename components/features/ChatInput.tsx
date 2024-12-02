@@ -35,14 +35,14 @@ export function ChatInput({ value, onChange, onSend }: ChatInputProps) {
           className="flex-1 border-none focus-visible:outline-none"
           onKeyPress={(e) => e.key === 'Enter' && !isInputEmpty && onSend()}
         />
-        <Button variant="ghost" size="icon" className="flex-shrink-0">
+        <Button variant="ghost" size="icon" className="flex-shrink-0 rounded-full h-9 w-9">
           <Mic className="h-4 w-4" />
         </Button>
         <Button
           onClick={onSend}
           size="icon"
           className={`flex-shrink-0 rounded-full h-8 w-8 ${
-            isInputEmpty ? 'bg-gray-300 text-gray-500 hover:bg-gray-300' : 'bg-black text-white hover:bg-black-300'
+            isInputEmpty ? 'bg-gray-300 text-gray-500 hover:bg-gray-300' : 'bg-bodyColor hover:bg-opacity-70 transition-all duration-200'
           }`}
           disabled={isInputEmpty}
         >

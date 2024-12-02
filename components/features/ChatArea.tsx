@@ -3,17 +3,13 @@
 
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ModelSelector } from "./ModelSelector";
-import { ChatMessage } from "./ChatMessage";
-import { ChatInput } from "./ChatInput";
-import { ModelResponse } from "./ModelResponse";
-import {
-  MODELS,
-  Message,
-  initialMessages,
-  useSidebarStore,
-} from "@/lib/constants";
-import GreetingMessage from "./GreetingMessage";
+import { ModelSelector } from './ModelSelector';
+import { ChatMessage } from './ChatMessage';
+import { ChatInput } from './ChatInput';
+import { ModelResponse } from './ModelResponse';
+import { CHAT_MODELS as MODELS, Message, initialMessages, useSidebarStore } from '@/lib/constants';
+        
+        import GreetingMessage from "./GreetingMessage";
 
 // static options
 const options = [
@@ -24,6 +20,7 @@ const options = [
     label: "How do I stay motivated to work out?",
   },
 ];
+
 
 export function ChatArea() {
   const { isOpen } = useSidebarStore();
