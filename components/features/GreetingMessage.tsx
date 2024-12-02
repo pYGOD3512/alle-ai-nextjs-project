@@ -31,10 +31,10 @@ const GreetingMessage = ({
           {options.map((option, index) => (
             <div
               key={index}
-              className="bg-white  border hover:bg-secondary rounded-2xl p-2 cursor-pointer "
+              className="border dark:border border-gray-500 hover:bg-secondary rounded-2xl p-2 cursor-pointer "
               onClick={() => handlePressed(option)}
             >
-              <p className="text-gray-800 text-sm font-medium">
+              <p className="dark:text-gray-400 text-gray-800 text-sm font-medium">
                 {option.label}
               </p>
             </div>
