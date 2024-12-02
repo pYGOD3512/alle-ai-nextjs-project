@@ -56,7 +56,11 @@ export function Sidebar() {
           {isOpen ? (
             <>
               <div className="flex gap-2 px-2">
-                <Button onClick={handleNewChat} variant="outline" className="flex-1">
+                <Button
+                  onClick={handleNewChat}
+                  variant="outline"
+                  className="flex-1"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   NEW CHAT
                 </Button>
@@ -65,7 +69,6 @@ export function Sidebar() {
                   size="icon"
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
-                  <Button variant="outline" size="icon" onClick={() => setModelSelectionModalOpen(true)}>
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
               </div>
@@ -77,13 +80,13 @@ export function Sidebar() {
                     href={item.href}
                     onClick={() => setCurrentPage(item.label)}
                     className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                        item.href === "/"
-                    ? pathname === "/" || pathname.startsWith("/chat/res")
+                      item.href === "/"
+                        ? pathname === "/" || pathname.startsWith("/chat/res")
+                          ? "bg-secondary"
+                          : ""
+                        : pathname === item.href
                         ? "bg-secondary"
                         : ""
-                    : pathname === item.href
-                    ? "bg-secondary"
-                    : ""
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
@@ -104,13 +107,13 @@ export function Sidebar() {
                   key={item.label}
                   href={item.href}
                   className={`w-full h-9 inline-flex items-center justify-center rounded-md ${
-                     item.href === "/"
-                    ? pathname === "/" || pathname.startsWith("/chat/res")
+                    item.href === "/"
+                      ? pathname === "/" || pathname.startsWith("/chat/res")
                         ? "bg-secondary"
                         : ""
-                    : pathname === item.href
-                    ? "bg-secondary"
-                    : ""
+                      : pathname === item.href
+                      ? "bg-secondary"
+                      : ""
                   } hover:bg-accent hover:text-accent-foreground`}
                 >
                   <item.icon className="h-4 w-4" />

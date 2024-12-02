@@ -50,7 +50,7 @@ export default function Home() {
   };
   return (
     <div
-      className={`flex flex-col h-[calc(100vh-3.5rem)] transition-all duration-300 ${
+      className={`flex flex-col justify-between h-[calc(100vh-3.5rem)] transition-all duration-300 ${
         isOpen ? "pl-60" : "pl-16"
       }`}
     >
