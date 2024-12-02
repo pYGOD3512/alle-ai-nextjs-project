@@ -77,7 +77,13 @@ export function Sidebar() {
                     href={item.href}
                     onClick={() => setCurrentPage(item.label)}
                     className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                      pathname === item.href ? "bg-secondary" : ""
+                        item.href === "/"
+                    ? pathname === "/" || pathname.startsWith("/chat/res")
+                        ? "bg-secondary"
+                        : ""
+                    : pathname === item.href
+                    ? "bg-secondary"
+                    : ""
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
