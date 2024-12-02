@@ -21,7 +21,6 @@ const options = [
   },
 ];
 
-
 export function ChatArea() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isOpen } = useSidebarStore();
