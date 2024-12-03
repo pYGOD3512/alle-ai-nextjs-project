@@ -9,10 +9,10 @@ import { useRouter } from "next/navigation";
 // static options
 const options = [
   {
-    label: "Write a Python function to sort an array",
+    label: "What does Santa do on his day off?",
   },
   {
-    label: "How do I stay motivated to work out?",
+    label: "Why is christmas gift wrapping harder than math?",
   },
 ];
 export default function Home() {
@@ -55,7 +55,7 @@ export default function Home() {
     >
       <div className="flex-1 mt-20 py-4">
         <GreetingMessage
-          username={"Clinton"}
+          username={"Christmas"}
           options={options}
           handlePressed={handleClicked}
         />

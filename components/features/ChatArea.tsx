@@ -61,29 +61,29 @@ export function ChatArea() {
                 sender={message.sender}
                 timestamp={message.timestamp}
               />
-              {message.responses && (
+              {message.responses && message.responses.length > 0 && (
                 <div className="mt-4">
                   <ModelSelector
-                    models={MODELS}
+                    models={MODELS.filter(model => 
+                      message.responses?.some(
+                        response => response.model === model.name && response.content
+                      )
+                    )}
                     activeModel={activeModel}
                     onSelect={setActiveModel}
                   />
                   <div className="mt-4">
-                    <ModelResponse
-                      model={
-                        MODELS.find((m) => m.id === activeModel)?.name || ""
-                      }
-                      content={
-                        message.responses.find(
-                          (r) =>
-                            r.model ===
-                            MODELS.find((m) => m.id === activeModel)?.name
-                        )?.content || ""
-                      }
-                      model_img={
-                        MODELS.find((m) => m.id === activeModel)?.icon || ""
-                      }
-                    />
+                    {message.responses.find(
+                      r => r.model === MODELS.find(m => m.id === activeModel)?.name
+                    )?.content && (
+                      <ModelResponse
+                        model={MODELS.find(m => m.id === activeModel)?.name || ""}
+                        content={message.responses.find(
+                          r => r.model === MODELS.find(m => m.id === activeModel)?.name
+                        )?.content || ""}
+                        model_img={MODELS.find(m => m.id === activeModel)?.icon || ""}
+                      />
+                    )}
                   </div>
                 </div>
               )}
