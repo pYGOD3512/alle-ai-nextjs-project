@@ -43,7 +43,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[30rem]">
         <DialogHeader className="flex flex-row items-center justify-between relative">
-          <DialogTitle>Customer Feedback</DialogTitle>
+          <DialogTitle>We value your feedback</DialogTitle>
           <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
