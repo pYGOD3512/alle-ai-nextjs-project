@@ -2,7 +2,7 @@
 
 import React from "react";
 import { textReveal } from "@/lib/utils";
-import { motion, Variants } from "framer-motion"
+import { motion } from "framer-motion"
 
 interface option {
   label: String;
@@ -24,7 +24,7 @@ const GreetingMessage = ({
   handlePressed,
 }: GreetingMessageProp) => {
 
-  const greetings = textReveal(`Hi! ${username} 👋`)
+  const greetings = textReveal(`Hi! ${username} 🎉`)
   const questionText = textReveal(`What would you like to do today?`)
 
   return (
