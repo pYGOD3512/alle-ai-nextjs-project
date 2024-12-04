@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -7,6 +8,7 @@ import {
   Paperclip,
   Mic
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatInputProps {
   value: string;
@@ -16,6 +18,20 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ value, onChange, onSend, inputRef }: ChatInputProps) {
+  const [textIndex, setTextIndex] = useState(0);
+  const texts = [
+    "Your all-in-one AI Platform",
+    "Alle-AI: Combine and compare AI models",
+    "Alle-AI: Explore innovative AI solutions"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTextIndex((current) => (current + 1) % texts.length);
+    }, 5000); // Change text every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const isInputEmpty = value.trim() === '';
 
@@ -47,7 +63,20 @@ export function ChatInput({ value, onChange, onSend, inputRef }: ChatInputProps)
           <ArrowUp className="h-4 w-4" />
         </Button>
       </div>
-      <p className="text-center text-xs mt-2">Your all-in-one AI Platform</p>
+      <div className="h-6 relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={textIndex}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.5 }}
+            className="text-center text-xs mt-2 absolute w-full"
+          >
+            {texts[textIndex]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
