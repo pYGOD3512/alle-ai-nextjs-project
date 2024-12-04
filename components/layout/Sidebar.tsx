@@ -31,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal } from "../ui/modals";
+import { ModelSelectionModal, PlansModal } from "../ui/modals";
 import { useState } from "react";
 
 export function Sidebar() {
@@ -40,6 +40,8 @@ export function Sidebar() {
   const router = useRouter();
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
+  
   const handleNewChat = () => {
     // other logics later
 
@@ -91,11 +93,11 @@ export function Sidebar() {
                   >
                     <item.icon className="mr-2 h-4 w-4" />
                     {item.label}
-                    {item.beta && (
-                      <span className="ml-2 text-xs bg-primary/10 px-0.5 py-0.5 rounded">
+                    {/* {item.beta && (
+                      <span className="ml-2 text-[0.6rem] bg-primary/10 px-0.5 py-0.2 rounded">
                         Soon
                       </span>
-                    )}
+                    )} */}
                   </Link>
                 ))}
               </div>
@@ -218,7 +220,9 @@ export function Sidebar() {
                   </div>
                 </div>
               </div>
-              <Button size="sm" variant="outline" className="w-full text-xs">
+              <Button size="sm" variant="outline" className="w-full text-xs"
+              onClick={() => setPlansModalOpen(true)}
+              >
                 MANAGE SUBSCRIPTION
               </Button>
             </div>
@@ -234,6 +238,10 @@ export function Sidebar() {
       <ModelSelectionModal
         isOpen={modelSelectionModalOpen}
         onClose={() => setModelSelectionModalOpen(false)}
+      />
+      <PlansModal
+        isOpen={plansModalOpen}
+        onClose={() => setPlansModalOpen(false)}
       />
     </>
   );

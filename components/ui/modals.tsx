@@ -18,8 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, User, BarChart2, Shield, Save, Gem , Copy, Container, Pencil, X, Search } from "lucide-react";
+import { Settings, User, BarChart2, Shield, Save, Gem , Copy, Container, Pencil, X, Search, Check, DatabaseBackup, Info } from "lucide-react";
+import { FaWhatsapp, FaFacebook  } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { ScrollArea } from '@radix-ui/react-scroll-area';
+import {  TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface ModalProps {
   isOpen: boolean;
@@ -59,8 +62,8 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
                   key={rating}
                   onClick={() => setSelectedRating(rating)}
                   className={cn(
-                    "p-4 text-2xl rounded-lg border hover:bg-accent/50 transition-colors",
-                    selectedRating === rating ? "border-2 border-borderColorPrimary bg-accent" : "border-input"
+                    "p-4 text-2xl rounded-lg border border-borderColorPrimary hover:bg-[#ad933470] transition-colors",
+                    selectedRating === rating ? "border-2 border-borderColorPrimary bg-[#524310]" : "border-input"
                   )}
                   whileTap={{ scale: 1.2, rotate: 10 }}
                   animate={selectedRating === rating ? { scale: 1.1 } : { scale: 1 }}
@@ -172,7 +175,6 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const currentPage = useSidebarStore((state) => state.currentPage);
   
   useEffect(() => {
-    console.log('Selected models updated:', selectedModels);
   }, [selectedModels]);
 
   useEffect(() => {
@@ -223,7 +225,6 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   // Filter and search models
   const filteredModels = models.filter(model => {
-    console.log(models);
     const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) || model.provider?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterType === 'all' || model.type === filterType;
     return matchesSearch && matchesFilter;
@@ -354,6 +355,10 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
   const { theme, setTheme } = useTheme();
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
+  const [exportModalOpen, setExportModalOpen] = React.useState(false);
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false);
+  const [logoutAllModalOpen, setLogoutAllModalOpen] = React.useState(false);
+
 
   const settingsData = {
     general: {
@@ -383,6 +388,18 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
         enabled: true,
       },
     },
+    data_controls: {
+      extpertMyData: {
+        title: "Export data",
+        description: "",
+        action: "Export",
+      },
+      deleteMyAccount: {
+        title: "Delete account",
+        description: "",
+        action: "Delete",
+      },
+    },
     analytics: {
       myAnalytics: {
         title: "Coming soon...",
@@ -401,104 +418,141 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
   const tabs = [
     { value: 'general', label: 'General', icon: <Settings className="h-4 w-4" /> },
     { value: 'personalization', label: 'Personalization', icon: <User className="h-4 w-4" /> },
+    { value: 'data controls', label: 'Data controls', icon: <DatabaseBackup   className="h-4 w-4" /> },
     { value: 'analytics', label: 'My Analytics', icon: <BarChart2 className="h-4 w-4" /> },
     { value: 'security', label: 'Security', icon: <Shield className="h-4 w-4" /> },
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[40rem]">
-        <DialogHeader className="flex flex-row items-center justify-between relative border-b border-borderColorPrimary">
-          <DialogTitle className='mb-2'>Settings</DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">esc</span>
-          </kbd>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[40rem]">
+          <DialogHeader className="flex flex-row items-center justify-between relative border-b border-borderColorPrimary">
+            <DialogTitle className='mb-2'>Settings</DialogTitle>
+            <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
 
-        <Tabs defaultValue="general" className="w-full">
-          <div className="flex gap-4">
-            {/* Sidebar */}
-            <div className="w-48 space-y-1">
-            <TabsList className="flex flex-col h-auto bg-transparent space-y-1">
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="w-full justify-start gap-2 focus-visible:outline-none data-[state=active]:bg-backgroundSecondary">
-                  {tab.icon}
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1">
-              <TabsContent value="general" className="space-y-2">
-                <div className="flex items-center justify-between border-b border-borderColorPrimary">
-                  <span className='text-sm'>Theme</span>
-                  <Select defaultValue={theme} onValueChange={(value) => setTheme(value)}>
-                    <SelectTrigger className="w-24 p-2 border-none focus:outline-none focus:border-b">
-                      <SelectValue placeholder="Select theme" />
-                    </SelectTrigger>
-                    <SelectContent className='bg-backgroundSecondary'>
-                      <SelectItem className='text-sm cursor-pointer focus:outline-none' value="system">System</SelectItem>
-                      <SelectItem className='text-sm cursor-pointer focus:outline-none' value="light">Light</SelectItem>
-                      <SelectItem className='text-sm cursor-pointer focus:outline-none' value="dark">Dark</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center justify-between border-b border-borderColorPrimary">
-                  <span className='text-sm'>Text size</span>
-                  <Select defaultValue="16">
-                    <SelectTrigger className="w-24 p-2 border-none focus:outline-none">
-                      <SelectValue placeholder="Select size" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-backgroundSecondary">
-                      {[12, 14, 16, 18, 20].map((size) => (
-                        <SelectItem key={size} value={size.toString()} className='cursor-pointer focus:outline-none'>
-                          {size} px
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="personalization" className="space-y-6">
-                {Object.entries(settingsData.personalization).map(([key, setting]) => (
-                  <div key={key} className="flex items-center justify-between space-x-4 pb-2 border-b border-borderColorPrimary last:border-none">
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-medium">{setting.title}</h4>
-                      <p className="text-[0.75rem] text-muted-foreground">{setting.description}</p>
-                    </div>
-                    <Switch className='data-[state=unchecked]:bg-borderColorPrimary' defaultChecked={setting.enabled} />
-                  </div>
+          <Tabs defaultValue="general" className="w-full">
+            <div className="flex gap-4">
+              {/* Sidebar */}
+              <div className="w-48 space-y-1">
+              <TabsList className="flex flex-col h-auto bg-transparent space-y-1">
+                {tabs.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value} className="w-full justify-start gap-2 focus-visible:outline-none data-[state=active]:bg-backgroundSecondary">
+                    {tab.icon}
+                    {tab.label}
+                  </TabsTrigger>
                 ))}
-              </TabsContent>
+              </TabsList>
+              </div>
 
-              <TabsContent value="analytics">
-                <div className="flex items-center justify-between space-x-4">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium">{settingsData.analytics.myAnalytics.title}</h4>
-                    <p className="text-[0.75rem] text-muted-foreground">{settingsData.analytics.myAnalytics.description}</p>
+              {/* Content */}
+              <div className="flex-1">
+                <TabsContent value="general" className="space-y-2">
+                  <div className="flex items-center justify-between border-b border-borderColorPrimary">
+                    <span className='text-sm'>Theme</span>
+                    <Select defaultValue={theme} onValueChange={(value) => setTheme(value)}>
+                      <SelectTrigger className="w-24 p-2 border-none focus:outline-none focus:border-b">
+                        <SelectValue placeholder="Select theme" />
+                      </SelectTrigger>
+                      <SelectContent className='bg-backgroundSecondary'>
+                        <SelectItem className='text-sm cursor-pointer focus:outline-none' value="system">System</SelectItem>
+                        <SelectItem className='text-sm cursor-pointer focus:outline-none' value="light">Light</SelectItem>
+                        <SelectItem className='text-sm cursor-pointer focus:outline-none' value="dark">Dark</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
-              </TabsContent>
+                  <div className="flex items-center justify-between border-b border-borderColorPrimary">
+                    <span className='text-sm'>Text size</span>
+                    <Select defaultValue="16">
+                      <SelectTrigger className="w-24 p-2 border-none focus:outline-none">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-backgroundSecondary">
+                        {[12, 14, 16, 18, 20].map((size) => (
+                          <SelectItem key={size} value={size.toString()} className='cursor-pointer focus:outline-none'>
+                            {size} px
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </TabsContent>
 
-              <TabsContent value="security" className="space-y-6">
-                <div className="">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm font-small">{settingsData.security.logoutAll.title}</h4>
-                    <Button variant="outline" className='rounded-full px-3 text-xs hover:bg-red-600 border-borderColorPrimary hover:text-white' size="sm">
-                    {settingsData.security.logoutAll.action}
-                    </Button>
+                <TabsContent value="personalization" className="space-y-6">
+                  {Object.entries(settingsData.personalization).map(([key, setting]) => (
+                    <div key={key} className="flex items-center justify-between space-x-4 pb-2 border-b border-borderColorPrimary last:border-none">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-medium">{setting.title}</h4>
+                        <p className="text-[0.75rem] text-muted-foreground">{setting.description}</p>
+                      </div>
+                      <Switch className='data-[state=unchecked]:bg-borderColorPrimary' defaultChecked={setting.enabled} />
+                    </div>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="data controls" className="space-y-2">
+                  {Object.entries(settingsData.data_controls).map(([key, setting]) => (
+                    <div key={key} className="border-b border-borderColorPrimary last:border-none">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-small">{setting.title}</h4>
+                        <Button 
+                          variant={`${setting.action === "Delete" ? "destructive" : "outline"}`} 
+                          className={`h-8 rounded-full px-3 text-xs border-borderColorPrimary transition-all`} 
+                          size="sm"
+                          onClick={() => {
+                            if (setting.action === "Delete") {
+                              setDeleteAccountModalOpen(true);
+                            } else if (setting.action === "Export") {
+                              setExportModalOpen(true);
+                            }
+                          }}
+                        >
+                          {setting.action}
+                        </Button>
+                      </div>
+                      <p className="text-[0.75rem] text-muted-foreground">
+                        {setting.description}
+                      </p>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="analytics">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium">{settingsData.analytics.myAnalytics.title}</h4>
+                      <p className="text-[0.75rem] text-muted-foreground">{settingsData.analytics.myAnalytics.description}</p>
+                    </div>
                   </div>
-                  <p className="text-[0.75rem] text-muted-foreground">{settingsData.security.logoutAll.description}</p>
-                </div>
-              </TabsContent>
+                </TabsContent>
+
+                <TabsContent value="security" className="space-y-6">
+                  <div className="">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-sm font-small">{settingsData.security.logoutAll.title}</h4>
+                      <Button 
+                      variant="destructive" 
+                      className='h-8 rounded-full px-3 text-xs border-borderColorPrimary' size="sm"
+                      onClick={() => setLogoutAllModalOpen(true)}
+                      >
+                      {settingsData.security.logoutAll.action}
+                      </Button>
+                    </div>
+                    <p className="text-[0.75rem] text-muted-foreground">{settingsData.security.logoutAll.description}</p>
+                  </div>
+                </TabsContent>
+              </div>
             </div>
-          </div>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+      <DataExportModal isOpen={exportModalOpen} onClose={() => setExportModalOpen(false)} />
+      <DeleteAccountModal isOpen={deleteAccountModalOpen} onClose={() => setDeleteAccountModalOpen(false)} />
+      <LogoutAllDevicesModal isOpen={logoutAllModalOpen} onClose={() => setLogoutAllModalOpen(false)} />
+    </>
   );
 }
 
@@ -627,7 +681,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
   const referralLink = "https://alle.ai/ref=XXX_XXX";
   const stats = {
     friendsReferred: 0,
-    tokensEarned: "£0.00"
+    cashEarned: "£0.00"
   };
 
   const copyToClipboard = () => {
@@ -636,9 +690,21 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
   };
 
   const platforms = [
-    { name: 'whatsapp', url: 'https://wa.me/?text=' },
-    { name: 'twitter', url: 'https://twitter.com/intent/tweet?text=' },
-    { name: 'facebook', url: 'https://www.facebook.com/sharer/sharer.php?u=' },
+    { 
+      name: 'whatsapp', 
+      url: 'https://wa.me/?text=',
+      Icon: FaWhatsapp,
+    },
+    { 
+      name: 'twitter', 
+      url: 'https://twitter.com/intent/tweet?text=',
+      Icon: FaXTwitter,
+    },
+    { 
+      name: 'facebook', 
+      url: 'https://www.facebook.com/sharer/sharer.php?u=',
+      Icon: FaFacebook,
+    },
   ];
 
   return (
@@ -667,8 +733,8 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
                 <p className="text-sm text-muted-foreground">Friends referred</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">{stats.tokensEarned}</p>
-                <p className="text-sm text-muted-foreground">Earned tokens</p>
+                <p className="text-2xl font-bold">{stats.cashEarned}</p>
+                <p className="text-sm text-muted-foreground">Earned cash</p>
               </div>
             </div>
 
@@ -696,7 +762,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
 
             {/* Social Sharing */}
             <div className="flex justify-center gap-2 pt-4">
-              {platforms.map(({ name, url }) => (
+              {platforms.map(({ name, url, Icon }) => (
                 <Button
                   key={name}
                   variant="outline"
@@ -704,10 +770,306 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
                   className="rounded-full"
                   onClick={() => window.open(url + encodeURIComponent(referralLink))}
                 >
-                  <Container className="h-4 w-4" />
+                  <Icon className="h-4 w-4" />
                 </Button>
               ))}
             </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function PlansModal({ isOpen, onClose }: ModalProps) {
+  const [isYearly, setIsYearly] = useState(false);
+
+  
+  const plans = [
+    {
+      name: "Free",
+      price: 0,
+      description: "For small teams or individuals optimizing basic web queries.",
+      about: "Interact with up to 2 AI models in a single conversation to gain diverse insights and perspectives.",
+      features: [
+        "Text",
+        "Image",
+        "2 AI Models/conversation",
+        "Limited model Usage",
+      ],
+      buttonText: "Upgrade to Free",
+      highlighted: false
+    },
+    {
+      name: "Standard",
+      price: isYearly ? 200 : 20,
+      description: "Enhanced AI capabilities and additional features.",
+      about: "Interact with up to 3 AI models per conversation for even more diverse insights, plus access to Fact-checking, Audio, and Video generation models.",
+      features: [
+        "Everything in Free",
+        "Up to 3 AI models",
+        "Fact-checking",
+        "Audio",
+        "Video"
+      ],
+      buttonText: "Upgrade to Standard",
+      highlighted: false
+    },
+    {
+      name: "Plus",
+      price: isYearly ? 300 : 30,
+      description: "Advanced AI interactions, and comprehensive flexibility.",
+      about: "Access up to 5 AI models per conversation, with unlimited tokens and the ability to use all available AI models for maximum flexibility.",
+      features: [
+        "Everything in Standard",
+        "Up to 5 AI models",
+        "Access all AI models",
+        "Early access to new features"
+      ],
+      buttonText: "Upgrade to Plus",
+      highlighted: true
+    },
+    {
+      name: "Custom",
+      price: "X",
+      description: "Fully customizable features tailored for your unique needs.",
+      about: "Get a plan tailored to your business needs with custom AI models, features, and usage limits.",
+      features: [
+        "Customize Features",
+        "Flexible Billing Options",
+        "Custom Integrations & Development"
+      ],
+      buttonText: "Coming Soon",
+      highlighted: false
+    }
+  ];
+
+  return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[70rem]">
+          <DialogHeader className="text-center space-y-4 relative">
+            <DialogTitle className="text-xl">Upgrade your plan</DialogTitle>
+            
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-4">
+              <span className={cn("text-sm", !isYearly && "text-primary")}>Monthly</span>
+              <Switch
+                checked={isYearly}
+                onCheckedChange={setIsYearly}
+                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
+              />
+              <div className="flex items-center gap-2">
+                <span className={cn("text-sm", isYearly && "text-primary")}>Yearly</span>
+                <Badge variant="secondary" className="bg-primary/20 text-primary">
+                  17% discount
+                </Badge>
+              </div>
+            </div>
+            <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
+
+          {/* Plans Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+            {plans.map((plan) => (
+              <motion.div
+                key={plan.name}
+                layout
+                className={cn(
+                  "relative p-6 rounded-lg border",
+                  plan.highlighted ? "bg-[#130f0f] text-white" : "border-borderColorPrimary"
+                )}
+              >
+                <div className="relative space-y-4 min-h-[25rem]">
+                  <div>
+                    <h3 className="font-medium text-md">{plan.name}</h3>
+                    <motion.div 
+                      key={`${plan.name}-${isYearly ? 'yearly' : 'monthly'}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="flex items-end gap-1"
+                    >
+                      <span className="text-3xl font-bold">
+                        £{typeof plan.price === 'number' ? plan.price : plan.price}
+                      </span>
+                      {plan.price !== "X" && (
+                        <span className="text-muted-foreground mb-1">/{isYearly ? 'year' : 'month'}</span>
+                      )}
+                    </motion.div>
+                  </div>
+                  
+                  <div className={`text-sm text-muted-foreground pb-4 flex flex-col`}>
+                    {plan.description}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className={`h-3 w-3 cursor-pointer right-0 ${plan.highlighted ? 'text-[#fafafa]' : 'text-bodyColor'}`} />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
+                          {plan.about}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  <ul className="space-y-4">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2 text-[0.8rem]">
+                        <Check className={`h-4 w-4 text-primary ${plan.highlighted ? 'text-[#fafafa]' : ''}`} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button 
+                    className={`w-full absolute bottom-0 ${plan.highlighted ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]" : "" }`} 
+                    variant={plan.highlighted ? "default" : "outline"}
+                  >
+                    {plan.buttonText}
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-6 text-sm text-muted-foreground">
+            Need more Capabilities?{' '}
+            <a href="#" className="text-primary hover:underline">
+              See Alle-AI Team & Enterprise plans
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+  );
+}
+
+export function DataExportModal({ isOpen, onClose }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Request data export - are you sure?</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <ul className="list-disc pl-5 text-sm text-muted-foreground">
+            <li>Your account details and chats will be included in the export.</li>
+            <li>The data will be sent to your registered email in a downloadable file.</li>
+            <li>The download link will expire 24 hours after you receive it.</li>
+            <li>Processing may take some time. You'll be notified when it's ready.</li>
+          </ul>
+          <p className="text-sm">
+            To proceed, click "Confirm export" below.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              // Handle export logic here
+              onClose();
+            }}>
+              Confirm export
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function DeleteAccountModal({ isOpen, onClose }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="flex flex-row items-center justify-between relative">
+          <DialogTitle>Delete account - are you sure?</DialogTitle>
+          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">esc</span>
+          </kbd>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
+            <li>Deleting your account is permanent and cannot be undone.</li>  
+            <li>
+              You cannot create a new account using the same email 
+              address.
+            </li>
+            <li>
+              Your data will be deleted within 30 days, except we may retain 
+              a limited set of data for longer where required or permitted by 
+              law.
+            </li>
+            <li>
+              Read our{' '}
+              <a 
+                href="#" 
+                className="text-primary hover:underline"
+              >
+                help center article
+              </a>
+              {' '}for more information.
+            </li>
+          </ul>
+
+          <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+            You may only delete your account if you have logged in within the last 10 
+            minutes. Please log in again, then return here to continue.
+          </div>
+
+          <div className="flex justify-center pt-2">
+            <Button 
+              variant="destructive" 
+              className="w-full"
+              onClick={() => {
+                // Handle refresh login logic
+                console.log("Refreshing login...");
+              }}
+            >
+              Login & Delete Forever
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function LogoutAllDevicesModal({ isOpen, onClose }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="flex flex-row items-center justify-between relative">
+          <DialogTitle>Log out of all devices - are you sure?</DialogTitle>
+          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">esc</span>
+          </kbd>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
+            <li>You will be logged out of all devices.</li>
+            <li>All active sessions will be terminated immediately.</li>
+            <li>You'll need to log in again on other devices to regain access.</li>
+            <li>This action cannot be undone.</li>
+          </ul>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={() => {
+                // Handle logout all devices logic here
+                console.log("Logging out all devices...");
+                onClose();
+              }}
+            >
+              Confirm logout
+            </Button>
           </div>
         </div>
       </DialogContent>
