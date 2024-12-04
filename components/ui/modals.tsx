@@ -562,6 +562,10 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   const [email, setEmail] = React.useState("pascal@alle-ai.com");
   const [profilePhoto, setProfilePhoto] = React.useState("/user.jpg");
   const [isEditing, setIsEditing] = React.useState(false);
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
+
+
+
 
 
   const handleEditToggle = () => {
@@ -574,106 +578,112 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[35rem]">
-        <DialogHeader className="flex flex-row items-center justify-between relative">
-          <div className="flex flex-col items-center w-full gap-2">
-            <div className="relative">
-              <img 
-                src={profilePhoto} 
-                alt="Profile" 
-                className="w-20 h-20 rounded-full"
-              />
-              <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                <Badge variant="default">
-                  Plus
-                </Badge>
-              </div>
-            </div>
-            <div className="text-center">
-              <DialogTitle className="text-xl">{firstName} {lastName}</DialogTitle>
-              <p className="text-sm text-muted-foreground">{email}</p>
-            </div>
-          </div>
-          <div className="absolute right-4 top-4 flex gap-2">
-            <Button 
-              variant="outline" 
-              className='border-2 border-borderColorPrimary focus:outline-none' 
-              size="sm"
-              onClick={handleEditToggle}
-            >
-              {isEditing ? (
-                <>
-                  <Save className="h-4 w-4 mr-2" /> 
-                  Save Changes
-                </>
-              ) : (
-                <>
-                  <Pencil className="h-4 w-4 mr-2" /> 
-                  Edit Profile
-                </>
-              )}
-            </Button>
-          </div>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">esc</span>
-          </kbd>
-        </DialogHeader>
-
-        <div className="space-y-6 pt-4">
-          {isEditing && (<>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">First name</label>
-                  <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First name"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Last name</label>
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name"
-                    disabled={!isEditing}
-                  />
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[35rem]">
+          <DialogHeader className="flex flex-row items-center justify-between relative">
+            <div className="flex flex-col items-center w-full gap-2">
+              <div className="relative">
+                <img 
+                  src={profilePhoto} 
+                  alt="Profile" 
+                  className="w-20 h-20 rounded-full"
+                />
+                <div className="absolute -bottom-1 -right-2 text-white rounded-full">
+                  <Badge variant="default">
+                    Free
+                  </Badge>
                 </div>
               </div>
-
-              
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Profile photo</label>
-                  <div className="flex items-center gap-4">
-                    <img 
-                      src={profilePhoto} 
-                      alt="Profile" 
-                      className="w-16 h-16 rounded-full"
-                    />
-                    <Button variant="outline" size="sm">
-                      change picture
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
-
-          <div className="flex justify-between gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              <Gem className='h-4 w-4 mr-2'/>
-              MANAGE SUBSCRIPTION
-            </Button>
-            <div className='flex gap-4'>
-              <Button variant="outline" onClick={onClose}>
-                Cancel
+              <div className="text-center">
+                <DialogTitle className="text-xl">{firstName} {lastName}</DialogTitle>
+                <p className="text-sm text-muted-foreground">{email}</p>
+              </div>
+            </div>
+            <div className="absolute right-4 top-4 flex gap-2">
+              <Button 
+                variant="outline" 
+                className='border-2 border-borderColorPrimary focus:outline-none' 
+                size="sm"
+                onClick={handleEditToggle}
+              >
+                {isEditing ? (
+                  <>
+                    <Save className="h-4 w-4 mr-2" /> 
+                    Save Changes
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="h-4 w-4 mr-2" /> 
+                    Edit Profile
+                  </>
+                )}
               </Button>
             </div>
+            <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
+
+          <div className="space-y-6 pt-4">
+            {isEditing && (<>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">First name</label>
+                    <Input
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="First name"
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Last name</label>
+                    <Input
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Last name"
+                      disabled={!isEditing}
+                    />
+                  </div>
+                </div>
+
+                
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Profile photo</label>
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={profilePhoto} 
+                        alt="Profile" 
+                        className="w-16 h-16 rounded-full"
+                      />
+                      <Button variant="outline" size="sm">
+                        change picture
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+            <div className="flex justify-between gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => {
+                setPlansModalOpen(true);
+                onClose();
+                }}>
+                <Gem className='h-4 w-4 mr-2'/>
+                UPGRADE
+              </Button>
+              <div className='flex gap-4'>
+                <Button variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      <PlansModal isOpen={plansModalOpen} onClose={() => setPlansModalOpen(false)}/>
+    </>
   );
 }
 

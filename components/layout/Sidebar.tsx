@@ -213,7 +213,7 @@ export function Sidebar() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium">Pascal</div>
-                    <Badge variant="default">Plus</Badge>
+                    <Badge variant="default">Free</Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     pascal@alle-ai.com
@@ -223,7 +223,7 @@ export function Sidebar() {
               <Button size="sm" variant="outline" className="w-full text-xs"
               onClick={() => setPlansModalOpen(true)}
               >
-                MANAGE SUBSCRIPTION
+                UPGRADE
               </Button>
             </div>
           </>
