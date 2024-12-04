@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useSidebarStore, navItems, models, userMenuItems, notifications as notificationData } from '@/lib/constants';
 import { ThemeToggle } from "../ui/theme-toggle";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
 
 export function Header() {
@@ -293,6 +293,9 @@ export function Header() {
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />
                     {item.label}
+                    <DropdownMenuShortcut>
+                    {item.shortcut}
+                    </DropdownMenuShortcut>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
