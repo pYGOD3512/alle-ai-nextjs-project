@@ -40,28 +40,26 @@ export function Sidebar() {
   const router = useRouter();
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
-
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
   // handle newchat for all routes
- const handleNewChat = () => {
-   switch (true) {
-     case pathname.startsWith("/chat"):
-       router.push("/");
-       break;
-     case pathname.startsWith("/image"):
-       router.push("/image");
-       break;
-     case pathname.startsWith("/audio"):
-       router.push("/audio");
-       break;
-     case pathname.startsWith("/video"):
-       router.push("/video");
-       break;
-     default:
-       router.push("/");
-   }
- };
-
-  
+  const handleNewChat = () => {
+    switch (true) {
+      case pathname.startsWith("/chat"):
+        router.push("/");
+        break;
+      case pathname.startsWith("/image"):
+        router.push("/image");
+        break;
+      case pathname.startsWith("/audio"):
+        router.push("/audio");
+        break;
+      case pathname.startsWith("/video"):
+        router.push("/video");
+        break;
+      default:
+        router.push("/");
+    }
+  };
 
   return (
     <>
@@ -92,103 +90,29 @@ export function Sidebar() {
               </div>
 
               <div className="mt-4 px-2 space-y-1">
-                {sidebarMenuItems.map((item) => {
-                  // Check if the current page matches the item (for active styles)
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href === "/" &&
-                      (pathname === "/" || pathname.startsWith("/chat/"))) ||
-                    (item.href === "/image" &&
-                      pathname.startsWith("/image/")) ||
-                    (item.href === "/audio" &&
-                      pathname.startsWith("/audio/")) ||
-                    (item.href === "/video" && pathname.startsWith("/video/"));
-
-                  return (
-                    <div
-                      key={item.label}
-                      className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                        isActive ? "bg-secondary" : ""
-                      }`}
-                    >
-                      {/* Handle dynamic routes like with ids
-
-                      if the user is on "/" and he has a chatsections 
-
-                      ones he taps on other navitems like "image generation " 
-                      the page changes but then if he taps back on "/" which chat 
-                      it used to take user back to "/" instead it should keep the user at /chat/chatid
-                      which was his previous chatsection
-
-                      this code below fixes this issue
-                      
-                      */}
-                      {item.label === "Chat" ? (
-                        <Link
-                          href={
-                            sectionIds.chatId
-                              ? `/chat/res/${sectionIds.chatId}`
-                              : "/"
-                          } // If chatId exists, navigate to [chatid]
-                          className="flex items-center justify-start w-full"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Link>
-                      ) : item.label === "Image Generation" ? (
-                        <Link
-                          href={
-                            sectionIds.imageId
-                              ? `/image/${sectionIds.imageId}`
-                              : "/image"
-                          } // If imageId exists, navigate to /image[id]
-                          className="flex items-center justify-start w-full"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Link>
-                      ) : item.label === "Audio Generation" ? (
-                        <Link
-                          href={
-                            sectionIds.audioId
-                              ? `/audio/${sectionIds.audioId}`
-                              : "/audio"
-                          } // If audioId exists, navigate to /audio/[id]
-                          className="flex items-center justify-start w-full"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Link>
-                      ) : item.label === "Video Generation" ? (
-                        <Link
-                          href={
-                            sectionIds.videoId
-                              ? `/video/${sectionIds.videoId}`
-                              : "/video"
-                          } // If videoId exists, navigate to /video/[id]
-                          className="flex items-center justify-start w-full"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Link>
-                      ) : (
-                        // For other menu items, use Link normally
-                        <Link
-                          href={item.href}
-                          className="flex items-center justify-start w-full"
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Link>
-                      )}
-                      {item.beta && (
-                        <span className="ml-2 text-xs bg-primary/10 px-0.5 py-0.5 rounded">
-                          Soon
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+                {sidebarMenuItems.map((item, i) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
+                      item.href === "/"
+                        ? pathname === "/" || pathname.startsWith("/chat/res")
+                          ? "bg-secondary"
+                          : ""
+                        : pathname === item.href
+                        ? "bg-secondary"
+                        : ""
+                    }`}
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.label}
+                    {/* {item.beta && (
+                      <span className="ml-2 text-[0.6rem] bg-primary/10 px-0.5 py-0.2 rounded">
+                        Soon
+                      </span>
+                    )} */}
+                  </Link>
+                ))}
               </div>
             </>
           ) : (
@@ -308,15 +232,20 @@ export function Sidebar() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium">Pascal</div>
-                    <Badge variant="default">Plus</Badge>
+                    <Badge variant="default">Free</Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     pascal@alle-ai.com
                   </div>
                 </div>
               </div>
-              <Button size="sm" variant="outline" className="w-full text-xs">
-                MANAGE SUBSCRIPTION
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full text-xs"
+                onClick={() => setPlansModalOpen(true)}
+              >
+                UPGRADE
               </Button>
             </div>
           </>
