@@ -18,7 +18,7 @@ const options = [
 export default function Home() {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isOpen } = useSidebarStore();
+  const { isOpen, setSectionId } = useSidebarStore();
   const router = useRouter();
   const handleSend = () => {
     if (!input.trim()) return;
@@ -40,6 +40,7 @@ export default function Home() {
     
     */
     const chatId = crypto.randomUUID();
+    setSectionId("chatId", chatId);
     router.push(`/chat/res/${chatId}`);
   };
 
