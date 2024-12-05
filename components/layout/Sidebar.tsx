@@ -42,24 +42,7 @@ export function Sidebar() {
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   // handle newchat for all routes
-  const handleNewChat = () => {
-    switch (true) {
-      case pathname.startsWith("/chat"):
-        router.push("/");
-        break;
-      case pathname.startsWith("/image"):
-        router.push("/image");
-        break;
-      case pathname.startsWith("/audio"):
-        router.push("/audio");
-        break;
-      case pathname.startsWith("/video"):
-        router.push("/video");
-        break;
-      default:
-        router.push("/");
-    }
-  };
+  const handleNewChat = () => {};
 
   return (
     <>
