@@ -44,8 +44,36 @@ export function Sidebar() {
 
   const handleNewChat = () => {
     // other logics later
+    switch (true) {
+      case pathname.startsWith("/chat"):
+        router.push("/");
+        break;
+      case pathname.startsWith("/image"):
+        router.push("/image");
+        break;
+      case pathname.startsWith("/audio"):
+        router.push("/audio");
+        break;
+      case pathname.startsWith("/video"):
+        router.push("/video");
+        break;
+      default:
+        router.push("/");
+    }
+  };
+  // active helper
+  const isActiveRoute = (itemHref: string, pathname: string): boolean => {
+    // Exact match for specific routes
+    if (itemHref === "/")
+      return pathname === "/" || pathname.startsWith("/chat/res");
+    if (itemHref === "/image")
+      return pathname === "/image" || pathname.startsWith("/image/res");
+    if (itemHref === "/audio")
+      return pathname === "/audio" || pathname.startsWith("/audio/res");
+    if (itemHref === "/video")
+      return pathname === "/video" || pathname.startsWith("/video/res");
 
-    router.push("/");
+    return false;
   };
   return (
     <>
