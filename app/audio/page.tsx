@@ -1,7 +1,14 @@
 "use client";
+import { useEffect } from "react";
 import { useSidebarStore } from "@/lib/constants";
 export default function AudioGenerationPage() {
   const { isOpen } = useSidebarStore();
+  const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+
+
+  useEffect(() => {
+    setCurrentPage("audio");
+  }, [setCurrentPage]);
 
   return (
     <div

@@ -31,12 +31,22 @@ export const useSidebarStore = create<SidebarState>()(
   persist(
     (set) => ({
       isOpen: true,
-      currentPage: "Chat",
+      currentPage: "chat",
+      sectionIds: {
+        chatId: null,
+        imageId: null,
+        audioId: null,
+        videoId: null,
+      }, // Default section IDs
       toggle: () => set((state) => ({ isOpen: !state.isOpen })),
       setCurrentPage: (page) => set({ currentPage: page }),
     }),
     {
       name: "sidebar-storage",
+      partialize: (state) => ({
+        isOpen: state.isOpen,
+        sectionIds: state.sectionIds,
+      }),
     }
   )
 );
