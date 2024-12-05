@@ -21,10 +21,11 @@ import { persist } from "zustand/middleware";
 interface SidebarState {
   isOpen: boolean;
   currentPage: string;
+  sectionIds: { [key: string]: string | null }; // Generalized section IDs
   toggle: () => void;
   setCurrentPage: (page: string) => void;
+  setSectionId: (section: string, id: string | null) => void; // Setter for dynamic IDs
 }
-
 // SIDEBAR & HEADER CONSTANTS ----- START
 
 export const useSidebarStore = create<SidebarState>()(
@@ -40,6 +41,13 @@ export const useSidebarStore = create<SidebarState>()(
       }, // Default section IDs
       toggle: () => set((state) => ({ isOpen: !state.isOpen })),
       setCurrentPage: (page) => set({ currentPage: page }),
+      setSectionId: (section, id) =>
+        set((state) => ({
+          sectionIds: {
+            ...state.sectionIds,
+            [section]: id, // Dynamically update the section ID
+          },
+        })),
     }),
     {
       name: "sidebar-storage",
