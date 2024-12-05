@@ -31,19 +31,50 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal } from "../ui/modals";
+import { ModelSelectionModal, PlansModal } from "../ui/modals";
 import { useState } from "react";
 
 export function Sidebar() {
-  const { isOpen, setCurrentPage, sectionIds } = useSidebarStore();
+  const { isOpen, setCurrentPage } = useSidebarStore();
   const pathname = usePathname();
   const router = useRouter();
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
-  // handle newchat for all routes
-  const handleNewChat = () => {};
 
+  const handleNewChat = () => {
+    // other logics later
+    switch (true) {
+      case pathname.startsWith("/chat"):
+        router.push("/");
+        break;
+      case pathname.startsWith("/image"):
+        router.push("/image");
+        break;
+      case pathname.startsWith("/audio"):
+        router.push("/audio");
+        break;
+      case pathname.startsWith("/video"):
+        router.push("/video");
+        break;
+      default:
+        router.push("/");
+    }
+  };
+  // active helper
+  const isActiveRoute = (itemHref: string, pathname: string): boolean => {
+    // Exact match for specific routes
+    if (itemHref === "/")
+      return pathname === "/" || pathname.startsWith("/chat/res");
+    if (itemHref === "/image")
+      return pathname === "/image" || pathname.startsWith("/image/res");
+    if (itemHref === "/audio")
+      return pathname === "/audio" || pathname.startsWith("/audio/res");
+    if (itemHref === "/video")
+      return pathname === "/video" || pathname.startsWith("/video/res");
+
+    return false;
+  };
   return (
     <>
       <div
@@ -78,13 +109,7 @@ export function Sidebar() {
                     key={item.label}
                     href={item.href}
                     className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                      item.href === "/"
-                        ? pathname === "/" || pathname.startsWith("/chat/res")
-                          ? "bg-secondary"
-                          : ""
-                        : pathname === item.href
-                        ? "bg-secondary"
-                        : ""
+                      isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
@@ -104,15 +129,9 @@ export function Sidebar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`w-full h-9 inline-flex items-center justify-center rounded-md ${
-                    item.href === "/"
-                      ? pathname === "/" || pathname.startsWith("/chat/res")
-                        ? "bg-secondary"
-                        : ""
-                      : pathname === item.href
-                      ? "bg-secondary"
-                      : ""
-                  } hover:bg-accent hover:text-accent-foreground`}
+                  className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
+                    isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
+                  }`}
                 >
                   <item.icon className="h-4 w-4" />
                 </Link>
@@ -243,6 +262,10 @@ export function Sidebar() {
       <ModelSelectionModal
         isOpen={modelSelectionModalOpen}
         onClose={() => setModelSelectionModalOpen(false)}
+      />
+      <PlansModal
+        isOpen={plansModalOpen}
+        onClose={() => setPlansModalOpen(false)}
       />
     </>
   );
