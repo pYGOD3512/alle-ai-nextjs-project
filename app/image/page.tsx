@@ -1,5 +1,6 @@
 "use client";
 import { useSidebarStore } from "@/lib/constants";
+
 export default function ImageGenerationPage() {
   const { isOpen } = useSidebarStore();
 
@@ -9,7 +10,7 @@ export default function ImageGenerationPage() {
         isOpen ? "pl-60" : "pl-16"
       }`}
     >
-      Image Generation{" "}
+      
     </div>
   );
 }
