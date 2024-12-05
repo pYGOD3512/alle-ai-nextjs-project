@@ -61,20 +61,20 @@ export function Sidebar() {
         router.push("/");
     }
   };
-  // active helper
-  const isActiveRoute = (itemHref: string, pathname: string): boolean => {
-    // Exact match for specific routes
-    if (itemHref === "/")
-      return pathname === "/" || pathname.startsWith("/chat/res");
-    if (itemHref === "/image")
-      return pathname === "/image" || pathname.startsWith("/image/res");
-    if (itemHref === "/audio")
-      return pathname === "/audio" || pathname.startsWith("/audio/res");
-    if (itemHref === "/video")
-      return pathname === "/video" || pathname.startsWith("/video/res");
+  // active helper 
+ const isActiveRoute = (itemHref: string, pathname: string): boolean => {
+   // Exact match for specific routes
+   if (itemHref === "/")
+     return pathname === "/" || pathname.startsWith("/chat/res");
+   if (itemHref === "/image")
+     return pathname === "/image" || pathname.startsWith("/image/res");
+   if (itemHref === "/audio")
+     return pathname === "/audio" || pathname.startsWith("/audio/res");
+   if (itemHref === "/video")
+     return pathname === "/video" || pathname.startsWith("/video/res");
 
-    return false;
-  };
+   return false;
+ };
   return (
     <>
       <div
