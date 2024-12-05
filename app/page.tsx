@@ -1,6 +1,6 @@
 //@ts-nocheck
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { ChatInput } from "@/components/features/ChatInput";
 import { useSidebarStore } from "@/lib/constants";
@@ -20,6 +20,13 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isOpen, setSectionId } = useSidebarStore();
   const router = useRouter();
+  const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+
+  useEffect(() => {
+    setCurrentPage("chat");
+  }, [setCurrentPage]);
+
+
   const handleSend = () => {
     if (!input.trim()) return;
     //  to chatpage with id

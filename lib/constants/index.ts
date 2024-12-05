@@ -32,7 +32,7 @@ export const useSidebarStore = create<SidebarState>()(
   persist(
     (set) => ({
       isOpen: true,
-      currentPage: "Chat",
+      currentPage: "chat",
       sectionIds: {
         chatId: null,
         imageId: null,
@@ -50,10 +50,15 @@ export const useSidebarStore = create<SidebarState>()(
         })),
     }),
     {
-      name: "sidebar-storage", 
+      name: "sidebar-storage",
+      partialize: (state) => ({
+        isOpen: state.isOpen,
+        sectionIds: state.sectionIds,
+      }),
     }
   )
 );
+
 export const models = [
   "GPT-4o",
   "Llama 3 70B Instruct",

@@ -1,8 +1,14 @@
 "use client";
 import { useSidebarStore } from "@/lib/constants";
+import { useEffect } from "react";
 
 export default function ImageGenerationPage() {
   const { isOpen } = useSidebarStore();
+  const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+
+  useEffect(() => {
+    setCurrentPage("image");
+  }, [setCurrentPage]);
 
   return (
     <div
