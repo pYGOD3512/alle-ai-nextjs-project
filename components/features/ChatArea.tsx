@@ -28,21 +28,60 @@ export function ChatArea() {
   const handleSend = () => {
     if (!input.trim()) return;
 
-    // const newMessage: Message = {
-    //   id: Date.now().toString(),
-    //   content: input,
-    //   sender: "user",
-    //   timestamp: new Date(),
-    //   responses: [
-    //     {
-    //       model: "GPT-4o",
-    //       content: "Sample response from GPT-4o...",
-    //       icon: "/models/gpt-4o.png",
-    //     },
-    //   ],
-    // };
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      content: input,
+      sender: "user",
+      timestamp: new Date(),
+      responses: [
+        {
+          model: "GPT-4o",
+          content:
+            `
+            SQL injection: Occurs when a user can input malicious SQL code into a web application, allowing them to execute unauthorized commands on the database.
+            Cross-site scripting (XSS): Allows attackers to inject malicious scripts into a web page, which can be used to steal user information, redirect traffic, or launch other attacks.
+            Input forgery: Occurs when an attacker can manipulate the input validation process to bypass security checks, such as changing a numerical input field to a text field.`,
+          icon: "/models/gpt-4o.png",
+        },
+        {
+          model: "Claude 3.5 Sonnet",
+          content:
+            `
+            Weak passwords: Users often create passwords that are easy to guess or crack, allowing attackers to gain unauthorized access to accounts.
+            Unprotected login pages: Login pages may not be sufficiently protected against brute force attacks or password sniffing techniques.
+            Insufficient authorization: Users may be granted access to resources or functionality that they should not have, allowing them to perform unauthorized actions.`,
+          icon: "/models/claude-3.png",
+        },
+        {
+          model: "Gemini 1.5 Pro",
+          content:
+            `
+            Default configurations: Web applications may be installed with default settings that are insecure, such as weak passwords or unpatched software.
+            Unpatched software: Web application software often requires regular updates to patch security vulnerabilities. Failure to apply these updates can leave the application vulnerable to attack.
+            Insecure server configurations: Web servers may be misconfigured, exposing sensitive data or allowing attackers to gain unauthorized access.`,
+          icon: "/models/gemini.png",
+        },
+        {
+          model: "Llama 3 70B Instruct",
+          content:
+            `
+            Cross-site request forgery (CSRF): Occurs when an attacker can trick a user into submitting a request that they do not intend to, such as transferring funds or changing account settings.
+            Insecure direct object references (IDOR): Occurs when an attacker can guess or manipulate the URL of a web page to access sensitive information that they should not have access to.
+            Broken object-level authorization: Similar to IDOR, this vulnerability occurs when an attacker can bypass authorization checks to access objects that they should not have access to.`,
+          icon: "/models/meta.png",
+        },
+        {
+          model: "ChatGPT",
+          content: `
+          Outdated software: Web applications that are not kept up to date with the latest security patches may be vulnerable to known exploits.
+            Third-party libraries: Web applications often use third-party libraries, which can introduce vulnerabilities if not properly reviewed and updated.
+            Exploit kits: Attackers may use exploit kits to automate the process of exploiting common vulnerabilities.`,
+          icon: "/models/gpt-3-5.png",
+        },
+      ],
+    };
 
-    setMessages([...messages]);
+    setMessages([...messages, newMessage]);
     setInput("");
   };
 
