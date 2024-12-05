@@ -41,39 +41,11 @@ export function Sidebar() {
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
-
+  
   const handleNewChat = () => {
     // other logics later
-    switch (true) {
-      case pathname.startsWith("/chat"):
-        router.push("/");
-        break;
-      case pathname.startsWith("/image"):
-        router.push("/image");
-        break;
-      case pathname.startsWith("/audio"):
-        router.push("/audio");
-        break;
-      case pathname.startsWith("/video"):
-        router.push("/video");
-        break;
-      default:
-        router.push("/");
-    }
-  };
-  // active helper
-  const isActiveRoute = (itemHref: string, pathname: string): boolean => {
-    // Exact match for specific routes
-    if (itemHref === "/")
-      return pathname === "/" || pathname.startsWith("/chat/res");
-    if (itemHref === "/image")
-      return pathname === "/image" || pathname.startsWith("/image/res");
-    if (itemHref === "/audio")
-      return pathname === "/audio" || pathname.startsWith("/audio/res");
-    if (itemHref === "/video")
-      return pathname === "/video" || pathname.startsWith("/video/res");
 
-    return false;
+    router.push("/");
   };
   return (
     <>
@@ -108,8 +80,15 @@ export function Sidebar() {
                   <Link
                     key={item.label}
                     href={item.href}
+                    onClick={() => setCurrentPage(item.label)}
                     className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                      isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
+                      item.href === "/"
+                        ? pathname === "/" || pathname.startsWith("/chat/res")
+                          ? "bg-secondary"
+                          : ""
+                        : pathname === item.href
+                        ? "bg-secondary"
+                        : ""
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
@@ -129,9 +108,9 @@ export function Sidebar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                    isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
-                  }`}
+                  className={`w-full h-9 inline-flex items-center justify-center rounded-md ${
+                    pathname === item.href ? "bg-secondary" : ""
+                  } hover:bg-accent hover:text-accent-foreground`}
                 >
                   <item.icon className="h-4 w-4" />
                 </Link>
@@ -241,11 +220,8 @@ export function Sidebar() {
                   </div>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full text-xs"
-                onClick={() => setPlansModalOpen(true)}
+              <Button size="sm" variant="outline" className="w-full text-xs"
+              onClick={() => setPlansModalOpen(true)}
               >
                 UPGRADE
               </Button>

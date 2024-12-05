@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
@@ -266,29 +265,18 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[50%]">
         <DialogHeader className="space-y-4 relative">
-          <DialogTitle className="">Model Selection</DialogTitle>
-
+          <DialogTitle className=''>Model Selection</DialogTitle>
+          
           {/* Selected Models */}
           <div className="space-y-2">
-            {selectedModels.length < 1 ? (
-              ""
-            ) : (
-              <label className="text-sm font-medium">Selected Models</label>
-            )}
+            {selectedModels.length < 1 ? "" : <label className="text-sm font-medium">Selected Models</label>}
             <div className="flex flex-wrap gap-2">
               {selectedModels.map((modelId) => {
                 const model = models.find((m) => m.id === modelId);
                 return (
-                  <Badge
-                    variant="outline"
-                    key={modelId}
-                    className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
-                  >
+                  <Badge variant="outline" key={modelId} className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground">
                     {model?.name}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-700"
-                      onClick={() => removeModel(modelId)}
-                    />
+                    <X className="h-3 w-3 cursor-pointer hover:text-red-700" onClick={() => removeModel(modelId)} />
                   </Badge>
                 );
               })}
@@ -308,17 +296,16 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Select defaultValue="all" onValueChange={setFilterType}>
+              <Select 
+                defaultValue="all"
+                onValueChange={setFilterType}
+              >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="All models" />
                 </SelectTrigger>
                 <SelectContent className="bg-backgroundSecondary">
                   {filterOptions.map((option) => (
-                    <SelectItem
-                      className="cursor-pointer"
-                      key={option.value}
-                      value={option.value}
-                    >
+                    <SelectItem className="cursor-pointer" key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
                   ))}
@@ -335,28 +322,18 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
         <ScrollArea className="h-[20rem] pr-4 overflow-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
             {filteredModels.map((model) => (
-              <div
-                key={model.id}
+              <div 
+                key={model.id} 
                 onClick={() => toggleModelSelection(model.id)}
                 className={cn(
                   "flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
-                  selectedModels.includes(model.id) &&
-                    "border-primary bg-accent"
+                  selectedModels.includes(model.id) && "border-primary bg-accent"
                 )}
               >
-                <Image
-                width={8} height={8}
-                  src={model.icon}
-                  alt={model.name}
-                  className="w-8 h-8 rounded-md"
-                />
-                <div className="overflow-auto scrollbar-thin scrollbar-none">
-                  <h3 className="font-small text-xs whitespace-nowrap">
-                    {model.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {model.provider}
-                  </p>
+                <img src={model.icon} alt={model.name} className="w-8 h-8 rounded-md" />
+                <div className='overflow-auto scrollbar-thin scrollbar-none'>
+                  <h3 className="font-small text-xs whitespace-nowrap">{model.name}</h3>
+                  <p className="text-sm text-muted-foreground">{model.provider}</p>
                 </div>
               </div>
             ))}
@@ -365,7 +342,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
         {/* Save Button */}
         <div className="flex justify-end mt-4">
-          <Button onClick={onClose}>Save</Button>
+          <Button onClick={onClose}>
+            Save
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -605,39 +584,37 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           <DialogHeader className="flex flex-row items-center justify-between relative">
             <div className="flex flex-col items-center w-full gap-2">
               <div className="relative">
-                <Image
-                  width={20}
-                  height={20}
-                  src={profilePhoto}
-                  alt="Profile"
+                <img 
+                  src={profilePhoto} 
+                  alt="Profile" 
                   className="w-20 h-20 rounded-full"
                 />
                 <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                  <Badge variant="default">Free</Badge>
+                  <Badge variant="default">
+                    Free
+                  </Badge>
                 </div>
               </div>
               <div className="text-center">
-                <DialogTitle className="text-xl">
-                  {firstName} {lastName}
-                </DialogTitle>
+                <DialogTitle className="text-xl">{firstName} {lastName}</DialogTitle>
                 <p className="text-sm text-muted-foreground">{email}</p>
               </div>
             </div>
             <div className="absolute right-4 top-4 flex gap-2">
-              <Button
-                variant="outline"
-                className="border-2 border-borderColorPrimary focus:outline-none"
+              <Button 
+                variant="outline" 
+                className='border-2 border-borderColorPrimary focus:outline-none' 
                 size="sm"
                 onClick={handleEditToggle}
               >
                 {isEditing ? (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 mr-2" /> 
                     Save Changes
                   </>
                 ) : (
                   <>
-                    <Pencil className="h-4 w-4 mr-2" />
+                    <Pencil className="h-4 w-4 mr-2" /> 
                     Edit Profile
                   </>
                 )}
@@ -649,8 +626,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           </DialogHeader>
 
           <div className="space-y-6 pt-4">
-            {isEditing && (
-              <>
+            {isEditing && (<>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">First name</label>
@@ -672,35 +648,32 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Profile photo</label>
-                  <div className="flex items-center gap-4">
-                    <Image
-                    width={16} height={16}
-                      src={profilePhoto}
-                      alt="Profile"
-                      className="w-16 h-16 rounded-full"
-                    />
-                    <Button variant="outline" size="sm">
-                      change picture
-                    </Button>
+                
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Profile photo</label>
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={profilePhoto} 
+                        alt="Profile" 
+                        className="w-16 h-16 rounded-full"
+                      />
+                      <Button variant="outline" size="sm">
+                        change picture
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
             <div className="flex justify-between gap-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setPlansModalOpen(true);
-                  onClose();
-                }}
-              >
-                <Gem className="h-4 w-4 mr-2" />
+              <Button variant="outline" onClick={() => {
+                setPlansModalOpen(true);
+                onClose();
+                }}>
+                <Gem className='h-4 w-4 mr-2'/>
                 UPGRADE
               </Button>
-              <div className="flex gap-4">
+              <div className='flex gap-4'>
                 <Button variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
@@ -709,10 +682,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           </div>
         </DialogContent>
       </Dialog>
-      <PlansModal
-        isOpen={plansModalOpen}
-        onClose={() => setPlansModalOpen(false)}
-      />
+      <PlansModal isOpen={plansModalOpen} onClose={() => setPlansModalOpen(false)}/>
     </>
   );
 }
@@ -997,10 +967,10 @@ export function DataExportModal({ isOpen, onClose }: ModalProps) {
             <li>Your account details and chats will be included in the export.</li>
             <li>The data will be sent to your registered email in a downloadable file.</li>
             <li>The download link will expire 24 hours after you receive it.</li>
-            <li>{`Processing may take some time. You'll be notified when it's ready.`}</li>
+            <li>Processing may take some time. You'll be notified when it's ready.</li>
           </ul>
           <p className="text-sm">
-            {`To proceed, click "Confirm export" below.`}
+            To proceed, click "Confirm export" below.
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
@@ -1092,7 +1062,7 @@ export function LogoutAllDevicesModal({ isOpen, onClose }: ModalProps) {
           <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
             <li>You will be logged out of all devices.</li>
             <li>All active sessions will be terminated immediately.</li>
-            <li>{`You'll need to log in again on other devices to regain access.`}</li>
+            <li>You'll need to log in again on other devices to regain access.</li>
             <li>This action cannot be undone.</li>
           </ul>
 
