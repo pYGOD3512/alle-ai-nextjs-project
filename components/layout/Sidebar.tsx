@@ -78,9 +78,9 @@ export function Sidebar() {
   return (
     <>
       <div
-        className={`fixed left-0 top-0 z-40 mt-14 h-screen transition-all duration-300 ${
+        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 ${
           isOpen ? "w-60" : "w-16"
-        } border-r bg-sideBarBackground`}
+        } border-r bg-sideBarBackground flex flex-col`}
       >
         <div className="p-2">
           {isOpen ? (
@@ -146,7 +146,7 @@ export function Sidebar() {
               <div className="text-xs font-medium text-muted-foreground mb-2">
                 CHAT HISTORY
               </div>
-              <ScrollArea className="h-[16rem]">
+              <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
                 <div className="space-y-0.5">
                   {chatHistory.map((chat, i) => (
                     <ContextMenu key={i}>
@@ -222,7 +222,7 @@ export function Sidebar() {
               </ScrollArea>
             </div>
 
-            <div className="absolute bottom-12 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
+            <div className="absolute bottom-0 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
               <div className="flex items-center gap-3 mb-4">
                 <Image
                   src="/user.jpg"
@@ -252,7 +252,7 @@ export function Sidebar() {
             </div>
           </>
         ) : (
-          <div className="absolute bottom-16 left-0 right-0 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
+          <div className="absolute bottom-0 left-0 right-0 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
             <Button size="sm" variant="outline" className="w-full text-xs">
               <Gem className="h-4 w-4" />
             </Button>
