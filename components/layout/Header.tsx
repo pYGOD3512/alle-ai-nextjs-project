@@ -14,6 +14,12 @@ import {
   HelpCircle,
   LogOut,
 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useSidebarStore, navItems, models, userMenuItems, notifications as notificationData } from '@/lib/constants';
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
@@ -246,13 +252,25 @@ export function Header() {
           isOpen ? 'ml-60' : 'ml-16'
         }`}>
           {models.length > 0 ? (
-            <div className="w-1/2 overflow-auto whitespace-nowrap md:w-fit flex items-center ml-8 border border-muted-foreground rounded-md py-1">
-              {models.map((model, index) => (
-              <span key={index} className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none">
-                {model}
-              </span>
-              ))}
-            </div>
+            <TooltipProvider>
+               <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="w-1/2 overflow-auto whitespace-nowrap md:w-fit flex items-center ml-8 border border-muted-foreground rounded-md py-1">
+                    {models.map((model, index) => (
+                    <span key={index} className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none">
+                      {model}
+                    </span>
+                    ))}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  className="max-w-[300px] break-words bg-backgroundSecondary"
+                >
+                  Selected Models
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : (
             <div className="flex items-center ml-8 border  border-red-500 rounded-md py-1">
               <span className="text-xs text-red-500 px-1">

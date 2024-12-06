@@ -26,11 +26,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-screen">
+          <div className="h-screen flex overflow-hidden">
             <Sidebar />
-            <main className="flex-1 flex flex-col transition-all duration-300">
+            <main className="flex-1 flex flex-col h-full relative">
               <Header />
-              {children}
+              <div className="flex-1 overflow-auto">
+                {children}
+              </div>
             </main>
           </div>
         </ThemeProvider>
