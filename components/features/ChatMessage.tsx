@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Image from 'next/image';
-import { Edit, Check, X } from "lucide-react";
+import { Edit, Pencil} from "lucide-react";
 
 interface ChatMessageProps {
   content: string;
@@ -16,10 +16,21 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleEditClick = () => {
     setIsEditing(true);
   };
+
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(
+        textareaRef.current.value.length,
+        textareaRef.current.value.length
+      );
+    }
+  }, [isEditing]);
 
   const handleSaveEdit = () => {
     if (onEditMessage) {
@@ -36,7 +47,7 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
   return (
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
-        <Card className="flex items-center gap-3 p-3 rounded-2xl bg-backgroundSecondary">
+        <Card className="flex items-start gap-3 p-3 rounded-2xl bg-backgroundSecondary">
           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <Image
               src={sender === 'user' 
@@ -49,25 +60,28 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
             />
           </div>
           {isEditing ? (
-            <div className="flex-1 flex items-center gap-2">
-              <input
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="flex-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Edit message..."
-              />
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={handleSaveEdit}
-                  className="text-green-500 hover:bg-green-100 p-1 rounded-full transition-colors"
-                >
-                  <Check size={20} />
-                </button>
+            <div className="flex-1 flex flex-col gap-2">
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  className="w-full p-3 rounded-lg text-sm focus:outline-none bg-backgroundSecondary resize-none min-h-[40px]"
+                  placeholder="Edit message..."
+                />
+              </div>
+              <div className="flex justify-end gap-2">
                 <button
                   onClick={handleCancelEdit}
-                  className="text-red-500 hover:bg-red-100 p-1 rounded-full transition-colors"
+                  className={`px-3 py-1 text-sm bg-white text-foreground dark:bg-black rounded-full dark: transition-colors`}
                 >
-                  <X size={20} />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-3 py-1 text-sm rounded-full bg-black text-white dark:bg-white dark:text-black transition-colors"
+                >
+                  Save
                 </button>
               </div>
             </div>
@@ -76,10 +90,10 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
               <p className="text-sm flex-1 pr-2">{content}</p>
               <button
                 onClick={handleEditClick}
-                className="text-gray-500 hover:bg-gray-100 p-1 rounded-full transition-colors"
+                className="text-gray-500 hover:bg-hoverColorPrimary p-1 rounded-md transition-colors"
                 aria-label="Edit message"
               >
-                <Edit size={16} />
+                <Pencil size={16} />
               </button>
             </div>
           )}
