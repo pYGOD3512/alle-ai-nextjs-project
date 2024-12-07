@@ -1,6 +1,6 @@
 //@ts-nocheck
 "use client";
-import ImageInput from "@/components/features/image/ImageInput";
+import { ChatInput } from "@/components/features/ChatInput";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { useState, useRef, useEffect } from "react";
 import { useSidebarStore } from "@/lib/constants";
@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     >
       <div className="flex justify-center items-center  p-4">
         <div className="w-full max-w-3xl">
-          <ImageInput
+          <ChatInput
             value={input}
             onChange={setInput}
             onSend={handleGenerate}
@@ -44,7 +44,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <div className="flex-1 mt-5">
-        <GreetingMessage options={options} username="Christmas" handlePressed={handleClicked} />
+        <GreetingMessage
+          options={options}
+          username="Christmas"
+          handlePressed={handleClicked}
+        />
       </div>
       <div className="flex-1"> {children} </div>
     </div>
