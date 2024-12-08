@@ -27,6 +27,28 @@ interface SidebarState {
   setSectionId: (section: string, id: string | null) => void; // Setter for dynamic IDs
   setOpen: (value: boolean) => void;
 }
+
+interface ContentType {
+  input: string;
+  voice: string;
+  attachment: string;
+}
+
+interface ContentState {
+  chat: ContentType;
+  image: ContentType;
+  audio: ContentType;
+  video: ContentType;
+}
+
+interface ContentStore {
+  content: ContentState;
+  setContent: (
+    type: keyof ContentState,
+    key: keyof ContentType,
+    value: string
+  ) => void;
+}
 // SIDEBAR & HEADER CONSTANTS ----- START
 
 export const useSidebarStore = create<SidebarState>()(
@@ -60,6 +82,7 @@ export const useSidebarStore = create<SidebarState>()(
     }
   )
 );
+
 
 export const models = [
   "GPT-4o",
@@ -101,7 +124,7 @@ export const navItems = [
         icon: Bell,
         // onClick: () => console.log("All Notifications")
       },
-    ]
+    ],
   },
 ];
 
@@ -115,23 +138,23 @@ type Notification = {
 
 export const notifications: Notification[] = [
   {
-    id: '1',
-    title: 'New Model Available',
-    message: 'Claude 3 Opus is now available for all users',
+    id: "1",
+    title: "New Model Available",
+    message: "Claude 3 Opus is now available for all users",
     timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
     read: false,
   },
   {
-    id: '2',
-    title: 'Welcome!',
-    message: 'Thanks for joining our AI platform. Take a tour to get started.',
+    id: "2",
+    title: "Welcome!",
+    message: "Thanks for joining our AI platform. Take a tour to get started.",
     timestamp: new Date(Date.now() - 1000 * 60 * 24), // 1 day ago
     read: true,
-  }
+  },
 ];
 
 export const sidebarMenuItems = [
-  { icon: MessageSquare, label: "Chat" ,href:"/" },
+  { icon: MessageSquare, label: "Chat", href: "/" },
   { icon: ImageIcon, label: "Image Generation", href: "/image" },
   { icon: Music, label: "Audio Generation", beta: true, href: "/audio" },
   { icon: Video, label: "Video Generation", beta: true, href: "/video" },
@@ -172,47 +195,46 @@ export const dropdownMenuItems = {
 
 export const userMenuItems = [
   {
-    label: 'Profile',
+    label: "Profile",
     icon: User,
-    interactionType: 'modal',
+    interactionType: "modal",
     onClick: () => {
       // console.log('Opening Profile Modal');
     },
   },
   {
-    label: 'Developer',
+    label: "Developer",
     icon: Braces,
-    interactionType: 'link',
-    href: 'https://alle-ai.com/developer',
+    interactionType: "link",
+    href: "https://alle-ai.com/developer",
   },
   {
-    label: 'Refer',
+    label: "Refer",
     icon: Handshake,
-    interactionType: 'modal',
+    interactionType: "modal",
     onClick: () => {
       // console.log('Opening Refer Modal');
     },
   },
   {
-    label: 'Settings',
+    label: "Settings",
     icon: Settings,
-    interactionType: 'modal',
-    shortcut: 'Ctrl+K',
+    interactionType: "modal",
+    shortcut: "Ctrl+K",
     onClick: () => {
       // console.log('Opening Settings Modal');
     },
   },
   {
-    label: 'LogOut',
+    label: "LogOut",
     icon: LogOut,
-    interactionType: 'function',
+    interactionType: "function",
     onClick: () => {
       // console.log('Logging out...');
     },
   },
 ];
 // SIDEBAR & HEADER CONSTANTS ----- END
-
 
 // CHAT AREA CONSTANTS ----- START
 
@@ -294,7 +316,8 @@ export const IMAGE_MODELS = [
     icon: "/models/dall-e.png",
     provider: "OpenAI",
     type: "free",
-    preview: "Create stunning, photorealistic images with OpenAI's latest model",
+    preview:
+      "Create stunning, photorealistic images with OpenAI's latest model",
   },
   {
     id: "stable-diffusion",
@@ -302,7 +325,8 @@ export const IMAGE_MODELS = [
     icon: "/models/stability-ai.png",
     provider: "Stability AI",
     type: "free",
-    preview: "Create stunning, photorealistic images with OpenAI's latest model",
+    preview:
+      "Create stunning, photorealistic images with OpenAI's latest model",
   },
   {
     id: "midjourney",
@@ -355,7 +379,7 @@ export const VIDEO_MODELS = [
     name: "Runway Gen-2",
     icon: "/models/runway.png",
     provider: "runaway",
-    selected: 'true',
+    selected: "true",
     type: "free",
     preview: "Professional video generation and editing capabilities",
   },
@@ -370,8 +394,7 @@ export const initialMessages = [
     responses: [
       {
         model: "GPT-4o",
-        content:
-          `
+        content: `
           SQL injection: Occurs when a user can input malicious SQL code into a web application, allowing them to execute unauthorized commands on the database.
           Cross-site scripting (XSS): Allows attackers to inject malicious scripts into a web page, which can be used to steal user information, redirect traffic, or launch other attacks.
           Input forgery: Occurs when an attacker can manipulate the input validation process to bypass security checks, such as changing a numerical input field to a text field.`,
@@ -379,8 +402,7 @@ export const initialMessages = [
       },
       {
         model: "Claude 3.5 Sonnet",
-        content:
-          `
+        content: `
           Weak passwords: Users often create passwords that are easy to guess or crack, allowing attackers to gain unauthorized access to accounts.
           Unprotected login pages: Login pages may not be sufficiently protected against brute force attacks or password sniffing techniques.
           Insufficient authorization: Users may be granted access to resources or functionality that they should not have, allowing them to perform unauthorized actions.`,
@@ -388,8 +410,7 @@ export const initialMessages = [
       },
       {
         model: "Gemini 1.5 Pro",
-        content:
-          `
+        content: `
           Default configurations: Web applications may be installed with default settings that are insecure, such as weak passwords or unpatched software.
           Unpatched software: Web application software often requires regular updates to patch security vulnerabilities. Failure to apply these updates can leave the application vulnerable to attack.
           Insecure server configurations: Web servers may be misconfigured, exposing sensitive data or allowing attackers to gain unauthorized access.`,
@@ -397,8 +418,7 @@ export const initialMessages = [
       },
       {
         model: "Llama 3 70B Instruct",
-        content:
-          `
+        content: `
           Cross-site request forgery (CSRF): Occurs when an attacker can trick a user into submitting a request that they do not intend to, such as transferring funds or changing account settings.
           Insecure direct object references (IDOR): Occurs when an attacker can guess or manipulate the URL of a web page to access sensitive information that they should not have access to.
           Broken object-level authorization: Similar to IDOR, this vulnerability occurs when an attacker can bypass authorization checks to access objects that they should not have access to.`,
@@ -417,3 +437,6 @@ export const initialMessages = [
 ];
 
 // CHAT AREA CONSTANTS ----- END
+
+
+// NAVIGATION CONTENT DATA MANAGEMENTS --- STARTS
