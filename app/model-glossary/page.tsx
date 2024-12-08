@@ -1,13 +1,15 @@
-"use client"
+"use client";
 import { useEffect } from "react";
 import { useSidebarStore } from "@/lib/constants";
-export default function VideoGenerationPage() {
+
+
+export default function ModelGlossary() {
   const { isOpen } = useSidebarStore();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
 
 
   useEffect(() => {
-    setCurrentPage("video");
+    setCurrentPage("model-glossary");
   }, [setCurrentPage]);
 
   return (
@@ -15,6 +17,8 @@ export default function VideoGenerationPage() {
       className={`flex flex-col h-[calc(100vh-3.5rem)] transition-all duration-300 text-medium text-center justify-center text-5xl ${
         isOpen ? "pl-60" : ""
       }`}
-    > Video Generation </div>
+    >
+      Model Glossary Page{' '}
+    </div>
   );
 }

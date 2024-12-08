@@ -1,4 +1,6 @@
 "use client";
+
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -11,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -32,15 +34,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ModelSelectionModal, PlansModal } from "../ui/modals";
-import { useState } from "react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { useMediaQuery } from "@/hooks/use-media-query";
+
 
 export function Sidebar() {
-  const { isOpen, setCurrentPage } = useSidebarStore();
+  const { isOpen, setCurrentPage, toggle } = useSidebarStore();
   const pathname = usePathname();
   const router = useRouter();
+  const isMobile = useMediaQuery('(max-width: 1024px)');
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(true);
+
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      toggle();
+    }
+  }, [isMobile]);
 
   const handleNewChat = () => {
     // other logics later
@@ -72,15 +84,26 @@ export function Sidebar() {
      return pathname === "/audio" || pathname.startsWith("/audio/res");
    if (itemHref === "/video")
      return pathname === "/video" || pathname.startsWith("/video/res");
+   if (itemHref === "/model-glossary")
+     return pathname === "/model-glossary" || pathname.startsWith("/model-glossary");
 
    return false;
  };
   return (
     <>
+      {/* Backdrop overlay for mobile when sidebar is open */}
+      {isOpen && isMobile && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
+          onClick={toggle}
+        />
+      )}
+      
       <div
-        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 ${
-          isOpen ? "w-60" : "w-16"
-        } border-r bg-sideBarBackground flex flex-col`}
+        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 
+          ${isOpen ? "w-60" : "w-16"} 
+          ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}
+          border-r bg-sideBarBackground flex flex-col`}
       >
         <div className="p-2">
           {isOpen ? (
@@ -125,11 +148,27 @@ export function Sidebar() {
             </>
           ) : (
             <div className="space-y-2">
+              <div className="space-y-2 mb-8">
+                <Button
+                    onClick={handleNewChat}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setModelSelectionModalOpen(true)}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </div>
               {sidebarMenuItems.map((item, i) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
+                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
                     isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
                   }`}
                 >
@@ -220,6 +259,22 @@ export function Sidebar() {
                   ))}
                 </div>
               </ScrollArea>
+            </div>
+
+            <div className="px-4 mt-8">
+              <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md bg-backgroundSecondary text-xs font-medium text-muted-foreground hover:text-primary">
+                  MORE
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'transform rotate-180' : ''}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2 mt-2">
+                  <Link href={`/model-glossary`}>
+                    <div className="px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer">
+                      - Model Glossary
+                    </div>
+                  </Link>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             <div className="absolute bottom-0 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">

@@ -78,7 +78,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[30rem]">
+      <DialogContent className="max-w-md sm:max-w-lg rounded-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle>We value your feedback</DialogTitle>
           <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -304,7 +304,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[50%]">
+      <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md">
         <DialogHeader className="space-y-4 relative">
           <DialogTitle className="">Model Selection</DialogTitle>
 
@@ -336,9 +336,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
           </div>
 
           {/* Search and Filter */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between">
             <div className="text-sm font-medium">{getModelTypeText()}</div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-row-reverse sm:flex-row items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -373,7 +373,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
         {/* Model Grid */}
         <ScrollArea className="h-[20rem] pr-4 overflow-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
             {filteredModels.map((model) => (
               <div
                 key={model.id}
@@ -514,7 +514,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[40rem]">
+        <DialogContent className="sm:max-w-xl rounded-md">
           <DialogHeader className="flex flex-row items-center justify-between relative border-b border-borderColorPrimary">
             <DialogTitle className="mb-2">Settings</DialogTitle>
             <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -523,10 +523,10 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
           </DialogHeader>
 
           <Tabs defaultValue="general" className="w-full">
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               {/* Sidebar */}
               <div className="w-48 space-y-1">
-                <TabsList className="flex flex-col h-auto bg-transparent space-y-1">
+                <TabsList className="w-full flex flex-col h-auto bg-transparent space-y-1">
                   {tabs.map((tab) => (
                     <TabsTrigger
                       key={tab.value}
@@ -731,14 +731,14 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[35rem]">
+        <DialogContent className="max-w-sm sm:max-w-lg rounded-md">
           <DialogHeader className="flex flex-row items-center justify-between relative">
             <div className="flex flex-col items-center w-full gap-2">
               <div className="relative">
                 <Image
                   src={profilePhoto}
                   alt="Profile"
-                  className="w-20 h-20 rounded-full"
+                  className="h-16 w-16 sm:w-20 sm:h-20 rounded-full"
                   width={20}
                   height={20}
                 />
@@ -747,28 +747,26 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                 </div>
               </div>
               <div className="text-center">
-                <DialogTitle className="text-xl">
-                  {firstName} {lastName}
-                </DialogTitle>
-                <p className="text-sm text-muted-foreground">{email}</p>
+                <DialogTitle className="text-md sm:text-xl">{firstName} {lastName}</DialogTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground">{email}</p>
               </div>
             </div>
             <div className="absolute right-4 top-4 flex gap-2">
-              <Button
-                variant="outline"
-                className="border-2 border-borderColorPrimary focus:outline-none"
+              <Button 
+                variant="outline" 
+                className='px-2 sm:px-3 border-2 border-borderColorPrimary focus:outline-none' 
                 size="sm"
                 onClick={handleEditToggle}
               >
                 {isEditing ? (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                    <Save className="h-4 w-4 mr-0 sm:mr-2" /> 
+                    <span className='hidden sm:flex'>Save</span>
                   </>
                 ) : (
                   <>
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit Profile
+                    <Pencil className="h-4 w-4 mr-0 sm:mr-2" /> 
+                    <span className='hidden sm:flex'>Edit Profile</span>
                   </>
                 )}
               </Button>
@@ -803,16 +801,16 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Profile photo</label>
+                  <label className="text-xs sm:text-sm font-medium">Profile photo</label>
                   <div className="flex items-center gap-4">
                     <Image
                       src={profilePhoto}
                       alt="Profile"
                       width={16}
                       height={16}
-                      className="w-16 h-16 rounded-full"
+                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
                     />
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className='text-xs sm:text-sm p-2 sm:p-3'>
                       change picture
                     </Button>
                   </div>
@@ -821,18 +819,15 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
             )}
 
             <div className="flex justify-between gap-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setPlansModalOpen(true);
-                  onClose();
-                }}
-              >
-                <Gem className="h-4 w-4 mr-2" />
-                UPGRADE
+              <Button className='p-2 sm:p-3 text-xs sm:text-sm' variant="outline" onClick={() => {
+                setPlansModalOpen(true);
+                onClose();
+                }}>
+                <Gem className='w-4 h-4 mr-2'/>
+                <span>UPGRADE</span>
               </Button>
-              <div className="flex gap-4">
-                <Button variant="outline" onClick={onClose}>
+              <div className='flex gap-4'>
+                <Button className='p-2 sm:p-3 text-xs sm:text-sm' variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
               </div>
@@ -880,7 +875,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-sm sm:max-w-lg rounded-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle>
             Refer friends{" "}
@@ -1166,21 +1161,14 @@ export function DataExportModal({ isOpen, onClose }: ModalProps) {
         </DialogHeader>
         <div className="space-y-4">
           <ul className="list-disc pl-5 text-sm text-muted-foreground">
-            <li>
-              Your account details and chats will be included in the export.
-            </li>
-            <li>
-              The data will be sent to your registered email in a downloadable
-              file.
-            </li>
-            <li>
-              The download link will expire 24 hours after you receive it.
-            </li>
-            <li>
-              {`Processing may take some time. You'll be notified when it's ready.`}
-            </li>
+            <li>Your account details and chats will be included in the export.</li>
+            <li>The data will be sent to your registered email in a downloadable file.</li>
+            <li>The download link will expire 24 hours after you receive it.</li>
+            <li>Processing may take some time. You&apos;ll be notified when it&apos;s ready.</li>
           </ul>
-          <p className="text-sm">{`To proceed, click "Confirm export" below.`}</p>
+          <p className="text-sm">
+            To proceed, click &quot;Confirm export&quot; below.
+          </p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
@@ -1268,9 +1256,7 @@ export function LogoutAllDevicesModal({ isOpen, onClose }: ModalProps) {
           <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
             <li>You will be logged out of all devices.</li>
             <li>All active sessions will be terminated immediately.</li>
-            <li>
-              {`You'll need to log in again on other devices to regain access.`}
-            </li>
+            <li>You&apos;ll need to log in again on other devices to regain access.</li>
             <li>This action cannot be undone.</li>
           </ul>
 

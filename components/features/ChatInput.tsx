@@ -41,10 +41,8 @@ export function ChatInput({
   const isInputEmpty = value.trim() === "";
 
   return (
-    <div
-      className={` p-2 bg-background/95 backdrop-blur transition-all duration-300`}
-    >
-      <div className="max-w-3xl mx-auto flex justify-center items-end gap-1 border-2 rounded-2xl p-2">
+    <div className={` p-2 bg-background/95 backdrop-blur transition-all duration-300`}>
+      <div className="max-w-xl md:max-w-3xl mx-auto flex items-end gap-1 border-2 rounded-2xl p-2">
         <Button variant="ghost" size="icon" className="flex-shrink-0">
           <Paperclip className="h-4 w-4" />
         </Button>
@@ -91,7 +89,7 @@ export function ChatInput({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.5 }}
-              className="text-center text-xs mt-2 absolute w-full"
+              className="text-center text-[0.6rem] sm:text-xs mt-2 absolute w-full"
             >
               {texts[textIndex]}
             </motion.p>

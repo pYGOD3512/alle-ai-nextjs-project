@@ -85,7 +85,7 @@ export function ChatArea() {
     <RenderPageContent
     >
       <ScrollArea className="flex-1">
-        <div className="max-w-5xl mt-4 mx-auto px-4">
+        <div className="max-w-xl sm:max-w-2xl md:max-w-5xl mt-4 mx-auto px-4">
           {messages.map((message) => (
             <div key={message.id} className="mb-8">
               <ChatMessage
