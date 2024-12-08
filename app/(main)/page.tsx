@@ -6,6 +6,8 @@ import { ChatInput } from "@/components/features/ChatInput";
 import { useSidebarStore } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
 // static options
 const options = [
   {

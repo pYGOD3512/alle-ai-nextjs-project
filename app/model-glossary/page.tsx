@@ -1,10 +1,10 @@
 "use client";
 import { useEffect } from "react";
 import { useSidebarStore } from "@/lib/constants";
+import ModelGlossary from '@/components/features/model-glossary/ModelGlossary';
 
 
-export default function ModelGlossary() {
-  const { isOpen } = useSidebarStore();
+export default function ModelGlossaryPage() {
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
 
 
@@ -13,12 +13,8 @@ export default function ModelGlossary() {
   }, [setCurrentPage]);
 
   return (
-    <div
-      className={`flex flex-col h-[calc(100vh-3.5rem)] transition-all duration-300 text-medium text-center justify-center text-5xl ${
-        isOpen ? "pl-60" : ""
-      }`}
-    >
-      Model Glossary Page{' '}
+    <div>
+      <ModelGlossary />
     </div>
   );
 }
