@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
-import { Model } from "@/lib/types"
+import { ModelDetails } from "@/lib/types"
 
-export function ModelCard({ model }: { model: Model }) {
+export function ModelCard({ model }: { model: ModelDetails }) {
   return (
     <Link href={`/model-glossary/models/${model.id}`}>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors">

@@ -1,11 +1,11 @@
-import { Model } from "@/lib/types"
+import { ModelDetails } from "@/lib/types"
 import Link from "next/link"
 import Image from "next/image"
 
 interface RelatedModelsProps {
   currentModelId: string
   provider: string
-  models: Model[]
+  models: ModelDetails[]
 }
 
 export function RelatedModels({ currentModelId, provider, models }: RelatedModelsProps) {

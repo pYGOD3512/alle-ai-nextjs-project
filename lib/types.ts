@@ -1,33 +1,35 @@
-export interface Model {
-  id: string
-  name: string
-  provider: string
-  description: string
-  image: string
-  type: "chat" | "image"
-}
+export type Benchmark = {
+  name: string;
+  score: number;
+  maxScore: number;
+};
 
-export interface ModelDetails extends Model {
-  version: string
-  releaseDate: string
-  capabilities: string[]
-  technicalSpecs: {
-    parameters?: string
-    resolution?: string
-    contextWindow?: string
-    inputCost?: string
-    outputCost?: string
-    trainingData?: string
-    architecture?: string
-  }
-  benchmarks: {
-    name: string
-    score: number
-    maxScore: number
-  }[]
-  useCases: {
-    title: string
-    description: string
-  }[]
-  limitations: string[]
-}
+export type UseCase = {
+  title: string;
+  description: string;
+};
+
+export type TechnicalSpecs = {
+  modelSize?: string;
+  contextWindow?: string;
+  trainingData?: string;
+  architecture?: string;
+  parameters?: string;
+  [key: string]: string | undefined;
+};
+
+export type ModelDetails = {
+  id: string;
+  name: string;
+  provider: string;
+  version: string;
+  type: string;
+  releaseDate: string;
+  image: string;
+  description: string;
+  capabilities: string[];
+  technicalSpecs: TechnicalSpecs;
+  benchmarks: Benchmark[];
+  useCases: UseCase[];
+  limitations: string[];
+};
