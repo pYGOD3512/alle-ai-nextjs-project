@@ -5,7 +5,7 @@ import GreetingMessage from "@/components/features/GreetingMessage";
 import { ChatInput } from "@/components/features/ChatInput";
 import { useSidebarStore } from "@/lib/constants";
 import { useRouter } from "next/navigation";
-
+import RenderPageContent from "@/components/RenderPageContent";
 // static options
 const options = [
   {
@@ -56,10 +56,7 @@ export default function Home() {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
   return (
-    <div
-      className={`flex flex-col justify-between h-[calc(100vh-3.5rem)] transition-all duration-300 ${
-        isOpen ? "pl-60" : "pl-16"
-      }`}
+    <RenderPageContent
     >
       <div className="flex-1 mt-20 py-4">
         <GreetingMessage
@@ -74,6 +71,6 @@ export default function Home() {
         onSend={handleSend}
         inputRef={inputRef}
       />
-    </div>
+    </RenderPageContent>
   );
 }
