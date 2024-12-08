@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Image from 'next/image';
-import { Edit, Pencil} from "lucide-react";
+import { Edit, Check, X } from "lucide-react";
 
 interface ChatMessageProps {
   content: string;
@@ -47,8 +47,8 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
   return (
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
-        <Card className="flex items-start gap-3 p-3 rounded-2xl bg-backgroundSecondary">
-          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+        <Card className="flex items-center gap-3 p-3 rounded-2xl bg-backgroundSecondary">
+          <div className="hidden sm:flex w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <Image
               src={sender === 'user' 
             ? "/user.jpg"
@@ -66,20 +66,20 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
                   ref={textareaRef}
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full p-3 rounded-lg text-sm focus:outline-none bg-backgroundSecondary resize-none min-h-[40px]"
+                  className="w-full p-3 rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
                   placeholder="Edit message..."
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={handleCancelEdit}
-                  className={`px-3 py-1 text-sm bg-white text-foreground dark:bg-black rounded-full dark: transition-colors`}
+                  className="px-3 py-1 text-sm rounded-full hover:bg-gray-700 text-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="px-3 py-1 text-sm rounded-full bg-black text-white dark:bg-white dark:text-black transition-colors"
+                  className="px-3 py-1 text-sm rounded-full bg-white text-black hover:bg-gray-200 transition-colors"
                 >
                   Save
                 </button>
@@ -90,10 +90,10 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
               <p className="text-sm flex-1 pr-2">{content}</p>
               <button
                 onClick={handleEditClick}
-                className="text-gray-500 hover:bg-hoverColorPrimary p-1 rounded-md transition-colors"
+                className="text-gray-500 hover:bg-gray-100 p-1 rounded-full transition-colors"
                 aria-label="Edit message"
               >
-                <Pencil size={16} />
+                <Edit size={16} />
               </button>
             </div>
           )}

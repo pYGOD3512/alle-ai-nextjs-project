@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`flex flex-col justify-between h-[calc(100vh-3.5rem)] transition-all duration-300 ${
-        isOpen ? "pl-60" : "pl-16"
+        isOpen ? "pl-60" : ""
       }`}
     >
       <div className="flex justify-center items-center  p-4">

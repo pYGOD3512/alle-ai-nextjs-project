@@ -25,6 +25,7 @@ interface SidebarState {
   toggle: () => void;
   setCurrentPage: (page: string) => void;
   setSectionId: (section: string, id: string | null) => void; // Setter for dynamic IDs
+  setOpen: (value: boolean) => void;
 }
 // SIDEBAR & HEADER CONSTANTS ----- START
 
@@ -48,6 +49,7 @@ export const useSidebarStore = create<SidebarState>()(
             [section]: id, // Dynamically update the section ID
           },
         })),
+      setOpen: (value) => set({ isOpen: value }),
     }),
     {
       name: "sidebar-storage",

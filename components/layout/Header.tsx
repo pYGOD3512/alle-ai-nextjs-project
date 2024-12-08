@@ -24,10 +24,12 @@ import { useSidebarStore, navItems, models, userMenuItems, notifications as noti
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export function Header() {
   const { isOpen, toggle } = useSidebarStore();
   const { theme, setTheme } = useTheme();
+  const isMobile = useMediaQuery('(max-width: 1024px)');
 
   const [mounted, setMounted] = React.useState(false);
   const [notifications, setNotifications] = React.useState(notificationData);
@@ -208,10 +210,12 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className={`absolute left-0 h-14 flex items-center justify-center transition-all duration-200 ${
-          isOpen ? 'w-60' : 'w-16'
-        } border-r px-4 bg-sideBarBackground`}>
+      <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+        <div className={`absolute left-0 h-14 flex items-center justify-center transition-all duration-6300 z-10
+          ${isOpen ? 'w-60' : 'w-16'} 
+          ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
+          border-r px-4 bg-sideBarBackground`}
+        >
           {isOpen ? (
             mounted && (
               <Image 
@@ -219,7 +223,7 @@ export function Header() {
                 alt="Logo"
                 width={100}
                 height={100}
-                className="rounded mx-auto"
+                className={`rounded mx-auto`}
               />
             )
           ) : (
@@ -238,24 +242,24 @@ export function Header() {
             variant="secondary" 
             size="icon" 
             onClick={toggle}
-            className="h-6 w-6 absolute -right-3"
+            className={`h-6 w-6 absolute -right-3 transition-all duration-300 ${isMobile ? ( isOpen ? '-right-3' : 'right-[-2.5rem]') : "-right-3" }`}
           >
             {isOpen ? (
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             )}
           </Button>
         </div>
 
-        <div className={`flex h-14 items-center transition-all duration-300 ${
-          isOpen ? 'ml-60' : 'ml-16'
-        }`}>
+        <div className={`flex h-14 items-center transition-all duration-300 
+          ${isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')}`}
+        >
           {models.length > 0 ? (
             <TooltipProvider>
                <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="w-1/2 overflow-auto whitespace-nowrap md:w-fit flex items-center ml-8 border border-muted-foreground rounded-md py-1">
+                  <div className="w-2/5 sm:w-1/2 md:w-fit absolute overflow-auto whitespace-nowrap flex items-center ml-8 border border-muted-foreground rounded-md py-1">
                     {models.map((model, index) => (
                     <span key={index} className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none">
                       {model}

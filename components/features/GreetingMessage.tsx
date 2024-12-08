@@ -28,7 +28,7 @@ const GreetingMessage = ({
   const questionText = textReveal(`What would you like to do today?`)
 
   return (
-    <div className="flex flex-col items-center justify-center  mt-5 ">
+    <div className="max-w-xs sm:max-w-full mx-auto flex flex-col items-center justify-center  mt-5 ">
       <div className="w-full max-w-md">
         <div className="flex flex-col text-center mb-6">
           <motion.h2 
@@ -42,6 +42,7 @@ const GreetingMessage = ({
               key={id}
               transition={{duration: 0.5}}
               variants={charVariants}
+              className="text-md sm:text-lg"
               >
                 {char}
               </motion.span>

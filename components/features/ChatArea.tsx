@@ -88,11 +88,11 @@ export function ChatArea() {
   return (
     <div
       className={`flex flex-col h-[calc(100vh-3.5rem)] transition-all duration-300 ${
-        isOpen ? "pl-60" : "pl-16"
+        isOpen ? "pl-60" : ""
       }`}
     >
       <ScrollArea className="flex-1">
-        <div className="max-w-5xl mt-4 mx-auto px-4">
+        <div className="max-w-xl sm:max-w-2xl md:max-w-5xl mt-4 mx-auto px-4">
           {messages.map((message) => (
             <div key={message.id} className="mb-8">
               <ChatMessage
