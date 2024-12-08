@@ -5,7 +5,7 @@ export default function RenderPageContent({ children }: { children: React.ReactN
   return (
     <div
       className={`flex flex-col h-[calc(100vh-3.5rem)] transition-all duration-300 ${
-        isOpen ? "pl-60" : "pl-16"
+        isOpen ? "pl-60" : "pl-0"
       }`}
     >
         {children}

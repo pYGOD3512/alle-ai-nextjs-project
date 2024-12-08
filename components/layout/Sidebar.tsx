@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen  } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -268,10 +268,10 @@ export function Sidebar() {
                   <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'transform rotate-180' : ''}`} />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 mt-2">
-                  <Link href={`/model-glossary`}>
-                    <div className="px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer">
-                      - Model Glossary
-                    </div>
+                  <Link href={`/model-glossary`} legacyBehavior>
+                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer">
+                      <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
+                    </a>
                   </Link>
                 </CollapsibleContent>
               </Collapsible>
