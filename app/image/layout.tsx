@@ -1,9 +1,14 @@
 //@ts-nocheck
 "use client";
-import ImageInput from "@/components/features/image/ImageInput";
+import { ChatInput } from "@/components/features/ChatInput";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { useState, useRef, useEffect } from "react";
 import { useSidebarStore } from "@/lib/constants";
+import { useContentStore } from "@/stores";
+import { usePathname } from "next/navigation";
+import RenderPageContent from "@/components/RenderPageContent";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 // static options
 const options = [
   {
@@ -16,25 +21,29 @@ const options = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isOpen } = useSidebarStore();
   const [isLoading, setIsLoading] = useState(false);
- const handleClicked = (opt: { label: String }) => {
-   setInput(opt.label as String);
-   setTimeout(() => inputRef.current?.focus(), 0);
- };
+  const { setContent, resetContent } = useContentStore();
+  const router = useRouter();
+  const pathname = usePathname();
+  const handleClicked = (opt: { label: String }) => {
+    setInput(opt.label as String);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
   const handleGenerate = () => {
-    //
+    if (!input) return;
+    const chatId = crypto.randomUUID();
+    setContent("image", "input", input);
+    setInput("");
 
+    //
+    router.push(`/image/res/${chatId}`);
   };
   return (
-    <div
-      className={`flex flex-col justify-between h-[calc(100vh-3.5rem)] transition-all duration-300 ${
-        isOpen ? "pl-60" : "pl-16"
-      }`}
+    <RenderPageContent
     >
       <div className="flex justify-center items-center  p-4">
         <div className="w-full max-w-3xl">
-          <ImageInput
+          <ChatInput
             value={input}
             onChange={setInput}
             onSend={handleGenerate}
@@ -43,10 +52,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           />
         </div>
       </div>
-      <div className="flex-1 mt-5">
-        <GreetingMessage options={options} username="Christmas" handlePressed={handleClicked} />
-      </div>
+      {pathname === "/image" ? (
+        <div className="flex-1 mt-5">
+          <GreetingMessage
+            options={options}
+            username="Christmas"
+            handlePressed={handleClicked}
+          />
+        </div>
+      ) : (
+        ""
+      )}
+
       <div className="flex-1"> {children} </div>
-    </div>
+    </RenderPageContent>
   );
 }
