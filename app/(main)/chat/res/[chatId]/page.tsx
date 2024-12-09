@@ -1,5 +1,9 @@
 "use client";
+
 import { ChatArea } from "@/components/features/ChatArea";
-export default function ChatPage() {
+
+const ChatPage = () => {
   return <ChatArea />;
 }
+
+export default ChatPage

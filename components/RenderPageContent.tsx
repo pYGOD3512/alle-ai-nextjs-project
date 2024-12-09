@@ -1,5 +1,6 @@
 "use client"
 import { useSidebarStore } from "@/lib/constants";
+
 export default function RenderPageContent({ children }: { children: React.ReactNode }) {
   const { isOpen } = useSidebarStore();
   return (
