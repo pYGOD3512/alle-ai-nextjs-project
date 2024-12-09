@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
-import AnimatedGenerateButton from "./image/GenerateButton";
 import { ArrowUp, Paperclip, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -76,7 +75,17 @@ export function ChatInput({
             <ArrowUp className="h-4 w-4" />
           </Button>
         ) : (
-          <AnimatedGenerateButton isLoading={isLoading} onClick={onSend} />
+          <Button
+            onClick={onSend}
+            className={`flex-shrink-0 rounded-md select-none ${
+              isInputEmpty
+                ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
+                : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
+            }`}
+            disabled={isInputEmpty}
+          >
+            Generate
+          </Button>
         )}
       </div>
       {/* conditional rendering */}

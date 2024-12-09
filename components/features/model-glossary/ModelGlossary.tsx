@@ -28,14 +28,14 @@ export default function ModelGlossary() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar linkText="Blog" linkUrl="/model-glossary" />
+      <Navbar linkText="Blog" linkUrl="/" />
       <div className="container pt-16 mx-auto py-6 px-4 max-w-6xl flex-grow">
         <h1 className="text-2xl font-bold text-center mb-8">MODEL GLOSSARY</h1>
         
         <div className="relative max-w-md mx-auto mb-12">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            className="pl-10"
+            className="pl-10 focus-visible:outline-none focus:border-2 border-borderColorPrimary"
             placeholder="Find model..."
             type="search"
             value={searchQuery}
@@ -56,9 +56,9 @@ export default function ModelGlossary() {
             <div className="grid grid-cols-2 max-[500px]:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {displayedChatModels.map((model) => (
                 <Link key={model.id} href={`/model-glossary/models/${model.id}`}>
-                  <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Card className="cursor-pointer bg-transparent border border-borderColorPrimary hover:bg-accent hover:text-accent-foreground transition-colors">
                     <CardHeader className="flex flex-row items-center gap-3 p-4">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden relative bg-muted">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden relative">
                         <Image
                           src={model.image}
                           alt={model.name}
@@ -67,8 +67,8 @@ export default function ModelGlossary() {
                         />
                       </div>
                       <div>
-                        <CardTitle className="text-base">{model.name}</CardTitle>
-                        <CardDescription className="text-sm">{model.provider}</CardDescription>
+                        <CardTitle className="text-base text-foreground">{model.name}</CardTitle>
+                        <CardDescription className="text-sm text-muted-foreground">{model.provider}</CardDescription>
                       </div>
                     </CardHeader>
                   </Card>
@@ -97,9 +97,9 @@ export default function ModelGlossary() {
             <div className="grid grid-cols-2 max-[500px]:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {displayedImageModels.map((model) => (
                 <Link key={model.id} href={`/model-glossary/models/${model.id}`}>
-                  <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Card className="cursor-pointer bg-transparent border border-borderColorPrimary hover:bg-accent hover:text-accent-foreground transition-colors">
                     <CardHeader className="flex flex-row items-center gap-3 p-4">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden relative bg-muted">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden relative">
                         <Image
                           src={model.image}
                           alt={model.name}

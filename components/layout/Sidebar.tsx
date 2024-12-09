@@ -89,6 +89,7 @@ export function Sidebar() {
 
    return false;
  };
+ 
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}

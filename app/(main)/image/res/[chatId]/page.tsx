@@ -1,14 +1,10 @@
 "use client";
+
+import ImageArea from "@/components/features/image/ImageArea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useContentStore } from "@/stores";
-import { useSidebarStore } from "@/lib/constants";
-import RenderPageContent from "@/components/RenderPageContent";
-export default function ImageGenerationPage() {
-  const { content } = useContentStore();
-  const { isOpen } = useSidebarStore();
-  return (
-    <RenderPageContent>
-      image generation page
-    </RenderPageContent>
-  );
+
+const ImageGenerationPage = () => {
+  return <ImageArea />;
 }
+
+export default ImageGenerationPage

@@ -18,11 +18,11 @@ export function RelatedModels({ currentModelId, provider, models }: RelatedModel
   return (
     <div className="mt-12">
       <h2 className="text-xl font-semibold mb-6">Other Models from {provider}</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 max-[500px]:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {relatedModels.map((model) => (
           <Link key={model.id} href={`/model-glossary/models/${model.id}`}>
-            <div className="flex flex-col items-center text-center p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-              <div className="w-12 h-12 rounded-lg overflow-hidden relative bg-muted mb-3">
+            <div className="flex items-center gap-2 text-center p-4 rounded-lg border border-borderColorPrimary bg-transparent hover:bg-muted/90 transition-colors">
+              <div className="w-10 h-10 rounded-lg overflow-hidden relative">
                 <Image
                   src={model.image}
                   alt={model.name}
@@ -30,8 +30,10 @@ export function RelatedModels({ currentModelId, provider, models }: RelatedModel
                   className="object-cover"
                 />
               </div>
-              <h3 className="font-medium text-sm">{model.name}</h3>
-              <p className="text-xs text-muted-foreground">{model.provider}</p>
+              <div className="flex flex-col items-start">
+                <h3 className="font-medium text-sm text-foreground">{model.name}</h3>
+                <p className="text-xs text-muted-foreground">{model.provider}</p>
+              </div>
             </div>
           </Link>
         ))}
