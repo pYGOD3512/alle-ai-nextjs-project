@@ -316,7 +316,7 @@ export function Sidebar() {
                       <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                     </a>
                   </Link>
-                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary" : ""}`}>
+                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
                       <FileClock  className="w-4 h-4 ml-4"/> Changelog
                   </Link>
                 </CollapsibleContent>
