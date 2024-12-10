@@ -11,6 +11,7 @@ import {
   IMAGE_MODELS,
   AUDIO_MODELS,
   VIDEO_MODELS,
+  useSelectedModelsStore,
 } from "@/lib/constants";
 import {
   Select,
@@ -209,18 +210,33 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
 }
 
 export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
-  const [selectedModels, setSelectedModels] = React.useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [filterType, setFilterType] = React.useState("all");
   const currentPage = useSidebarStore((state) => state.currentPage);
-
-  useEffect(() => {}, [selectedModels]);
+  const { selectedModels, tempSelectedModels, setTempSelectedModels, saveSelectedModels, getSelectedModelNames } = useSelectedModelsStore();
+  const [filterType, setFilterType] = React.useState("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  
+  useEffect(() => {
+    // See selected models when I open the models menu (this is the current models I've selected and interacting with)
+    setTempSelectedModels(selectedModels[currentPage as keyof typeof selectedModels] || []);
+  }, [isOpen, currentPage]);
 
   useEffect(() => {
-    setSelectedModels([]);
     setSearchQuery("");
     setFilterType("all");
   }, [currentPage]);
+
+  const handleSave = () => {
+    saveSelectedModels(currentPage as 'chat' | 'image' | 'audio' | 'video');
+    onClose();
+  };
+
+  const toggleModelSelection = (modelId: string) => {
+    setTempSelectedModels(
+      tempSelectedModels.includes(modelId)
+        ? tempSelectedModels.filter(id => id !== modelId)
+        : [...tempSelectedModels, modelId]
+    );
+  };
 
   const getModelsForPage = () => {
     switch (currentPage) {
@@ -271,22 +287,6 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     return matchesSearch && matchesFilter;
   });
 
-  const toggleModelSelection = (modelId: string) => {
-    setSelectedModels((prevSelected) => {
-      const newSelected = prevSelected.includes(modelId)
-        ? prevSelected.filter((id) => id !== modelId)
-        : [...prevSelected, modelId];
-      return newSelected;
-    });
-  };
-
-  const removeModel = (modelId: string) => {
-    setSelectedModels((prevSelected) => {
-      const newSelected = prevSelected.filter((id) => id !== modelId);
-      return newSelected;
-    });
-  };
-
   const getModelTypeText = () => {
     switch (currentPage) {
       case "chat":
@@ -302,6 +302,10 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     }
   };
 
+  const handleRemoveAll = () => {
+    setTempSelectedModels([]); // Clear all temporary selections
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md">
@@ -310,13 +314,13 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
           {/* Selected Models */}
           <div className="space-y-2">
-            {selectedModels.length < 1 ? (
+            {tempSelectedModels.length < 1 ? (
               ""
             ) : (
               <label className="text-sm font-medium">Selected Models</label>
             )}
             <div className="flex flex-wrap gap-2">
-              {selectedModels.map((modelId) => {
+              {tempSelectedModels.map((modelId) => {
                 const model = models.find((m) => m.id === modelId);
                 return (
                   <Badge
@@ -327,7 +331,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                     {model?.name}
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-red-700"
-                      onClick={() => removeModel(modelId)}
+                      onClick={() => toggleModelSelection(modelId)}
                     />
                   </Badge>
                 );
@@ -380,7 +384,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                 onClick={() => toggleModelSelection(model.id)}
                 className={cn(
                   "flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
-                  selectedModels.includes(model.id) &&
+                  tempSelectedModels.includes(model.id) &&
                     "border-primary bg-accent"
                 )}
               >
@@ -404,10 +408,18 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
           </div>
         </ScrollArea>
 
-        {/* Save Button */}
-        <div className="flex justify-end mt-4">
-          {/* implement on save function  */}
-          <Button onClick={onClose}>Save</Button>
+        {/* Update the buttons section */}
+        <div className="flex justify-end gap-2 mt-4">
+          <Button
+            variant="outline"
+            onClick={handleRemoveAll}
+            className="hover:text-red-600"
+          >
+            Remove all
+          </Button>
+          <Button onClick={handleSave}>
+            Save
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
