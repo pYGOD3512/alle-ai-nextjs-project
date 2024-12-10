@@ -24,7 +24,7 @@ const ImageArea = () => {
             <div className="relative">
               <button
                 onClick={handleCopy}
-                className="flex items-center px-4 py-2 bg-background hover:bg-backgroundSecondary hover:border-violet-500 border border-transparent text-foreground rounded-md transition-all duration-200"
+                className="flex items-center px-4 py-2 bg-background hover:bg-backgroundSecondary hover:border-borderColorPrimary text-foreground rounded-md transition-all duration-200"
               >
                 <Copy className="h-4 w-3" />
               </button>
@@ -39,7 +39,6 @@ const ImageArea = () => {
           {/* test implementation 
           will handle with render component and suspense with skeleton
           */}
-          {/* <div className="mt-4 flex justify-center gap-6"> */}
           <div className="mt-4 grid grid-cols-2 max-[700px]:grid-cols-1 gap-y-4 lg:gap-x-6 justify-items-center">
             <Skeleton className="w-80 h-80 lg:w-96 lg:h-96" />
             <Skeleton className="w-80 h-80 lg:w-96 lg:h-96" />
