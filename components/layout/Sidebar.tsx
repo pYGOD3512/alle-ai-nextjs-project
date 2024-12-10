@@ -13,13 +13,11 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen  } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, FileClock  } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
   sidebarMenuItems,
-  chatHistory,
-  dropdownMenuItems,
 } from "@/lib/constants";
 import {
   Tooltip,
@@ -36,6 +34,8 @@ import {
 import { ModelSelectionModal, PlansModal } from "../ui/modals";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useHistoryStore } from "@/lib/constants";
+import { Input } from "@/components/ui/input";
 
 
 export function Sidebar() {
@@ -43,6 +43,9 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const isMobile = useMediaQuery('(max-width: 1024px)');
+  const { history, removeHistory: removeItem, renameHistory: renameItem, getHistoryByType } = useHistoryStore();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
@@ -84,11 +87,37 @@ export function Sidebar() {
      return pathname === "/audio" || pathname.startsWith("/audio/res");
    if (itemHref === "/video")
      return pathname === "/video" || pathname.startsWith("/video/res");
-   if (itemHref === "/model-glossary")
-     return pathname === "/model-glossary" || pathname.startsWith("/model-glossary");
+   if (itemHref === "/changelog")
+     return pathname === "/changelog" || pathname.startsWith("/changelog");
 
    return false;
  };
+ 
+  const handleRename = (id: string, currentTitle: string) => {
+    setEditingId(id);
+    setEditingTitle(currentTitle);
+  };
+
+  const handleRenameSubmit = (id: string) => {
+    if (editingTitle.trim()) {
+      renameItem(id, editingTitle.trim());
+    }
+    setEditingId(null);
+    setEditingTitle("");
+  };
+
+  // Determine current content type based on pathname
+  const getCurrentType = (): 'chat' | 'image' | 'audio' | 'video' => {
+    if (pathname.startsWith('/image')) return 'image';
+    if (pathname.startsWith('/audio')) return 'audio';
+    if (pathname.startsWith('/video')) return 'video';
+    return 'chat';
+  };
+
+  // Get filtered history based on current page
+  const currentType = getCurrentType();
+  const currentHistory = getHistoryByType(currentType);
+
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}
@@ -183,36 +212,50 @@ export function Sidebar() {
           <>
             <div className="px-4 mt-5">
               <div className="text-xs font-medium text-muted-foreground mb-2">
-                CHAT HISTORY
+                {currentType.toUpperCase()} HISTORY
               </div>
               <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
                 <div className="space-y-0.5">
-                  {chatHistory.map((chat, i) => (
-                    <ContextMenu key={i}>
+                  {currentHistory.map((item) => (
+                    <ContextMenu key={item.id}>
                       <ContextMenuTrigger>
                         <div className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md">
-                          <div className="relative flex-1 min-w-0">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="relative text-sm text-left cursor-pointer">
-                                    <div className="whitespace-nowrap overflow-hidden">
-                                      {chat.length > 26
-                                        ? `${chat.substring(0, 26)}`
-                                        : chat}
-                                      <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
+                          {editingId === item.id ? (
+                            <Input
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              onBlur={() => handleRenameSubmit(item.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleRenameSubmit(item.id);
+                                if (e.key === 'Escape') setEditingId(null);
+                              }}
+                              autoFocus
+                              className="h-6 text-xs"
+                            />
+                          ) : (
+                            <div className="relative flex-1 min-w-0">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="relative text-xs text-left cursor-pointer">
+                                      <div className="whitespace-nowrap overflow-hidden">
+                                        {item.title.length > 29
+                                          ? `${item.title.substring(0, 29)}`
+                                          : item.title}
+                                        <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
+                                      </div>
                                     </div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  side="top"
-                                  className="max-w-[300px] break-words"
-                                >
-                                  {chat}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent
+                                    side="top"
+                                    className="max-w-[300px] break-words"
+                                  >
+                                    {item.title}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          )}
 
                           <div className="absolute right-2">
                             <DropdownMenu>
@@ -225,35 +268,35 @@ export function Sidebar() {
                                   <EllipsisVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="w-[160px]"
-                              >
-                                {dropdownMenuItems.historyDropdownMenuItems.map(
-                                  (item, i) => (
-                                    <DropdownMenuItem
-                                      key={i}
-                                      className={item.className}
-                                    >
-                                      <item.icon className="mr-2 h-4 w-4" />
-                                      <span>{item.label}</span>
-                                    </DropdownMenuItem>
-                                  )
-                                )}
+                              <DropdownMenuContent align="end" className="w-[160px]">
+                                <DropdownMenuItem onClick={() => handleRename(item.id, item.title)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  <span>Rename</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => removeItem(item.id)}
+                                  className="text-red-500"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  <span>Delete</span>
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
                         </div>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
-                        {dropdownMenuItems.historyDropdownMenuItems.map(
-                          (item, i) => (
-                            <ContextMenuItem key={i} className={item.className}>
-                              <item.icon className="mr-2 h-4 w-4" />
-                              <span>{item.label}</span>
-                            </ContextMenuItem>
-                          )
-                        )}
+                        <ContextMenuItem onClick={() => handleRename(item.id, item.title)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          <span>Rename</span>
+                        </ContextMenuItem>
+                        <ContextMenuItem 
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-500"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
                   ))}
@@ -272,6 +315,9 @@ export function Sidebar() {
                     <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer">
                       <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                     </a>
+                  </Link>
+                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
+                      <FileClock  className="w-4 h-4 ml-4"/> Changelog
                   </Link>
                 </CollapsibleContent>
               </Collapsible>

@@ -1,4 +1,5 @@
 "use client";
+
 import { useSidebarStore } from "@/lib/constants";
 import { useEffect } from "react";
 import RenderPageContent from "@/components/RenderPageContent";
@@ -13,10 +14,5 @@ export default function ImageGenerationPage() {
   }, [setCurrentPage]);
 
   
-  return (
-    <RenderPageContent
-    >
-    <div></div>
-    </RenderPageContent>
-  );
+  return ;
 }

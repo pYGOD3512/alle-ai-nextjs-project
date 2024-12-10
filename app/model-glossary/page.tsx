@@ -13,7 +13,7 @@ export default function ModelGlossaryPage() {
   }, [setCurrentPage]);
 
   return (
-    <div>
+    <div className="bg-background">
       <ModelGlossary />
     </div>
   );

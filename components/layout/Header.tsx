@@ -20,16 +20,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSidebarStore, navItems, models, userMenuItems, notifications as notificationData } from '@/lib/constants';
+import { useSidebarStore, navItems, userMenuItems, notifications as notificationData, useSelectedModelsStore } from '@/lib/constants';
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { usePathname } from 'next/navigation';
 
 export function Header() {
   const { isOpen, toggle } = useSidebarStore();
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 1024px)');
+  const pathname = usePathname();
 
   const [mounted, setMounted] = React.useState(false);
   const [notifications, setNotifications] = React.useState(notificationData);
@@ -39,6 +41,17 @@ export function Header() {
   const [userProfileModalOpen, setUserProfileModalOpen] = React.useState(false);
   const [referModalOpen, setReferModalOpen] = React.useState(false);
 
+  const currentPage = useSidebarStore((state) => state.currentPage);
+  const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
+  const getSelectedModelNames = useSelectedModelsStore((state) => state.getSelectedModelNames);
+  
+  // Get current selected model names based on the current page
+  const selectedModelNames = React.useMemo(() => 
+    getSelectedModelNames(currentPage as 'chat' | 'image' | 'audio' | 'video'),
+    [currentPage, selectedModels, getSelectedModelNames]
+  );
+
+  const isChangelogPage = pathname.includes('changelog');
 
   React.useEffect(() => {
     setMounted(true);
@@ -255,32 +268,39 @@ export function Header() {
         <div className={`flex h-14 items-center transition-all duration-300 
           ${isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')}`}
         >
-          {models.length > 0 ? (
-            <TooltipProvider>
-               <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-2/5 sm:w-1/2 md:w-fit absolute overflow-auto whitespace-nowrap flex items-center ml-8 border border-muted-foreground rounded-md py-1">
-                    {models.map((model, index) => (
-                    <span key={index} className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none">
-                      {model}
-                    </span>
-                    ))}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className="max-w-[300px] break-words bg-backgroundSecondary"
-                >
-                  Selected Models
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          {!isChangelogPage && mounted ? (
+            selectedModelNames.length > 0 ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="w-2/5 sm:w-1/2 md:w-fit absolute overflow-auto whitespace-nowrap flex items-center ml-8 border border-muted-foreground rounded-md py-1">
+                      {selectedModelNames.map((model, index) => (
+                        <span 
+                          key={`${model}-${index}`} 
+                          className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none"
+                        >
+                          {model}
+                        </span>
+                      ))}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="max-w-[300px] break-words bg-backgroundSecondary"
+                  >
+                    Selected Models
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <div className="flex items-center ml-8 border border-red-500 rounded-md py-1">
+                <span className="text-xs text-red-500 px-1">
+                  No models selected
+                </span>
+              </div>
+            )
           ) : (
-            <div className="flex items-center ml-8 border  border-red-500 rounded-md py-1">
-              <span className="text-xs text-red-500 px-1">
-                No models selected
-              </span>
-            </div>
+            ''
           )}
           
           <div className="flex items-center gap-2 ml-auto mr-8">

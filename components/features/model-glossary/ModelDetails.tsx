@@ -29,11 +29,11 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
           </div>
         </div>
 
-        <h1 className="text-xl md:text-2xl font-bold text-center mb-8">About {model.name}</h1>
+        <h1 className="hidden md:flex text-xl md:text-2xl font-bold text-center mb-8">About {model.name}</h1>
         
-        <div className="grid gap-6">
+        <div className="">
           <div className="flex items-start gap-6 mb-8 mx-1">
-            <div className="w-24 h-24 rounded-lg overflow-hidden relative bg-muted">
+            <div className="w-10 h-10 md:w-24 md:h-24 rounded-lg overflow-hidden relative">
               <Image
                 src={model.image}
                 alt={model.name}
@@ -62,7 +62,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="w-full max-w-[600px] h-9">
+            <TabsList className="w-full h-10 overflow-auto">
               <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
               <TabsTrigger value="technical" className="text-sm">Technical</TabsTrigger>
               <TabsTrigger value="performance" className="text-sm">Performance</TabsTrigger>
@@ -71,7 +71,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
             </TabsList>
 
             <TabsContent value="overview">
-              <Card>
+              <Card className="bg-transparent border border-borderColorPrimary">
                 <CardHeader>
                   <CardTitle>About</CardTitle>
                   <CardDescription>{model.description}</CardDescription>
@@ -92,7 +92,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
             </TabsContent>
 
             <TabsContent value="technical">
-              <Card>
+              <Card className="bg-transparent border border-borderColorPrimary">
                 <CardHeader>
                   <CardTitle>Technical Specifications</CardTitle>
                 </CardHeader>
@@ -112,7 +112,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
             </TabsContent>
 
             <TabsContent value="performance">
-              <Card>
+              <Card className="bg-transparent border border-borderColorPrimary">
                 <CardHeader>
                   <CardTitle>Benchmark Performance</CardTitle>
                 </CardHeader>
@@ -126,7 +126,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
                             {benchmark.score}/{benchmark.maxScore}
                           </span>
                         </div>
-                        <Progress value={(benchmark.score / benchmark.maxScore) * 100} />
+                        <Progress className="h-2" value={(benchmark.score / benchmark.maxScore) * 100} />
                       </div>
                     ))}
                   </div>
@@ -135,7 +135,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
             </TabsContent>
 
             <TabsContent value="usecases">
-              <Card>
+              <Card className="bg-transparent border border-borderColorPrimary">
                 <CardHeader>
                   <CardTitle>Use Cases</CardTitle>
                 </CardHeader>
@@ -156,7 +156,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
             </TabsContent>
 
             <TabsContent value="limitations">
-              <Card>
+              <Card className="bg-transparent border border-borderColorPrimary">
                 <CardHeader>
                   <CardTitle>Limitations</CardTitle>
                 </CardHeader>
