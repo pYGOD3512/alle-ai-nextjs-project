@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, FileClock  } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History  } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -248,7 +248,7 @@ export function Sidebar() {
                                   </TooltipTrigger>
                                   <TooltipContent
                                     side="top"
-                                    className="max-w-[300px] break-words"
+                                    className="max-w-[200px] text-xs break-words"
                                   >
                                     {item.title}
                                   </TooltipContent>
@@ -317,7 +317,7 @@ export function Sidebar() {
                     </a>
                   </Link>
                   <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
-                      <FileClock  className="w-4 h-4 ml-4"/> Changelog
+                      <History  className="w-4 h-4 ml-4"/> Changelog
                   </Link>
                 </CollapsibleContent>
               </Collapsible>
