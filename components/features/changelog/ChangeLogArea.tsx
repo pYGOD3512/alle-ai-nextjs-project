@@ -110,7 +110,7 @@ export default function Changelog() {
             <h1 className="text-center font-medium text-3xl mb-16">Changelog</h1>
             <CardContent className="relative">
             {/* Timeline line */}
-            <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-800" />
+            <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-bodyColor" />
 
             {/* Timeline entries */}
             <div className="space-y-8">
@@ -130,18 +130,18 @@ export default function Changelog() {
                         index % 2 === 0 ? "justify-start" : "justify-end"
                         )}
                     >
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-400">{entry.date}</span>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">{entry.date}</span>
                     </div>
                     <div
                         className={cn(
-                        "mt-2 text-white",
+                        "mt-2 text-foreground",
                         index % 2 === 0 ? "text-left" : "text-right"
                         )}
                     >
                         <h3 className="font-medium">{entry.title}</h3>
                         {entry.description && (
-                        <p className="mt-1 text-sm text-gray-400">
+                        <p className="mt-1 text-sm text-muted-foreground">
                             {entry.description}
                         </p>
                         )}
