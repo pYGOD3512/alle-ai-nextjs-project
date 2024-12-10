@@ -25,11 +25,13 @@ import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { usePathname } from 'next/navigation';
 
 export function Header() {
   const { isOpen, toggle } = useSidebarStore();
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 1024px)');
+  const pathname = usePathname();
 
   const [mounted, setMounted] = React.useState(false);
   const [notifications, setNotifications] = React.useState(notificationData);
@@ -48,6 +50,8 @@ export function Header() {
     getSelectedModelNames(currentPage as 'chat' | 'image' | 'audio' | 'video'),
     [currentPage, selectedModels, getSelectedModelNames]
   );
+
+  const isChangelogPage = pathname.includes('changelog');
 
   React.useEffect(() => {
     setMounted(true);
@@ -264,7 +268,7 @@ export function Header() {
         <div className={`flex h-14 items-center transition-all duration-300 
           ${isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')}`}
         >
-          {mounted ? (
+          {!isChangelogPage && mounted ? (
             selectedModelNames.length > 0 ? (
               <TooltipProvider>
                 <Tooltip>
@@ -296,12 +300,7 @@ export function Header() {
               </div>
             )
           ) : (
-            // Show a placeholder during server-side rendering
-            <div className="flex items-center ml-8 border border-muted-foreground rounded-md py-1">
-              <span className="text-xs text-muted-foreground px-1">
-                Loading...
-              </span>
-            </div>
+            ''
           )}
           
           <div className="flex items-center gap-2 ml-auto mr-8">
