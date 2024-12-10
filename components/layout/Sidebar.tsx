@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2 } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, FileClock  } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -87,8 +87,8 @@ export function Sidebar() {
      return pathname === "/audio" || pathname.startsWith("/audio/res");
    if (itemHref === "/video")
      return pathname === "/video" || pathname.startsWith("/video/res");
-   if (itemHref === "/model-glossary")
-     return pathname === "/model-glossary" || pathname.startsWith("/model-glossary");
+   if (itemHref === "/changelog")
+     return pathname === "/changelog" || pathname.startsWith("/changelog");
 
    return false;
  };
@@ -315,6 +315,9 @@ export function Sidebar() {
                     <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer">
                       <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                     </a>
+                  </Link>
+                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary" : ""}`}>
+                      <FileClock  className="w-4 h-4 ml-4"/> Changelog
                   </Link>
                 </CollapsibleContent>
               </Collapsible>
