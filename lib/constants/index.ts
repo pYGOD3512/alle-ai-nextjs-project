@@ -83,14 +83,54 @@ export const useSidebarStore = create<SidebarState>()(
   )
 );
 
+interface SelectedModelsStore {
+  selectedModels: {
+    chat: string[];
+    image: string[];
+    audio: string[];
+    video: string[];
+  };
+  tempSelectedModels: string[]; // Here I'm using the tempSelectedModels to store the selected models before the user saves them.
+  setTempSelectedModels: (models: string[]) => void;
+  saveSelectedModels: (type: 'chat' | 'image' | 'audio' | 'video') => void;
+  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => string[];
+}
 
-export const models = [
-  "GPT-4o",
-  "Llama 3 70B Instruct",
-  "Gemini 1.5 Pro",
-  "Claude 3.5 Sonnet",
-  "ChatGPT",
-];
+export const useSelectedModelsStore = create<SelectedModelsStore>()(
+  persist(
+    (set, get) => ({
+      selectedModels: {
+        chat: [],
+        image: [],
+        audio: [],
+        video: [],
+      },
+      tempSelectedModels: [],
+      setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
+      saveSelectedModels: (type) => set((state) => ({
+        selectedModels: {
+          ...state.selectedModels,
+          [type]: state.tempSelectedModels
+        },
+        tempSelectedModels: [] // So here we empty the tempSelectedModels
+      })),
+      getSelectedModelNames: (type) => {
+        const state = get();
+        const modelList = type === 'chat' ? CHAT_MODELS 
+          : type === 'image' ? IMAGE_MODELS
+          : type === 'audio' ? AUDIO_MODELS
+          : VIDEO_MODELS;
+        
+        return state.selectedModels[type]
+          .map(id => modelList.find(model => model.id === id)?.name ?? '')
+          .filter(name => name !== '');
+      }
+    }),
+    {
+      name: 'selected-models-storage'
+    }
+  )
+);
 
 export const navItems = [
   {
@@ -161,37 +201,133 @@ export const sidebarMenuItems = [
 ];
 
 export const chatHistory = [
-  "Time to Build a Wall with Four",
-  "Making $1 Million in 5 Days",
-  "Future of Generative AI in",
-  "Strategies to Improve Empl",
-  "Making $1 Million in 5 Days",
-  "Future of Generative AI in",
-  "Strategies to Improve Emplo",
-  "Making $1 Million in 5 Days",
-  "Future of Generative AI in",
-  "Strategies to Improve Emplo",
+  "Time to Build a Wall with Four: Key Insights on Effective Barrier Construction and Team Collaboration",
+  "Making $1 Million in 5 Days: Proven Strategies for Rapid Wealth Creation in a Short Timeframe",
+  "The Future of Generative AI in Business: How AI is Transforming Industries and Creating New Opportunities",
+  "Strategies to Improve Employee Productivity: Effective Methods to Enhance Workplace Efficiency and Focus",
+  "Making $1 Million in 5 Days: A Guide to Quick Financial Success and Smart Investment Approaches",
+  "The Future of Generative AI in Healthcare: Exploring AI's Potential in Revolutionizing Medical Practices",
+  "Strategies to Improve Employee Retention: Tips for Keeping Top Talent Engaged and Motivated Long-Term",
+  "Making $1 Million in 5 Days: Actionable Insights from Entrepreneurs Who Have Achieved Quick Financial Growth",
+  "The Future of Generative AI in Education: How AI is Shaping the Future of Learning and Personalized Teaching",
+  "Strategies to Improve Employee Engagement: Techniques to Build Stronger Connections and Motivation at Work",
 ];
 
-export const dropdownMenuItems = {
-  historyDropdownMenuItems: [
+
+export const imageHistory = [
+  "Sunset over mountain landscape",
+  "Futuristic city skyline",
+  "Abstract geometric patterns",
+  "Cyberpunk character portrait",
+  "Magical forest scene",
+  "Underwater coral reef",
+  "Space station interior",
+  "Medieval castle at dawn",
+  "Neon-lit street market",
+  "Steampunk machinery",
+];
+
+export const audioHistory = [
+  "Epic orchestral soundtrack",
+  "Ambient nature sounds",
+  "Lo-fi beats composition",
+  "Jazz piano improvisation",
+  "Electronic dance track",
+  "Acoustic guitar melody",
+  "Cinematic sound effects",
+  "Meditation background music",
+  "Synthwave composition",
+  "Vocal harmony arrangement",
+];
+
+export const videoHistory = [
+  "Product showcase animation",
+  "Nature documentary clip",
+  "Character animation test",
+  "Particle effects demo",
+  "Architectural walkthrough",
+  "Logo reveal animation",
+  "Sci-fi scene rendering",
+  "Motion graphics intro",
+  "3D environment flythrough",
+  "Special effects compilation",
+];
+
+interface HistoryItem {
+  id: string;
+  title: string;
+  createdAt: Date;
+  type: 'chat' | 'image' | 'audio' | 'video';
+}
+
+interface HistoryStore {
+  history: HistoryItem[];
+  addHistory: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
+  removeHistory: (id: string) => void;
+  renameHistory: (id: string, newTitle: string) => void;
+  getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
+}
+
+// So I'm using the state manager to handle the static history for each page.
+export const useHistoryStore = create<HistoryStore>()(
+  persist(
+    (set, get) => ({
+      history: [
+        ...chatHistory.map((title, index) => ({
+          id: `chat-${index}`,
+          title,
+          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
+          type: 'chat' as const,
+        })),
+        ...imageHistory.map((title, index) => ({
+          id: `image-${index}`,
+          title,
+          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
+          type: 'image' as const,
+        })),
+        ...audioHistory.map((title, index) => ({
+          id: `audio-${index}`,
+          title,
+          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
+          type: 'audio' as const,
+        })),
+        ...videoHistory.map((title, index) => ({
+          id: `video-${index}`,
+          title,
+          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
+          type: 'video' as const,
+        })),
+      ],
+      addHistory: (item) =>
+        set((state) => ({
+          history: [
+            {
+              ...item,
+              id: `${item.type}-${Date.now()}`,
+              createdAt: new Date(),
+            },
+            ...state.history,
+          ],
+        })),
+      removeHistory: (id) =>
+        set((state) => ({
+          history: state.history.filter((item) => item.id !== id),
+        })),
+      renameHistory: (id, newTitle) =>
+        set((state) => ({
+          history: state.history.map((item) =>
+            item.id === id ? { ...item, title: newTitle } : item
+          ),
+        })),
+      getHistoryByType: (type) => {
+        return get().history.filter((item) => item.type === type);
+      },
+    }),
     {
-      label: "Rename",
-      icon: Pencil,
-    },
-    {
-      label: "Delete",
-      className: "text-red-500",
-      icon: Trash2,
-    },
-  ],
-  chatDropdownMenuItems: [
-    {
-      label: "name",
-      icon: "iocn",
-    },
-  ],
-};
+      name: 'history-storage',
+    }
+  )
+);
 
 export const userMenuItems = [
   {
