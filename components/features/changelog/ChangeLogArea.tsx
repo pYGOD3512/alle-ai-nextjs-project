@@ -131,7 +131,7 @@ export default function Changelog() {
                         )}
                     >
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{entry.date}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{entry.date}</span>
                     </div>
                     <div
                         className={cn(
@@ -139,9 +139,9 @@ export default function Changelog() {
                         index % 2 === 0 ? "text-left" : "text-right"
                         )}
                     >
-                        <h3 className="font-medium">{entry.title}</h3>
+                        <h3 className="text-sm sm:text-base sm:font-medium">{entry.title}</h3>
                         {entry.description && (
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
                             {entry.description}
                         </p>
                         )}
