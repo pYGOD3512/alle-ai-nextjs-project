@@ -34,6 +34,7 @@ const config: Config = {
         borderColorPrimary: 'var(--borderColorPrimary)',
         bodyColor: 'var(--bodyColor)',
         hoverColorPrimary: 'var(--hoverColorPrimary)',
+        toastBackgroundColor: 'var(--toastBackgroundColor)',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',
@@ -104,7 +105,7 @@ const config: Config = {
       const newUtilities = {
         ".scrollbar-thin": {
           scrollbarWidth: "thin",
-          scrollbarColor: "rgb(31 29 29) transparent"
+          scrollbarColor: "hsl(var(--muted-foreground))"
         },
         ".scrollbar-webkit": {
           "&::-webkit-scrollbar" : {
