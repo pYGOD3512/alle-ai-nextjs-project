@@ -58,6 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             options={options}
             username="Christmas"
             handlePressed={handleClicked}
+            questionText="ready to create something amazing today?"
           />
         </div>
       ) : (

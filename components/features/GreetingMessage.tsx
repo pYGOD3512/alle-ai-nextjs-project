@@ -8,9 +8,10 @@ interface option {
   label: String;
 }
 interface GreetingMessageProp {
-  username: string;
-  options: option[];
-  handlePressed: (option: option) => void;
+  username?: string;
+  options?: option[];
+  handlePressed?: (option: option) => void;
+  questionText?: string;
 }
 
 const charVariants = {
@@ -19,13 +20,14 @@ const charVariants = {
 }
 
 const GreetingMessage = ({
-  username,
-  options,
-  handlePressed,
+  username = "Guest",
+  options = [],
+  handlePressed = () => {},
+  questionText = "What would you like to do today?",
 }: GreetingMessageProp) => {
 
   const greetings = textReveal(`Hi! ${username} 🎉`)
-  const questionText = textReveal(`What would you like to do today?`)
+  const questionTextArray = textReveal(questionText)
 
   return (
     <div className="max-w-xs sm:max-w-full mx-auto flex flex-col items-center justify-center  mt-5 ">
@@ -48,13 +50,14 @@ const GreetingMessage = ({
               </motion.span>
             ))}
           </motion.h2>
+          {/* {options.length > 0 && ( */}
           <motion.p 
           initial="hidden" 
           whileInView="reveal" 
           transition={{staggerChildren: .015}} 
           className="text-lg text-gray-500"
           >
-          {questionText.map(({char, id}) => (
+          {questionTextArray.map(({char, id}) => (
               <motion.span
               key={id}
               transition={{duration: 0.5}}
@@ -64,7 +67,9 @@ const GreetingMessage = ({
               </motion.span>
             ))}
           </motion.p>
+          {/* // )} */}
         </div>
+        {options.length > 0 && (
         <div className="space-y-4">
           {options.map((option, index) => (
             <div
@@ -78,6 +83,7 @@ const GreetingMessage = ({
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );
