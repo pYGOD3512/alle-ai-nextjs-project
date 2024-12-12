@@ -1,6 +1,6 @@
 'use client';
 
-import React from "react";
+import React, { forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@radix-ui/themes";
 import Image from 'next/image';
@@ -44,6 +44,8 @@ export function Header() {
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
   const getSelectedModelNames = useSelectedModelsStore((state) => state.getSelectedModelNames);
+
+
   
   // Get current selected model names based on the current page
   const selectedModelNames = React.useMemo(() => 

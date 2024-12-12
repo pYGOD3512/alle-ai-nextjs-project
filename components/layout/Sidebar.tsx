@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History  } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -31,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal, PlansModal } from "../ui/modals";
+import { ModelSelectionModal, PlansModal, SearchHistoryModal } from "../ui/modals";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useHistoryStore } from "@/lib/constants";
@@ -50,6 +50,8 @@ export function Sidebar() {
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(true);
+  const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -114,7 +116,7 @@ export function Sidebar() {
     return 'chat';
   };
 
-  // Get filtered history based on current page
+  // Here we get the history of the various pages
   const currentType = getCurrentType();
   const currentHistory = getHistoryByType(currentType);
 
@@ -128,7 +130,7 @@ export function Sidebar() {
         />
       )}
       
-      <div
+      <aside
         className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 
           ${isOpen ? "w-60" : "w-16"} 
           ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}
@@ -144,7 +146,7 @@ export function Sidebar() {
                   className="flex-1"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  NEW CHAT
+                  NEW {currentType.toUpperCase()}
                 </Button>
                 <Button
                   variant="outline"
@@ -211,10 +213,18 @@ export function Sidebar() {
         {isOpen ? (
           <>
             <div className="px-4 mt-5">
-              <div className="text-xs font-medium text-muted-foreground mb-2">
+              <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
                 {currentType.toUpperCase()} HISTORY
+                <Button
+                variant={`ghost`}
+                size={`icon`}
+                className="p-0 h-8 w-8"
+                onClick={() => setHistorySearchModalOpen(true)}
+                >
+                  <Search   className="w-4 h-4"/>
+                </Button>
               </div>
-              <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
+              <ScrollArea className="flex-1 h-[calc(100vh-38rem)]">
                 <div className="space-y-0.5">
                   {currentHistory.map((item) => (
                     <ContextMenu key={item.id}>
@@ -310,13 +320,13 @@ export function Sidebar() {
                   MORE
                   <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'transform rotate-180' : ''}`} />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2 mt-2">
+                <CollapsibleContent className="space-y-1 mt-1">
                   <Link href={`/model-glossary`} legacyBehavior>
-                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer">
+                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
                       <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                     </a>
                   </Link>
-                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-sm hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
+                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
                       <History  className="w-4 h-4 ml-4"/> Changelog
                   </Link>
                 </CollapsibleContent>
@@ -359,7 +369,7 @@ export function Sidebar() {
             </Button>
           </div>
         )}
-      </div>
+      </aside>
       <ModelSelectionModal
         isOpen={modelSelectionModalOpen}
         onClose={() => setModelSelectionModalOpen(false)}
@@ -367,6 +377,11 @@ export function Sidebar() {
       <PlansModal
         isOpen={plansModalOpen}
         onClose={() => setPlansModalOpen(false)}
+      />
+      <SearchHistoryModal
+        isOpen={historySearchModalOpen} 
+        onClose={() => setHistorySearchModalOpen(false)} 
+        currentType={currentType}
       />
     </>
   );
