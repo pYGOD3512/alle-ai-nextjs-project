@@ -12,6 +12,7 @@ import {
   AUDIO_MODELS,
   VIDEO_MODELS,
   useSelectedModelsStore,
+  useHistoryStore,
 } from "@/lib/constants";
 import {
   Select,
@@ -30,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings,
@@ -46,6 +48,9 @@ import {
   Check,
   DatabaseBackup,
   Info,
+  History,
+  MoreHorizontal,
+  Trash2,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -56,10 +61,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { formatDistanceToNow } from "date-fns";
+import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface SearchHistoryModalProps extends ModalProps {
+  currentType: 'chat' | 'image' | 'audio' | 'video';
 }
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
@@ -1288,6 +1300,121 @@ export function LogoutAllDevicesModal({ isOpen, onClose }: ModalProps) {
             </Button>
           </div>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHistoryModalProps) {
+  const { getHistoryByType, removeHistory: removeItem, renameHistory: renameItem } = useHistoryStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "az" | "za">("recent");
+
+  // Get history for current type and filter based on search
+  const filteredHistory = getHistoryByType(currentType)
+    .filter(item => 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+
+      switch (sortBy) {
+        case "oldest":
+          return dateA.getTime() - dateB.getTime();
+        case "az":
+          return a.title.localeCompare(b.title);
+        case "za":
+          return b.title.localeCompare(a.title);
+        default: // "recent"
+          return dateB.getTime() - dateA.getTime();
+      }
+    });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg sm:max-w-2xl overflow-hidden p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Search History</DialogTitle>
+        </DialogHeader>
+        <Command className="rounded-lg border-none">
+          <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <CommandInput
+              placeholder={`Search ${currentType} history...`}
+              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
+          </div>
+          <div className="flex items-center justify-between border-b px-4 py-2 text-xs text-muted-foreground">
+            <div>
+              <span className="font-medium">Tip:</span> Search by title or date
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Sort by:</span>
+              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                <SelectTrigger className="h-8 w-[120px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="az">A to Z</SelectItem>
+                  <SelectItem value="za">Z to A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <CommandList className="max-h-[400px] overflow-y-auto p-2">
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Recent History">
+              {filteredHistory.map((item) => (
+                <CommandItem 
+                  key={item.id}
+                  className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-accent rounded-md"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-primary/10 p-2 rounded-md">
+                      <History className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(item.createdAt))} ago
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="hidden sm:flex text-xs capitalize">
+                      {item.type}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => renameItem(item.id, item.title)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          <span>Rename</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-500"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
       </DialogContent>
     </Dialog>
   );
