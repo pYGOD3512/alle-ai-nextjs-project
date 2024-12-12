@@ -211,6 +211,11 @@ export const chatHistory = [
   "Making $1 Million in 5 Days: Actionable Insights from Entrepreneurs Who Have Achieved Quick Financial Growth",
   "The Future of Generative AI in Education: How AI is Shaping the Future of Learning and Personalized Teaching",
   "Strategies to Improve Employee Engagement: Techniques to Build Stronger Connections and Motivation at Work",
+  "The Future of Generative AI in Business: How AI is Transforming Industries and Creating New Opportunities",
+  "Strategies to Improve Employee Productivity: Effective Methods to Enhance Workplace Efficiency and Focus",
+  "Making $1 Million in 5 Days: A Guide to Quick Financial Success and Smart Investment Approaches",
+  "The Future of Generative AI in Healthcare: Exploring AI's Potential in Revolutionizing Medical Practices",
+  "Strategies to Improve Employee Retention: Tips for Keeping Top Talent Engaged and Motivated Long-Term",
 ];
 
 
@@ -576,3 +581,5 @@ export const initialMessages = [
 
 
 // NAVIGATION CONTENT DATA MANAGEMENTS --- STARTS
+// NAVIGATION CONTENT DATA MANAGEMENTS --- ENDS
+

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, RotateCcw, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, ChevronDown, ChevronUp, Settings, Volume2, AudioWaveform , Music, CircleEqual   } from "lucide-react";
+import { Upload, RotateCcw, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import RenderPageContent from "@/components/RenderPageContent";
@@ -13,12 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import GreetingMessage from "../GreetingMessage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-
+import { SearchHistoryModal } from "@/components/ui/modals";
 interface AudioResponse {
   content: string;
   model: string;
@@ -46,18 +41,6 @@ export function AudioArea() {
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const { toast } = useToast()
-  const [openAdvanced, setOpenAdvanced] = useState<Record<string, boolean>>({});
-  const [audioEffects, setAudioEffects] = useState<Record<string, {
-    reverb: number;
-    echo: number;
-    volume: number;
-    pan: number;
-    eq: {
-      low: number;
-      mid: number;
-      high: number;
-    };
-  }>>({});
 
   const ResponseSkeleton = () => (
     <div className="border border-borderColorPrimary rounded-lg p-4 space-y-4">
@@ -99,6 +82,7 @@ export function AudioArea() {
     setIsLoading(true);
     setHasResponse(true);
     setSubmittedPrompt(description);
+    setDescription("");
     
     // Simulate API call
     setTimeout(() => {
@@ -119,7 +103,6 @@ export function AudioArea() {
       
       setResponses(simulatedResponses);
       setIsLoading(false);
-      setDescription(""); // Clear the textarea after submission
     }, 5000);
   };
 
@@ -356,47 +339,16 @@ export function AudioArea() {
     }
   };
 
-  const initializeAudioEffects = (model: string) => {
-    if (!audioEffects[model]) {
-      setAudioEffects(prev => ({
-        ...prev,
-        [model]: {
-          reverb: 0,
-          echo: 0,
-          volume: 100,
-          pan: 0,
-          eq: {
-            low: 0,
-            mid: 0,
-            high: 0
-          }
-        }
-      }));
-    }
-  };
-
-  const handleEffectChange = (model: string, effect: string, value: number) => {
-    setAudioEffects(prev => ({
-      ...prev,
-      [model]: {
-        ...prev[model],
-        [effect]: value
-      }
-    }));
-    // Here you would apply the effect to the audio
-    // This would require Web Audio API implementation
-  };
-
   return (
     <RenderPageContent>
       <div className={cn(
-        "max-w-7xl w-full mx-auto mt-10 flex h-full transition-all duration-300",
+        "max-w-7xl w-full mx-auto mt-10 flex flex-col h-full transition-all duration-300",
         hasResponse ? "gap-4" : "gap-0"
       )}>
         {/* Left side - Prompt Section */}
         <div className={cn(
-          "flex flex-col transition-all duration-300 mx-auto",
-          hasResponse ? "w-1/2" : "w-1/2 max-h-screen mt-40"
+          "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
+          hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
         )}>
           {!hasResponse && ( <GreetingMessage username="Christmas" questionText=" What sound are you thinking of today?"/>)}
           <div className="flex flex-col flex-1 p-4 space-y-4">
@@ -405,7 +357,7 @@ export function AudioArea() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Input prompt here..."
+                placeholder="Describe your audio..."
                 className="flex-1 min-h-[100px] resize-none border-borderColorPrimary focus-visible:outline-none focus:border-2 scrollbar-thin scrollbar-webkit"
               />
             </div>
@@ -443,9 +395,9 @@ export function AudioArea() {
 
         {/* Right side - Response Section */}
         {hasResponse && (
-          <div className="w-1/2 h-full border-l">
+          <div className="w-full sm:w-2/3 lg:w-1/2 h-full mx-auto">
             <div className="p-4">
-              <ScrollArea className="h-[calc(100vh-200px)]">
+              <ScrollArea className="">
                 <div className="mb-6 rounded-lg">
                   <div className="flex items-start gap-4 justify-between mb-2">
                     <p className="text-sm text-muted-foreground">{submittedPrompt}</p>
@@ -584,159 +536,6 @@ export function AudioArea() {
                                   className="focus-visible:outline-none"
                                 />
                               </div>
-
-                              <Collapsible
-                                open={openAdvanced[response.model]}
-                                onOpenChange={(isOpen) => 
-                                  setOpenAdvanced(prev => ({
-                                    ...prev,
-                                    [response.model]: isOpen
-                                  }))
-                                }
-                                className="mt-4 space-y-2"
-                              >
-                                <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                  {openAdvanced[response.model] ? (
-                                    <ChevronUp className="h-4 w-4" />
-                                  ) : (
-                                    <ChevronDown className="h-4 w-4" />
-                                  )}
-                                  Advanced Options
-                                </CollapsibleTrigger>
-                                
-                                <CollapsibleContent className="space-y-4">
-                                  {/* Volume Control */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Volume2 className="h-4 w-4" />
-                                      <span className="text-sm">Master Volume</span>
-                                    </div>
-                                    <Slider
-                                      value={[audioEffects[response.model]?.volume || 100]}
-                                      max={100}
-                                      step={1}
-                                      onValueChange={(value) => handleEffectChange(response.model, 'volume', value[0])}
-                                      className="focus-visible:outline-none"
-                                    />
-                                  </div>
-
-                                  {/* Stereo Pan */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Music className="h-4 w-4" />
-                                      <span className="text-sm">Stereo Pan</span>
-                                    </div>
-                                    <Slider
-                                      value={[audioEffects[response.model]?.pan || 0]}
-                                      min={-100}
-                                      max={100}
-                                      step={1}
-                                      onValueChange={(value) => handleEffectChange(response.model, 'pan', value[0])}
-                                      className="focus-visible:outline-none"
-                                    />
-                                  </div>
-
-                                  {/* EQ Controls */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <CircleEqual   className="h-4 w-4" />
-                                      <span className="text-sm">CircleEqual  </span>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-4">
-                                      <div className="space-y-2">
-                                        <span className="text-xs text-muted-foreground">Low</span>
-                                        <Slider
-                                          orientation="vertical"
-                                          className="h-24 focus-visible:outline-none"
-                                          value={[audioEffects[response.model]?.eq?.low || 0]}
-                                          min={-12}
-                                          max={12}
-                                          step={1}
-                                          onValueChange={(value) => handleEffectChange(response.model, 'eq.low', value[0])}
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <span className="text-xs text-muted-foreground">Mid</span>
-                                        <Slider
-                                          orientation="vertical"
-                                          className="h-24 focus-visible:outline-none"
-                                          value={[audioEffects[response.model]?.eq?.mid || 0]}
-                                          min={-12}
-                                          max={12}
-                                          step={1}
-                                          onValueChange={(value) => handleEffectChange(response.model, 'eq.mid', value[0])}
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <span className="text-xs text-muted-foreground">High</span>
-                                        <Slider
-                                          orientation="vertical"
-                                          className="h-24 focus-visible:outline-none"
-                                          value={[audioEffects[response.model]?.eq?.high || 0]}
-                                          min={-12}
-                                          max={12}
-                                          step={1}
-                                          onValueChange={(value) => handleEffectChange(response.model, 'eq.high', value[0])}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Effects */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <AudioWaveform  className="h-4 w-4" />
-                                      <span className="text-sm">Effects</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="space-y-2">
-                                        <span className="text-xs text-muted-foreground">Reverb</span>
-                                        <Slider
-                                          value={[audioEffects[response.model]?.reverb || 0]}
-                                          max={100}
-                                          step={1}
-                                          onValueChange={(value) => handleEffectChange(response.model, 'reverb', value[0])}
-                                          className="focus-visible:outline-none"
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <span className="text-xs text-muted-foreground">Echo</span>
-                                        <Slider
-                                          value={[audioEffects[response.model]?.echo || 0]}
-                                          max={100}
-                                          step={1}
-                                          onValueChange={(value) => handleEffectChange(response.model, 'echo', value[0])}
-                                          className="focus-visible:outline-none"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex justify-end pt-4 border-t border-borderColorPrimary">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        // Close the advanced panel for this response
-                                        setOpenAdvanced(prev => ({
-                                          ...prev,
-                                          [response.model]: false
-                                        }));
-                                        
-                                        // Here we'll later add the actual application of effects
-                                        toast({
-                                          title: "Settings Applied",
-                                          description: "Audio effects have been updated",
-                                          duration: 3000,
-                                          className: "bg-toastBackgroundColor border border-borderColorPrimary text-foreground",
-                                        });
-                                      }}
-                                    >
-                                      Apply Changes
-                                    </Button>
-                                  </div>
-                                </CollapsibleContent>
-                              </Collapsible>
                             </div>
                             
                             <audio
