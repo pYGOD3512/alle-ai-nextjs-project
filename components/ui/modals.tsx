@@ -412,7 +412,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                   <h3 className="font-small text-xs whitespace-nowrap">
                     {model.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground whitespace-nowrap">
                     {model.provider}
                   </p>
                 </div>
@@ -1458,6 +1458,75 @@ export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialo
               </span>
             </button>
           ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function VideoSettingsInfoModal({ isOpen, onClose, settingType }: { isOpen: boolean; onClose: () => void; settingType: 'aspectRatio' | 'quality' | 'duration' | 'display' }) {
+  const settingsInfo = {
+    aspectRatio: {
+      title: "Aspect Ratio",
+      description: "The aspect ratio determines the shape and dimensions of your video.",
+      details: [
+        { label: "16:9", description: "Landscape format, ideal for YouTube, presentations" },
+        { label: "1:1", description: "Square format, perfect for Instagram posts" },
+        { label: "9:16", description: "Portrait format, best for TikTok, Instagram Stories" }
+      ]
+    },
+    quality: {
+      title: "Video Quality",
+      description: "Higher quality means better visual detail but larger file sizes.",
+      details: [
+        { label: "480p", description: "SD quality, faster generation, smaller file size" },
+        { label: "720p", description: "HD quality, balanced performance" },
+        { label: "1080p", description: "Full HD quality, best visual detail" }
+      ]
+    },
+    duration: {
+      title: "Video Duration",
+      description: "Choose how long your generated video will be.",
+      details: [
+        { label: "Short (5-15s)", description: "Perfect for social media clips" },
+        { label: "Medium (30s)", description: "Ideal for detailed concepts" },
+        { label: "Long (60s+)", description: "Best for comprehensive content" }
+      ]
+    },
+    display: {
+      title: "Display Layout",
+      description: "Choose how your generated videos are displayed.",
+      details: [
+        { label: "Column", description: "Vertical scrolling, one video at a time" },
+        { label: "Grid", description: "2x2 layout, view multiple videos at once" },
+        { label: "Carousel", description: "Horizontal sliding, focused viewing" }
+      ]
+    }
+  };
+
+  const currentSetting = settingsInfo[settingType];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5" />
+            {currentSetting.title}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {currentSetting.description}
+          </p>
+          <div className="space-y-4">
+            {currentSetting.details.map((detail, index) => (
+              <div key={index} className="flex flex-col gap-1">
+                <h4 className="text-sm font-medium">{detail.label}</h4>
+                <p className="text-sm text-muted-foreground">{detail.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
