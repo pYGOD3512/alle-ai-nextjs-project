@@ -595,6 +595,31 @@ export const VIDEO_MODELS = [
     type: "free",
     preview: "Professional video generation and editing capabilities",
   },
+  {
+    id: "luma",
+    name: "Luma AI",
+    icon: "/models/luma.png",
+    provider: "Dream Machine",
+    selected: "true",
+    type: "free",
+    preview: "Professional video generation and editing capabilities",
+  },
+  {
+    id: "kling",
+    name: "Kling AI",
+    icon: "/models/kling.png",
+    provider: "Kuaishou Technology",
+    type: "free",
+    preview: "Create realistic and imaginative videos with OpenAI's latest",
+  },
+  {
+    id: "animate-diff",
+    name: "Animate Diff",
+    icon: "/models/stability-ai.png",
+    provider: "Stability AI",
+    type: "free",
+    preview: "Create realistic and imaginative videos with OpenAI's latest",
+  },
 ];
 
 export const initialMessages = [
