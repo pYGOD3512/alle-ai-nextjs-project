@@ -409,6 +409,7 @@ const VideoArea = () => {
                 )}
             <span className="font-medium">
               {settings.display === "column" ? "Column" : settings.display === "grid" ? "Grid" : "Carousel"}
+              
             </span>
           </Button>
         </DropdownMenuTrigger>
