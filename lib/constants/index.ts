@@ -132,6 +132,77 @@ export const useSelectedModelsStore = create<SelectedModelsStore>()(
   )
 );
 
+interface ImageResponse {
+  modelId: string;
+  liked: boolean;
+  imageUrl: string;
+}
+
+interface GeneratedImagesStore {
+  images: ImageResponse[];
+  lastPrompt: string | null;
+  setImages: (images: ImageResponse[]) => void;
+  updateImage: (modelId: string, updates: Partial<ImageResponse>) => void;
+  setLastPrompt: (prompt: string) => void;
+  clearImages: () => void;
+}
+
+export const useGeneratedImagesStore = create<GeneratedImagesStore>()(
+  persist(
+    (set, get) => ({
+      images: [],
+      lastPrompt: null,
+      setImages: (images) => set({ images }),
+      updateImage: (modelId, updates) => set((state) => ({
+        images: state.images.map(img => 
+          img.modelId === modelId ? { ...img, ...updates } : img
+        )
+      })),
+      setLastPrompt: (prompt) => set({ lastPrompt: prompt }),
+      clearImages: () => set({ images: [], lastPrompt: null }),
+    }),
+    {
+      name: 'generated-images-storage'
+    }
+  )
+);
+
+interface AudioResponse {
+  modelId: string;
+  content: string;
+  audioUrl: string;
+  liked?: boolean;
+}
+
+interface GeneratedAudioStore {
+  responses: AudioResponse[];
+  lastPrompt: string | null;
+  setResponses: (responses: AudioResponse[]) => void;
+  updateResponse: (modelId: string, updates: Partial<AudioResponse>) => void;
+  setLastPrompt: (prompt: string) => void;
+  clearResponses: () => void;
+}
+
+export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
+  persist(
+    (set) => ({
+      responses: [],
+      lastPrompt: null,
+      setResponses: (responses) => set({ responses }),
+      updateResponse: (modelId, updates) => set((state) => ({
+        responses: state.responses.map(res => 
+          res.modelId === modelId ? { ...res, ...updates } : res
+        )
+      })),
+      setLastPrompt: (prompt) => set({ lastPrompt: prompt }),
+      clearResponses: () => set({ responses: [], lastPrompt: null }),
+    }),
+    {
+      name: 'generated-audio-storage'
+    }
+  )
+);
+
 export const navItems = [
   {
     type: ALargeSmall,
@@ -583,3 +654,58 @@ export const initialMessages = [
 // NAVIGATION CONTENT DATA MANAGEMENTS --- STARTS
 // NAVIGATION CONTENT DATA MANAGEMENTS --- ENDS
 
+
+// SOCIAL MEDIA SHARE --- START
+
+export const socialMediaOptions = [
+  {
+    name: 'X',
+    icon: '/svgs/x-transparent.svg',
+    color: 'bg-[#0088cc]/10',
+    hoverColor: 'hover:bg-[#0088cc]/20',
+    textColor: 'text-black',
+    handler: (url: string) => `https://x.com/intent/tweet?url=${encodeURIComponent(url)}`
+  },
+  {
+    name: 'Facebook',
+    icon: '/svgs/facebook.svg',
+    color: 'bg-[#4267B2]/10',
+    hoverColor: 'hover:bg-[#4267B2]/20',
+    textColor: 'text-[#4267B2]',
+    handler: (url: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
+  },
+  {
+    name: 'Reddit',
+    icon: '/svgs/reddit.svg',
+    color: 'bg-[#FF4500]/10',
+    hoverColor: 'hover:bg-[#FF4500]/20',
+    textColor: 'text-[#FF4500]',
+    handler: (url: string) => `https://reddit.com/submit?url=${encodeURIComponent(url)}`
+  },
+  {
+    name: 'Discord',
+    icon: '/svgs/discord.svg',
+    color: 'bg-[#5865F2]/10',
+    hoverColor: 'hover:bg-[#5865F2]/20',
+    textColor: 'text-[#5865F2]',
+    handler: (url: string) => `https://discord.com/channels/@me`
+  },
+  {
+    name: 'WhatsApp',
+    icon: '/svgs/whatsapp.svg',
+    color: 'bg-[#25D366]/10',
+    hoverColor: 'hover:bg-[#25D366]/20',
+    textColor: 'text-[#25D366]',
+    handler: (url: string) => `https://wa.me/?text=${encodeURIComponent(url)}`
+  },
+  {
+    name: 'Telegram',
+    icon: '/svgs/telegram.svg',
+    color: 'bg-[#0088cc]/10',
+    hoverColor: 'hover:bg-[#0088cc]/20',
+    textColor: 'text-[#0088cc]',
+    handler: (url: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}`
+  }
+];
+
+// SOCIAL MEDIA SHARE --- END
