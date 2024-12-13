@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine  } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -224,7 +224,7 @@ export function Sidebar() {
                   <Search   className="w-4 h-4"/>
                 </Button>
               </div>
-              <ScrollArea className="flex-1 h-[calc(100vh-38rem)]">
+              <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
                 <div className="space-y-0.5">
                   {currentHistory.map((item) => (
                     <ContextMenu key={item.id}>
@@ -326,6 +326,11 @@ export function Sidebar() {
                       <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                     </a>
                   </Link>
+                  <Link href={`/model-glossary`} legacyBehavior>
+                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
+                      <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
+                    </a>
+                  </Link>
                   <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
                       <History  className="w-4 h-4 ml-4"/> Changelog
                   </Link>
@@ -344,8 +349,8 @@ export function Sidebar() {
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <div className="font-medium">Pascal</div>
-                    <Badge variant="default">Free</Badge>
+                    <div className="font-medium text-sm">Pascal</div>
+                    <Badge variant="default" className="text-[0.6rem] h-3">Free</Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     pascal@alle-ai.com

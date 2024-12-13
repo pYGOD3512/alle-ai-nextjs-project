@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 "use client";
 import { ChatInput } from "@/components/features/ChatInput";
 import GreetingMessage from "@/components/features/GreetingMessage";
@@ -9,6 +9,9 @@ import { usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+
+
 // static options
 const options = [
   {
@@ -29,6 +32,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setInput(opt.label as String);
     setTimeout(() => inputRef.current?.focus(), 0);
   };
+
   const handleGenerate = () => {
     if (!input) return;
     const chatId = crypto.randomUUID();

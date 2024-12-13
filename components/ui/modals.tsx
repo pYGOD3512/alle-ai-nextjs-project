@@ -13,6 +13,7 @@ import {
   VIDEO_MODELS,
   useSelectedModelsStore,
   useHistoryStore,
+  socialMediaOptions,
 } from "@/lib/constants";
 import {
   Select,
@@ -1414,6 +1415,50 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
             </CommandGroup>
           </CommandList>
         </Command>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface ShareDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  modelName: string;
+}
+
+export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialogProps) {
+  const handleShare = (platform: typeof socialMediaOptions[0]) => {
+    window.open(platform.handler(imageUrl), '_blank');
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Share Image</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-3 gap-4 py-4">
+          {socialMediaOptions.map((platform) => (
+            <button
+              key={platform.name}
+              onClick={() => handleShare(platform)}
+              className={`flex flex-col items-center gap-2 p-4 rounded-lg ${platform.color} ${platform.hoverColor} transition-colors duration-200`}
+            >
+              <Image
+                src={platform.icon}
+                alt={platform.name}
+                width={24}
+                height={24}
+                className="w-6 h-6"
+              />
+              <span className={`text-sm font-medium ${platform.textColor}`}>
+                {platform.name}
+              </span>
+            </button>
+          ))}
+        </div>
       </DialogContent>
     </Dialog>
   );
