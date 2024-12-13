@@ -5,15 +5,17 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, RotateCcw, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy } from "lucide-react";
+import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Slider } from "@/components/ui/slider";
 import GreetingMessage from "../GreetingMessage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
-import { SearchHistoryModal } from "@/components/ui/modals";
+import { useContentStore } from "@/stores";
+import { useSelectedModelsStore, useGeneratedAudioStore, AUDIO_MODELS } from "@/lib/constants";
+
+
 interface AudioResponse {
   content: string;
   model: string;
@@ -30,17 +32,20 @@ interface AudioPlayerState {
 }
 
 export function AudioArea() {
+  const { content } = useContentStore();
+  const { selectedModels } = useSelectedModelsStore();
+  const { responses, lastPrompt, setResponses, updateResponse, setLastPrompt } = useGeneratedAudioStore();
+  
   const [description, setDescription] = useState("");
   const [submittedPrompt, setSubmittedPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasResponse, setHasResponse] = useState(false);
-  const [responses, setResponses] = useState<AudioResponse[]>([]);
-  const [activeModel, setActiveModel] = useState("gpt4");
-  const [credits, setCredits] = useState(50);
   const [audioStates, setAudioStates] = useState<Record<string, AudioPlayerState>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
-  const { toast } = useToast()
+  const { toast } = useToast();
+  const [credits, setCredits] = useState(50);
+
 
   const ResponseSkeleton = () => (
     <div className="border border-borderColorPrimary rounded-lg p-4 space-y-4">
@@ -75,33 +80,31 @@ export function AudioArea() {
     </div>
   );
 
-
   const handleSubmit = async () => {
-    if (!description.trim()) return;
+    if (!description.trim() || selectedModels.audio.length === 0) return;
 
     setIsLoading(true);
     setHasResponse(true);
     setSubmittedPrompt(description);
     setDescription("");
     
+    // Clear previous responses
+    setResponses([]);
+    
     // Simulate API call
     setTimeout(() => {
-      const simulatedResponses: AudioResponse[] = [
-        {
-          content: "Something about the audio",
-          model: "Whisper",
-          icon: "/models/gpt-4.png",
-          audioUrl: "/audio/sample3.mp3"
-        },
-        {
-          content: "Something about the audio",
-          model: "MusicGen",
-          icon: "/models/dream.png",
-          audioUrl: "/audio/sample4.mp3"
-        },
-      ];
+      const simulatedResponses = selectedModels.audio.map(modelId => {
+        const modelInfo = AUDIO_MODELS.find(model => model.id === modelId);
+        return {
+          modelId,
+          content: `Generated audio response for ${modelInfo?.name}`,
+          audioUrl: `/audio/sample${Math.floor(Math.random() * 4) + 1}.mp3`,
+          liked: false
+        };
+      });
       
       setResponses(simulatedResponses);
+      setLastPrompt(description);
       setIsLoading(false);
     }, 5000);
   };
@@ -312,24 +315,19 @@ export function AudioArea() {
     }
   };
 
-  const handleLike = (model: string) => {
-    const response = responses.find(r => r.model === model);
+  const handleLike = (modelId: string) => {
+    const response = responses.find(r => r.modelId === modelId);
+    const modelInfo = AUDIO_MODELS.find(model => model.id === modelId);
     const newLikedState = !response?.liked;
     
-    setTimeout(() => {
-      toast({
-        title: newLikedState ? "Liked" : "Unliked",
-        description: `${model} response ${newLikedState ? "liked" : "unliked"}`,
-        duration: 3000,
-        className:"bg-toastBackgroundColor border-borderColorPrimary text-foreground" 
-      });
-    }, 0);
-
-    setResponses(prev => prev.map(response => 
-      response.model === model 
-        ? { ...response, liked: newLikedState }
-        : response
-    ));
+    updateResponse(modelId, { liked: newLikedState });
+    
+    toast({
+      title: newLikedState ? "Liked" : "Unliked",
+      description: `${modelInfo?.name} response ${newLikedState ? "liked" : "unliked"}`,
+      duration: 3000,
+      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -345,7 +343,7 @@ export function AudioArea() {
         "max-w-7xl w-full mx-auto mt-10 flex flex-col h-full transition-all duration-300",
         hasResponse ? "gap-4" : "gap-0"
       )}>
-        {/* Left side - Prompt Section */}
+        {/* Prompt Section */}
         <div className={cn(
           "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
           hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
@@ -393,7 +391,7 @@ export function AudioArea() {
           </div>
         </div>
 
-        {/* Right side - Response Section */}
+        {/* Response Section */}
         {hasResponse && (
           <div className="w-full sm:w-2/3 lg:w-1/2 h-full mx-auto">
             <div className="p-4">
@@ -414,156 +412,159 @@ export function AudioArea() {
 
                 <div className="space-y-6">
                   {isLoading ? (
-                    <>
-                      <ResponseSkeleton />
-                      <ResponseSkeleton />
-                    </>
+                    // We show the loading for each response based on the number of models selected by the user.
+                    selectedModels.audio.map((modelId) => (
+                      <ResponseSkeleton key={modelId} />
+                    ))
                   ) : (
-                    responses.map((response) => (
-                      <div 
-                        key={response.model}
-                        className="border border-borderColorPrimary rounded-lg p-4"
-                      >
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2">
-                            <Image 
-                            src={response.icon} 
-                            alt={response.model} 
-                            width={34}
-                            height={34}
-                            className="w-6 h-6 rounded-full"
-                            />
-                            <h3 className="font-medium">{response.model}</h3>
-                          </div>
-                          
-                          <p className="text-sm text-muted-foreground">
-                            {response.content}
-                          </p>
-
-                          <div className="border rounded-lg p-4">
-                            <div className="space-y-4">
-                              {/* Playback Controls */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8 focus-visible:outline-none"
-                                    onClick={() => handlePlayPause(response.model)}
-                                  >
-                                    {audioStates[response.model]?.isPlaying ? (
-                                      <Pause className="h-4 w-4" />
-                                    ) : (
-                                      <Play className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8 focus-visible:outline-none"
-                                    onClick={() => handleStop(response.model)}
-                                  >
-                                    <Square className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8"
-                                    onClick={() => handleReplay(response.model)}
-                                  >
-                                    <Replay className="h-4 w-4 focus-visible:outline-none" />
-                                  </Button>
-                                  
-                                  {/* Speed Controls */}
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8 focus-visible:outline-none"
-                                    onClick={() => handlePlaybackRateChange(response.model, false)}
-                                  >
-                                    <Rewind className="h-4 w-4" />
-                                  </Button>
-                                  <span className="text-xs">
-                                    {audioStates[response.model]?.playbackRate || 1}x
-                                  </span>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8 focus-visible:outline-none"
-                                    onClick={() => handlePlaybackRateChange(response.model, true)}
-                                  >
-                                    <FastForward className="h-4 w-4" />
-                                  </Button>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8 focus-visible:outline-none"
-                                    onClick={() => handleLike(response.model)}
-                                  >
-                                    <Heart 
-                                      className={cn(
-                                        "h-4 w-4",
-                                        response.liked && "fill-current text-red-500"
-                                      )} 
-                                    />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8 focus-visible:outline-none"
-                                    onClick={() => handleDownload(response.audioUrl, response.model)}
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-
-                              {/* Time and Progress */}
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-sm text-muted-foreground">
-                                  <span>{formatTime(audioStates[response.model]?.currentTime || 0)}</span>
-                                  <span>{formatTime(audioStates[response.model]?.duration || 0)}</span>
-                                </div>
-                                
-                                <Slider
-                                  value={[audioStates[response.model]?.currentTime || 0]}
-                                  max={audioStates[response.model]?.duration || 100}
-                                  step={0.1}
-                                  onValueChange={(value) => handleSliderChange(response.model, value)}
-                                  className="focus-visible:outline-none"
-                                />
-                              </div>
+                    responses.map((response) => {
+                      const modelInfo = AUDIO_MODELS.find(model => model.id === response.modelId);
+                      return (
+                        <div 
+                          key={response.modelId}
+                          className="border border-borderColorPrimary rounded-lg p-4"
+                        >
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <Image 
+                                src={modelInfo?.icon || ''} 
+                                alt={modelInfo?.name || ''} 
+                                width={34}
+                                height={34}
+                                className="w-6 h-6 rounded-full"
+                              />
+                              <h3 className="font-medium">{modelInfo?.name}</h3>
                             </div>
                             
-                            <audio
-                              ref={(el) => {
-                                if (el) {
-                                  audioRefs.current[response.model] = el;
-                                  initializeAudioState(response.model);
-                                }
-                              }}
-                              src={response.audioUrl}
-                              onTimeUpdate={() => handleTimeUpdate(response.model)}
-                              onLoadedMetadata={() => handleLoadedMetadata(response.model)}
-                              onEnded={() => {
-                                setCurrentlyPlaying(null);
-                                setAudioStates(prev => ({
-                                  ...prev,
-                                  [response.model]: {
-                                    ...prev[response.model],
-                                    isPlaying: false,
-                                    currentTime: 0
+                            <p className="text-sm text-muted-foreground">
+                              {response.content}
+                            </p>
+
+                            <div className="border rounded-lg p-4">
+                              <div className="space-y-4">
+                                {/* Playback Controls */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8 focus-visible:outline-none"
+                                      onClick={() => handlePlayPause(response.modelId)}
+                                    >
+                                      {audioStates[response.modelId]?.isPlaying ? (
+                                        <Pause className="h-4 w-4" />
+                                      ) : (
+                                        <Play className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8 focus-visible:outline-none"
+                                      onClick={() => handleStop(response.modelId)}
+                                    >
+                                      <Square className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8"
+                                      onClick={() => handleReplay(response.modelId)}
+                                    >
+                                      <Replay className="h-4 w-4 focus-visible:outline-none" />
+                                    </Button>
+                                    
+                                    {/* Speed Controls */}
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8 focus-visible:outline-none"
+                                      onClick={() => handlePlaybackRateChange(response.modelId, false)}
+                                    >
+                                      <Rewind className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-xs">
+                                      {audioStates[response.modelId]?.playbackRate || 1}x
+                                    </span>
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8 focus-visible:outline-none"
+                                      onClick={() => handlePlaybackRateChange(response.modelId, true)}
+                                    >
+                                      <FastForward className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8 focus-visible:outline-none"
+                                      onClick={() => handleLike(response.modelId)}
+                                    >
+                                      <Heart 
+                                        className={cn(
+                                          "h-4 w-4",
+                                          response.liked && "fill-current text-red-500"
+                                        )} 
+                                      />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="h-8 w-8 focus-visible:outline-none"
+                                      onClick={() => handleDownload(response.audioUrl, response.modelId)}
+                                    >
+                                      <Download className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                {/* Time and Progress */}
+                                <div className="space-y-2">
+                                  <div className="flex justify-between text-sm text-muted-foreground">
+                                    <span>{formatTime(audioStates[response.modelId]?.currentTime || 0)}</span>
+                                    <span>{formatTime(audioStates[response.modelId]?.duration || 0)}</span>
+                                  </div>
+                                  
+                                  <Slider
+                                    value={[audioStates[response.modelId]?.currentTime || 0]}
+                                    max={audioStates[response.modelId]?.duration || 100}
+                                    step={0.1}
+                                    onValueChange={(value) => handleSliderChange(response.modelId, value)}
+                                    className="focus-visible:outline-none"
+                                  />
+                                </div>
+                              </div>
+                              
+                              <audio
+                                ref={(el) => {
+                                  if (el) {
+                                    audioRefs.current[response.modelId] = el;
+                                    initializeAudioState(response.modelId);
                                   }
-                                }));
-                              }}
-                            />
+                                }}
+                                src={response.audioUrl}
+                                onTimeUpdate={() => handleTimeUpdate(response.modelId)}
+                                onLoadedMetadata={() => handleLoadedMetadata(response.modelId)}
+                                onEnded={() => {
+                                  setCurrentlyPlaying(null);
+                                  setAudioStates(prev => ({
+                                    ...prev,
+                                    [response.modelId]: {
+                                      ...prev[response.modelId],
+                                      isPlaying: false,
+                                      currentTime: 0
+                                    }
+                                  }));
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </ScrollArea>
