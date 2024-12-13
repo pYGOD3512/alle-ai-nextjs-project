@@ -1,19 +1,23 @@
-'use client';
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import Image from 'next/image';
+import Image from "next/image";
 import { Edit, Check, X } from "lucide-react";
 
 interface ChatMessageProps {
   content: string;
-  sender: 'user' | 'ai';
+  sender: "user" | "ai";
   timestamp: Date;
   onEditMessage?: (newContent: string) => void;
 }
 
-export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatMessageProps) {
-
+export function ChatMessage({
+  content,
+  sender,
+  timestamp,
+  onEditMessage,
+}: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -43,16 +47,18 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
     setEditedContent(content);
     setIsEditing(false);
   };
-  
+
   return (
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
         <Card className="flex items-center gap-3 p-3 rounded-2xl bg-backgroundSecondary">
           <div className="hidden sm:flex w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <Image
-              src={sender === 'user' 
-            ? "/user.jpg"
-            : "https://avatars.githubusercontent.com/u/2?v=4"}
+              src={
+                sender === "user"
+                  ? "/user.jpg"
+                  : "https://avatars.githubusercontent.com/u/2?v=4"
+              }
               alt={sender}
               width={32}
               height={32}
@@ -66,7 +72,7 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
                   ref={textareaRef}
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full p-3 rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
+                  className="w-full p-3 bg-backgroundSecondary rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
                   placeholder="Edit message..."
                 />
               </div>
