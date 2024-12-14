@@ -23,7 +23,7 @@ import {
 import { useSidebarStore, navItems, userMenuItems, notifications as notificationData, useSelectedModelsStore } from '@/lib/constants';
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
-import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
+import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
@@ -40,7 +40,8 @@ export function Header() {
   const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
   const [userProfileModalOpen, setUserProfileModalOpen] = React.useState(false);
   const [referModalOpen, setReferModalOpen] = React.useState(false);
-
+  const [albumModalOpen, setAlbumModalOpen] = React.useState(false);
+  
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
   const getSelectedModelNames = useSelectedModelsStore((state) => state.getSelectedModelNames);
@@ -184,6 +185,8 @@ export function Header() {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
           setReferModalOpen(true);
+        } else if (item.label === 'Album') {
+          setAlbumModalOpen(true);
         }
         break;
       case 'link':
@@ -366,6 +369,10 @@ export function Header() {
       <ReferModal 
         isOpen={referModalOpen} 
         onClose={() => setReferModalOpen(false)} 
+      />
+      <AlbumModal 
+        isOpen={albumModalOpen} 
+        onClose={() => setAlbumModalOpen(false)} 
       />
     </>
   );
