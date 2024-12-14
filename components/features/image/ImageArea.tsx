@@ -97,6 +97,7 @@ const ImageArea = () => {
         type: 'image',
         url: image?.imageUrl || '',
         modelName: modelInfo?.name || '',
+        modelIcon: modelInfo?.icon || '',
         modelId: modelId,
         prompt: content.image.input,
         liked: true

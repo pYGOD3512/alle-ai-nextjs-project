@@ -749,6 +749,7 @@ export interface LikedMediaItem {
   type: 'image' | 'video' | 'audio';
   url: string;
   modelName: string;
+  modelIcon: string;
   modelId: string;
   prompt: string;
   timestamp: Date;
@@ -759,7 +760,7 @@ interface LikedMediaStore {
   likedMedia: LikedMediaItem[];
   addLikedMedia: (item: Omit<LikedMediaItem, 'id' | 'timestamp'>) => void;
   removeLikedMedia: (id: string) => void;
-  getLikedMediaByType: (type: 'all' | 'image' | 'video') => LikedMediaItem[];
+  getLikedMediaByType: (type: 'all' | 'image' | 'video' | 'audio') => LikedMediaItem[];
 }
 
 export const useLikedMediaStore = create<LikedMediaStore>()(

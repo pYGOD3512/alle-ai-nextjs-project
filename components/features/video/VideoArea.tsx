@@ -552,8 +552,9 @@ const VideoArea = () => {
         type: 'video',
         url: video.videoUrl,
         modelName: modelInfo?.name || '',
+        modelIcon: modelInfo?.icon || '',
         modelId: video.modelId,
-        prompt: prompt, // Current prompt
+        prompt: prompt,
         liked: true
       });
 

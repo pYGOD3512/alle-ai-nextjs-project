@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -55,10 +55,13 @@ import {
   Trash2,
   Heart,
   Maximize2,
+  Music,
+  Pause,
+  Play,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   TooltipProvider,
   Tooltip,
@@ -68,6 +71,7 @@ import {
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { formatDistanceToNow } from "date-fns";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
 
 interface ModalProps {
   isOpen: boolean;
@@ -1546,42 +1550,102 @@ export function VideoSettingsInfoModal({ isOpen, onClose, settingType }: { isOpe
 }
 
 export function AlbumModal({ isOpen, onClose }: ModalProps) {
-  const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all');
+  const [filter, setFilter] = useState<'all' | 'image' | 'video' | 'audio'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<LikedMediaItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { likedMedia, getLikedMediaByType, removeLikedMedia } = useLikedMediaStore();
 
+  // Audio state management
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Audio control handlers
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSliderChange = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Reset audio state when closing preview
+  useEffect(() => {
+    if (!isPreviewOpen) {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+  }, [isPreviewOpen]);
+
   const filteredMedia = useMemo(() => {
-    const mediaByType = getLikedMediaByType(filter);
+    const mediaByType = getLikedMediaByType(filter as 'image' | 'video' | 'audio' | 'all');
     if (!searchQuery) return mediaByType;
     return mediaByType.filter(item => 
       item.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.modelName.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [filter, searchQuery, getLikedMediaByType]);
+  }, [likedMedia, filter, searchQuery, getLikedMediaByType]);
+
+  const handleRemoveLikedMedia = (id: string) => {
+    removeLikedMedia(id);
+    // Optionally, update the filteredMedia state if needed
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[80vh]">
+      <DialogContent className="max-w-[95%] md:max-w-5xl h-[80vh]">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Heart className="h-5 w-5 text-primary" />
-              Your Album
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-0 items-center justify-between">
+            <DialogTitle className="flex gap-2 text-lg">
+              Album
             </DialogTitle>
-            <div className="flex items-center gap-4">
-              <Tabs defaultValue={filter} onValueChange={(value: string) => setFilter(value as 'all' | 'image' | 'video')}>
+            <div className="flex flex-col-reverse gap-2 xs:flex-row xs:gap-4 items-center">
+              <Tabs defaultValue={filter} onValueChange={(value: string) => setFilter(value as 'all' | 'image' | 'video' | 'audio')}>
                 <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="image">Images</TabsTrigger>
-                  <TabsTrigger value="video">Videos</TabsTrigger>
+                  <TabsTrigger value="all" className="text-xs md:text-sm">All</TabsTrigger>
+                  <TabsTrigger value="image" className="text-xs md:text-sm">Images</TabsTrigger>
+                  <TabsTrigger value="video" className="text-xs md:text-sm">Videos</TabsTrigger>
+                  <TabsTrigger value="audio" className="text-xs md:text-sm">Audio</TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="relative w-64">
+              <div className="relative max-w-64">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by prompt or model..."
+                  placeholder="Search"
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -1591,14 +1655,14 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="h-[calc(80vh-120px)]">
+        <ScrollArea className="h-[calc(80vh-12rem)] sm:h-[calc(80vh-6rem)]">
           {filteredMedia.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <Heart className="h-12 w-12 mb-4" />
               <p>No {filter === 'all' ? 'media' : filter + 's'} found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
               {filteredMedia.map((item) => (
                 <div key={item.id} className="relative group rounded-lg overflow-hidden">
                   {item.type === 'video' ? (
@@ -1610,7 +1674,7 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
                       onMouseOver={e => (e.target as HTMLVideoElement).play()}
                       onMouseOut={e => (e.target as HTMLVideoElement).pause()}
                     />
-                  ) : (
+                  ) : item.type === 'image' ? (
                     <Image
                       src={item.url}
                       alt={item.prompt}
@@ -1618,19 +1682,34 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
                       height={400}
                       className="w-full aspect-square object-cover"
                     />
+                  ) : (
+                    // Audio preview card
+                    <div className="w-full aspect-square bg-accent/10 flex flex-col items-center justify-center p-4">
+                      <Music className="h-12 w-12 mb-4 text-muted-foreground" />
+                      <p className="text-sm text-center line-clamp-2">{item.prompt.length > 15 ? item.prompt.substring(0, 15) + '...' : item.prompt}</p>
+                    </div>
                   )}
                   
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <p className="text-white text-sm mb-2 line-clamp-2">{item.prompt}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-white/80 text-xs">{item.modelName}</span>
+                        <div className="flex items-center gap-2">
+                          <Image
+                            src={item.modelIcon}
+                            alt={item.modelName || ''}
+                            width={16}
+                            height={16}
+                            className="w-4 h-4 rounded-full"
+                          />
+                          <span className="text-white/80 text-xs">{item.modelName}</span>
+                        </div>
                         <div className="flex gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30"
-                            onClick={() => removeLikedMedia(item.id)}
+                            onClick={() => handleRemoveLikedMedia(item.id)}
                           >
                             <Trash2 className="h-4 w-4 text-white" />
                           </Button>
@@ -1672,19 +1751,75 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
                   autoPlay
                   loop
                 />
-              ) : (
+              ) : selectedItem.type === 'image' ? (
                 <Image
                   src={selectedItem.url}
                   alt={selectedItem.prompt}
                   fill
-                  className="object-contain"
+                  className="object-contain rounded-lg"
                 />
+              ) : (
+                // Enhanced audio player preview
+                <div className="w-full h-full flex flex-col items-center justify-center bg-accent/10 p-8">
+                  <Music className="h-24 w-24 mb-8 text-muted-foreground" />
+                  <div className="w-full max-w-md space-y-4">
+                    {/* Audio Controls */}
+                    <div className="flex items-center justify-center gap-4">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-10 w-10"
+                        onClick={handlePlayPause}
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Time and Progress */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                      <Slider
+                        value={[currentTime]}
+                        max={duration}
+                        step={0.1}
+                        onValueChange={(value) => handleSliderChange(value)}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <audio
+                      ref={audioRef}
+                      src={selectedItem.url}
+                      onTimeUpdate={handleTimeUpdate}
+                      onLoadedMetadata={handleLoadedMetadata}
+                      onEnded={() => setIsPlaying(false)}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                    />
+                  </div>
+                </div>
               )}
             </div>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">{selectedItem.prompt}</p>
               <div className="flex items-center justify-between">
-                <span className="text-sm">{selectedItem.modelName}</span>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={selectedItem.modelIcon}
+                    alt={selectedItem.modelName || ''}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded-full"
+                  />
+                  <span className="text-sm">{selectedItem.modelName}</span>
+                </div>
                 <span className="text-sm text-muted-foreground">
                   {formatDistanceToNow(selectedItem.timestamp, { addSuffix: true })}
                 </span>

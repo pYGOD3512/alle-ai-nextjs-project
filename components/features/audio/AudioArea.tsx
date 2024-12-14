@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
 import { useContentStore } from "@/stores";
 import { useSelectedModelsStore, useGeneratedAudioStore, AUDIO_MODELS } from "@/lib/constants";
+import { useLikedMediaStore } from "@/lib/constants";
 
 
 interface AudioResponse {
@@ -35,6 +36,7 @@ export function AudioArea() {
   const { content } = useContentStore();
   const { selectedModels } = useSelectedModelsStore();
   const { responses, lastPrompt, setResponses, updateResponse, setLastPrompt } = useGeneratedAudioStore();
+  const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
   
   const [description, setDescription] = useState("");
   const [submittedPrompt, setSubmittedPrompt] = useState("");
@@ -98,7 +100,7 @@ export function AudioArea() {
         return {
           modelId,
           content: `Generated audio response for ${modelInfo?.name}`,
-          audioUrl: `/audio/sample${Math.floor(Math.random() * 4) + 1}.mp3`,
+          audioUrl: `/audio/sample1.mp3`,
           liked: false
         };
       });
@@ -315,20 +317,51 @@ export function AudioArea() {
     }
   };
 
-  const handleLike = (modelId: string) => {
+  const handleLike = useCallback((modelId: string) => {
     const response = responses.find(r => r.modelId === modelId);
-    const modelInfo = AUDIO_MODELS.find(model => model.id === modelId);
-    const newLikedState = !response?.liked;
+    const modelInfo = AUDIO_MODELS.find(m => m.id === modelId);
     
-    updateResponse(modelId, { liked: newLikedState });
+    if (!response || !modelInfo) return;
+
+    const newResponses = responses.map(r => 
+      r.modelId === modelId ? { ...r, liked: !r.liked } : r
+    );
+    setResponses(newResponses);
     
-    toast({
-      title: newLikedState ? "Liked" : "Unliked",
-      description: `${modelInfo?.name} response ${newLikedState ? "liked" : "unliked"}`,
-      duration: 3000,
-      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
-    });
-  };
+    const newLikedState = !response.liked;
+    if (newLikedState) {
+      // Add to liked media store
+      addLikedMedia({
+        type: 'audio',
+        url: response.audioUrl,
+        modelName: modelInfo.name,
+        modelIcon: modelInfo.icon,
+        modelId: modelId,
+        prompt: submittedPrompt,
+        liked: true
+      });
+
+      toast({
+        title: "Audio Liked",
+        description: `You liked ${modelInfo.name}'s audio generation`,
+      });
+    } else {
+      // Remove from liked media store
+      const likedItems = useLikedMediaStore.getState().getLikedMediaByType('audio');
+      const likedItem = likedItems.find(item => 
+        item.modelId === modelId && 
+        item.url === response.audioUrl
+      );
+      if (likedItem) {
+        removeLikedMedia(likedItem.id);
+      }
+
+      toast({
+        title: "Audio Unliked",
+        description: `You unliked ${modelInfo.name}'s audio generation`,
+      });
+    }
+  }, [responses, submittedPrompt, addLikedMedia, removeLikedMedia, toast]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -343,7 +376,7 @@ export function AudioArea() {
         "max-w-7xl w-full mx-auto mt-10 flex flex-col h-full transition-all duration-300",
         hasResponse ? "gap-4" : "gap-0"
       )}>
-        {/* Prompt Section */}
+        {/*Prompt Section */}
         <div className={cn(
           "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
           hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
