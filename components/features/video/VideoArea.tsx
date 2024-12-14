@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useContentStore } from "@/stores";
 import { useSelectedModelsStore, VIDEO_MODELS } from "@/lib/constants";
 import RenderPageContent from "@/components/RenderPageContent";
-import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8   } from "lucide-react";
+import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +30,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { VideoSettingsInfoModal } from "@/components/ui/modals";
+import { Progress } from "@/components/ui/progress";
+import { useLikedMediaStore } from "@/lib/constants";
 
 interface VideoResponse {
   modelId: string;
@@ -76,12 +78,25 @@ const useVideoControls = () => {
   };
 };
 
-const VideoResponse = React.memo(({ video, onLike }: { 
+const VideoResponse = React.memo(({ 
+  video, 
+  onLike,
+  onNext,
+  onPrevious,
+  hasNext,
+  hasPrevious 
+}: { 
   video: VideoResponse, 
-  onLike: (video: VideoResponse) => void 
+  onLike: (video: VideoResponse) => void,
+  onNext?: () => void,
+  onPrevious?: () => void,
+  hasNext?: boolean,
+  hasPrevious?: boolean
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const {
     isPlaying,
     setIsPlaying,
@@ -90,6 +105,52 @@ const VideoResponse = React.memo(({ video, onLike }: {
     isFullscreen,
     setIsFullscreen
   } = useVideoControls();
+
+  // Calculate progress percentage
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+
+  // Add event listeners for time updates
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration);
+    };
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, []);
+
+  // Handle seeking
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const newTime = percentage * duration;
+    
+    if (videoRef.current) {
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  // Format time for display
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const togglePlay = useCallback(() => {
     if (videoRef.current) {
@@ -130,90 +191,110 @@ const VideoResponse = React.memo(({ video, onLike }: {
       <video
         ref={videoRef}
         src={video.videoUrl}
-        className="w-full h-full"
-        onEnded={() => setIsPlaying(false)}
+        className="w-full aspect-video object-contain"
         loop
+        muted={isMuted}
       />
-      
-      {/* Overlay Container */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300">
-        {/* Top Controls - Model Info */}
-        <div className="absolute top-0 left-0 right-0 p-4 flex items-center gap-1">
-          <div className="h-8 w-8 rounded-full backdrop-blur-sm flex items-center justify-center overflow-hidden">
-            <Image
-              src={modelInfo.icon}
-              alt={modelInfo.name}
-              width={20}
-              height={20}
-              className="object-contain rounded-full"
+
+      {/* Add fullscreen navigation controls */}
+      {isFullscreen && (
+        <>
+          {hasPrevious && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={onPrevious}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+          )}
+          {hasNext && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={onNext}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </Button>
+          )}
+        </>
+      )}
+
+      {/* Video Controls Overlay */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Seeker Bar */}
+        <div className="flex flex-col gap-2 w-full mb-2">
+          <div 
+            className="relative cursor-pointer" 
+            onClick={handleSeek}
+          >
+            <Progress 
+              value={progress} 
+              className="h-1 cursor-pointer hover:h-1.5 transition-all"
             />
           </div>
-          <span className="font-medium text-white text-sm backdrop-blur-sm px-2 py-1 rounded-full bg-white/10">
-            {modelInfo.name}
-          </span>
+          <div className="flex justify-between text-xs text-white/80">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
         </div>
 
-        {/* Center Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-            onClick={togglePlay}
-          >
-            {isPlaying ? (
-              <Pause className="h-6 w-6" />
-            ) : (
-              <Play className="h-6 w-6" />
-            )}
-          </Button>
-        </div>
-
-        {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-            onClick={toggleMute}
-          >
-            {isMuted ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-
-          <div className="flex-1" />
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-            onClick={() => onLike(video)}
-          >
-            <Heart 
-              className="h-4 w-4" 
-              fill={video.liked ? "red" : "none"} 
-            />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
-            onClick={toggleFullscreen}
-          >
-          <Maximize2 className="h-4 w-4" />
-          </Button>
+        {/* Existing Controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+              onClick={togglePlay}
+            >
+              {isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+              onClick={toggleMute}
+            >
+              {isMuted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+              onClick={() => onLike(video)}
+            >
+              <Heart 
+                className="h-4 w-4" 
+                fill={video.liked ? "red" : "none"} 
+              />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+              onClick={toggleFullscreen}
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -237,6 +318,7 @@ const VideoArea = () => {
   });
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [currentSettingInfo, setCurrentSettingInfo] = useState<'aspectRatio' | 'quality' | 'duration' | 'display'>('aspectRatio');
+  const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
 
   const showSettingInfo = (setting: 'aspectRatio' | 'quality' | 'duration' | 'display') => {
     setCurrentSettingInfo(setting);
@@ -460,21 +542,42 @@ const VideoArea = () => {
     const newVideos = [...videos];
     const index = newVideos.findIndex(v => v.modelId === video.modelId);
     const modelInfo = VIDEO_MODELS.find(m => m.id === video.modelId);
-    newVideos[index].liked = !video.liked;
+    const newLikedState = !video.liked;
+    newVideos[index].liked = newLikedState;
     setVideos(newVideos);
     
-    if (newVideos[index].liked) {
+    if (newLikedState) {
+      // Add to liked media store
+      addLikedMedia({
+        type: 'video',
+        url: video.videoUrl,
+        modelName: modelInfo?.name || '',
+        modelId: video.modelId,
+        prompt: prompt, // Current prompt
+        liked: true
+      });
+
       toast({
         title: "Video Liked",
         description: `You liked ${modelInfo?.name}'s video generation`,
       });
     } else {
+      // Remove from liked media store - find the video's ID first
+      const likedItems = useLikedMediaStore.getState().getLikedMediaByType('video');
+      const likedItem = likedItems.find(item => 
+        item.modelId === video.modelId && 
+        item.url === video.videoUrl
+      );
+      if (likedItem) {
+        removeLikedMedia(likedItem.id);
+      }
+
       toast({
         title: "Video Unliked",
         description: `You unliked ${modelInfo?.name}'s video generation`,
       });
     }
-  }, [videos, toast]);
+  }, [videos, toast, addLikedMedia, removeLikedMedia, prompt]);
 
   const handleSubmit = useCallback(async () => {
     if (!prompt.trim() || selectedModels.video.length === 0) return;
@@ -505,6 +608,22 @@ const VideoArea = () => {
       setLoading(false);
     }, 3000);
   }, [prompt, selectedModels.video]);
+
+  const handleNext = useCallback((currentIndex: number) => {
+    const filteredVideos = videos.filter(video => VIDEO_MODELS.find(m => m.id === video.modelId));
+    if (currentIndex < filteredVideos.length - 1) {
+      return filteredVideos[currentIndex + 1];
+    }
+    return null;
+  }, [videos]);
+
+  const handlePrevious = useCallback((currentIndex: number) => {
+    const filteredVideos = videos.filter(video => VIDEO_MODELS.find(m => m.id === video.modelId));
+    if (currentIndex > 0) {
+      return filteredVideos[currentIndex - 1];
+    }
+    return null;
+  }, [videos]);
 
   return (
     <RenderPageContent>
@@ -541,10 +660,17 @@ const VideoArea = () => {
                         <CarouselContent>
                           {videos
                             .filter(video => VIDEO_MODELS.find(m => m.id === video.modelId))
-                            .map((video, index) => (
+                            .map((video, index, filteredArray) => (
                               <CarouselItem key={index}>
                                 <div className="rounded-lg overflow-hidden">
-                                  <VideoResponse video={video} onLike={handleLike} />
+                                  <VideoResponse 
+                                    video={video} 
+                                    onLike={handleLike}
+                                    onNext={() => handleNext(index)}
+                                    onPrevious={() => handlePrevious(index)}
+                                    hasNext={index < filteredArray.length - 1}
+                                    hasPrevious={index > 0}
+                                  />
                                 </div>
                               </CarouselItem>
                             ))}
@@ -556,9 +682,16 @@ const VideoArea = () => {
                       // Regular grid or column display
                       videos
                         .filter(video => VIDEO_MODELS.find(m => m.id === video.modelId))
-                        .map((video, index) => (
+                        .map((video, index, filteredArray) => (
                           <div key={index} className="rounded-lg overflow-hidden">
-                            <VideoResponse video={video} onLike={handleLike} />
+                            <VideoResponse 
+                              video={video} 
+                              onLike={handleLike}
+                              onNext={() => handleNext(index)}
+                              onPrevious={() => handlePrevious(index)}
+                              hasNext={index < filteredArray.length - 1}
+                              hasPrevious={index > 0}
+                            />
                           </div>
                         ))
                     )

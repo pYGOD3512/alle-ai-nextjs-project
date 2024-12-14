@@ -15,6 +15,7 @@ import { ShareDialog } from "@/components/ui/modals";
 import { Skeleton as AntdSkeleton} from 'antd';
 import { useGeneratedImagesStore } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
+import { useLikedMediaStore } from '@/lib/constants';
 
 type SizeType = 'default' | 'small' | 'large';
 type ButtonShapeType = 'circle' | 'square' | 'round' | 'default';
@@ -36,6 +37,7 @@ const ImageArea = () => {
   const { content } = useContentStore();
   const { selectedModels } = useSelectedModelsStore();
   const { images, lastPrompt, setImages, updateImage, setLastPrompt } = useGeneratedImagesStore();
+  const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
   
   const [loading, setLoading] = useState(() => {
     return !lastPrompt || lastPrompt !== content.image.input;
@@ -75,24 +77,55 @@ const ImageArea = () => {
   }, [content.image.input, selectedModels.image]);
 
   const handleLike = (modelId: string, isModal: boolean = false) => {
-    updateImage(modelId, { liked: !images.find(img => img.modelId === modelId)?.liked });
+    const image = images.find(img => img.modelId === modelId);
+    const modelInfo = getModelInfo(modelId);
+    const newLikedState = !image?.liked;
+    
+    // Update local state
+    updateImage(modelId, { liked: newLikedState });
     
     if (isModal && selectedImage) {
       setSelectedImage({
         ...selectedImage,
-        liked: !selectedImage.liked
+        liked: newLikedState
       });
     }
 
-    const image = images.find(img => img.modelId === modelId);
-    const modelInfo = getModelInfo(modelId);
-    
-    toast({
-      title: image?.liked ? "Unliked" : "Liked",
-      description: `${modelInfo?.name} image ${image?.liked ? "unliked" : "liked"}`,
-      duration: 3000,
-      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
-    });
+    if (newLikedState) {
+      // Add to liked media store
+      addLikedMedia({
+        type: 'image',
+        url: image?.imageUrl || '',
+        modelName: modelInfo?.name || '',
+        modelId: modelId,
+        prompt: content.image.input,
+        liked: true
+      });
+
+      toast({
+        title: "Liked",
+        description: `${modelInfo?.name} image liked`,
+        duration: 3000,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    } else {
+      // Remove from liked media store - find the image's ID first
+      const likedItems = useLikedMediaStore.getState().getLikedMediaByType('image');
+      const likedItem = likedItems.find(item => 
+        item.modelId === modelId && 
+        item.url === image?.imageUrl
+      );
+      if (likedItem) {
+        removeLikedMedia(likedItem.id);
+      }
+
+      toast({
+        title: "Unliked",
+        description: `${modelInfo?.name} image unliked`,
+        duration: 3000,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    }
   };
 
   const handleCopy = () => {

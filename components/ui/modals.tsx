@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,8 @@ import {
   useSelectedModelsStore,
   useHistoryStore,
   socialMediaOptions,
+  useLikedMediaStore,
+  LikedMediaItem
 } from "@/lib/constants";
 import {
   Select,
@@ -32,7 +34,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings,
@@ -52,6 +53,8 @@ import {
   History,
   MoreHorizontal,
   Trash2,
+  Heart,
+  Maximize2,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -73,6 +76,15 @@ interface ModalProps {
 
 interface SearchHistoryModalProps extends ModalProps {
   currentType: 'chat' | 'image' | 'audio' | 'video';
+}
+
+interface AlbumItem {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  modelName: string;
+  timestamp: Date;
+  prompt?: string;
 }
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
@@ -1529,6 +1541,158 @@ export function VideoSettingsInfoModal({ isOpen, onClose, settingType }: { isOpe
           </div>
         </div>
       </DialogContent>
+    </Dialog>
+  );
+}
+
+export function AlbumModal({ isOpen, onClose }: ModalProps) {
+  const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedItem, setSelectedItem] = useState<LikedMediaItem | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { likedMedia, getLikedMediaByType, removeLikedMedia } = useLikedMediaStore();
+
+  const filteredMedia = useMemo(() => {
+    const mediaByType = getLikedMediaByType(filter);
+    if (!searchQuery) return mediaByType;
+    return mediaByType.filter(item => 
+      item.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.modelName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [filter, searchQuery, getLikedMediaByType]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-5xl h-[80vh]">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Heart className="h-5 w-5 text-primary" />
+              Your Album
+            </DialogTitle>
+            <div className="flex items-center gap-4">
+              <Tabs defaultValue={filter} onValueChange={(value: string) => setFilter(value as 'all' | 'image' | 'video')}>
+                <TabsList>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="image">Images</TabsTrigger>
+                  <TabsTrigger value="video">Videos</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <div className="relative w-64">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by prompt or model..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <ScrollArea className="h-[calc(80vh-120px)]">
+          {filteredMedia.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <Heart className="h-12 w-12 mb-4" />
+              <p>No {filter === 'all' ? 'media' : filter + 's'} found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4 p-4">
+              {filteredMedia.map((item) => (
+                <div key={item.id} className="relative group rounded-lg overflow-hidden">
+                  {item.type === 'video' ? (
+                    <video
+                      src={item.url}
+                      className="w-full aspect-video object-cover"
+                      muted
+                      loop
+                      onMouseOver={e => (e.target as HTMLVideoElement).play()}
+                      onMouseOut={e => (e.target as HTMLVideoElement).pause()}
+                    />
+                  ) : (
+                    <Image
+                      src={item.url}
+                      alt={item.prompt}
+                      width={400}
+                      height={400}
+                      className="w-full aspect-square object-cover"
+                    />
+                  )}
+                  
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p className="text-white text-sm mb-2 line-clamp-2">{item.prompt}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-white/80 text-xs">{item.modelName}</span>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30"
+                            onClick={() => removeLikedMedia(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-white" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setIsPreviewOpen(true);
+                            }}
+                          >
+                            <Maximize2 className="h-4 w-4 text-white" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </DialogContent>
+
+      {/* Preview Modal */}
+      {selectedItem && (
+        <Dialog open={isPreviewOpen} onOpenChange={() => setIsPreviewOpen(false)}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Preview</DialogTitle>
+            </DialogHeader>
+            <div className="aspect-video relative rounded-lg overflow-hidden">
+              {selectedItem.type === 'video' ? (
+                <video
+                  src={selectedItem.url}
+                  className="w-full h-full object-contain"
+                  controls
+                  autoPlay
+                  loop
+                />
+              ) : (
+                <Image
+                  src={selectedItem.url}
+                  alt={selectedItem.prompt}
+                  fill
+                  className="object-contain"
+                />
+              )}
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{selectedItem.prompt}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">{selectedItem.modelName}</span>
+                <span className="text-sm text-muted-foreground">
+                  {formatDistanceToNow(selectedItem.timestamp, { addSuffix: true })}
+                </span>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 }
