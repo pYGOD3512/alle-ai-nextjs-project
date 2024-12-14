@@ -14,6 +14,7 @@ import {
   Handshake,
   LogOut,
   Braces,
+  Heart,
 } from "lucide-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -429,6 +430,14 @@ export const userMenuItems = [
     },
   },
   {
+    label: "Album",
+    icon: Heart,
+    interactionType: "modal",
+    onClick: () => {
+      // console.log('Opening Refer Modal');
+    },
+  },
+  {
     label: "Settings",
     icon: Settings,
     interactionType: "modal",
@@ -595,6 +604,31 @@ export const VIDEO_MODELS = [
     type: "free",
     preview: "Professional video generation and editing capabilities",
   },
+  {
+    id: "luma",
+    name: "Luma AI",
+    icon: "/models/luma.png",
+    provider: "Dream Machine",
+    selected: "true",
+    type: "free",
+    preview: "Professional video generation and editing capabilities",
+  },
+  {
+    id: "kling",
+    name: "Kling AI",
+    icon: "/models/kling.png",
+    provider: "Kuaishou Technology",
+    type: "free",
+    preview: "Create realistic and imaginative videos with OpenAI's latest",
+  },
+  {
+    id: "animate-diff",
+    name: "Animate Diff",
+    icon: "/models/stability-ai.png",
+    provider: "Stability AI",
+    type: "free",
+    preview: "Create realistic and imaginative videos with OpenAI's latest",
+  },
 ];
 
 export const initialMessages = [
@@ -709,3 +743,53 @@ export const socialMediaOptions = [
 ];
 
 // SOCIAL MEDIA SHARE --- END
+
+export interface LikedMediaItem {
+  id: string;
+  type: 'image' | 'video' | 'audio';
+  url: string;
+  modelName: string;
+  modelIcon: string;
+  modelId: string;
+  prompt: string;
+  timestamp: Date;
+  liked: boolean;
+}
+
+interface LikedMediaStore {
+  likedMedia: LikedMediaItem[];
+  addLikedMedia: (item: Omit<LikedMediaItem, 'id' | 'timestamp'>) => void;
+  removeLikedMedia: (id: string) => void;
+  getLikedMediaByType: (type: 'all' | 'image' | 'video' | 'audio') => LikedMediaItem[];
+}
+
+export const useLikedMediaStore = create<LikedMediaStore>()(
+  persist(
+    (set, get) => ({
+      likedMedia: [],
+      addLikedMedia: (item) =>
+        set((state) => ({
+          likedMedia: [
+            {
+              ...item,
+              id: `${item.type}-${Date.now()}`,
+              timestamp: new Date(),
+            },
+            ...state.likedMedia,
+          ],
+        })),
+      removeLikedMedia: (id) =>
+        set((state) => ({
+          likedMedia: state.likedMedia.filter((item) => item.id !== id),
+        })),
+      getLikedMediaByType: (type) => {
+        const media = get().likedMedia;
+        if (type === 'all') return media;
+        return media.filter((item) => item.type === type);
+      },
+    }),
+    {
+      name: 'liked-media-storage',
+    }
+  )
+);

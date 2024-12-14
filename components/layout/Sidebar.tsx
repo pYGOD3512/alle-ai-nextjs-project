@@ -326,7 +326,7 @@ export function Sidebar() {
                       <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                     </a>
                   </Link>
-                  <Link href={`/model-glossary`} legacyBehavior>
+                  <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
                     <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
                       <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
                     </a>

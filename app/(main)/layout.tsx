@@ -1,8 +1,13 @@
+"use client";
+
 import '../globals.css';
 
 import { Inter } from 'next/font/google';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import PlansArea from '@/components/features/plans/PlansArea';
+
+import { useAuth } from '@/components/providers/authTest';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -11,7 +16,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { isSubscribed } = useAuth();
   return (
+  <>
+    {isSubscribed ? (
     <div className="h-screen flex overflow-hidden">
       <Sidebar />
       <main className="flex-1 flex flex-col h-full relative">
@@ -20,6 +28,15 @@ export default function RootLayout({
           {children}
         </div>
       </main>
-    </div>
+      </div>
+    ) : (
+      <div className="h-screen flex overflow-hidden">
+        <main className="flex-1 flex flex-col h-full relative">
+          <Header />
+          <PlansArea />
+        </main>
+      </div>
+    )}
+  </>
   );
 }

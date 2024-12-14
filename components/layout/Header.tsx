@@ -23,11 +23,16 @@ import {
 import { useSidebarStore, navItems, userMenuItems, notifications as notificationData, useSelectedModelsStore } from '@/lib/constants';
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
-import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal } from "../ui/modals";
+import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
+import { useAuth } from '@/components/providers/authTest';
+import { AuthSwitch } from "../authSwitch";
+
 export function Header() {
+  const { isSubscribed } = useAuth();
+
   const { isOpen, toggle } = useSidebarStore();
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 1024px)');
@@ -40,6 +45,7 @@ export function Header() {
   const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
   const [userProfileModalOpen, setUserProfileModalOpen] = React.useState(false);
   const [referModalOpen, setReferModalOpen] = React.useState(false);
+  const [albumModalOpen, setAlbumModalOpen] = React.useState(false);
 
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
@@ -60,6 +66,7 @@ export function Header() {
   }, []);
 
   const renderNavItem = (item: any, index: number) => {
+
     //navItems that triggers a function
     if (item.interactionType === "function") {
       const functionMap = {
@@ -184,6 +191,8 @@ export function Header() {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
           setReferModalOpen(true);
+        } else if (item.label === 'Album') {
+          setAlbumModalOpen(true);
         }
         break;
       case 'link':
@@ -226,10 +235,11 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+        {isSubscribed ? (
         <div className={`absolute left-0 h-14 flex items-center justify-center transition-all duration-6300 z-10
           ${isOpen ? 'w-60' : 'w-16'} 
           ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
-          border-r px-4 bg-sideBarBackground`}
+          border-r px-4  bg-sideBarBackground`}
         >
           {isOpen ? (
             mounted && (
@@ -266,11 +276,14 @@ export function Header() {
             )}
           </Button>
         </div>
+        ) : (
+          ''
+        )}
 
         <div className={`flex h-14 items-center transition-all duration-300 
-          ${isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')}`}
+        ${isSubscribed ? (isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')) : 'justify-around'}`}
         >
-          {!isChangelogPage && mounted ? (
+          {!isChangelogPage && mounted && isSubscribed ? (
             selectedModelNames.length > 0 ? (
               <TooltipProvider>
                 <Tooltip>
@@ -302,12 +315,25 @@ export function Header() {
               </div>
             )
           ) : (
-            ''
+            !isSubscribed && mounted && (
+              <Image
+                src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+                alt="Logo"
+                width={100}
+                height={100}
+                className="rounded md:mx-auto"
+              />
+            )
           )}
           
-          <div className="flex items-center gap-2 ml-auto mr-8">
+
+          <div className={`flex items-center gap-2 ${isSubscribed ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
+            <AuthSwitch />
             <ThemeToggle />
-            {navItems.map((item, index) => renderNavItem(item, index))}
+            {navItems.filter(item => 
+              isSubscribed || 
+              !(item.type === HelpCircle || item.type === ALargeSmall)
+            ).map((item, index) => renderNavItem(item, index))}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Image
@@ -333,7 +359,10 @@ export function Header() {
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>
-                {userMenuItems.map((item, index) => (
+                {userMenuItems.filter(item => 
+                  isSubscribed || 
+                  !(item.label === 'Profile' || item.label === 'Developer' || item.label === 'Refer' || item.label === 'Album' || item.label === 'Settings')
+                ).map((item, index) => (
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />
                     {item.label}
@@ -366,6 +395,10 @@ export function Header() {
       <ReferModal 
         isOpen={referModalOpen} 
         onClose={() => setReferModalOpen(false)} 
+      />
+      <AlbumModal 
+        isOpen={albumModalOpen} 
+        onClose={() => setAlbumModalOpen(false)} 
       />
     </>
   );
