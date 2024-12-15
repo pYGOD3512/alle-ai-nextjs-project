@@ -1,13 +1,14 @@
 "use client";
 
 import '../globals.css';
-
+import React from 'react';
 import { Inter } from 'next/font/google';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import PlansArea from '@/components/features/plans/PlansArea';
 
 import { useAuth } from '@/components/providers/authTest';
+import { SettingsModal } from '@/components/ui/modals';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,7 +17,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   const { isSubscribed } = useAuth();
+
   return (
   <>
     {isSubscribed ? (

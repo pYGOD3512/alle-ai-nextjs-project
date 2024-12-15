@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
 import { ArrowUp, Paperclip, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Textarea } from "../ui/textarea";
 
 interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: React.RefObject<HTMLTextAreaElement>;
   isLoading: boolean;
 }
 
@@ -45,13 +46,22 @@ export function ChatInput({
         <Button variant="ghost" size="icon" className="flex-shrink-0">
           <Paperclip className="h-4 w-4" />
         </Button>
-        <Input
+        <Textarea 
           ref={inputRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
           placeholder="Message multiple models..."
-          className="flex-1 border-none focus-visible:outline-none"
-          onKeyPress={(e) => e.key === "Enter" && !isInputEmpty && onSend()}
+          className="flex-1 bg-transparent border-0 outline-none text-base resize-none overflow-auto min-h-[2rem] max-h-[10rem] p-0 focus:border-0 focus:ring-0"
+          value={value}
+          onChange={(e) => {
+            e.target.style.height = 'inherit';
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+            onChange(e.target.value);
+          }}
+          onKeyDown={(e) => e.key === "Enter" && !isInputEmpty && onSend()}
+          rows={1}
+          style={{
+            overflow: value.split('\n').length > 4 ? 'auto' : 'hidden',
+            scrollbarWidth: 'none',
+          }}
         />
         <Button
           variant="ghost"
@@ -82,7 +92,7 @@ export function ChatInput({
                 ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
                 : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
             }`}
-            disabled={isInputEmpty}
+            disabled={isInputEmpty || isLoading }
           >
             Generate
           </Button>
