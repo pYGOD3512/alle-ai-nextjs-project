@@ -9,8 +9,7 @@ import { usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-
+import { useHistoryStore } from "@/lib/constants";
 
 // static options
 const options = [
@@ -28,6 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setContent, resetContent } = useContentStore();
   const router = useRouter();
   const pathname = usePathname();
+  const { addHistory } = useHistoryStore();
   const handleClicked = (opt: { label: String }) => {
     setInput(opt.label as String);
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -38,13 +38,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const chatId = crypto.randomUUID();
     setContent("image", "input", input);
     setInput("");
-
     //
     router.push(`/image/res/${chatId}`);
+    addHistory({ title: input, type: "image" });
   };
   return (
-    <RenderPageContent
-    >
+    <RenderPageContent>
       <div className="flex justify-center items-center  p-4">
         <div className="w-full max-w-3xl">
           <ChatInput

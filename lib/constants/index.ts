@@ -1,3 +1,4 @@
+import { animate } from "framer-motion";
 import {
   ALargeSmall,
   Settings,
@@ -93,8 +94,10 @@ interface SelectedModelsStore {
   };
   tempSelectedModels: string[]; // Here I'm using the tempSelectedModels to store the selected models before the user saves them.
   setTempSelectedModels: (models: string[]) => void;
-  saveSelectedModels: (type: 'chat' | 'image' | 'audio' | 'video') => void;
-  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => string[];
+  saveSelectedModels: (type: "chat" | "image" | "audio" | "video") => void;
+  getSelectedModelNames: (
+    type: "chat" | "image" | "audio" | "video"
+  ) => string[];
 }
 
 export const useSelectedModelsStore = create<SelectedModelsStore>()(
@@ -108,27 +111,32 @@ export const useSelectedModelsStore = create<SelectedModelsStore>()(
       },
       tempSelectedModels: [],
       setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
-      saveSelectedModels: (type) => set((state) => ({
-        selectedModels: {
-          ...state.selectedModels,
-          [type]: state.tempSelectedModels
-        },
-        tempSelectedModels: [] // So here we empty the tempSelectedModels
-      })),
+      saveSelectedModels: (type) =>
+        set((state) => ({
+          selectedModels: {
+            ...state.selectedModels,
+            [type]: state.tempSelectedModels,
+          },
+          tempSelectedModels: [], // So here we empty the tempSelectedModels
+        })),
       getSelectedModelNames: (type) => {
         const state = get();
-        const modelList = type === 'chat' ? CHAT_MODELS 
-          : type === 'image' ? IMAGE_MODELS
-          : type === 'audio' ? AUDIO_MODELS
-          : VIDEO_MODELS;
-        
+        const modelList =
+          type === "chat"
+            ? CHAT_MODELS
+            : type === "image"
+            ? IMAGE_MODELS
+            : type === "audio"
+            ? AUDIO_MODELS
+            : VIDEO_MODELS;
+
         return state.selectedModels[type]
-          .map(id => modelList.find(model => model.id === id)?.name ?? '')
-          .filter(name => name !== '');
-      }
+          .map((id) => modelList.find((model) => model.id === id)?.name ?? "")
+          .filter((name) => name !== "");
+      },
     }),
     {
-      name: 'selected-models-storage'
+      name: "selected-models-storage",
     }
   )
 );
@@ -154,16 +162,17 @@ export const useGeneratedImagesStore = create<GeneratedImagesStore>()(
       images: [],
       lastPrompt: null,
       setImages: (images) => set({ images }),
-      updateImage: (modelId, updates) => set((state) => ({
-        images: state.images.map(img => 
-          img.modelId === modelId ? { ...img, ...updates } : img
-        )
-      })),
+      updateImage: (modelId, updates) =>
+        set((state) => ({
+          images: state.images.map((img) =>
+            img.modelId === modelId ? { ...img, ...updates } : img
+          ),
+        })),
       setLastPrompt: (prompt) => set({ lastPrompt: prompt }),
       clearImages: () => set({ images: [], lastPrompt: null }),
     }),
     {
-      name: 'generated-images-storage'
+      name: "generated-images-storage",
     }
   )
 );
@@ -190,16 +199,17 @@ export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
       responses: [],
       lastPrompt: null,
       setResponses: (responses) => set({ responses }),
-      updateResponse: (modelId, updates) => set((state) => ({
-        responses: state.responses.map(res => 
-          res.modelId === modelId ? { ...res, ...updates } : res
-        )
-      })),
+      updateResponse: (modelId, updates) =>
+        set((state) => ({
+          responses: state.responses.map((res) =>
+            res.modelId === modelId ? { ...res, ...updates } : res
+          ),
+        })),
       setLastPrompt: (prompt) => set({ lastPrompt: prompt }),
       clearResponses: () => set({ responses: [], lastPrompt: null }),
     }),
     {
-      name: 'generated-audio-storage'
+      name: "generated-audio-storage",
     }
   )
 );
@@ -290,7 +300,6 @@ export const chatHistory = [
   "Strategies to Improve Employee Retention: Tips for Keeping Top Talent Engaged and Motivated Long-Term",
 ];
 
-
 export const imageHistory = [
   "Sunset over mountain landscape",
   "Futuristic city skyline",
@@ -334,15 +343,17 @@ interface HistoryItem {
   id: string;
   title: string;
   createdAt: Date;
-  type: 'chat' | 'image' | 'audio' | 'video';
+  type: "chat" | "image" | "audio" | "video";
+  animate?: boolean;
 }
 
 interface HistoryStore {
   history: HistoryItem[];
-  addHistory: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
+  addHistory: (item: Omit<HistoryItem, "id" | "createdAt">) => void;
   removeHistory: (id: string) => void;
   renameHistory: (id: string, newTitle: string) => void;
-  getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
+  getHistoryByType: (type: HistoryItem["type"]) => HistoryItem[];
+  removeAnimate: (id?: string) => void;
 }
 
 // So I'm using the state manager to handle the static history for each page.
@@ -354,25 +365,29 @@ export const useHistoryStore = create<HistoryStore>()(
           id: `chat-${index}`,
           title,
           createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'chat' as const,
+          type: "chat" as const,
+          animate: false,
         })),
         ...imageHistory.map((title, index) => ({
           id: `image-${index}`,
           title,
           createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'image' as const,
+          type: "image" as const,
+          animate: false,
         })),
         ...audioHistory.map((title, index) => ({
           id: `audio-${index}`,
           title,
           createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'audio' as const,
+          type: "audio" as const,
+          animate: false,
         })),
         ...videoHistory.map((title, index) => ({
           id: `video-${index}`,
           title,
           createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'video' as const,
+          type: "video" as const,
+          animate: false,
         })),
       ],
       addHistory: (item) =>
@@ -382,10 +397,18 @@ export const useHistoryStore = create<HistoryStore>()(
               ...item,
               id: `${item.type}-${Date.now()}`,
               createdAt: new Date(),
+              animate: true,
             },
             ...state.history,
           ],
         })),
+      removeAnimate: () => {
+        set((state) => ({
+          history: state.history.map((item) =>
+            item.animate ? { ...item, animate: false } : item
+          ),
+        }));
+      },
       removeHistory: (id) =>
         set((state) => ({
           history: state.history.filter((item) => item.id !== id),
@@ -400,8 +423,9 @@ export const useHistoryStore = create<HistoryStore>()(
         return get().history.filter((item) => item.type === type);
       },
     }),
+
     {
-      name: 'history-storage',
+      name: "history-storage",
     }
   )
 );
@@ -634,7 +658,7 @@ export const VIDEO_MODELS = [
 export const initialMessages = [
   {
     id: "1",
-    content: "How do I make 1 million dollars in 5 days?",
+
     sender: "user",
     timestamp: new Date(),
     responses: [
@@ -684,69 +708,71 @@ export const initialMessages = [
 
 // CHAT AREA CONSTANTS ----- END
 
-
 // NAVIGATION CONTENT DATA MANAGEMENTS --- STARTS
 // NAVIGATION CONTENT DATA MANAGEMENTS --- ENDS
-
 
 // SOCIAL MEDIA SHARE --- START
 
 export const socialMediaOptions = [
   {
-    name: 'X',
-    icon: '/svgs/x-transparent.svg',
-    color: 'bg-[#0088cc]/10',
-    hoverColor: 'hover:bg-[#0088cc]/20',
-    textColor: 'text-black',
-    handler: (url: string) => `https://x.com/intent/tweet?url=${encodeURIComponent(url)}`
+    name: "X",
+    icon: "/svgs/x-transparent.svg",
+    color: "bg-[#0088cc]/10",
+    hoverColor: "hover:bg-[#0088cc]/20",
+    textColor: "text-black",
+    handler: (url: string) =>
+      `https://x.com/intent/tweet?url=${encodeURIComponent(url)}`,
   },
   {
-    name: 'Facebook',
-    icon: '/svgs/facebook.svg',
-    color: 'bg-[#4267B2]/10',
-    hoverColor: 'hover:bg-[#4267B2]/20',
-    textColor: 'text-[#4267B2]',
-    handler: (url: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
+    name: "Facebook",
+    icon: "/svgs/facebook.svg",
+    color: "bg-[#4267B2]/10",
+    hoverColor: "hover:bg-[#4267B2]/20",
+    textColor: "text-[#4267B2]",
+    handler: (url: string) =>
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
   },
   {
-    name: 'Reddit',
-    icon: '/svgs/reddit.svg',
-    color: 'bg-[#FF4500]/10',
-    hoverColor: 'hover:bg-[#FF4500]/20',
-    textColor: 'text-[#FF4500]',
-    handler: (url: string) => `https://reddit.com/submit?url=${encodeURIComponent(url)}`
+    name: "Reddit",
+    icon: "/svgs/reddit.svg",
+    color: "bg-[#FF4500]/10",
+    hoverColor: "hover:bg-[#FF4500]/20",
+    textColor: "text-[#FF4500]",
+    handler: (url: string) =>
+      `https://reddit.com/submit?url=${encodeURIComponent(url)}`,
   },
   {
-    name: 'Discord',
-    icon: '/svgs/discord.svg',
-    color: 'bg-[#5865F2]/10',
-    hoverColor: 'hover:bg-[#5865F2]/20',
-    textColor: 'text-[#5865F2]',
-    handler: (url: string) => `https://discord.com/channels/@me`
+    name: "Discord",
+    icon: "/svgs/discord.svg",
+    color: "bg-[#5865F2]/10",
+    hoverColor: "hover:bg-[#5865F2]/20",
+    textColor: "text-[#5865F2]",
+    handler: (url: string) => `https://discord.com/channels/@me`,
   },
   {
-    name: 'WhatsApp',
-    icon: '/svgs/whatsapp.svg',
-    color: 'bg-[#25D366]/10',
-    hoverColor: 'hover:bg-[#25D366]/20',
-    textColor: 'text-[#25D366]',
-    handler: (url: string) => `https://wa.me/?text=${encodeURIComponent(url)}`
+    name: "WhatsApp",
+    icon: "/svgs/whatsapp.svg",
+    color: "bg-[#25D366]/10",
+    hoverColor: "hover:bg-[#25D366]/20",
+    textColor: "text-[#25D366]",
+    handler: (url: string) => `https://wa.me/?text=${encodeURIComponent(url)}`,
   },
   {
-    name: 'Telegram',
-    icon: '/svgs/telegram.svg',
-    color: 'bg-[#0088cc]/10',
-    hoverColor: 'hover:bg-[#0088cc]/20',
-    textColor: 'text-[#0088cc]',
-    handler: (url: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}`
-  }
+    name: "Telegram",
+    icon: "/svgs/telegram.svg",
+    color: "bg-[#0088cc]/10",
+    hoverColor: "hover:bg-[#0088cc]/20",
+    textColor: "text-[#0088cc]",
+    handler: (url: string) =>
+      `https://t.me/share/url?url=${encodeURIComponent(url)}`,
+  },
 ];
 
 // SOCIAL MEDIA SHARE --- END
 
 export interface LikedMediaItem {
   id: string;
-  type: 'image' | 'video' | 'audio';
+  type: "image" | "video" | "audio";
   url: string;
   modelName: string;
   modelIcon: string;
@@ -758,9 +784,11 @@ export interface LikedMediaItem {
 
 interface LikedMediaStore {
   likedMedia: LikedMediaItem[];
-  addLikedMedia: (item: Omit<LikedMediaItem, 'id' | 'timestamp'>) => void;
+  addLikedMedia: (item: Omit<LikedMediaItem, "id" | "timestamp">) => void;
   removeLikedMedia: (id: string) => void;
-  getLikedMediaByType: (type: 'all' | 'image' | 'video' | 'audio') => LikedMediaItem[];
+  getLikedMediaByType: (
+    type: "all" | "image" | "video" | "audio"
+  ) => LikedMediaItem[];
 }
 
 export const useLikedMediaStore = create<LikedMediaStore>()(
@@ -784,12 +812,12 @@ export const useLikedMediaStore = create<LikedMediaStore>()(
         })),
       getLikedMediaByType: (type) => {
         const media = get().likedMedia;
-        if (type === 'all') return media;
+        if (type === "all") return media;
         return media.filter((item) => item.type === type);
       },
     }),
     {
-      name: 'liked-media-storage',
+      name: "liked-media-storage",
     }
   )
 );

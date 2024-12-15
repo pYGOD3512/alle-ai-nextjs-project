@@ -11,5 +11,5 @@ export default function AudioGenerationPage() {
     setCurrentPage("audio");
   }, [setCurrentPage]);
 
-  return <AudioArea />
+  return <div></div>
 }

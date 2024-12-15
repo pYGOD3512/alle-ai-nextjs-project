@@ -7,6 +7,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ModelResponse } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
+import { useContentStore } from "@/stores";
 import {
   CHAT_MODELS as MODELS,
   Message,
@@ -16,15 +17,16 @@ import {
 
 export function ChatArea() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { content } = useContentStore();
   const [messages, setMessages] = useState<Message[]>(
     initialMessages.map((message) => ({
       ...message,
+      content: content.chat.input,
       sender: message.sender as "user" | "ai",
     }))
   );
   const [input, setInput] = useState("");
   const [activeModel, setActiveModel] = useState("gpt4");
-
   const handleSend = () => {
     if (!input.trim()) return;
 
@@ -82,8 +84,7 @@ export function ChatArea() {
   };
 
   return (
-    <RenderPageContent
-    >
+    <RenderPageContent>
       <ScrollArea className="flex-1">
         <div className="max-w-xl sm:max-w-2xl md:max-w-5xl mt-4 mx-auto px-4">
           {messages.map((message) => (

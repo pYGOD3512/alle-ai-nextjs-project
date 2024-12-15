@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { useHistoryStore } from "@/lib/constants";
+import { useContentStore } from "@/stores";
 // static options
 const options = [
   {
@@ -23,11 +25,11 @@ export default function Home() {
   const { isOpen, setSectionId } = useSidebarStore();
   const router = useRouter();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
-
+  const { addHistory } = useHistoryStore();
+  const { setContent } = useContentStore();
   useEffect(() => {
     setCurrentPage("chat");
   }, [setCurrentPage]);
-
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -50,7 +52,9 @@ export default function Home() {
     */
     const chatId = crypto.randomUUID();
     setSectionId("chatId", chatId);
+    setContent("chat", "input", input);
     router.push(`/chat/res/${chatId}`);
+    addHistory({ title: input,type:"chat"});
   };
 
   const handleClicked = (opt: { label: String }) => {
@@ -58,8 +62,7 @@ export default function Home() {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
   return (
-    <RenderPageContent
-    >
+    <RenderPageContent>
       <div className="flex-1 mt-20 py-4">
         <GreetingMessage
           username={"Christmas"}
