@@ -15,7 +15,7 @@ import {
 } from "@/lib/constants";
 
 export function ChatArea() {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [messages, setMessages] = useState<Message[]>(
     initialMessages.map((message) => ({
       ...message,
@@ -43,7 +43,7 @@ export function ChatArea() {
           icon: "/models/gpt-4o.png",
         },
         {
-          model: "Claude 3.5 Sonnet",
+          model: "Claude 3 Sonnet",
           content: `
             Weak passwords: Users often create passwords that are easy to guess or crack, allowing attackers to gain unauthorized access to accounts.
             Unprotected login pages: Login pages may not be sufficiently protected against brute force attacks or password sniffing techniques.
@@ -59,21 +59,21 @@ export function ChatArea() {
           icon: "/models/gemini.png",
         },
         {
-          model: "Llama 3 70B Instruct",
+          model: "Llama 3.1 70B Instruct",
           content: `
             Cross-site request forgery (CSRF): Occurs when an attacker can trick a user into submitting a request that they do not intend to, such as transferring funds or changing account settings.
             Insecure direct object references (IDOR): Occurs when an attacker can guess or manipulate the URL of a web page to access sensitive information that they should not have access to.
             Broken object-level authorization: Similar to IDOR, this vulnerability occurs when an attacker can bypass authorization checks to access objects that they should not have access to.`,
           icon: "/models/meta.png",
         },
-        {
-          model: "ChatGPT",
-          content: `
-          Outdated software: Web applications that are not kept up to date with the latest security patches may be vulnerable to known exploits.
-            Third-party libraries: Web applications often use third-party libraries, which can introduce vulnerabilities if not properly reviewed and updated.
-            Exploit kits: Attackers may use exploit kits to automate the process of exploiting common vulnerabilities.`,
-          icon: "/models/gpt-3-5.png",
-        },
+        // {
+        //   model: "ChatGPT",
+        //   content: `
+        //   Outdated software: Web applications that are not kept up to date with the latest security patches may be vulnerable to known exploits.
+        //     Third-party libraries: Web applications often use third-party libraries, which can introduce vulnerabilities if not properly reviewed and updated.
+        //     Exploit kits: Attackers may use exploit kits to automate the process of exploiting common vulnerabilities.`,
+        //   icon: "/models/gpt-3-5.png",
+        // },
       ],
     };
 

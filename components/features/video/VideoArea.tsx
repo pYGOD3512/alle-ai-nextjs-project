@@ -32,6 +32,7 @@ import {
 import { VideoSettingsInfoModal } from "@/components/ui/modals";
 import { Progress } from "@/components/ui/progress";
 import { useLikedMediaStore } from "@/lib/constants";
+import { Textarea } from "@/components/ui/textarea";
 
 interface VideoResponse {
   modelId: string;
@@ -187,6 +188,20 @@ const VideoResponse = React.memo(({
 
   return (
     <div ref={containerRef} className="relative group rounded-lg overflow-hidden bg-black">
+      {/* Model Badge */}
+      <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 select-none">
+        <Image 
+          src={modelInfo.icon} 
+          alt={modelInfo.name} 
+          width={20}
+          height={20}
+          className="rounded-full"
+        />
+        <span className="text-sm text-white font-medium">
+          {modelInfo.name}
+        </span>
+      </div>
+
       {/* Video Element */}
       <video
         ref={videoRef}
@@ -636,7 +651,7 @@ const VideoArea = () => {
               {!hasResponse ? (
                 <div className="mt-64">
                     <GreetingMessage
-                    username="Christmas" 
+                    username="Pascal" 
                     questionText="Ready to create your next video masterpiece?"
                     />
                 </div>
@@ -707,33 +722,45 @@ const VideoArea = () => {
         <div className="border-borderColorPrimary p-4">
           <div className="max-w-4xl mx-auto">
             <div className="relative flex items-center gap-2 mb-2">
-              <div className="flex-1 flex items-center gap-2 px-4 py-3 rounded-2xl border border-borderColorPrimary transition-colors">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-accent/50"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <input
-                  type="text"
+              <div className="flex-1 flex items-end gap-2 px-4 py-3 rounded-2xl border border-borderColorPrimary transition-colors">
+                <div className="flex justify-center items-center relative">
+                    <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-accent/50"
+                    >
+                    <Plus className="absolute top-1 h-5 w-5" />
+                    </Button>
+                </div>
+                
+                <Textarea
                   placeholder="Describe your video..."
-                  className="flex-1 bg-transparent outline-none text-base"
+                  className="flex-1 bg-transparent border-0 outline-none text-base resize-none overflow-auto min-h-[2rem] max-h-[10rem] p-0 focus:border-0 focus:ring-0"
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
+                  onChange={(e) => {
+                    e.target.style.height = 'inherit';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                    setPrompt(e.target.value);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
                       handleSubmit();
                     }
                   }}
+                  rows={1}
+                  style={{
+                    overflow: prompt.split('\n').length > 4 ? 'auto' : 'hidden',
+                    scrollbarWidth: 'none',
+                  }}
                 />
+
                 <div className="flex items-center gap-2">
                   <Button 
                     onClick={handleSubmit}
-                    disabled={!prompt.trim() || selectedModels.video.length === 0}
+                    disabled={!prompt.trim() || loading || selectedModels.video.length === 0}
                     className={cn(
-                      "rounded-xl px-6",
+                      "rounded-xl px-4",
                       "transition-all duration-200",
                       prompt.trim() && selectedModels.video.length > 0
                         ? "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"

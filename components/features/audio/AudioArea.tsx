@@ -381,7 +381,7 @@ export function AudioArea() {
           "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
           hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
         )}>
-          {!hasResponse && ( <GreetingMessage username="Christmas" questionText=" What sound are you thinking of today?"/>)}
+          {!hasResponse && ( <GreetingMessage username="Pascal" questionText=" What sound are you thinking of today?"/>)}
           <div className="flex flex-col flex-1 p-4 space-y-4">
             <div className="flex flex-col space-y-2">
               <Textarea
@@ -416,7 +416,7 @@ export function AudioArea() {
 
             <Button 
               onClick={handleSubmit} 
-              disabled={!description.trim() || isLoading}
+              disabled={!description.trim() || isLoading || selectedModels.audio.length === 0}
               className="w-full mt-auto"
             >
               {isLoading ? "Generating..." : "Generate"}
