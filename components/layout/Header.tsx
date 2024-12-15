@@ -51,7 +51,6 @@ export function Header() {
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
   const getSelectedModelNames = useSelectedModelsStore((state) => state.getSelectedModelNames);
 
-
   
   // Get current selected model names based on the current page
   const selectedModelNames = React.useMemo(() => 
@@ -328,7 +327,7 @@ export function Header() {
           
 
           <div className={`flex items-center gap-2 ${isSubscribed ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            <AuthSwitch />
+            {/* <AuthSwitch /> */}
             <ThemeToggle />
             {navItems.filter(item => 
               isSubscribed || 
