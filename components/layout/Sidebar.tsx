@@ -13,12 +13,21 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine  } from "lucide-react";
-import Image from "next/image";
 import {
-  useSidebarStore,
-  sidebarMenuItems,
-} from "@/lib/constants";
+  LayoutGrid,
+  Plus,
+  EllipsisVertical,
+  Gem,
+  ChevronDown,
+  BookOpen,
+  Pencil,
+  Trash2,
+  History,
+  Search,
+  ChartLine,
+} from "lucide-react";
+import Image from "next/image";
+import { useSidebarStore, sidebarMenuItems } from "@/lib/constants";
 import {
   Tooltip,
   TooltipContent,
@@ -31,19 +40,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal, PlansModal, SearchHistoryModal } from "../ui/modals";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  ModelSelectionModal,
+  PlansModal,
+  SearchHistoryModal,
+} from "../ui/modals";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useHistoryStore } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
-
+import ChatHistory from "../features/ChatHistory";
 
 export function Sidebar() {
   const { isOpen, setCurrentPage, toggle } = useSidebarStore();
   const pathname = usePathname();
   const router = useRouter();
-  const isMobile = useMediaQuery('(max-width: 1024px)');
-  const { history, removeHistory: removeItem, renameHistory: renameItem, getHistoryByType } = useHistoryStore();
+  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const {
+    history,
+    removeHistory: removeItem,
+    renameHistory: renameItem,
+    getHistoryByType,
+  } = useHistoryStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
@@ -51,7 +73,6 @@ export function Sidebar() {
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(true);
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
-
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -78,23 +99,23 @@ export function Sidebar() {
         router.push("/");
     }
   };
-  // active helper 
- const isActiveRoute = (itemHref: string, pathname: string): boolean => {
-   // Exact match for specific routes
-   if (itemHref === "/")
-     return pathname === "/" || pathname.startsWith("/chat/res");
-   if (itemHref === "/image")
-     return pathname === "/image" || pathname.startsWith("/image/res");
-   if (itemHref === "/audio")
-     return pathname === "/audio" || pathname.startsWith("/audio/res");
-   if (itemHref === "/video")
-     return pathname === "/video" || pathname.startsWith("/video/res");
-   if (itemHref === "/changelog")
-     return pathname === "/changelog" || pathname.startsWith("/changelog");
+  // active helper
+  const isActiveRoute = (itemHref: string, pathname: string): boolean => {
+    // Exact match for specific routes
+    if (itemHref === "/")
+      return pathname === "/" || pathname.startsWith("/chat/res");
+    if (itemHref === "/image")
+      return pathname === "/image" || pathname.startsWith("/image/res");
+    if (itemHref === "/audio")
+      return pathname === "/audio" || pathname.startsWith("/audio/res");
+    if (itemHref === "/video")
+      return pathname === "/video" || pathname.startsWith("/video/res");
+    if (itemHref === "/changelog")
+      return pathname === "/changelog" || pathname.startsWith("/changelog");
 
-   return false;
- };
- 
+    return false;
+  };
+
   const handleRename = (id: string, currentTitle: string) => {
     setEditingId(id);
     setEditingTitle(currentTitle);
@@ -109,31 +130,39 @@ export function Sidebar() {
   };
 
   // Determine current content type based on pathname
-  const getCurrentType = (): 'chat' | 'image' | 'audio' | 'video' => {
-    if (pathname.startsWith('/image')) return 'image';
-    if (pathname.startsWith('/audio')) return 'audio';
-    if (pathname.startsWith('/video')) return 'video';
-    return 'chat';
+  const getCurrentType = (): "chat" | "image" | "audio" | "video" => {
+    if (pathname.startsWith("/image")) return "image";
+    if (pathname.startsWith("/audio")) return "audio";
+    if (pathname.startsWith("/video")) return "video";
+    return "chat";
   };
 
   // Here we get the history of the various pages
   const currentType = getCurrentType();
   const currentHistory = getHistoryByType(currentType);
 
+  
+  
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}
       {isOpen && isMobile && (
-        <div 
+        <div
           className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
           onClick={toggle}
         />
       )}
-      
+
       <aside
         className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 
           ${isOpen ? "w-60" : "w-16"} 
-          ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}
+          ${
+            isMobile
+              ? isOpen
+                ? "translate-x-0"
+                : "-translate-x-full"
+              : "translate-x-0"
+          }
           border-r bg-sideBarBackground flex flex-col`}
       >
         <div className="p-2">
@@ -181,20 +210,20 @@ export function Sidebar() {
             <div className="space-y-2">
               <div className="space-y-2 mb-8">
                 <Button
-                    onClick={handleNewChat}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setModelSelectionModalOpen(true)}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                </div>
+                  onClick={handleNewChat}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setModelSelectionModalOpen(true)}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
               {sidebarMenuItems.map((item, i) => (
                 <Link
                   key={item.label}
@@ -212,127 +241,49 @@ export function Sidebar() {
 
         {isOpen ? (
           <>
-            <div className="px-4 mt-5">
-              <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
-                {currentType.toUpperCase()} HISTORY
-                <Button
-                variant={`ghost`}
-                size={`icon`}
-                className="p-0 h-8 w-8"
-                onClick={() => setHistorySearchModalOpen(true)}
-                >
-                  <Search   className="w-4 h-4"/>
-                </Button>
-              </div>
-              <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
-                <div className="space-y-0.5">
-                  {currentHistory.map((item) => (
-                    <ContextMenu key={item.id}>
-                      <ContextMenuTrigger>
-                        <div className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md">
-                          {editingId === item.id ? (
-                            <Input
-                              value={editingTitle}
-                              onChange={(e) => setEditingTitle(e.target.value)}
-                              onBlur={() => handleRenameSubmit(item.id)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleRenameSubmit(item.id);
-                                if (e.key === 'Escape') setEditingId(null);
-                              }}
-                              autoFocus
-                              className="h-6 text-xs"
-                            />
-                          ) : (
-                            <div className="relative flex-1 min-w-0">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="relative text-xs text-left cursor-pointer">
-                                      <div className="whitespace-nowrap overflow-hidden">
-                                        {item.title.length > 29
-                                          ? `${item.title.substring(0, 29)}`
-                                          : item.title}
-                                        <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
-                                      </div>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent
-                                    side="top"
-                                    className="max-w-[200px] text-xs break-words"
-                                  >
-                                    {item.title}
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          )}
-
-                          <div className="absolute right-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
-                                >
-                                  <EllipsisVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-[160px]">
-                                <DropdownMenuItem onClick={() => handleRename(item.id, item.title)}>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  <span>Rename</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => removeItem(item.id)}
-                                  className="text-red-500"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Delete</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuContent>
-                        <ContextMenuItem onClick={() => handleRename(item.id, item.title)}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          <span>Rename</span>
-                        </ContextMenuItem>
-                        <ContextMenuItem 
-                          onClick={() => removeItem(item.id)}
-                          className="text-red-500"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                        </ContextMenuItem>
-                      </ContextMenuContent>
-                    </ContextMenu>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
+           <ChatHistory currentHistory={currentHistory} currentType={currentType}  historyModalOpen={()=>setHistorySearchModalOpen(true)} />
 
             <div className="px-4 mt-8">
               <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
                 <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md bg-backgroundSecondary text-xs font-medium text-muted-foreground hover:text-primary">
                   MORE
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'transform rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      isMoreOpen ? "transform rotate-180" : ""
+                    }`}
+                  />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-1 mt-1">
                   <Link href={`/model-glossary`} legacyBehavior>
-                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
-                      <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer"
+                    >
+                      <BookOpen className="w-4 h-4 ml-4" /> Model Glossary
                     </a>
                   </Link>
-                  <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
-                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
-                      <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
+                  <Link
+                    href={`https://all-ai-model-usage-tracker.vercel.app/`}
+                    legacyBehavior
+                  >
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer"
+                    >
+                      <ChartLine className="w-4 h-4 ml-4" /> Model Analytics
                     </a>
                   </Link>
-                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
-                      <History  className="w-4 h-4 ml-4"/> Changelog
+                  <Link
+                    href={`/changelog`}
+                    className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${
+                      isActiveRoute("/changelog", pathname)
+                        ? "bg-secondary font-medium"
+                        : ""
+                    }`}
+                  >
+                    <History className="w-4 h-4 ml-4" /> Changelog
                   </Link>
                 </CollapsibleContent>
               </Collapsible>
@@ -350,7 +301,9 @@ export function Sidebar() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-sm">Pascal</div>
-                    <Badge variant="default" className="text-[0.6rem] h-3">Free</Badge>
+                    <Badge variant="default" className="text-[0.6rem] h-3">
+                      Free
+                    </Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     pascal@alle-ai.com
@@ -384,8 +337,8 @@ export function Sidebar() {
         onClose={() => setPlansModalOpen(false)}
       />
       <SearchHistoryModal
-        isOpen={historySearchModalOpen} 
-        onClose={() => setHistorySearchModalOpen(false)} 
+        isOpen={historySearchModalOpen}
+        onClose={() => setHistorySearchModalOpen(false)}
         currentType={currentType}
       />
     </>
