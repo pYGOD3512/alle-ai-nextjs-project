@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import {
   ContextMenu,
@@ -19,13 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Pencil,
-  Trash2,
-  EllipsisVertical,
-  ChartNoAxesColumnIcon,
-} from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Pencil, Trash2, EllipsisVertical } from "lucide-react";
+import { usePathname, useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useHistoryStore } from "@/lib/constants";
 interface Chat {
@@ -46,7 +42,10 @@ export default function ChatEntry({ chat }: EntryProps) {
   const [editingTitle, setEditingTitle] = useState(chat.title);
   const MAX_LENGTH = 30;
   const pathname = usePathname();
+  const params = useParams();
   const router = useRouter();
+  const { chatId } = params;
+  
   const { removeAnimate } = useHistoryStore();
   // typing animation effect
   useEffect(() => {
@@ -115,6 +114,7 @@ export default function ChatEntry({ chat }: EntryProps) {
     // use id to trigger dynamic route
     // pass the entire chat section
     // render at appropriate route
+    document.title = chat.title;
     switch (true) {
       case pathname.startsWith("/image"):
         router.push(`/image/res/${chat.id}`);
@@ -128,8 +128,6 @@ export default function ChatEntry({ chat }: EntryProps) {
       default:
         router.push(`/image/res/${chat.id}`);
     }
-
-    console.log(chat);
   };
   return (
     <ContextMenu>
@@ -152,7 +150,11 @@ export default function ChatEntry({ chat }: EntryProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative text-xs text-left cursor-pointer">
-                    <div className="whitespace-nowrap overflow-hidden">
+                    <div
+                      className={`whitespace-nowrap overflow-hidden ${
+                        chat.id === chatId ? "" : "text-gray-400"
+                      } `}
+                    >
                       {displayText}
                       <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
                     </div>

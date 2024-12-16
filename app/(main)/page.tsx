@@ -54,7 +54,7 @@ export default function Home() {
     setSectionId("chatId", chatId);
     setContent("chat", "input", input);
     router.push(`/chat/res/${chatId}`);
-    addHistory({ title: input,type:"chat"});
+    addHistory({ title: input, type: "chat", generateId: chatId });
   };
 
   const handleClicked = (opt: { label: String }) => {

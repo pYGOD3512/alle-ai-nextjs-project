@@ -28,13 +28,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const chatId = crypto.randomUUID();
     setDescription("");
     router.push(`/audio/res/${chatId}`);
-    addHistory({ title: description, type: "audio" });
+    addHistory({ title: description, type: "audio", generateId: chatId });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-        handleSubmit(); 
+      handleSubmit();
     }
   };
   return (

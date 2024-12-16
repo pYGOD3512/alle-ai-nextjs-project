@@ -8,8 +8,8 @@ import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSelectedModelsStore } from "@/lib/constants";
 import AdvancedOptions from "@/components/features/video/AdvancedOptions";
-
-
+import { useHistoryStore } from "@/lib/constants";
+import { useRouter } from "next/navigation";
 interface VideoSettings {
   aspectRatio: "16:9" | "1:1" | "9:16";
   quality: "480p" | "720p" | "1080p";
@@ -21,11 +21,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [prompt, setPrompt] = useState("");
   const { selectedModels } = useSelectedModelsStore();
+  const { addHistory } = useHistoryStore();
+  const router = useRouter();
   const [currentSettingInfo, setCurrentSettingInfo] = useState<
     "aspectRatio" | "quality" | "duration" | "display"
   >("aspectRatio");
   const [infoModalOpen, setInfoModalOpen] = useState(false);
- const [settings, setSettings] = useState<VideoSettings>({
+  const [settings, setSettings] = useState<VideoSettings>({
     aspectRatio: "16:9",
     quality: "720p",
     duration: 10,
@@ -37,7 +39,13 @@ function Layout({ children }: { children: React.ReactNode }) {
     setCurrentSettingInfo(setting);
     setInfoModalOpen(true);
   };
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    if (!prompt) return;
+    const chatId = crypto.randomUUID();
+
+    router.push(`/video/res/${chatId}`);
+    addHistory({ title: prompt, type: "video", generateId: chatId });
+  };
   return (
     <RenderPageContent>
       <div className="flex flex-col h-full">
@@ -96,7 +104,11 @@ function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             </div>
-            <AdvancedOptions onShowSettingInfo={showSettingInfo} settings={settings} onSettingsChange={setSettings} />
+            <AdvancedOptions
+              onShowSettingInfo={showSettingInfo}
+              settings={settings}
+              onSettingsChange={setSettings}
+            />
           </div>
         </div>
       </div>

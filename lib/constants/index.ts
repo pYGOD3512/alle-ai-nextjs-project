@@ -9,8 +9,6 @@ import {
   Video,
   Music,
   ImageIcon,
-  Trash2,
-  Pencil,
   Bell,
   Handshake,
   LogOut,
@@ -345,6 +343,7 @@ interface HistoryItem {
   createdAt: Date;
   type: "chat" | "image" | "audio" | "video";
   animate?: boolean;
+  generateId?: string;
 }
 
 interface HistoryStore {
@@ -395,7 +394,7 @@ export const useHistoryStore = create<HistoryStore>()(
           history: [
             {
               ...item,
-              id: `${item.type}-${Date.now()}`,
+              id: `${item.generateId}`,
               createdAt: new Date(),
               animate: true,
             },

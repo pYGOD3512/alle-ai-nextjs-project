@@ -40,7 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setInput("");
     //
     router.push(`/image/res/${chatId}`);
-    addHistory({ title: input, type: "image" });
+    addHistory({ title: input, type: "image", generateId: chatId });
   };
   return (
     <RenderPageContent>
