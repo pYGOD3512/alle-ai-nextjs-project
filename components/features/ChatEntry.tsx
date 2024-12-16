@@ -19,7 +19,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, EllipsisVertical } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  EllipsisVertical,
+  ChartNoAxesColumnIcon,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useHistoryStore } from "@/lib/constants";
@@ -42,7 +47,7 @@ export default function ChatEntry({ chat }: EntryProps) {
   const MAX_LENGTH = 30;
   const pathname = usePathname();
   const router = useRouter();
-  const {removeAnimate} = useHistoryStore()
+  const { removeAnimate } = useHistoryStore();
   // typing animation effect
   useEffect(() => {
     if (chat.animate) {
@@ -56,7 +61,7 @@ export default function ChatEntry({ chat }: EntryProps) {
           currentIndex++;
         } else {
           clearInterval(timer);
-          removeAnimate()
+          removeAnimate();
         }
       }, 50);
 
@@ -70,7 +75,6 @@ export default function ChatEntry({ chat }: EntryProps) {
       );
     }
   }, [chat.title, chat.animate]);
-
 
   // Rename handler
   const handleRename = async () => {
@@ -111,11 +115,26 @@ export default function ChatEntry({ chat }: EntryProps) {
     // use id to trigger dynamic route
     // pass the entire chat section
     // render at appropriate route
+    switch (true) {
+      case pathname.startsWith("/image"):
+        router.push(`/image/res/${chat.id}`);
+        break;
+      case pathname.startsWith("/video"):
+        router.push(`/video/res/${chat.id}`);
+        break;
+      case pathname.startsWith("/audio"):
+        router.push(`/audio/res/${chat.id}`);
+        break;
+      default:
+        router.push(`/image/res/${chat.id}`);
+    }
+
+    console.log(chat);
   };
   return (
     <ContextMenu>
       <ContextMenuTrigger onClick={handleChatItemClicked}>
-        <div className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md">
+        <div className=" group relative flex items-center mb-1 px-2 py-1.5 hover:bg-secondary/80 rounded-md">
           {isEditing ? (
             <Input
               value={editingTitle}
@@ -141,7 +160,7 @@ export default function ChatEntry({ chat }: EntryProps) {
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="max-w-[200px] text-xs break-words"
+                  className="max-w-[200px] text-xs break-words "
                 >
                   {chat.title}
                 </TooltipContent>
