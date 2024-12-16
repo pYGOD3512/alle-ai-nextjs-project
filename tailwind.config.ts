@@ -35,6 +35,7 @@ const config: Config = {
         bodyColor: 'var(--bodyColor)',
         hoverColorPrimary: 'var(--hoverColorPrimary)',
         toastBackgroundColor: 'var(--toastBackgroundColor)',
+        infoColorPrimary: 'hsl(var(--infoColorPrimary))',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',
