@@ -6,40 +6,19 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuItem,
-  ContextMenuContent,
-} from "@/components/ui/context-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   LayoutGrid,
   Plus,
-  EllipsisVertical,
   Gem,
   ChevronDown,
   BookOpen,
-  Pencil,
-  Trash2,
   History,
-  Search,
   ChartLine,
 } from "lucide-react";
 import Image from "next/image";
 import { useSidebarStore, sidebarMenuItems } from "@/lib/constants";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   ModelSelectionModal,
   PlansModal,
@@ -52,7 +31,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useHistoryStore } from "@/lib/constants";
-import { Input } from "@/components/ui/input";
 import ChatHistory from "../features/ChatHistory";
 
 export function Sidebar() {
@@ -141,8 +119,6 @@ export function Sidebar() {
   const currentType = getCurrentType();
   const currentHistory = getHistoryByType(currentType);
 
-  
-  
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}
@@ -241,7 +217,11 @@ export function Sidebar() {
 
         {isOpen ? (
           <>
-           <ChatHistory currentHistory={currentHistory} currentType={currentType}  historyModalOpen={()=>setHistorySearchModalOpen(true)} />
+            <ChatHistory
+              currentHistory={currentHistory}
+              currentType={currentType}
+              historyModalOpen={() => setHistorySearchModalOpen(true)}
+            />
 
             <div className="px-4 mt-8">
               <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
