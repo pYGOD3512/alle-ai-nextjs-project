@@ -8,7 +8,7 @@ export default function AudioGenerationPage() {
 
   useEffect(() => {
     setCurrentPage("audio");
-    document.title = "Alle-AI";
+    document.title = "Audio - Alle-AI";
   }, [setCurrentPage]);
 
   return <div></div>;

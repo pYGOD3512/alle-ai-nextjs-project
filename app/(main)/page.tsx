@@ -31,7 +31,7 @@ export default function Home() {
   const { setContent } = useContentStore();
   useEffect(() => {
     setCurrentPage("chat");
-    document.title = "Alle-AI"
+    document.title = "Chat - Alle-AI"
   }, [setCurrentPage]);
 
   const handleSend = () => {

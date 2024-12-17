@@ -149,7 +149,7 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className="flex-1 bg-black text-white hover:bg-black hover:text-white dark:bg-white dark:text-black "
+                  className=" flex-1 bg-blue-600 text-white hover:bg-blue-500 hover:text-white"
                 >
                   <Plus className="mr-2 h-4 w-4  " />
                   NEW {currentType.toUpperCase()}
@@ -157,6 +157,7 @@ export function Sidebar() {
                 <Button
                   variant="outline"
                   size="icon"
+                  className="animate-borderHighlight"
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -170,7 +171,7 @@ export function Sidebar() {
                     href={item.href}
                     className={`w-full flex items-center  justify-start h-8 text-sm rounded-md px-2  ${
                       isActiveRoute(item.href, pathname)
-                        ? "bg-black text-white dark:bg-white dark:text-black "
+                        ? "bg-blue-200 text-blue-600 "
                         : "hover:bg-secondary"
                     }`}
                   >
@@ -191,13 +192,13 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500  "
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 animate-borderHighlight"
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -209,7 +210,9 @@ export function Sidebar() {
                   key={item.label}
                   href={item.href}
                   className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                    isActiveRoute(item.href, pathname) ? "bg-green-500" : ""
+                    isActiveRoute(item.href, pathname)
+                      ? "bg-blue-200 text-blue-600"
+                      : "hover:bg-secondary"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />

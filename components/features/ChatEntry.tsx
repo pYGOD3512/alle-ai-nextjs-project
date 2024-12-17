@@ -152,7 +152,7 @@ export default function ChatEntry({ chat }: EntryProps) {
                   <div className="relative text-xs text-left cursor-pointer">
                     <div
                       className={`whitespace-nowrap overflow-hidden ${
-                        chat.id === chatId ? "" : "text-gray-400"
+                        chat.id === chatId ? "text-black font-semibold dark:text-white" : "text-gray-500"
                       } `}
                     >
                       {displayText}

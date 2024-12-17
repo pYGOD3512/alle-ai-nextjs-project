@@ -19,8 +19,8 @@ function ChatHistory({
   
   return (
     <div className="px-4 mt-5">
-      <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
-        {currentType.toUpperCase()} HISTORY
+      <div className="flex justify-between  items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
+        <span className="text-black font-bold dark:text-white">{currentType.toUpperCase()} HISTORY</span>
         <Button
           variant={"ghost"}
           size={`icon`}
@@ -32,9 +32,9 @@ function ChatHistory({
       </div>
       <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
         <div className="space-y-0.5">
-         {currentHistory.map((item)=>(
-          <ChatEntry key={item.id} chat={item}/>
-         ))}
+          {currentHistory.map((item) => (
+            <ChatEntry key={item.id} chat={item} />
+          ))}
         </div>
       </ScrollArea>
     </div>
