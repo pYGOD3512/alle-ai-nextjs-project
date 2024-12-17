@@ -60,6 +60,7 @@ export function Sidebar() {
 
   const handleNewChat = () => {
     // other logics later
+
     switch (true) {
       case pathname.startsWith("/chat"):
         router.push("/");
@@ -144,13 +145,13 @@ export function Sidebar() {
         <div className="p-2">
           {isOpen ? (
             <>
-              <div className="flex gap-2 px-2">
+              <div className="flex gap-2 px-2 ">
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 bg-black text-white hover:bg-black hover:text-white dark:bg-white dark:text-black "
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 h-4 w-4  " />
                   NEW {currentType.toUpperCase()}
                 </Button>
                 <Button
@@ -167,8 +168,10 @@ export function Sidebar() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                      isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
+                    className={`w-full flex items-center  justify-start h-8 text-sm rounded-md px-2  ${
+                      isActiveRoute(item.href, pathname)
+                        ? "bg-black text-white dark:bg-white dark:text-black "
+                        : "hover:bg-secondary"
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
@@ -200,12 +203,13 @@ export function Sidebar() {
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
               </div>
+              {/* test color for opened */}
               {sidebarMenuItems.map((item, i) => (
                 <Link
                   key={item.label}
                   href={item.href}
                   className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                    isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
+                    isActiveRoute(item.href, pathname) ? "bg-green-500" : ""
                   }`}
                 >
                   <item.icon className="h-4 w-4" />

@@ -11,6 +11,8 @@ export default function ImageGenerationPage() {
 
   useEffect(() => {
     setCurrentPage("image");
+    document.title = "Alle-AI";
+
   }, [setCurrentPage]);
 
   

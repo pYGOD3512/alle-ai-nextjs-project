@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import {
   ContextMenu,
@@ -45,7 +45,7 @@ export default function ChatEntry({ chat }: EntryProps) {
   const params = useParams();
   const router = useRouter();
   const { chatId } = params;
-  
+
   const { removeAnimate } = useHistoryStore();
   // typing animation effect
   useEffect(() => {
@@ -126,7 +126,7 @@ export default function ChatEntry({ chat }: EntryProps) {
         router.push(`/audio/res/${chat.id}`);
         break;
       default:
-        router.push(`/image/res/${chat.id}`);
+        router.push(`/chat/res/${chat.id}`);
     }
   };
   return (

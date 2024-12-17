@@ -8,6 +8,7 @@ export default function VideoGenerationPage() {
 
   useEffect(() => {
     setCurrentPage("video");
+    document.title = "Alle-AI";
   }, [setCurrentPage]);
 
   return <div></div>;

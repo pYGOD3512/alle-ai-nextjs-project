@@ -6,10 +6,10 @@ export default function AudioGenerationPage() {
   const { isOpen } = useSidebarStore();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
 
-
   useEffect(() => {
     setCurrentPage("audio");
+    document.title = "Alle-AI";
   }, [setCurrentPage]);
 
-  return <div></div>
+  return <div></div>;
 }

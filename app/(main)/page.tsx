@@ -10,6 +10,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { useHistoryStore } from "@/lib/constants";
 import { useContentStore } from "@/stores";
+
 // static options
 const options = [
   {
@@ -19,6 +20,7 @@ const options = [
     label: "Why is christmas gift wrapping harder than math?",
   },
 ];
+
 export default function Home() {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +31,7 @@ export default function Home() {
   const { setContent } = useContentStore();
   useEffect(() => {
     setCurrentPage("chat");
+    document.title = "Alle-AI"
   }, [setCurrentPage]);
 
   const handleSend = () => {
@@ -62,20 +65,23 @@ export default function Home() {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
   return (
-    <RenderPageContent>
-      <div className="flex-1 mt-20 py-4">
-        <GreetingMessage
-          username={"Christmas"}
-          options={options}
-          handlePressed={handleClicked}
+    <>
+      
+      <RenderPageContent>
+        <div className="flex-1 mt-20 py-4">
+          <GreetingMessage
+            username={"Christmas"}
+            options={options}
+            handlePressed={handleClicked}
+          />
+        </div>
+        <ChatInput
+          value={input}
+          onChange={setInput}
+          onSend={handleSend}
+          inputRef={inputRef}
         />
-      </div>
-      <ChatInput
-        value={input}
-        onChange={setInput}
-        onSend={handleSend}
-        inputRef={inputRef}
-      />
-    </RenderPageContent>
+      </RenderPageContent>
+    </>
   );
 }
