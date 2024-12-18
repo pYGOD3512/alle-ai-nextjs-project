@@ -1,4 +1,4 @@
-import { animate } from "framer-motion";
+
 import {
   ALargeSmall,
   Settings,

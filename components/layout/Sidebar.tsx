@@ -120,6 +120,49 @@ export function Sidebar() {
   const currentType = getCurrentType();
   const currentHistory = getHistoryByType(currentType);
 
+  const getPageStyle = (itemHref?: string, path?: string) => {
+    if (!itemHref) {
+      if (pathname === "/" || pathname.startsWith("/chat/res")) {
+        return "bg-blue-50 text-blue-500 hover:bg-blue-50 hover:text-blue-500";
+      }
+      if (pathname === "/image" || pathname.startsWith("/image/res")) {
+        return "bg-green-50 text-green-500 hover:bg-green-50 hover:text-green-500";
+      }
+      if (pathname === "/audio" || pathname.startsWith("/audio/res")) {
+        return "bg-yellow-50 text-yellow-500 hover:bg-yellow-50 hover:text-yellow-500";
+      }
+      if (pathname === "/video" || pathname.startsWith("/video/res")) {
+        return "bg-pink-50 text-pink-500 hover:bg-pink-50 hover:text-orange-500";
+      }
+      return "";
+    }
+
+    if (itemHref && path) {
+      if (itemHref === "/") {
+        if (path === "/" || path.startsWith("/chat/res")) {
+          return "bg-blue-50 text-blue-500";
+        }
+      }
+      if (itemHref === "/image") {
+        if (path === "/image" || path.startsWith("/image/res")) {
+          return "bg-green-50 text-green-500";
+        }
+      }
+      if (itemHref === "/audio") {
+        if (path === "/audio" || path.startsWith("/audio/res")) {
+          return "bg-yellow-50 text-yellow-500";
+        }
+      }
+      if (itemHref === "/video") {
+        if (path === "/video" || path.startsWith("/video/res")) {
+          return "bg-pink-50 text-pink-500";
+        }
+      }
+      if (itemHref === "/changelog") {
+        if (path.startsWith("/changelog")) return "bg-secondary font-medium";
+      }
+    }
+  };
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}
@@ -149,7 +192,7 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className=" flex-1 "
+                  className={`flex-1 ${getPageStyle()}`}
                 >
                   <Plus className="mr-2 h-4 w-4  " />
                   NEW {currentType.toUpperCase()}
@@ -157,7 +200,7 @@ export function Sidebar() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className=""
+                  className={`${getPageStyle()}`}
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -169,11 +212,10 @@ export function Sidebar() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`w-full flex items-center  justify-start h-8 text-sm rounded-md px-2  ${
-                      isActiveRoute(item.href, pathname)
-                        ? "bg-secondary "
-                        : ""
-                    }`}
+                    className={`w-full flex items-center  justify-start h-8 text-sm rounded-md px-2  ${getPageStyle(
+                      item.href,
+                      pathname
+                    )}`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
                     {item.label}
@@ -192,13 +234,13 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className="flex-1   "
+                  className={`flex-1 ${getPageStyle()}`}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 "
+                  className={`${getPageStyle()}`}
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -209,11 +251,10 @@ export function Sidebar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
-                    isActiveRoute(item.href, pathname)
-                      ? "bg-blue-200 text-blue-600"
-                      : "hover:bg-secondary"
-                  }`}
+                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${getPageStyle(
+                    item.href,
+                    pathname
+                  )}`}
                 >
                   <item.icon className="h-4 w-4" />
                 </Link>
@@ -264,11 +305,10 @@ export function Sidebar() {
                   </Link>
                   <Link
                     href={`/changelog`}
-                    className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${
-                      isActiveRoute("/changelog", pathname)
-                        ? "bg-secondary font-medium"
-                        : ""
-                    }`}
+                    className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${getPageStyle(
+                      "/changelog",
+                      pathname
+                    )}`}
                   >
                     <History className="w-4 h-4 ml-4" /> Changelog
                   </Link>

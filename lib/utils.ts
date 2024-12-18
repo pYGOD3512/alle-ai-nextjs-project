@@ -25,3 +25,6 @@ export const generateRandomId = () => {
   const chatId = uuidv4();
   return chatId;
 };
+
+
+// Active sideBar page navigation color picker 
