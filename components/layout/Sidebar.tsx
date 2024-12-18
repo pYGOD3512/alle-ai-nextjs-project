@@ -149,7 +149,7 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className=" flex-1 bg-blue-600 text-white hover:bg-blue-500 hover:text-white"
+                  className=" flex-1 "
                 >
                   <Plus className="mr-2 h-4 w-4  " />
                   NEW {currentType.toUpperCase()}
@@ -157,7 +157,7 @@ export function Sidebar() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="animate-borderHighlight"
+                  className=""
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -171,8 +171,8 @@ export function Sidebar() {
                     href={item.href}
                     className={`w-full flex items-center  justify-start h-8 text-sm rounded-md px-2  ${
                       isActiveRoute(item.href, pathname)
-                        ? "bg-blue-200 text-blue-600 "
-                        : "hover:bg-secondary"
+                        ? "bg-secondary "
+                        : ""
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
@@ -192,13 +192,13 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className="flex-1 bg-blue-600 hover:bg-blue-500  "
+                  className="flex-1   "
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 animate-borderHighlight"
+                  className="flex-1 "
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
