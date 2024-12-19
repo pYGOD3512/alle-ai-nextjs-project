@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy } from "lucide-react";
+import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Slider } from "@/components/ui/slider";
@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useContentStore } from "@/stores";
 import { useSelectedModelsStore, useGeneratedAudioStore, AUDIO_MODELS } from "@/lib/constants";
 import { useLikedMediaStore } from "@/lib/constants";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { MicButton } from "@/components/ui/MicButton";
 
 
 interface AudioResponse {
@@ -38,16 +40,22 @@ export function AudioArea() {
   const { responses, lastPrompt, setResponses, updateResponse, setLastPrompt } = useGeneratedAudioStore();
   const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
   
-  const [description, setDescription] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [submittedPrompt, setSubmittedPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasResponse, setHasResponse] = useState(false);
   const [audioStates, setAudioStates] = useState<Record<string, AudioPlayerState>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
+
   const { toast } = useToast();
   const [credits, setCredits] = useState(50);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const { isListening, toggleListening } = useSpeechRecognition({
+    onTranscript: setPrompt,
+    inputRef: textareaRef
+  });
 
   const ResponseSkeleton = () => (
     <div className="border border-borderColorPrimary rounded-lg p-4 space-y-4">
@@ -83,12 +91,12 @@ export function AudioArea() {
   );
 
   const handleSubmit = async () => {
-    if (!description.trim() || selectedModels.audio.length === 0) return;
+    if (!prompt.trim() || selectedModels.audio.length === 0) return;
 
     setIsLoading(true);
     setHasResponse(true);
-    setSubmittedPrompt(description);
-    setDescription("");
+    setSubmittedPrompt(prompt);
+    setPrompt("");
     
     // Clear previous responses
     setResponses([]);
@@ -106,7 +114,7 @@ export function AudioArea() {
       });
       
       setResponses(simulatedResponses);
-      setLastPrompt(description);
+      setLastPrompt(prompt);
       setIsLoading(false);
     }, 5000);
   };
@@ -385,8 +393,9 @@ export function AudioArea() {
           <div className="flex flex-col flex-1 p-4 space-y-4">
             <div className="flex flex-col space-y-2">
               <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                ref={textareaRef}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Describe your audio..."
                 className="flex-1 min-h-[100px] resize-none border-borderColorPrimary focus-visible:outline-none focus:border-2 scrollbar-thin scrollbar-webkit"
@@ -402,13 +411,9 @@ export function AudioArea() {
                 <Upload className="w-4 h-4" />
                 Upload file
               </Button>
-              <Button 
-                variant="outline"
-                className="flex items-center gap-2 border-borderColorPrimary"
-                onClick={() => {}}
-              >
-                <Mic className="w-4 h-4" />
-              </Button>
+
+              <MicButton className="w-10 h-10 rounded-md border border-borderColorPrimary" isListening={isListening} onClick={toggleListening} />
+              
               <div className="ml-auto text-sm text-muted-foreground">
                 Requests left: {credits}
               </div>
@@ -416,7 +421,7 @@ export function AudioArea() {
 
             <Button 
               onClick={handleSubmit} 
-              disabled={!description.trim() || isLoading || selectedModels.audio.length === 0}
+              disabled={!prompt.trim() || isLoading || selectedModels.audio.length === 0}
               className="w-full mt-auto"
             >
               {isLoading ? "Generating..." : "Generate"}

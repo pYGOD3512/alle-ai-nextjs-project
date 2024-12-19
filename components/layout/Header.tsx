@@ -28,7 +28,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/components/providers/authTest';
-import { AuthSwitch } from "../authSwitch";
+import { AuthSwitch } from "../ui/authSwitch";
 
 export function Header() {
   const { isSubscribed } = useAuth();

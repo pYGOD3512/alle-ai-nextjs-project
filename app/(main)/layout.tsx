@@ -7,8 +7,10 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import PlansArea from '@/components/features/plans/PlansArea';
 
+import { message, Tour } from 'antd';
+import type { TourProps } from 'antd';
+
 import { useAuth } from '@/components/providers/authTest';
-import { SettingsModal } from '@/components/ui/modals';
 
 const inter = Inter({ subsets: ['latin'] });
 
