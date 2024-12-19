@@ -45,6 +45,7 @@
     "@types/react-dom": "18.2.7",
     "antd": "^5.22.3",
     "autoprefixer": "10.4.15",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -55,12 +56,12 @@
     "framer-motion": "^11.12.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.446.0",
-    "mammoth": "^1.8.0",
+    "mammoth": "^1.6.0",
     "motion": "^11.12.0",
     "next": "^15.0.3",
     "next-themes": "^0.3.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^4.9.155",
+    "pdfjs-dist": "^4.0.189",
     "postcss": "8.4.30",
     "react": "18.2.0",
     "react-day-picker": "^8.10.1",
@@ -78,5 +79,8 @@
     "vaul": "^0.9.9",
     "zod": "^3.23.8",
     "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/pdfjs-dist": "^2.10.377"
   }
 }

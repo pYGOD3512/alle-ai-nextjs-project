@@ -17,6 +17,8 @@ const getFileExtension = (type: string) => {
         return 'DOC';
       case 'text/plain':
         return 'TXT';
+      case 'application/pdf':
+        return 'PDF';
       case 'image/jpeg':
         return 'JPG';
       case 'image/png':
@@ -26,7 +28,6 @@ const getFileExtension = (type: string) => {
       case 'image/webp':
         return 'WEBP';
       default:
-        // Fallback to the last part of the MIME type if not handled above
         return type.split('/').pop()?.toUpperCase() || 'UNKNOWN';
     }
   };
@@ -38,12 +39,14 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
     <div className="relative group flex items-center gap-2 max-w-[200px] w-fit p-1 bg-muted/30 rounded-lg border border-border">
       <div className="flex-shrink-0">
         {isImage ? (
-          <div className="relative w-8 h-8 rounded overflow-hidden">
+          <div className="relative w-10 h-10 rounded overflow-hidden">
             <Image
               src={file.url}
               alt={file.name}
               fill
               className="object-cover"
+              width={100}
+              height={100}
             />
           </div>
         ) : (
