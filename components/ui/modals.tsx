@@ -73,6 +73,8 @@ import { formatDistanceToNow } from "date-fns";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+
 
 interface ModalProps {
   isOpen: boolean;
@@ -897,6 +899,8 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
 export function ReferModal({ isOpen, onClose }: ModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { toast } = useToast();
+
 
   useEffect(() => {
     if (!isOpen) {
@@ -907,7 +911,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
   const referralLink = "https://alle.ai/ref=XXX_XXX";
   const stats = {
     friendsReferred: 125,
-    cashEarned: 500.00, 
+    cashEarned: 50.00, 
   };
 
   // Available plans based on earned amount
@@ -932,7 +936,12 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
-    // Implement toast notification here
+    toast({
+      title: "Copied",
+      description: `Referral link copied to clipboard`,
+      duration: 3000,
+      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+    });
   };
 
   const platforms = [
@@ -964,7 +973,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
           <DialogHeader className="flex flex-row items-center justify-between relative">
             <DialogTitle>
               Refer & Earn{" "}
-              <span className="text-sm text-blue-500">(coming soon)</span>
+              <span className="text-sm text-infoColorPrimary">(coming soon)</span>
               </DialogTitle>
             <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">esc</span>
@@ -976,7 +985,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
               <p className="text-sm text-muted-foreground">
                 Invite your friends and earn cash rewards on each successful referral. 
                 Use your earnings to subscribe to Alle-AI plans.{' '}
-                <a href="#" className="text-blue-500 hover:underline">
+                <a href="#" className="text-infoColorPrimary hover:underline">
                   learn more
                 </a>
               </p>
@@ -990,7 +999,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold">£{stats.cashEarned.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-infoColorPrimary">£{stats.cashEarned.toFixed(2)}</p>
                   <p className="text-sm text-muted-foreground">Earned cash</p>
                 </div>
               </div>
@@ -1111,8 +1120,13 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
           currentBalance={stats.cashEarned}
           onConfirm={() => {
             console.log(`Subscription confirmed for ${selectedPlan}`);
-            // Handle actual subscription logic here
-            onClose(); // Close the main modal
+            toast({
+              title: "Success",
+              description: `You've subscribed to Alle-AI ${selectedPlan}`,
+              duration: 3000,
+              className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+            });
+            onClose();
           }}
         />
       )}
@@ -1150,7 +1164,7 @@ export function SubscriptionConfirmModal({
               <span className="text-sm">Current Balance</span>
               <span className="font-medium">£{currentBalance.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center text-red-500">
+            <div className="flex justify-between items-center text-infoColorPrimary">
               <span className="text-sm">Subscription Cost</span>
               <span className="font-medium">-£{planPrice.toFixed(2)}</span>
             </div>
@@ -1161,8 +1175,9 @@ export function SubscriptionConfirmModal({
             </div>
           </div>
 
-          <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4">
-            <p className="text-xs text-center text-red-500">
+          <div className="rounded-lg border border-infoColorPrimary/50 bg-infoColorPrimary/5 p-4">
+            <p className="text-xs text-center text-infoColorPrimary">
+              <Info className="h-3 w-3 text-infoColorPrimary inline-flex" />
               This action cannot be undone. Your subscription will start immediately.
             </p>
           </div>
@@ -1261,131 +1276,133 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[70rem]">
-        <DialogHeader className="text-center space-y-4 relative">
-          <DialogTitle className="text-xl">Upgrade your plan</DialogTitle>
+    <div className="overflow-auto">
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[70rem]">
+          <DialogHeader className="text-center space-y-4 relative">
+            <DialogTitle className="text-xl">Upgrade your plan</DialogTitle>
 
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4">
-            <span className={cn("text-sm", !isYearly && "text-primary")}>
-              Monthly
-            </span>
-            <Switch
-              checked={isYearly}
-              onCheckedChange={setIsYearly}
-              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
-            />
-            <div className="flex items-center gap-2">
-              <span className={cn("text-sm", isYearly && "text-primary")}>
-                Yearly
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-4">
+              <span className={cn("text-sm", !isYearly && "text-primary")}>
+                Monthly
               </span>
-              <Badge variant="secondary" className="bg-primary/20 text-primary">
-                17% discount
-              </Badge>
+              <Switch
+                checked={isYearly}
+                onCheckedChange={setIsYearly}
+                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
+              />
+              <div className="flex items-center gap-2">
+                <span className={cn("text-sm", isYearly && "text-primary")}>
+                  Yearly
+                </span>
+                <Badge variant="secondary" className="bg-primary/20 text-primary">
+                  17% discount
+                </Badge>
+              </div>
             </div>
-          </div>
-          <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">esc</span>
-          </kbd>
-        </DialogHeader>
+            <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4">
-          {plans.map((plan) => (
-            <motion.div
-              key={plan.name}
-              layout
-              className={cn(
-                "relative p-6 rounded-lg border",
-                plan.highlighted
-                  ? "bg-[#130f0f] text-white"
-                  : "border-borderColorPrimary"
-              )}
-            >
-              <div className="relative space-y-4 min-h-[25rem]">
-                <div>
-                  <h3 className="font-medium text-md">{plan.name}</h3>
-                  <motion.div
-                    key={`${plan.name}-${isYearly ? "yearly" : "monthly"}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex items-end gap-1"
-                  >
-                    <span className="text-3xl font-bold">
-                      £
-                      {typeof plan.price === "number" ? plan.price : plan.price}
-                    </span>
-                    {plan.price !== "X" && (
-                      <span className="text-muted-foreground mb-1">
-                        /{isYearly ? "year" : "month"}
+          {/* Plans Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-4">
+            {plans.map((plan) => (
+              <motion.div
+                key={plan.name}
+                layout
+                className={cn(
+                  "relative p-6 rounded-lg border",
+                  plan.highlighted
+                    ? "bg-[#130f0f] text-white"
+                    : "border-borderColorPrimary"
+                )}
+              >
+                <div className="relative space-y-4 min-h-[25rem]">
+                  <div>
+                    <h3 className="font-medium text-md">{plan.name}</h3>
+                    <motion.div
+                      key={`${plan.name}-${isYearly ? "yearly" : "monthly"}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="flex items-end gap-1"
+                    >
+                      <span className="text-3xl font-bold">
+                        £
+                        {typeof plan.price === "number" ? plan.price : plan.price}
                       </span>
-                    )}
-                  </motion.div>
-                </div>
+                      {plan.price !== "X" && (
+                        <span className="text-muted-foreground mb-1">
+                          /{isYearly ? "year" : "month"}
+                        </span>
+                      )}
+                    </motion.div>
+                  </div>
 
-                <div
-                  className={`text-sm text-muted-foreground pb-4 flex flex-col`}
-                >
-                  {plan.description}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info
-                          className={`h-3 w-3 cursor-pointer right-0 ${
-                            plan.highlighted
-                              ? "text-[#fafafa]"
-                              : "text-bodyColor"
+                  <div
+                    className={`text-sm text-muted-foreground pb-4 flex flex-col`}
+                  >
+                    {plan.description}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info
+                            className={`h-3 w-3 cursor-pointer right-0 ${
+                              plan.highlighted
+                                ? "text-[#fafafa]"
+                                : "text-bodyColor"
+                            }`}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
+                          {plan.about}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+
+                  <ul className="space-y-4">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-2 text-[0.8rem]"
+                      >
+                        <Check
+                          className={`h-4 w-4 text-primary ${
+                            plan.highlighted ? "text-[#fafafa]" : ""
                           }`}
                         />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
-                        {plan.about}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className={`w-full absolute bottom-0 ${
+                      plan.highlighted
+                        ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
+                        : ""
+                    }`}
+                    variant={plan.highlighted ? "default" : "outline"}
+                  >
+                    {plan.buttonText}
+                  </Button>
                 </div>
+              </motion.div>
+            ))}
+          </div>
 
-                <ul className="space-y-4">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2 text-[0.8rem]"
-                    >
-                      <Check
-                        className={`h-4 w-4 text-primary ${
-                          plan.highlighted ? "text-[#fafafa]" : ""
-                        }`}
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className={`w-full absolute bottom-0 ${
-                    plan.highlighted
-                      ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
-                      : ""
-                  }`}
-                  variant={plan.highlighted ? "default" : "outline"}
-                >
-                  {plan.buttonText}
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="text-center mt-6 text-sm text-muted-foreground">
-          Need more Capabilities?{" "}
-          <a href="#" className="text-primary hover:underline">
-            See Alle-AI Team & Enterprise plans
-          </a>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <div className="text-center mt-6 text-sm text-muted-foreground">
+            Need more Capabilities?{" "}
+            <a href="#" className="text-primary hover:underline">
+              See Alle-AI Team & Enterprise plans
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 

@@ -33,3 +33,12 @@ export type ModelDetails = {
   useCases: UseCase[];
   limitations: string[];
 };
+
+export interface UploadedFile {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  status: 'loading' | 'ready' | 'error';
+}

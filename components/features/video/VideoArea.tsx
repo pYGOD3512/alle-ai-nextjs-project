@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useContentStore } from "@/stores";
 import { useSelectedModelsStore, VIDEO_MODELS } from "@/lib/constants";
 import RenderPageContent from "@/components/RenderPageContent";
-import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ import { VideoSettingsInfoModal } from "@/components/ui/modals";
 import { Progress } from "@/components/ui/progress";
 import { useLikedMediaStore } from "@/lib/constants";
 import { Textarea } from "@/components/ui/textarea";
+import { MicButton } from "@/components/ui/MicButton";
 
 interface VideoResponse {
   modelId: string;
@@ -334,6 +336,13 @@ const VideoArea = () => {
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [currentSettingInfo, setCurrentSettingInfo] = useState<'aspectRatio' | 'quality' | 'duration' | 'display'>('aspectRatio');
   const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { isListening, toggleListening } = useSpeechRecognition({
+    onTranscript: setPrompt,
+    inputRef: textareaRef
+  });
+
 
   const showSettingInfo = (setting: 'aspectRatio' | 'quality' | 'duration' | 'display') => {
     setCurrentSettingInfo(setting);
@@ -734,6 +743,7 @@ const VideoArea = () => {
                 </div>
                 
                 <Textarea
+                  ref={textareaRef}
                   placeholder="Describe your video..."
                   className="flex-1 bg-transparent border-0 outline-none text-base resize-none overflow-auto min-h-[2rem] max-h-[10rem] p-0 focus:border-0 focus:ring-0"
                   value={prompt}
@@ -754,6 +764,8 @@ const VideoArea = () => {
                     scrollbarWidth: 'none',
                   }}
                 />
+
+                <MicButton isListening={isListening} onClick={toggleListening} />
 
                 <div className="flex items-center gap-2">
                   <Button 

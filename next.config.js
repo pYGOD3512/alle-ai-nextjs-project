@@ -14,8 +14,13 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',
-      }
-    ]
+      },
+    ],
+  },
+  webpack: (config) => {
+    config.resolve.alias.canvas = false;
+    config.resolve.fallback = { fs: false };
+    return config;
   },
 };
 
