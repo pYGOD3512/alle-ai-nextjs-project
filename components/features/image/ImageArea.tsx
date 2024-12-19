@@ -1,7 +1,9 @@
+"use client"
+
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useContentStore } from "@/stores";
-import { Copy, Download, Share2, Heart } from "lucide-react";
+import { Copy, Download, Share2, Heart, Plus } from "lucide-react";
 import { useSelectedModelsStore, IMAGE_MODELS } from '@/lib/constants';
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -58,14 +60,14 @@ const ImageArea = () => {
         return;
       }
 
-      // If we don't have images then we go ahead and run the function.
+      
       setLoading(true);
       setImages([]);
       
       setTimeout(() => {
         const simulatedResponses = selectedModels.image.map(modelId => ({
           modelId,
-          imageUrl: `https://picsum.photos/seed/${modelId}/400/400`,
+          imageUrl: `/images/${modelId}.jpg`,
           liked: false
         }));
         

@@ -1,20 +1,11 @@
-"use client";
+"use client"
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Play,
-  Pause,
-  RotateCcw as Replay,
-  Square,
-  FastForward,
-  Rewind,
-  Download,
-  Heart,
-  Copy,
-} from "lucide-react";
+import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +17,8 @@ import {
   AUDIO_MODELS,
 } from "@/lib/constants";
 import { useLikedMediaStore } from "@/lib/constants";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { MicButton } from "@/components/ui/MicButton";
 
 interface AudioResponse {
   content: string;
@@ -47,9 +40,8 @@ export function AudioArea() {
   const { selectedModels } = useSelectedModelsStore();
   const { responses, lastPrompt, setResponses, updateResponse, setLastPrompt } =
     useGeneratedAudioStore();
-  const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
-
-  const [description, setDescription] = useState("");
+  const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();  
+  const [prompt, setPrompt] = useState("");
   const [submittedPrompt, setSubmittedPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [hasResponse, setHasResponse] = useState(false);
@@ -58,8 +50,15 @@ export function AudioArea() {
   >({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
+
   const { toast } = useToast();
   const [credits, setCredits] = useState(50);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { isListening, toggleListening } = useSpeechRecognition({
+    onTranscript: setPrompt,
+    inputRef: textareaRef
+  });
 
   const ResponseSkeleton = () => (
     <div className="border border-borderColorPrimary rounded-lg p-4 space-y-4">
@@ -93,6 +92,35 @@ export function AudioArea() {
       </div>
     </div>
   );
+
+  const handleSubmit = async () => {
+    if (!prompt.trim() || selectedModels.audio.length === 0) return;
+
+    setIsLoading(true);
+    setHasResponse(true);
+    setSubmittedPrompt(prompt);
+    setPrompt("");
+    
+    // Clear previous responses
+    setResponses([]);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const simulatedResponses = selectedModels.audio.map(modelId => {
+        const modelInfo = AUDIO_MODELS.find(model => model.id === modelId);
+        return {
+          modelId,
+          content: `Generated audio response for ${modelInfo?.name}`,
+          audioUrl: `/audio/sample1.mp3`,
+          liked: false
+        };
+      });
+      
+      setResponses(simulatedResponses);
+      setLastPrompt(prompt);
+      setIsLoading(false);
+    }, 5000);
+  };
 
   const handleCopyPrompt = async () => {
     try {
@@ -359,53 +387,55 @@ export function AudioArea() {
   );
 
   return (
-    <div className={cn("gap-4")}>
-      {/* Response Section */}
-      <div className="w-full sm:w-2/3 lg:w-1/2 h-full mx-auto">
-        <div className="p-4">
-          <ScrollArea className="">
-            <div className="mb-6 rounded-lg">
-              <div className="flex items-start gap-4 justify-between mb-2">
-                <p className="text-sm text-muted-foreground">
-                  {content.audio.input}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={handleCopyPrompt}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
+    <RenderPageContent>
+      <div className={cn(
+        "max-w-7xl w-full mx-auto mt-10 flex flex-col h-full transition-all duration-300",
+        hasResponse ? "gap-4" : "gap-0"
+      )}>
+        {/*Prompt Section */}
+        <div className={cn(
+          "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
+          hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
+        )}>
+          {!hasResponse && ( <GreetingMessage username="Pascal" questionText=" What sound are you thinking of today?"/>)}
+          <div className="flex flex-col flex-1 p-4 space-y-4">
+            <div className="flex flex-col space-y-2">
+              <Textarea
+                ref={textareaRef}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Describe your audio..."
+                className="flex-1 min-h-[100px] resize-none border-borderColorPrimary focus-visible:outline-none focus:border-2 scrollbar-thin scrollbar-webkit"
+              />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline" 
+                className="flex items-center gap-2 border-borderColorPrimary"
+                onClick={() => {}}
+              >
+                <Upload className="w-4 h-4" />
+                Upload file
+              </Button>
+
+              <MicButton className="w-10 h-10 rounded-md border border-borderColorPrimary" isListening={isListening} onClick={toggleListening} />
+              
+              <div className="ml-auto text-sm text-muted-foreground">
+                Requests left: {credits}
               </div>
             </div>
 
-            <div className="space-y-6">
-              {isLoading
-                ? // We show the loading for each response based on the number of models selected by the user.
-                  selectedModels.audio.map((modelId) => (
-                    <ResponseSkeleton key={modelId} />
-                  ))
-                : responses.map((response) => {
-                    const modelInfo = AUDIO_MODELS.find(
-                      (model) => model.id === response.modelId
-                    );
-                    return (
-                      <div
-                        key={response.modelId}
-                        className="border border-borderColorPrimary rounded-lg p-4"
-                      >
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2">
-                            <Image
-                              src={modelInfo?.icon || ""}
-                              alt={modelInfo?.name || ""}
-                              width={34}
-                              height={34}
-                              className="w-6 h-6 rounded-full"
-                            />
-                            <h3 className="font-medium">{modelInfo?.name}</h3>
-                          </div>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!prompt.trim() || isLoading || selectedModels.audio.length === 0}
+              className="w-full mt-auto"
+            >
+              {isLoading ? "Generating..." : "Generate"}
+            </Button>
+          </div>
+        </div>
 
                           <p className="text-sm text-muted-foreground">
                             {response.content}

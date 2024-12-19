@@ -1,17 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
-import { ArrowUp, Paperclip, Mic } from "lucide-react";
+import { ArrowUp, Paperclip, Mic, MicOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Textarea } from "../ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { MicButton } from "@/components/ui/MicButton";
+import { FileUploadButton } from "@/components/ui/file-upload-button";
+import { UploadedFile } from "@/lib/types";
+import { ALLOWED_FILE_TYPES, validateFile } from "@/lib/utils";
+import { FilePreview } from "../ui/file-preview";
+import { processFile } from '@/lib/fileProcessing';
+
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+}
 
 interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: React.RefObject<HTMLTextAreaElement>;
   isLoading: boolean;
 }
 
@@ -23,6 +38,102 @@ export function ChatInput({
   isLoading,
 }: ChatInputProps) {
   const [textIndex, setTextIndex] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const { toast } = useToast();
+
+  const { isListening, toggleListening } = useSpeechRecognition({
+    onTranscript: onChange,
+    inputRef
+  });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadFromComputer = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadFromDrive = () => {
+    toast({
+      title: "Coming Soon",
+      description: "This feature will be added soon",
+      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+    });
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateFile(file);
+    if (!validation.isValid) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: validation.error
+      });
+      return;
+    }
+
+    try {
+      const fileUrl = URL.createObjectURL(file);
+      
+      const uploadedFile: UploadedFile = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl,
+        status: 'loading'
+      };
+
+      setUploadedFile(uploadedFile);
+
+      // Process the file
+      const { text } = await processFile(file);
+
+      // Log the extracted text
+      console.log('Extracted content:', text);
+
+      // Update file status to ready
+      setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
+
+      toast({
+        title: "File Processed",
+        description: `${file.name} has been processed and content added`,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    } catch (error) {
+      setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+      toast({
+        variant: "destructive",
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process file"
+      });
+    }
+  };
+
+  // Cleanup object URL when component unmounts or file changes
+  useEffect(() => {
+    return () => {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+    };
+  }, [uploadedFile]);
+
+  const handleRemoveFile = () => {
+    if (uploadedFile) {
+      // Remove file reference from input value
+      const fileText = `[File: ${uploadedFile.name}] `;
+      const newValue = value.replace(fileText, '').trim();
+      onChange(newValue);
+      
+      // Cleanup URL and reset state
+      URL.revokeObjectURL(uploadedFile.url);
+      setUploadedFile(null);
+    }
+  };
+
   const texts = [
     "Your all-in-one AI Platform",
     "Alle-AI: Combine and compare AI models",
@@ -41,25 +152,48 @@ export function ChatInput({
 
   return (
     <div className={` p-2 bg-background/95 backdrop-blur transition-all duration-300`}>
+      {uploadedFile && (
+        <div className="max-w-xl md:max-w-3xl mx-auto mb-2">
+          <FilePreview 
+            file={uploadedFile} 
+            onRemove={handleRemoveFile} 
+          />
+        </div>
+      )}
       <div className="max-w-xl md:max-w-3xl mx-auto flex items-end gap-1 border-2 rounded-2xl p-2">
-        <Button variant="ghost" size="icon" className="flex-shrink-0">
-          <Paperclip className="h-4 w-4" />
-        </Button>
-        <Input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Message multiple models..."
-          className="flex-1 border-none focus-visible:outline-none"
-          onKeyPress={(e) => e.key === "Enter" && !isInputEmpty && onSend()}
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleFileChange}
+          accept={Object.entries(ALLOWED_FILE_TYPES)
+            .flatMap(([, exts]) => exts)
+            .join(',')}
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="flex-shrink-0 rounded-full h-9 w-9"
-        >
-          <Mic className="h-4 w-4" />
-        </Button>
+        
+        <FileUploadButton
+          onUploadFromComputer={handleUploadFromComputer}
+          onUploadFromDrive={handleUploadFromDrive}
+        />
+
+        <Textarea 
+          ref={inputRef}
+          placeholder="Message multiple models..."
+          className="flex-1 bg-transparent border-0 outline-none text-base resize-none overflow-auto min-h-[2rem] max-h-[10rem] p-0 focus:border-0 focus:ring-0"
+          value={value}
+          onChange={(e) => {
+            e.target.style.height = 'inherit';
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+            onChange(e.target.value);
+          }}
+          onKeyDown={(e) => e.key === "Enter" && !isInputEmpty && onSend()}
+          rows={1}
+          style={{
+            overflow: value.split('\n').length > 4 ? 'auto' : 'hidden',
+            scrollbarWidth: 'none',
+          }}
+        />
+        <MicButton isListening={isListening} onClick={toggleListening} />
         {/* conditional rendering */}
         {pathname === "/" || pathname.startsWith("/chat") ? (
           <Button
@@ -82,7 +216,7 @@ export function ChatInput({
                 ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
                 : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
             }`}
-            disabled={isInputEmpty}
+            disabled={isInputEmpty || isLoading }
           >
             Generate
           </Button>

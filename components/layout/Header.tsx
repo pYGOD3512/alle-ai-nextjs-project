@@ -28,7 +28,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/components/providers/authTest';
-import { AuthSwitch } from "../authSwitch";
+import { AuthSwitch } from "../ui/authSwitch";
 
 export function Header() {
   const { isSubscribed } = useAuth();
@@ -50,7 +50,6 @@ export function Header() {
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
   const getSelectedModelNames = useSelectedModelsStore((state) => state.getSelectedModelNames);
-
 
   
   // Get current selected model names based on the current page
@@ -328,7 +327,7 @@ export function Header() {
           
 
           <div className={`flex items-center gap-2 ${isSubscribed ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            <AuthSwitch />
+            {/* <AuthSwitch /> */}
             <ThemeToggle />
             {navItems.filter(item => 
               isSubscribed || 

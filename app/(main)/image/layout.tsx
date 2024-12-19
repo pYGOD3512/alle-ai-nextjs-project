@@ -59,7 +59,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 mt-5">
           <GreetingMessage
             options={options}
-            username="Christmas"
+            username="Pascal"
             handlePressed={handleClicked}
             questionText="ready to create something amazing today?"
           />

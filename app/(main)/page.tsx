@@ -70,7 +70,7 @@ export default function Home() {
       <RenderPageContent>
         <div className="flex-1 mt-20 py-4">
           <GreetingMessage
-            username={"Christmas"}
+            username={"Pascal"}
             options={options}
             handlePressed={handleClicked}
           />

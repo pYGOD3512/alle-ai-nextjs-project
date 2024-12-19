@@ -27,6 +27,7 @@
     --hoverColorPrimary: rgba(233, 231, 231, 0.664);
     --secondary: #ececec;
     --toastBackgroundColor: #f0fdf4;
+    --infoColorPrimary: 178 60.45% 43.28%;
 
 
 
@@ -64,6 +65,8 @@
     --hoverColorPrimary: #92d3ff;
     --secondary: #262626;
     --toastBackgroundColor: #171717;
+    --infoColorPrimary: 178 60.45% 43.28%;
+
 
 
 

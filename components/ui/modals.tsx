@@ -72,6 +72,9 @@ import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, Command
 import { formatDistanceToNow } from "date-fns";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+
 
 interface ModalProps {
   isOpen: boolean;
@@ -89,6 +92,15 @@ interface AlbumItem {
   modelName: string;
   timestamp: Date;
   prompt?: string;
+}
+
+interface SubscriptionConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  planName: string;
+  planPrice: number;
+  currentBalance: number;
+  onConfirm: () => void;
 }
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
@@ -885,15 +897,51 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
 }
 
 export function ReferModal({ isOpen, onClose }: ModalProps) {
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { toast } = useToast();
+
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedPlan("");
+    }
+  }, [isOpen]);
+
   const referralLink = "https://alle.ai/ref=XXX_XXX";
   const stats = {
-    friendsReferred: 0,
-    cashEarned: "£0.00",
+    friendsReferred: 125,
+    cashEarned: 50.00, 
   };
+
+  // Available plans based on earned amount
+  const getEligiblePlans = (amount: number) => {
+    const plans = [];
+    if (amount >= 20) {
+      plans.push({ name: 'Standard Monthly', price: 20 });
+    }
+    if (amount >= 30) {
+      plans.push({ name: 'Plus Monthly', price: 30 });
+    }
+    if (amount >= 200) {
+      plans.push({ name: 'Standard Yearly', price: 200 });
+    }
+    if (amount >= 300) {
+      plans.push({ name: 'Plus Yearly', price: 300 });
+    }
+    return plans;
+  };
+
+  const eligiblePlans = getEligiblePlans(stats.cashEarned);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
-    //I'll implement a toast here
+    toast({
+      title: "Copied",
+      description: `Referral link copied to clipboard`,
+      duration: 3000,
+      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+    });
   };
 
   const platforms = [
@@ -914,82 +962,245 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
     },
   ];
 
+  const handleSubscribe = (planName: string, planPrice: number) => {
+    setShowConfirmModal(true);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm sm:max-w-lg rounded-md">
-        <DialogHeader className="flex flex-row items-center justify-between relative">
-          <DialogTitle>
-            Refer friends{" "}
-            <span className="text-sm text-blue-500">(coming soon)</span>
-          </DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">esc</span>
-          </kbd>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-sm sm:max-w-lg rounded-md">
+          <DialogHeader className="flex flex-row items-center justify-between relative">
+            <DialogTitle>
+              Refer & Earn{" "}
+              <span className="text-sm text-infoColorPrimary">(coming soon)</span>
+              </DialogTitle>
+            <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Invite your friends and earn alle-ai tokens on each successful
-              referral. These tokens can be used to subscribe to Alle-IA plans.{" "}
-              <a href="#" className="text-blue-500 hover:underline">
-                learn more
-              </a>
-            </p>
-
-            {/* Stats Display */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/50">
-              <div className="text-center">
-                <p className="text-2xl font-bold">{stats.friendsReferred}</p>
-                <p className="text-sm text-muted-foreground">
-                  Friends referred
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold">{stats.cashEarned}</p>
-                <p className="text-sm text-muted-foreground">Earned cash</p>
-              </div>
-            </div>
-
-            {/* Invitation Link */}
+          <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">
-                Invitation Link
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  value={referralLink}
-                  readOnly
-                  className="bg-muted focus:outline-none focus:border-borderColorPrimary"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={copyToClipboard}
-                  className="shrink-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+              <p className="text-sm text-muted-foreground">
+                Invite your friends and earn cash rewards on each successful referral. 
+                Use your earnings to subscribe to Alle-AI plans.{' '}
+                <a href="#" className="text-infoColorPrimary hover:underline">
+                  learn more
+                </a>
+              </p>
 
-            {/* Social Sharing */}
-            <div className="flex justify-center gap-2 pt-4">
-              {platforms.map(({ name, url, Icon }) => (
-                <Button
-                  key={name}
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={() =>
-                    window.open(url + encodeURIComponent(referralLink))
-                  }
-                >
-                  <Icon className="h-4 w-4" />
-                </Button>
-              ))}
+              {/* Stats Display */}
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/50">
+                <div className="text-center">
+                  <p className="text-2xl font-bold">{stats.friendsReferred}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Friends referred
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-infoColorPrimary">£{stats.cashEarned.toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">Earned cash</p>
+                </div>
+              </div>
+
+              {/* Subscription Options */}
+              {eligiblePlans.length > 0 && (
+                <div className="mt-4 p-4 rounded-lg border border-primary/20 bg-inherit">
+                  <h3 className="text-sm font-medium mb-2">Available Plans</h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    You have enough credit to subscribe to the following plans:
+                  </p>
+                  <div className="space-y-2">
+                    {stats.cashEarned === 20 ? (
+                      <Button 
+                        className="w-full"
+                        onClick={() => handleSubscribe('Standard Monthly', 20)}
+                      >
+                        Subscribe to Standard Monthly (£20)
+                      </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        <Select 
+                          value={selectedPlan}
+                          onValueChange={setSelectedPlan}
+                        >
+                          <SelectTrigger className="bg-transparent border-borderColorPrimary focus-visible:outline-none">
+                            <SelectValue placeholder="Select a plan"/>
+                          </SelectTrigger>
+                          <SelectContent className="bg-backgroundSecondary">
+                            {eligiblePlans.map((plan) => (
+                              <SelectItem 
+                                key={plan.name} 
+                                value={plan.name}
+                                className="cursor-pointer hover:bg-[#f7fee7]/50 focus-visible:outline-none"
+                              >
+                                {plan.name} (£{plan.price})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button 
+                          className="w-full"
+                          disabled={!selectedPlan}
+                          onClick={() => {
+                            const plan = eligiblePlans.find(p => p.name === selectedPlan);
+                            if (plan) {
+                              handleSubscribe(plan.name, plan.price);
+                            }
+                          }}
+                        >
+                          {selectedPlan ? 'Confirm Subscription' : 'Select a plan to continue'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Show message if earned amount is less than £20 */}
+              {stats.cashEarned < 20 && (
+                <div className="mt-4 p-4 rounded-lg border border-primary/20 bg-[#f0fdf4] dark:bg-inherit">
+                  <p className="text-sm text-muted-foreground">
+                    Earn £{(20 - stats.cashEarned).toFixed(2)} more to unlock Standard Monthly subscription!
+                  </p>
+                </div>
+              )}
+
+              {/* Invitation Link */}
+              <div className="space-y-2 mt-4">
+                <label className="text-sm text-muted-foreground">
+                  Share your referral link
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    value={referralLink}
+                    readOnly
+                    className="bg-muted focus:outline-none focus:border-borderColorPrimary"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyToClipboard}
+                    className="shrink-0"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Social Sharing */}
+              <div className="flex justify-center gap-2 pt-4">
+                {platforms.map(({ name, url, Icon }) => (
+                  <Button
+                    key={name}
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={() =>
+                      window.open(url + encodeURIComponent(referralLink))
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      {/* Add the confirmation modal */}
+      {selectedPlan && (
+        <SubscriptionConfirmModal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          planName={selectedPlan}
+          planPrice={eligiblePlans.find(p => p.name === selectedPlan)?.price || 0}
+          currentBalance={stats.cashEarned}
+          onConfirm={() => {
+            console.log(`Subscription confirmed for ${selectedPlan}`);
+            toast({
+              title: "Success",
+              description: `You've subscribed to Alle-AI ${selectedPlan}`,
+              duration: 3000,
+              className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+            });
+            onClose();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+export function SubscriptionConfirmModal({
+  isOpen,
+  onClose,
+  planName,
+  planPrice,
+  currentBalance,
+  onConfirm,
+}: SubscriptionConfirmModalProps) {
+  const remainingBalance = currentBalance - planPrice;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm rounded-lg">
+        <DialogHeader className="space-y-4">
+          <DialogTitle className="text-center">Confirm Subscription</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          <div className="space-y-2 text-center">
+            <p className="text-sm text-muted-foreground">
+              You&apos;re about to subscribe to
+            </p>
+            <p className="text-lg font-semibold">Alle-AI {planName}</p>
+          </div>
+
+          <div className="space-y-4 p-4 rounded-lg bg-muted/50">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Current Balance</span>
+              <span className="font-medium">£{currentBalance.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-infoColorPrimary">
+              <span className="text-sm">Subscription Cost</span>
+              <span className="font-medium">-£{planPrice.toFixed(2)}</span>
+            </div>
+            <Separator className="my-2" />
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Remaining Balance</span>
+              <span className="font-medium">£{remainingBalance.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-infoColorPrimary/50 bg-infoColorPrimary/5 p-4">
+            <p className="text-xs text-center text-infoColorPrimary">
+              <Info className="h-3 w-3 text-infoColorPrimary inline-flex" />
+              This action cannot be undone. Your subscription will start immediately.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            className="flex-1 bg-primary hover:bg-primary/90"
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
+          >
+            Proceed
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -1065,131 +1276,133 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[70rem]">
-        <DialogHeader className="text-center space-y-4 relative">
-          <DialogTitle className="text-xl">Upgrade your plan</DialogTitle>
+    <div className="overflow-auto">
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[70rem]">
+          <DialogHeader className="text-center space-y-4 relative">
+            <DialogTitle className="text-xl">Upgrade your plan</DialogTitle>
 
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4">
-            <span className={cn("text-sm", !isYearly && "text-primary")}>
-              Monthly
-            </span>
-            <Switch
-              checked={isYearly}
-              onCheckedChange={setIsYearly}
-              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
-            />
-            <div className="flex items-center gap-2">
-              <span className={cn("text-sm", isYearly && "text-primary")}>
-                Yearly
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-4">
+              <span className={cn("text-sm", !isYearly && "text-primary")}>
+                Monthly
               </span>
-              <Badge variant="secondary" className="bg-primary/20 text-primary">
-                17% discount
-              </Badge>
+              <Switch
+                checked={isYearly}
+                onCheckedChange={setIsYearly}
+                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
+              />
+              <div className="flex items-center gap-2">
+                <span className={cn("text-sm", isYearly && "text-primary")}>
+                  Yearly
+                </span>
+                <Badge variant="secondary" className="bg-primary/20 text-primary">
+                  17% discount
+                </Badge>
+              </div>
             </div>
-          </div>
-          <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">esc</span>
-          </kbd>
-        </DialogHeader>
+            <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4">
-          {plans.map((plan) => (
-            <motion.div
-              key={plan.name}
-              layout
-              className={cn(
-                "relative p-6 rounded-lg border",
-                plan.highlighted
-                  ? "bg-[#130f0f] text-white"
-                  : "border-borderColorPrimary"
-              )}
-            >
-              <div className="relative space-y-4 min-h-[25rem]">
-                <div>
-                  <h3 className="font-medium text-md">{plan.name}</h3>
-                  <motion.div
-                    key={`${plan.name}-${isYearly ? "yearly" : "monthly"}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex items-end gap-1"
-                  >
-                    <span className="text-3xl font-bold">
-                      £
-                      {typeof plan.price === "number" ? plan.price : plan.price}
-                    </span>
-                    {plan.price !== "X" && (
-                      <span className="text-muted-foreground mb-1">
-                        /{isYearly ? "year" : "month"}
+          {/* Plans Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-4">
+            {plans.map((plan) => (
+              <motion.div
+                key={plan.name}
+                layout
+                className={cn(
+                  "relative p-6 rounded-lg border",
+                  plan.highlighted
+                    ? "bg-[#130f0f] text-white"
+                    : "border-borderColorPrimary"
+                )}
+              >
+                <div className="relative space-y-4 min-h-[25rem]">
+                  <div>
+                    <h3 className="font-medium text-md">{plan.name}</h3>
+                    <motion.div
+                      key={`${plan.name}-${isYearly ? "yearly" : "monthly"}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="flex items-end gap-1"
+                    >
+                      <span className="text-3xl font-bold">
+                        £
+                        {typeof plan.price === "number" ? plan.price : plan.price}
                       </span>
-                    )}
-                  </motion.div>
-                </div>
+                      {plan.price !== "X" && (
+                        <span className="text-muted-foreground mb-1">
+                          /{isYearly ? "year" : "month"}
+                        </span>
+                      )}
+                    </motion.div>
+                  </div>
 
-                <div
-                  className={`text-sm text-muted-foreground pb-4 flex flex-col`}
-                >
-                  {plan.description}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info
-                          className={`h-3 w-3 cursor-pointer right-0 ${
-                            plan.highlighted
-                              ? "text-[#fafafa]"
-                              : "text-bodyColor"
+                  <div
+                    className={`text-sm text-muted-foreground pb-4 flex flex-col`}
+                  >
+                    {plan.description}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info
+                            className={`h-3 w-3 cursor-pointer right-0 ${
+                              plan.highlighted
+                                ? "text-[#fafafa]"
+                                : "text-bodyColor"
+                            }`}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
+                          {plan.about}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+
+                  <ul className="space-y-4">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-2 text-[0.8rem]"
+                      >
+                        <Check
+                          className={`h-4 w-4 text-primary ${
+                            plan.highlighted ? "text-[#fafafa]" : ""
                           }`}
                         />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
-                        {plan.about}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className={`w-full absolute bottom-0 ${
+                      plan.highlighted
+                        ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
+                        : ""
+                    }`}
+                    variant={plan.highlighted ? "default" : "outline"}
+                  >
+                    {plan.buttonText}
+                  </Button>
                 </div>
+              </motion.div>
+            ))}
+          </div>
 
-                <ul className="space-y-4">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2 text-[0.8rem]"
-                    >
-                      <Check
-                        className={`h-4 w-4 text-primary ${
-                          plan.highlighted ? "text-[#fafafa]" : ""
-                        }`}
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className={`w-full absolute bottom-0 ${
-                    plan.highlighted
-                      ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
-                      : ""
-                  }`}
-                  variant={plan.highlighted ? "default" : "outline"}
-                >
-                  {plan.buttonText}
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="text-center mt-6 text-sm text-muted-foreground">
-          Need more Capabilities?{" "}
-          <a href="#" className="text-primary hover:underline">
-            See Alle-AI Team & Enterprise plans
-          </a>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <div className="text-center mt-6 text-sm text-muted-foreground">
+            Need more Capabilities?{" "}
+            <a href="#" className="text-primary hover:underline">
+              See Alle-AI Team & Enterprise plans
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 
@@ -1655,7 +1868,8 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="h-[calc(80vh-12rem)] sm:h-[calc(80vh-6rem)]">
+        <ScrollArea className={`h-[calc(80vh-12rem)] sm:h-[calc(80vh-6rem)]`}
+        >
           {filteredMedia.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <Heart className="h-12 w-12 mb-4" />
