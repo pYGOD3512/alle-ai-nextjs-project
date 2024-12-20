@@ -44,7 +44,7 @@ export default function ChatEntry({ chat }: EntryProps) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
-  const { chatId } = params;
+  const { chatId,audioId } = params;
 
   const { removeAnimate } = useHistoryStore();
   // typing animation effect

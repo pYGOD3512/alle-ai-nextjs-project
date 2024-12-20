@@ -123,16 +123,16 @@ export function Sidebar() {
   const getPageStyle = (itemHref?: string, path?: string) => {
     if (!itemHref) {
       if (pathname === "/" || pathname.startsWith("/chat/res")) {
-        return "bg-blue-50 text-blue-500 hover:bg-blue-50 hover:text-blue-500";
+        return "bg-secondary font-semibold text-blue-800  hover:text-blue-500";
       }
       if (pathname === "/image" || pathname.startsWith("/image/res")) {
-        return "bg-green-50 text-green-500 hover:bg-green-50 hover:text-green-500";
+        return "bg-secondary font-semibold text-green-500  hover:text-green-500";
       }
       if (pathname === "/audio" || pathname.startsWith("/audio/res")) {
-        return "bg-yellow-50 text-yellow-500 hover:bg-yellow-50 hover:text-yellow-500";
+        return "bg-secondary font-semibold text-yellow-500  hover:text-yellow-500";
       }
       if (pathname === "/video" || pathname.startsWith("/video/res")) {
-        return "bg-pink-50 text-pink-500 hover:bg-pink-50 hover:text-orange-500";
+        return "bg-secondary font-semibold text-pink-500  hover:text-orange-500";
       }
       return "";
     }
@@ -140,22 +140,22 @@ export function Sidebar() {
     if (itemHref && path) {
       if (itemHref === "/") {
         if (path === "/" || path.startsWith("/chat/res")) {
-          return "bg-blue-50 text-blue-500";
+          return " bg-secondary font-semibold text-blue-500";
         }
       }
       if (itemHref === "/image") {
         if (path === "/image" || path.startsWith("/image/res")) {
-          return "bg-green-50 text-green-500";
+          return "bg-secondary font-semibold text-green-500";
         }
       }
       if (itemHref === "/audio") {
         if (path === "/audio" || path.startsWith("/audio/res")) {
-          return "bg-yellow-50 text-yellow-500";
+          return "bg-secondary font-semibold text-yellow-500";
         }
       }
       if (itemHref === "/video") {
         if (path === "/video" || path.startsWith("/video/res")) {
-          return "bg-pink-50 text-pink-500";
+          return "bg-secondary font-semibold text-pink-500";
         }
       }
       if (itemHref === "/changelog") {
@@ -168,7 +168,7 @@ export function Sidebar() {
       {/* Backdrop overlay for mobile when sidebar is open */}
       {isOpen && isMobile && (
         <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
+          className="fixed  inset-0 bg-background/80 backdrop-blur-sm z-30"
           onClick={toggle}
         />
       )}
