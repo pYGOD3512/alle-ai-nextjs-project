@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video  } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine  } from "lucide-react";
 import Image from "next/image";
 import {
   useSidebarStore,
@@ -120,52 +120,6 @@ export function Sidebar() {
   const currentType = getCurrentType();
   const currentHistory = getHistoryByType(currentType);
 
-  // Add this helper function to get section-specific styles
-  const getSectionStyles = (type: 'chat' | 'image' | 'audio' | 'video') => {
-    switch (type) {
-      case 'image':
-        return {
-          bgColor: 'bg-purple-500/10',
-          hoverBg: 'hover:bg-purple-500/20',
-          iconColor: 'text-purple-500'
-        };
-      case 'audio':
-        return {
-          bgColor: 'bg-blue-500/10',
-          hoverBg: 'hover:bg-blue-500/20',
-          iconColor: 'text-blue-500'
-        };
-      case 'video':
-        return {
-          bgColor: 'bg-red-500/10',
-          hoverBg: 'hover:bg-red-500/20',
-          iconColor: 'text-red-500'
-        };
-      default: // chat
-        return {
-          bgColor: 'bg-green-500/10',
-          hoverBg: 'hover:bg-green-500/20',
-          iconColor: 'text-green-500'
-        };
-    }
-  };
-
-  // Helper function to get current section icon
-  const getCurrentSectionIcon = () => {
-    switch (true) {
-      case pathname.startsWith("/image"):
-        return ImageIcon;
-      case pathname.startsWith("/audio"):
-        return Music;
-      case pathname.startsWith("/video"):
-        return Video;
-      default:
-        return MessageSquare;
-    }
-  };
-
-  const CurrentIcon = getCurrentSectionIcon();
-
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}
@@ -189,9 +143,9 @@ export function Sidebar() {
                 <Button
                   onClick={handleNewChat}
                   variant="outline"
-                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg}`}
+                  className="flex-1"
                 >
-                  <Plus className={`mr-2 h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
+                  <Plus className="mr-2 h-4 w-4" />
                   NEW {currentType.toUpperCase()}
                 </Button>
                 <Button
@@ -204,67 +158,54 @@ export function Sidebar() {
               </div>
 
               <div className="mt-4 px-2 space-y-1">
-                {sidebarMenuItems.map((item, i) => {
-                  const isActive = isActiveRoute(item.href, pathname);
-                  const type = item.href === "/" ? "chat" 
-                    : item.href === "/image" ? "image"
-                    : item.href === "/audio" ? "audio"
-                    : "video";
-                  const styles = getSectionStyles(type);
-                  
-                  return (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 
-                        ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                        ${styles.hoverBg}`}
-                    >
-                      <item.icon className={`mr-2 h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                {sidebarMenuItems.map((item, i) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
+                      isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
+                    }`}
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.label}
+                    {/* {item.beta && (
+                      <span className="ml-2 text-[0.6rem] bg-primary/10 px-0.5 py-0.2 rounded">
+                        Soon
+                      </span>
+                    )} */}
+                  </Link>
+                ))}
               </div>
             </>
           ) : (
             <div className="space-y-2">
               <div className="space-y-2 mb-8">
                 <Button
-                  onClick={handleNewChat}
-                  variant="outline"
-                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg}`}
-                >
-                  <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setModelSelectionModalOpen(true)}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </div>
-              {sidebarMenuItems.map((item, i) => {
-                const isActive = isActiveRoute(item.href, pathname);
-                const type = item.href === "/" ? "chat" 
-                  : item.href === "/image" ? "image"
-                  : item.href === "/audio" ? "audio"
-                  : "video";
-                const styles = getSectionStyles(type);
-                
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
-                      ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                      ${styles.hoverBg}`}
+                    onClick={handleNewChat}
+                    variant="outline"
+                    className="flex-1"
                   >
-                    <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
-                  </Link>
-                );
-              })}
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setModelSelectionModalOpen(true)}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </div>
+              {sidebarMenuItems.map((item, i) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2 hover:bg-secondary/80 ${
+                    isActiveRoute(item.href, pathname) ? "bg-secondary" : ""
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                </Link>
+              ))}
             </div>
           )}
         </div>
