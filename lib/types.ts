@@ -41,4 +41,5 @@ export interface UploadedFile {
   size: number;
   url: string;
   status: 'loading' | 'ready' | 'error';
+  progress?: number;
 }

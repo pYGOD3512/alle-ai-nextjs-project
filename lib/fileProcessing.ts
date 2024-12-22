@@ -1,4 +1,10 @@
 import mammoth from 'mammoth';
+import * as PDFJS from 'pdfjs-dist/webpack.mjs';
+
+// Here we initialize the PDF.js worker
+if (typeof window !== 'undefined') {
+  PDFJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS.version}/pdf.worker.min.js`;
+}
 
 export async function processFile(file: File): Promise<{ text: string }> {
   try {
@@ -11,6 +17,29 @@ export async function processFile(file: File): Promise<{ text: string }> {
       case 'text/plain':
         const textContent = await file.text();
         return { text: textContent };
+
+      // PDF files
+      case 'application/pdf':
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdfDoc = await PDFJS.getDocument({ data: arrayBuffer }).promise;
+          let fullText = '';
+
+          // Extract text from all pages
+          for (let i = 1; i <= pdfDoc.numPages; i++) {
+            const page = await pdfDoc.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = content.items
+              .map((item: any) => item.str)
+              .join(' ');
+            fullText += pageText + '\n';
+          }
+
+          return { text: fullText.trim() || `[PDF: ${file.name}]` };
+        } catch (pdfError) {
+          console.error('PDF processing error:', pdfError);
+          return { text: `[Failed to process PDF: ${file.name}]` };
+        }
 
       // Word documents
       case 'application/msword':
