@@ -75,9 +75,15 @@ export function ChatInput({
     }
 
     try {
+      // Create blob URL
       const fileUrl = URL.createObjectURL(file);
       
-      const uploadedFile: UploadedFile = {
+      // Clean up previous blob URL if it exists
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+
+      const newUploadedFile: UploadedFile = {
         id: crypto.randomUUID(),
         name: file.name,
         type: file.type,
@@ -86,23 +92,23 @@ export function ChatInput({
         status: 'loading'
       };
 
-      setUploadedFile(uploadedFile);
+      setUploadedFile(newUploadedFile);
 
       // Process the file
       const { text } = await processFile(file);
-
-      // Log the extracted text
-      console.log('Extracted content:', text);
 
       // Update file status to ready
       setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
 
       toast({
         title: "File Processed",
-        description: `${file.name} has been processed and content added`,
+        description: `${file.name} has been added successfully`,
         className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
       setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
       toast({
         variant: "destructive",
@@ -112,17 +118,8 @@ export function ChatInput({
     }
   };
 
-  // Cleanup object URL when component unmounts or file changes
-  useEffect(() => {
-    return () => {
-      if (uploadedFile?.url) {
-        URL.revokeObjectURL(uploadedFile.url);
-      }
-    };
-  }, [uploadedFile]);
-
   const handleRemoveFile = () => {
-    if (uploadedFile) {
+    if (uploadedFile?.url) {
       // Remove file reference from input value
       const fileText = `[File: ${uploadedFile.name}] `;
       const newValue = value.replace(fileText, '').trim();
@@ -133,6 +130,15 @@ export function ChatInput({
       setUploadedFile(null);
     }
   };
+
+  // Cleanup blob URL when component unmounts or file changes
+  useEffect(() => {
+    return () => {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+    };
+  }, []);  // Only run on unmount
 
   const texts = [
     "Your all-in-one AI Platform",
