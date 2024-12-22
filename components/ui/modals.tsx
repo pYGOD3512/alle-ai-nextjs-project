@@ -43,7 +43,7 @@ import {
   Save,
   Gem,
   Copy,
-  Container,
+  Loader,
   Pencil,
   X,
   Search,
@@ -58,6 +58,11 @@ import {
   Music,
   Pause,
   Play,
+  Folder,
+  File,
+  ArrowLeft,
+  LogIn,
+  RefreshCw,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -74,6 +79,12 @@ import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigge
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+
+import { useDriveAuthStore } from "@/lib/constants";
+
+import { driveService } from '@/lib/driveServices';
+import { gapi } from "gapi-script";
+
 
 
 interface ModalProps {
@@ -475,6 +486,9 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
   const [deleteAccountModalOpen, setDeleteAccountModalOpen] =
     React.useState(false);
   const [logoutAllModalOpen, setLogoutAllModalOpen] = React.useState(false);
+  const { toast } = useToast();
+  const { isAuthenticated } = useDriveAuthStore();
+  const [showDriveModal, setShowDriveModal] = useState(false);
 
   const settingsData = {
     general: {
@@ -512,6 +526,13 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
         title: "Export data",
         description: "",
         action: "Export",
+      },
+      google_drive: {
+        title: "Google Drive",
+        description: isAuthenticated 
+          ? ""
+          : "",
+        action: isAuthenticated ? "Unlink" : "Link"
       },
       deleteMyAccount: {
         title: "Delete account",
@@ -563,6 +584,32 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
       icon: <Shield className="h-4 w-4" />,
     },
   ];
+
+  const handleGoogleDriveAction = async () => {
+    if (isAuthenticated) {
+      // Handle unlinking
+      try {
+        await driveService.signOut();
+        useDriveAuthStore.getState().clearAuth();
+        
+        toast({
+          title: "Success",
+          description: "Google Drive has been unlinked successfully",
+          className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+        });
+      } catch (error) {
+        console.error('Failed to unlink Google Drive:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to unlink Google Drive"
+        });
+      }
+    } else {
+      // Show the connect modal
+      setShowDriveModal(true);
+    }
+  };
 
   return (
     <>
@@ -673,41 +720,37 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                 </TabsContent>
 
                 <TabsContent value="data controls" className="space-y-2">
-                  {Object.entries(settingsData.data_controls).map(
-                    ([key, setting]) => (
-                      <div
-                        key={key}
-                        className="border-b border-borderColorPrimary last:border-none"
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="text-sm font-small">
-                            {setting.title}
-                          </h4>
-                          <Button
-                            variant={`${
-                              setting.action === "Delete"
-                                ? "destructive"
-                                : "outline"
-                            }`}
-                            className={`h-8 rounded-full px-3 text-xs border-borderColorPrimary transition-all`}
-                            size="sm"
-                            onClick={() => {
-                              if (setting.action === "Delete") {
-                                setDeleteAccountModalOpen(true);
-                              } else if (setting.action === "Export") {
-                                setExportModalOpen(true);
-                              }
-                            }}
-                          >
-                            {setting.action}
-                          </Button>
-                        </div>
-                        <p className="text-[0.75rem] text-muted-foreground">
-                          {setting.description}
-                        </p>
+                  {Object.entries(settingsData.data_controls).map(([key, setting]) => (
+                    <div
+                      key={key}
+                      className="border-b border-borderColorPrimary last:border-none"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-small">{setting.title}</h4>
+                        <Button
+                          variant={key === "google_drive" ? "outline" : setting.action === "Delete" ? "destructive" : "outline"}
+                          className={`h-8 rounded-full px-3 text-xs border-borderColorPrimary transition-all ${
+                            key === "google_drive" && isAuthenticated ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""
+                          }`}
+                          size="sm"
+                          onClick={() => {
+                            if (key === "google_drive") {
+                              handleGoogleDriveAction();
+                            } else if (setting.action === "Delete") {
+                              setDeleteAccountModalOpen(true);
+                            } else if (setting.action === "Export") {
+                              setExportModalOpen(true);
+                            }
+                          }}
+                        >
+                          {setting.action}
+                        </Button>
                       </div>
-                    )
-                  )}
+                      <p className="text-[0.75rem] text-muted-foreground">
+                        {setting.description}
+                      </p>
+                    </div>
+                  ))}
                 </TabsContent>
 
                 <TabsContent value="analytics">
@@ -759,6 +802,12 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
       <LogoutAllDevicesModal
         isOpen={logoutAllModalOpen}
         onClose={() => setLogoutAllModalOpen(false)}
+      />
+      {/* Add the Google Drive Modal */}
+      <GoogleDriveModal
+        isOpen={showDriveModal}
+        onClose={() => setShowDriveModal(false)}
+        onFileSelect={() => {}} // Empty function since we're just using it for authentication
       />
     </>
   );
@@ -2042,6 +2091,291 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
           </DialogContent>
         </Dialog>
       )}
+    </Dialog>
+  );
+}
+
+interface GoogleDriveModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onFileSelect: (file: DriveFile) => void;
+}
+
+interface DriveFile {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  mimeType: string;
+  thumbnailUrl?: string;
+  size?: string;
+}
+
+export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveModalProps) {
+  const { isAuthenticated, checkAndRefreshAuth } = useDriveAuthStore();
+  const [pathHistory, setPathHistory] = useState<Array<{ name: string; id: string }>>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [files, setFiles] = useState<DriveFile[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<DriveFile[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredFiles(files);
+      return;
+    }
+
+    const filtered = files.filter((file) =>
+      file.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredFiles(filtered);
+  }, [searchQuery, files]);
+
+  const loadFolderContents = async (folderId: string) => {
+    setLoading(true);
+    try {
+      const response = await gapi.client.drive.files.list({
+        q: `'${folderId}' in parents and trashed = false`,
+        fields: 'files(id, name, mimeType, size, thumbnailLink)',
+        orderBy: 'folder,name'
+      });
+
+      const driveFiles: DriveFile[] = response.result.files.map((file: any) => ({
+        id: file.id,
+        name: file.name,
+        type: file.mimeType === 'application/vnd.google-apps.folder' ? 'folder' : 'file',
+        mimeType: file.mimeType,
+        size: file.size,
+        thumbnailUrl: file.thumbnailLink
+      }));
+
+      setFiles(driveFiles);
+      setFilteredFiles(driveFiles);
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error('Failed to load folder contents:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load folder contents"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFolderClick = async (folderId: string, folderName: string) => {
+    setPathHistory(prev => [...prev, { name: folderName, id: folderId }]);
+    loadFolderContents(folderId);
+  };
+
+  const handleBackClick = () => {
+    setPathHistory(prev => {
+      const newPath = prev.slice(0, -1);
+      const parentFolderId = newPath.length > 0 
+        ? newPath[newPath.length - 1].id 
+        : 'root';
+      
+      // Load the parent folder contents
+      loadFolderContents(parentFolderId);
+      
+      return newPath;
+    });
+  };
+
+  useEffect(() => {
+    const initGoogleDrive = async () => {
+      try {
+        await driveService.init();
+        const isAuthed = await checkAndRefreshAuth();
+        if (isAuthed) {
+          loadFolderContents('root');
+        }
+      } catch (error) {
+        console.error('Failed to initialize Google Drive:', error);
+      }
+    };
+
+    if (isOpen) {
+      initGoogleDrive();
+    }
+  }, [isOpen]);
+
+  const handleAuthenticate = async () => {
+    setIsLoading(true);
+    try {
+      const success = await driveService.signIn();
+      if (success) {
+        const authInstance = gapi.auth2.getAuthInstance();
+        const currentUser = authInstance.currentUser.get();
+        const authResponse = currentUser.getAuthResponse();
+        
+        useDriveAuthStore.getState().setAuth(
+          authResponse.access_token,
+          authResponse.expires_in
+        );
+        
+        await loadFolderContents('root');
+      }
+    } catch (error) {
+      console.error('Authentication failed:', error);
+      setPathHistory([]);
+      setFiles([]);
+      setSearchQuery('');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFileSelect = (file: DriveFile) => {
+    if (file.type === 'folder') {
+      handleFolderClick(file.id, file.name);
+      return;
+    }
+    
+    onFileSelect(file);
+    onClose();
+  };
+
+  const refreshFiles = () => {
+    const currentFolderId = pathHistory.length > 0 
+      ? pathHistory[pathHistory.length - 1].id 
+      : 'root';
+    loadFolderContents(currentFolderId);
+  };
+
+  const currentPath = pathHistory.map(p => p.name);
+
+  if (!isAuthenticated) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect Google Drive</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <Image
+              src="/icons/google-drive.png"
+              alt="Google Drive"
+              width={64}
+              height={64}
+            />
+            <p className="text-center text-sm text-muted-foreground">
+              Connect your Google Drive to access and upload files directly from your drive.
+            </p>
+            <Button 
+              onClick={handleAuthenticate} 
+              className="gap-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogIn className="h-4 w-4" />
+              )}
+              {isLoading ? 'Connecting...' : 'Connect Google Drive'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-2xl h-[80vh]">
+        <DialogHeader className="space-y-4">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              {currentPath.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBackClick}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              {currentPath.length === 0 ? (
+                <div className="flex items-center gap-2">
+                  <Image
+                    src="/icons/google-drive.png"
+                    alt="Google Drive"
+                    width={100}
+                    height={100}
+                    className="w-4 h-4"
+                  />
+                  Google Drive
+                </div>
+              ) : currentPath[currentPath.length - 1]}
+            </DialogTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={refreshFiles}
+                disabled={loading}
+                className="relative"
+                title="Refresh files"
+              >
+                <RefreshCw className={cn(
+                  "h-4 w-4",
+                  loading && "animate-spin"
+                )} />
+              </Button>
+              {lastRefresh && (
+                <span className="text-xs text-muted-foreground">
+                  Last updated: {formatDistanceToNow(lastRefresh, { addSuffix: true })}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search files..."
+              className="pl-8 border-borderColorPrimary focus-visible:outline-none focus:border-2"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </DialogHeader>
+
+        <ScrollArea className="h-[calc(80vh-10rem)]">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader className="h-6 w-6 animate-spin" />
+            </div>
+          ) : filteredFiles.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <File className="h-12 w-12 mb-4" />
+              <p>{searchQuery ? 'No matching files found' : 'No files in this folder'}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+              {filteredFiles.map((file) => (
+                <div
+                  key={file.id}
+                  onClick={() => handleFileSelect(file)}
+                  className="flex flex-col items-center p-4 rounded-lg border border-border hover:bg-accent cursor-pointer"
+                >
+                  {file.type === 'folder' ? (
+                    <Folder className="h-8 w-8 text-blue-500" />
+                  ) : (
+                    <File className="h-8 w-8 text-gray-500" />
+                  )}
+                  <span className="mt-2 text-sm text-center truncate w-full">
+                    {file.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </DialogContent>
     </Dialog>
   );
 }
