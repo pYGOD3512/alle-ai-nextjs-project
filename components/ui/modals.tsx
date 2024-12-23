@@ -2136,6 +2136,11 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
   const loadFolderContents = async (folderId: string) => {
     setLoading(true);
     try {
+      const gapi = driveService.getGapi();
+      if (!gapi) {
+        throw new Error('Google Drive API not initialized');
+      }
+
       const response = await gapi.client.drive.files.list({
         q: `'${folderId}' in parents and trashed = false`,
         fields: 'files(id, name, mimeType, size, thumbnailLink)',
@@ -2208,6 +2213,11 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
     try {
       const success = await driveService.signIn();
       if (success) {
+        const gapi = driveService.getGapi();
+        if (!gapi) {
+          throw new Error('Google Drive API not initialized');
+        }
+
         const authInstance = gapi.auth2.getAuthInstance();
         const currentUser = authInstance.currentUser.get();
         const authResponse = currentUser.getAuthResponse();

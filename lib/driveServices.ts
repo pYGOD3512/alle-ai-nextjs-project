@@ -11,6 +11,7 @@ class GoogleDriveService {
   private static instance: GoogleDriveService;
   private isInitialized = false;
   private isAuthenticated = false;
+  private gapi: typeof gapi | null = null;
 
   private constructor() {}
 
@@ -21,13 +22,25 @@ class GoogleDriveService {
     return GoogleDriveService.instance;
   }
 
+  private async loadGapi(): Promise<void> {
+    if (typeof window === 'undefined') return;
+    
+    // Dynamically import gapi only on client side
+    const { gapi } = await import('gapi-script');
+    this.gapi = gapi;
+  }
+
   async init(): Promise<void> {
     if (this.isInitialized) return;
+    if (typeof window === 'undefined') return;
+
+    await this.loadGapi();
+    if (!this.gapi) return;
 
     return new Promise((resolve, reject) => {
-      gapi.load('client:auth2', async () => {
+      this.gapi!.load('client:auth2', async () => {
         try {
-          await gapi.client.init({
+          await this.gapi!.client.init({
             apiKey: API_KEY,
             clientId: CLIENT_ID,
             discoveryDocs: DISCOVERY_DOCS,
@@ -57,7 +70,7 @@ class GoogleDriveService {
     }
     
     try {
-      const authInstance = gapi.auth2.getAuthInstance();
+      const authInstance = this.gapi!.auth2.getAuthInstance();
       await authInstance.signIn();
       
       const currentUser = authInstance.currentUser.get();
@@ -94,7 +107,7 @@ class GoogleDriveService {
     if (!this.isInitialized) return;
     
     try {
-      await gapi.auth2.getAuthInstance().signOut();
+      await this.gapi!.auth2.getAuthInstance().signOut();
       this.isAuthenticated = false;
       useDriveAuthStore.getState().clearAuth();
     } catch (error) {
@@ -108,6 +121,10 @@ class GoogleDriveService {
 
   isSignedIn(): boolean {
     return this.isAuthenticated;
+  }
+
+  getGapi(): typeof gapi | null {
+    return this.gapi;
   }
 }
 

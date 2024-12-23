@@ -19,7 +19,6 @@ import {
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { driveService } from '@/lib/driveServices';
-import { gapi } from "gapi-script";
 
 interface SidebarState {
   isOpen: boolean;
@@ -911,6 +910,12 @@ export const useDriveAuthStore = create<DriveAuthStore>()(
         }
 
         try {
+          // Get gapi instance from driveService
+          const gapi = driveService.getGapi();
+          if (!gapi) {
+            throw new Error('Google Drive API not initialized');
+          }
+
           // Try to refresh the token using gapi
           const authInstance = gapi.auth2.getAuthInstance();
           if (authInstance.isSignedIn.get()) {

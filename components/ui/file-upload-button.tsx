@@ -1,3 +1,5 @@
+'use client'; 
+
 import { Paperclip, HardDrive, Cloud } from "lucide-react";
 import { useState } from "react";
 import {
@@ -9,10 +11,9 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { GoogleDriveModal } from "@/components/ui/modals";
-import { gapi } from "gapi-script";
+import { driveService } from '@/lib/driveServices';
 import { validateFile } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast"; 
-import { processFile } from "@/lib/fileProcessing";
 
 interface FileUploadButtonProps {
   onUploadFromComputer: () => void;
@@ -57,7 +58,11 @@ export function FileUploadButton({
       // Show loading state
       onUploadFromDrive(placeholderFile);
 
-      // Download the file content
+      // Get gapi instance and access token
+      const gapi = driveService.getGapi();
+      if (!gapi) {
+        throw new Error('Google Drive API not initialized');
+      }
       const accessToken = gapi.auth.getToken().access_token;
       
       // Special handling for PDFs
