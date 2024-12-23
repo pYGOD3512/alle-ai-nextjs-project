@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ALLOWED_FILE_TYPES, cn, validateFile } from "@/lib/utils";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Slider } from "@/components/ui/slider";
 import GreetingMessage from "../GreetingMessage";
@@ -17,6 +17,10 @@ import { useSelectedModelsStore, useGeneratedAudioStore, AUDIO_MODELS } from "@/
 import { useLikedMediaStore } from "@/lib/constants";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { MicButton } from "@/components/ui/MicButton";
+import { FileUploadButton } from "@/components/ui/file-upload-button";
+import { UploadedFile } from "@/lib/types";
+import { processFile } from "@/lib/fileProcessing";
+import { FilePreview } from "@/components/ui/file-preview";
 
 
 interface AudioResponse {
@@ -56,6 +60,9 @@ export function AudioArea() {
     onTranscript: setPrompt,
     inputRef: textareaRef
   });
+
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const ResponseSkeleton = () => (
     <div className="border border-borderColorPrimary rounded-lg p-4 space-y-4">
@@ -98,7 +105,6 @@ export function AudioArea() {
     setSubmittedPrompt(prompt);
     setPrompt("");
     
-    // Clear previous responses
     setResponses([]);
     
     // Simulate API call
@@ -378,19 +384,174 @@ export function AudioArea() {
     }
   };
 
+  const handleUploadFromComputer = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUploadProgress = (progress: number) => {
+    setUploadedFile(prev => prev ? { ...prev, progress } : null);
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateFile(file);
+    if (!validation.isValid) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: validation.error
+      });
+      return;
+    }
+
+    try {
+      // Create blob URL
+      const fileUrl = URL.createObjectURL(file);
+      
+      // Clean up previous blob URL if it exists
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+
+      const newUploadedFile: UploadedFile = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl,
+        status: 'loading',
+        progress: 0
+      };
+
+      setUploadedFile(newUploadedFile);
+
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        handleFileUploadProgress(Math.random() * 100);
+      }, 200);
+
+      // Process the file
+      const { text } = await processFile(file);
+      console.log('content', text);
+
+      // Clear interval and set progress to 100%
+      clearInterval(progressInterval);
+      handleFileUploadProgress(100);
+
+      // Update file status to ready after a brief delay
+      setTimeout(() => {
+        setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
+      }, 500);
+
+      toast({
+        title: "File Processed",
+        description: `${file.name} has been added successfully`,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    } catch (error) {
+      handleFileError(error);
+    }
+  };
+
+  const handleUploadFromDrive = async (file: File) => {
+    try {
+      const validation = validateFile(file);
+      if (!validation.isValid) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: validation.error
+        });
+        return;
+      }
+
+      const fileUrl = URL.createObjectURL(file);
+      
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+
+      const newUploadedFile: UploadedFile = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl,
+        status: 'loading',
+        progress: 0
+      };
+
+      setUploadedFile(newUploadedFile);
+
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        handleFileUploadProgress(Math.random() * 100);
+      }, 200);
+
+      const { text } = await processFile(file);
+      console.log('content', text);
+
+      // Clear interval and set progress to 100%
+      clearInterval(progressInterval);
+      handleFileUploadProgress(100);
+
+      // Update status to ready after a brief delay
+      setTimeout(() => {
+        setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
+      }, 500);
+
+      toast({
+        title: "File Processed",
+        description: `${file.name} has been added successfully`,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    } catch (error) {
+      handleFileError(error);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    if (uploadedFile?.url) {
+      URL.revokeObjectURL(uploadedFile.url);
+      setUploadedFile(null);
+    }
+  };
+
+  const handleFileError = (error: any) => {
+    if (uploadedFile?.url) {
+      URL.revokeObjectURL(uploadedFile.url);
+    }
+    setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+    toast({
+      variant: "destructive",
+      title: "Processing Failed",
+      description: error instanceof Error ? error.message : "Failed to process file"
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+    };
+  }, []);
+
   return (
     <RenderPageContent>
       <div className={cn(
         "max-w-7xl w-full mx-auto mt-10 flex flex-col h-full transition-all duration-300",
         hasResponse ? "gap-4" : "gap-0"
       )}>
-        {/*Prompt Section */}
         <div className={cn(
           "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
           hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
         )}>
-          {!hasResponse && ( <GreetingMessage username="Pascal" questionText=" What sound are you thinking of today?"/>)}
+          {!hasResponse && <GreetingMessage username="Pascal" questionText=" What sound are you thinking of today?"/>}
           <div className="flex flex-col flex-1 p-4 space-y-4">
+
             <div className="flex flex-col space-y-2">
               <Textarea
                 ref={textareaRef}
@@ -402,20 +563,45 @@ export function AudioArea() {
               />
             </div>
 
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
+              accept={Object.entries(ALLOWED_FILE_TYPES)
+                .flatMap(([, exts]) => exts)
+                .join(',')}
+            />
+
             <div className="flex items-center gap-4">
-              <Button
+
+              <FileUploadButton
+                onUploadFromComputer={handleUploadFromComputer}
+                onUploadFromDrive={handleUploadFromDrive}
+                buttonIcon={
+                  <Button
                 variant="outline" 
                 className="flex items-center gap-2 border-borderColorPrimary"
-                onClick={() => {}}
-              >
-                <Upload className="w-4 h-4" />
-                Upload file
-              </Button>
+                    onClick={() => {}}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload file
+                  </Button>
+                }
+              />
 
               <MicButton className="w-10 h-10 rounded-md border border-borderColorPrimary" isListening={isListening} onClick={toggleListening} />
               
               <div className="ml-auto text-sm text-muted-foreground">
-                Requests left: {credits}
+                {/* Requests left: {credits} */}
+                {uploadedFile && (
+                  <div className="mb-2">
+                    <FilePreview 
+                      file={uploadedFile} 
+                      onRemove={handleRemoveFile} 
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -429,7 +615,6 @@ export function AudioArea() {
           </div>
         </div>
 
-        {/* Response Section */}
         {hasResponse && (
           <div className="w-full sm:w-2/3 lg:w-1/2 h-full mx-auto">
             <div className="p-4">
