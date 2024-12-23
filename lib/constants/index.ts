@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { driveService } from '@/lib/driveServices';
 
 interface SidebarState {
   isOpen: boolean;
@@ -862,6 +863,86 @@ export const useLikedMediaStore = create<LikedMediaStore>()(
     }),
     {
       name: 'liked-media-storage',
+    }
+  )
+);
+
+interface DriveAuthStore {
+  isAuthenticated: boolean;
+  accessToken: string | null;
+  expiresAt: number | null;
+  setAuth: (token: string, expiresIn: number) => void;
+  clearAuth: () => void;
+  checkAndRefreshAuth: () => Promise<boolean>;
+}
+
+export const useDriveAuthStore = create<DriveAuthStore>()(
+  persist(
+    (set, get) => ({
+      isAuthenticated: false,
+      accessToken: null,
+      expiresAt: null,
+
+      setAuth: (token: string, expiresIn: number) => {
+        const expiresAt = Date.now() + (expiresIn * 1000);
+        set({ 
+          isAuthenticated: true, 
+          accessToken: token,
+          expiresAt: expiresAt
+        });
+      },
+
+      clearAuth: () => {
+        set({ 
+          isAuthenticated: false, 
+          accessToken: null,
+          expiresAt: null 
+        });
+      },
+
+      checkAndRefreshAuth: async () => {
+        const state = get();
+        const now = Date.now();
+
+        // If we have a valid token that's not expired
+        if (state.accessToken && state.expiresAt && state.expiresAt > now) {
+          return true;
+        }
+
+        try {
+          // Get gapi instance from driveService
+          const gapi = driveService.getGapi();
+          if (!gapi) {
+            throw new Error('Google Drive API not initialized');
+          }
+
+          // Try to refresh the token using gapi
+          const authInstance = gapi.auth2.getAuthInstance();
+          if (authInstance.isSignedIn.get()) {
+            const currentUser = authInstance.currentUser.get();
+            const authResponse = currentUser.getAuthResponse();
+            
+            set({
+              isAuthenticated: true,
+              accessToken: authResponse.access_token,
+              expiresAt: authResponse.expires_at
+            });
+            
+            return true;
+          }
+          
+          // If not signed in, clear auth state
+          state.clearAuth();
+          return false;
+        } catch (error) {
+          console.error('Failed to refresh auth:', error);
+          state.clearAuth();
+          return false;
+        }
+      }
+    }),
+    {
+      name: 'drive-auth-storage'
     }
   )
 );

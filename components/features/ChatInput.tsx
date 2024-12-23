@@ -52,12 +52,63 @@ export function ChatInput({
     fileInputRef.current?.click();
   };
 
-  const handleUploadFromDrive = () => {
-    toast({
-      title: "Coming Soon",
-      description: "This feature will be added soon",
-      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
-    });
+  const handleUploadFromDrive = async (file: File) => {
+    try {
+      const validation = validateFile(file);
+      if (!validation.isValid) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: validation.error
+        });
+        return;
+      }
+
+      // Create blob URL
+      const fileUrl = URL.createObjectURL(file);
+      
+      // Clean up previous blob URL if it exists
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+
+      const newUploadedFile: UploadedFile = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl,
+        status: 'loading'
+      };
+
+      setUploadedFile(newUploadedFile);
+
+      // If this is the actual file (not placeholder), process it
+      if (file.size > 0) {
+        // Process the file
+        const { text } = await processFile(file);
+        console.log('content', text);
+
+        // Update status to ready
+        setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
+
+        toast({
+        title: "File Processed",
+        description: `${file.name} has been added successfully`,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+      }
+    } catch (error) {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+      setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+      toast({
+        variant: "destructive",
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process file"
+      });
+    }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +148,7 @@ export function ChatInput({
       // Process the file
       const { text } = await processFile(file);
 
+      console.log('content', text )
       // Update file status to ready
       setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
 
@@ -131,14 +183,14 @@ export function ChatInput({
     }
   };
 
-  // Cleanup blob URL when component unmounts or file changes
+  // Here we cleanup blob URL when component unmounts or file changes
   useEffect(() => {
     return () => {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
     };
-  }, []);  // Only run on unmount
+  }, []);
 
   const texts = [
     "Your all-in-one AI Platform",
