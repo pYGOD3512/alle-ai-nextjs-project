@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 interface FileUploadButtonProps {
   onUploadFromComputer: () => void;
   onUploadFromDrive: (file: File) => void; 
+  buttonIcon?: React.ReactNode;
 }
 
 interface DriveFile {  // Add this interface
@@ -40,7 +41,8 @@ interface UploadedFile {
 
 export function FileUploadButton({ 
   onUploadFromComputer, 
-  onUploadFromDrive 
+  onUploadFromDrive,
+  buttonIcon
 }: FileUploadButtonProps) {
   const [showDriveModal, setShowDriveModal] = useState(false);
   const { toast } = useToast();
@@ -147,9 +149,12 @@ export function FileUploadButton({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="flex-shrink-0 focus-visible:outline-none">
-            <Paperclip className="h-4 w-4" />
-          </Button>
+          {buttonIcon ? buttonIcon : (
+            <Button variant="ghost" size="icon" className="flex-shrink-0 focus-visible:outline-none" aria-label="Upload File">
+              <Paperclip className="h-4 w-4" />
+            </Button>
+          )}
+          
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 bg-background">
           <DropdownMenuItem 

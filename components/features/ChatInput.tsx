@@ -234,6 +234,7 @@ export function ChatInput({
           onUploadFromDrive={handleUploadFromDrive}
         />
 
+
         <Textarea 
           ref={inputRef}
           placeholder="Message multiple models..."

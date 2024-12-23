@@ -9,7 +9,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useContentStore } from "@/stores";
 import { useSelectedModelsStore, VIDEO_MODELS } from "@/lib/constants";
 import RenderPageContent from "@/components/RenderPageContent";
-import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff } from "lucide-react";
+import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +20,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { ALLOWED_FILE_TYPES, cn, validateFile } from "@/lib/utils";
 import GreetingMessage from "../GreetingMessage";
 import Image from "next/image";
 import {
@@ -35,6 +35,10 @@ import { Progress } from "@/components/ui/progress";
 import { useLikedMediaStore } from "@/lib/constants";
 import { Textarea } from "@/components/ui/textarea";
 import { MicButton } from "@/components/ui/MicButton";
+import { FileUploadButton } from "@/components/ui/file-upload-button";
+import { UploadedFile } from "@/lib/types";
+import { processFile } from "@/lib/fileProcessing";
+import { FilePreview } from "@/components/ui/file-preview";
 
 interface VideoResponse {
   modelId: string;
@@ -337,12 +341,13 @@ const VideoArea = () => {
   const [currentSettingInfo, setCurrentSettingInfo] = useState<'aspectRatio' | 'quality' | 'duration' | 'display'>('aspectRatio');
   const { addLikedMedia, removeLikedMedia } = useLikedMediaStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { isListening, toggleListening } = useSpeechRecognition({
     onTranscript: setPrompt,
     inputRef: textareaRef
   });
-
 
   const showSettingInfo = (setting: 'aspectRatio' | 'quality' | 'duration' | 'display') => {
     setCurrentSettingInfo(setting);
@@ -556,7 +561,6 @@ const VideoArea = () => {
     </div>
   );
 
-
   const responsesContainerClass = cn(
     "space-y-6",
     settings.display === "grid" && "grid grid-cols-2 gap-6 space-y-0"
@@ -650,6 +654,185 @@ const VideoArea = () => {
     return null;
   }, [videos]);
 
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateFile(file);
+    if (!validation.isValid) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: validation.error
+      });
+      return;
+    }
+
+    try {
+      const fileUrl = URL.createObjectURL(file);
+      
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+
+      const newUploadedFile: UploadedFile = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl,
+        status: 'loading',
+        progress: 0
+      };
+
+      setUploadedFile(newUploadedFile);
+
+      // Create a more natural progress simulation
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        // Exponential slowdown as we approach 90%
+        const increment = Math.max(1, (90 - progress) / 10);
+        progress = Math.min(90, progress + increment);
+        
+        setUploadedFile(prev => 
+          prev ? { ...prev, progress } : null
+        );
+      }, 100);
+
+      // Process the file
+      const { text } = await processFile(file);
+      console.log('content', text);
+
+      // Complete the progress animation
+      clearInterval(progressInterval);
+      
+      // Jump to 100% and show completion
+      setUploadedFile(prev => 
+        prev ? { ...prev, progress: 100 } : null
+      );
+
+      // Short delay before showing ready state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setUploadedFile(prev => 
+        prev ? { ...prev, status: 'ready' } : null
+      );
+
+      toast({
+        title: "File Processed",
+        description: `${file.name} has been added successfully`,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    } catch (error) {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+      setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+      toast({
+        variant: "destructive",
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process file"
+      });
+    }
+  };
+
+  const handleUploadFromComputer = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadFromDrive = async (file: File) => {
+    try {
+      const validation = validateFile(file);
+      if (!validation.isValid) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: validation.error
+        });
+        return;
+      }
+
+      const fileUrl = URL.createObjectURL(file);
+      
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+
+      const newUploadedFile: UploadedFile = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: fileUrl,
+        status: 'loading',
+        progress: 0
+      };
+
+      setUploadedFile(newUploadedFile);
+
+      // Create a more natural progress simulation
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        // Exponential slowdown as we approach 90%
+        const increment = Math.max(1, (90 - progress) / 10);
+        progress = Math.min(90, progress + increment);
+        
+        setUploadedFile(prev => 
+          prev ? { ...prev, progress } : null
+        );
+      }, 100);
+
+      const { text } = await processFile(file);
+      console.log('content', text);
+      setPrompt(text);
+
+      // Complete the progress animation
+      clearInterval(progressInterval);
+      
+      // Jump to 100% and show completion
+      setUploadedFile(prev => 
+        prev ? { ...prev, progress: 100 } : null
+      );
+
+      // Short delay before showing ready state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setUploadedFile(prev => 
+        prev ? { ...prev, status: 'ready' } : null
+      );
+
+      toast({
+        title: "File Processed",
+        description: `${file.name} has been added successfully`,
+        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+      });
+    } catch (error) {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+      setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+      toast({
+        variant: "destructive",
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process file"
+      });
+    }
+  };
+
+  const handleRemoveFile = () => {
+    if (uploadedFile?.url) {
+      URL.revokeObjectURL(uploadedFile.url);
+      setUploadedFile(null);
+    }
+  };
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      if (uploadedFile?.url) {
+        URL.revokeObjectURL(uploadedFile.url);
+      }
+    };
+  }, []);
+
   return (
     <RenderPageContent>
       <div className="flex flex-col h-full">
@@ -730,16 +913,43 @@ const VideoArea = () => {
         {/* Prompt Input Area */}
         <div className="border-borderColorPrimary p-4">
           <div className="max-w-4xl mx-auto">
+            {uploadedFile && (
+              <div className="mb-2">
+                <FilePreview 
+                  file={uploadedFile} 
+                  onRemove={handleRemoveFile} 
+                />
+              </div>
+            )}
+            
             <div className="relative flex items-center gap-2 mb-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+                accept={Object.entries(ALLOWED_FILE_TYPES)
+                  .flatMap(([, exts]) => exts)
+                  .join(',')}
+              />
+              
               <div className="flex-1 flex items-end gap-2 px-4 py-3 rounded-2xl border border-borderColorPrimary transition-colors">
                 <div className="flex justify-center items-center relative">
-                    <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-accent/50"
-                    >
-                    <Plus className="absolute top-1 h-5 w-5" />
-                    </Button>
+                    
+
+                    <FileUploadButton
+                    onUploadFromComputer={handleUploadFromComputer}
+                    onUploadFromDrive={handleUploadFromDrive}
+                    buttonIcon={
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 rounded-full hover:bg-accent/50"
+                        >
+                        <Plus className="absolute top-1 h-5 w-5" />
+                        </Button>
+                    }
+              />
                 </div>
                 
                 <Textarea

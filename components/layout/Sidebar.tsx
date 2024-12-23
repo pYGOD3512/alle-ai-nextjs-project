@@ -199,6 +199,7 @@ export function Sidebar() {
                   size="icon"
                   className={`${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
                   onClick={() => setModelSelectionModalOpen(true)}
+                  aria-label="Model Selection"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
@@ -280,6 +281,7 @@ export function Sidebar() {
                 size={`icon`}
                 className="p-0 h-8 w-8"
                 onClick={() => setHistorySearchModalOpen(true)}
+                aria-label="Search History"
                 >
                   <Search   className="w-4 h-4"/>
                 </Button>
@@ -334,6 +336,7 @@ export function Sidebar() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
+                                  aria-label="More Actions"
                                 >
                                   <EllipsisVertical className="h-4 w-4" />
                                 </Button>

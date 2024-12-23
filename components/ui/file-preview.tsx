@@ -45,7 +45,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
 
   return (
     <>
-      <div className="relative group flex items-center gap-2 max-w-[200px] w-fit p-2 bg-muted/30 rounded-lg border border-border">
+      <div className="relative group flex items-center gap-2 max-w-[200px] w-fit p-2 bg-muted/30 rounded-lg border border-borderColorPrimary">
         <div className="flex-shrink-0 relative">
           {isImage ? (
             <div 

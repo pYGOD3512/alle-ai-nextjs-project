@@ -267,6 +267,7 @@ export function Header() {
             size="icon" 
             onClick={toggle}
             className={`h-6 w-6 absolute -right-3 transition-all duration-300 ${isMobile ? ( isOpen ? '-right-3' : 'right-[-2.5rem]') : "-right-3" }`}
+            aria-label="Toggle Sidebar"
           >
             {isOpen ? (
               <ChevronLeft className="h-5 w-5" />

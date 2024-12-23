@@ -614,7 +614,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-xl rounded-md">
+        <DialogContent className="sm:max-w-xl lg:max-w-2xl rounded-md">
           <DialogHeader className="flex flex-row items-center justify-between relative border-b border-borderColorPrimary">
             <DialogTitle className="mb-2">Settings</DialogTitle>
             <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -729,7 +729,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                         <h4 className="text-sm font-small">{setting.title}</h4>
                         <Button
                           variant={key === "google_drive" ? "outline" : setting.action === "Delete" ? "destructive" : "outline"}
-                          className={`h-8 rounded-full px-3 text-xs border-borderColorPrimary transition-all ${
+                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all ${
                             key === "google_drive" && isAuthenticated ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""
                           }`}
                           size="sm"
@@ -774,7 +774,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                       </h4>
                       <Button
                         variant="destructive"
-                        className="h-8 rounded-full px-3 text-xs border-borderColorPrimary"
+                        className="h-8 rounded-md p-2 text-xs border-borderColorPrimary"
                         size="sm"
                         onClick={() => setLogoutAllModalOpen(true)}
                       >
