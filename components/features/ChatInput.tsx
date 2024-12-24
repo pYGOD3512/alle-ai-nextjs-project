@@ -64,10 +64,8 @@ export function ChatInput({
         return;
       }
 
-      // Create blob URL
       const fileUrl = URL.createObjectURL(file);
       
-      // Clean up previous blob URL if it exists
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
@@ -78,25 +76,42 @@ export function ChatInput({
         type: file.type,
         size: file.size,
         url: fileUrl,
-        status: 'loading'
+        status: 'loading',
+        progress: 0
       };
 
       setUploadedFile(newUploadedFile);
 
-      // If this is the actual file (not placeholder), process it
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        const increment = Math.max(1, (90 - progress) / 10);
+        progress = Math.min(90, progress + increment);
+        
+        setUploadedFile(prev => 
+          prev ? { ...prev, progress } : null
+        );
+      }, 100);
+
       if (file.size > 0) {
-        // Process the file
         const { text } = await processFile(file);
         console.log('content', text);
 
-        // Update status to ready
-        setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
+        clearInterval(progressInterval);
+        
+        setUploadedFile(prev => 
+          prev ? { ...prev, progress: 100 } : null
+        );
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setUploadedFile(prev => 
+          prev ? { ...prev, status: 'ready' } : null
+        );
 
         toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
-      });
+          title: "File Processed",
+          description: `${file.name} has been added successfully`,
+          className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+        });
       }
     } catch (error) {
       if (uploadedFile?.url) {
@@ -126,10 +141,8 @@ export function ChatInput({
     }
 
     try {
-      // Create blob URL
       const fileUrl = URL.createObjectURL(file);
       
-      // Clean up previous blob URL if it exists
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
@@ -140,17 +153,35 @@ export function ChatInput({
         type: file.type,
         size: file.size,
         url: fileUrl,
-        status: 'loading'
+        status: 'loading',
+        progress: 0
       };
 
       setUploadedFile(newUploadedFile);
 
-      // Process the file
-      const { text } = await processFile(file);
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        const increment = Math.max(1, (90 - progress) / 10);
+        progress = Math.min(90, progress + increment);
+        
+        setUploadedFile(prev => 
+          prev ? { ...prev, progress } : null
+        );
+      }, 100);
 
-      console.log('content', text )
-      // Update file status to ready
-      setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
+      const { text } = await processFile(file);
+      console.log('content', text);
+
+      clearInterval(progressInterval);
+      
+      setUploadedFile(prev => 
+        prev ? { ...prev, progress: 100 } : null
+      );
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setUploadedFile(prev => 
+        prev ? { ...prev, status: 'ready' } : null
+      );
 
       toast({
         title: "File Processed",
@@ -172,18 +203,15 @@ export function ChatInput({
 
   const handleRemoveFile = () => {
     if (uploadedFile?.url) {
-      // Remove file reference from input value
       const fileText = `[File: ${uploadedFile.name}] `;
       const newValue = value.replace(fileText, '').trim();
       onChange(newValue);
       
-      // Cleanup URL and reset state
       URL.revokeObjectURL(uploadedFile.url);
       setUploadedFile(null);
     }
   };
 
-  // Here we cleanup blob URL when component unmounts or file changes
   useEffect(() => {
     return () => {
       if (uploadedFile?.url) {
@@ -201,7 +229,7 @@ export function ChatInput({
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((current) => (current + 1) % texts.length);
-    }, 5000); // Change text every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -253,7 +281,6 @@ export function ChatInput({
           }}
         />
         <MicButton isListening={isListening} onClick={toggleListening} />
-        {/* conditional rendering */}
         {pathname === "/" || pathname.startsWith("/chat") ? (
           <Button
             onClick={onSend}
@@ -281,7 +308,6 @@ export function ChatInput({
           </Button>
         )}
       </div>
-      {/* conditional rendering */}
       {pathname === "/" || pathname.startsWith("/chat") ? (
         <div className="h-6 relative overflow-hidden">
           <AnimatePresence mode="wait">

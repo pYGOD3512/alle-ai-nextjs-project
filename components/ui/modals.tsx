@@ -83,6 +83,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDriveAuthStore } from "@/lib/constants";
 
 import { driveService } from '@/lib/driveServices';
+import { dropboxService } from '@/lib/dropboxServices';
 import { gapi } from "gapi-script";
 
 
@@ -2328,7 +2329,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
                 size="icon"
                 onClick={refreshFiles}
                 disabled={loading}
-                className="relative"
+                className="relative focus-visible:outline-none"
                 title="Refresh files"
               >
                 <RefreshCw className={cn(
