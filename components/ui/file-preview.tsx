@@ -1,4 +1,5 @@
-import { X, FileText } from "lucide-react";
+import { X, File } from "lucide-react";
+import { BiSolidFilePdf, BiSolidFileTxt, BiSolidFileDoc  } from "react-icons/bi";
 import Image from "next/image";
 import { UploadedFile } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
@@ -17,27 +18,19 @@ interface FilePreviewProps {
   onRemove: () => void;
 }
 
-const getFileExtension = (type: string) => {
-    switch (type) {
-      case 'application/msword':
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return 'DOC';
-      case 'text/plain':
-        return 'TXT';
-      case 'application/pdf':
-        return 'PDF';
-      case 'image/jpeg':
-        return 'JPG';
-      case 'image/png':
-        return 'PNG';
-      case 'image/svg+xml':
-        return 'SVG';
-      case 'image/webp':
-        return 'WEBP';
-      default:
-        return type.split('/').pop()?.toUpperCase() || 'UNKNOWN';
-    }
-  };
+const getFileIcon = (type: string) => {
+  switch (type) {
+    case 'application/msword':
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      return { icon: <BiSolidFileDoc  className="w-8 h-8 text-blue-500" />, label: 'DOC' };
+    case 'text/plain':
+      return { icon: <BiSolidFileTxt  className="w-8 h-8 text-gray-500" />, label: 'TXT' };
+    case 'application/pdf':
+      return { icon: <BiSolidFilePdf className="w-8 h-8 text-red-500" />, label: 'PDF' };
+    default:
+      return { icon: <File className="w-8 h-8 text-muted-foreground" />, label: 'Unknown' };
+  }
+};
 
 export function FilePreview({ file, onRemove }: FilePreviewProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -61,7 +54,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
               />
             </div>
           ) : (
-            <FileText className="w-8 h-8 text-muted-foreground" />
+            getFileIcon(file.type).icon
           )}
 
           {/* Loading overlay with progress */}
@@ -81,7 +74,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
           <p className="text-sm font-medium truncate">{file.name}</p>
           <div className="flex flex-col gap-1">
             <p className="text-xs text-muted-foreground">
-              {getFileExtension(file.type)} • {formatFileSize(file.size)}
+              {getFileIcon(file.type).label} • {formatFileSize(file.size)}
             </p>
             
             {/* Progress bar */}

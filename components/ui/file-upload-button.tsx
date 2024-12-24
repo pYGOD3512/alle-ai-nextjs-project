@@ -14,6 +14,8 @@ import { GoogleDriveModal } from "@/components/ui/modals";
 import { driveService } from '@/lib/driveServices';
 import { validateFile } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast"; 
+import { dropboxService } from "@/lib/dropboxServices";
+import { oneDriveService, OneDriveResponse } from '@/lib/onedriveServices';
 
 interface FileUploadButtonProps {
   onUploadFromComputer: () => void;
@@ -21,22 +23,13 @@ interface FileUploadButtonProps {
   buttonIcon?: React.ReactNode;
 }
 
-interface DriveFile {  // Add this interface
+interface DriveFile { 
   id: string;
   name: string;
   type: 'folder' | 'file';
   mimeType: string;
   size?: string;
   thumbnailUrl?: string;
-}
-
-interface UploadedFile {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url: string;
-  status: 'loading' | 'ready';
 }
 
 export function FileUploadButton({ 
@@ -145,6 +138,184 @@ export function FileUploadButton({
     }
   };
 
+  const handleDropboxSelect = async () => {
+    try {
+      dropboxService.openChooser({
+        success: async (files) => {
+          if (files && files.length > 0) {
+            const file = files[0];
+            
+            // Create a placeholder for loading state
+            const placeholderBlob = new Blob([], { type: getMimeType(file.name) });
+            const placeholderUrl = URL.createObjectURL(placeholderBlob);
+            
+            const placeholderFile = new File([placeholderBlob], file.name, { 
+              type: getMimeType(file.name)
+            });
+
+            // Show loading state
+            onUploadFromDrive(placeholderFile);
+
+            try {
+              // Download the actual file
+              const response = await fetch(file.link);
+              if (!response.ok) {
+                throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+              }
+
+              // Get the file data as ArrayBuffer
+              const arrayBuffer = await response.arrayBuffer();
+              console.log('File downloaded, size:', arrayBuffer.byteLength);
+
+              // Create a regular File object
+              const dropboxFile = new File(
+                [arrayBuffer], 
+                file.name, 
+                { type: getMimeType(file.name) }
+              );
+
+              // Validate the file
+              const validation = validateFile(dropboxFile);
+              if (!validation.isValid) {
+                throw new Error(validation.error);
+              }
+
+              // Clean up placeholder
+              URL.revokeObjectURL(placeholderUrl);
+
+              // Process file
+              onUploadFromDrive(dropboxFile);
+
+              toast({
+                title: "File Processed",
+                description: `${file.name} has been added successfully`,
+                className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+              });
+            } catch (error) {
+              throw error;
+            }
+          }
+        },
+        cancel: () => {
+          toast({
+            title: "Cancelled",
+            description: `File upload cancelled`,
+            className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+          });
+        },
+        linkType: 'direct',
+        multiselect: false,
+        folderselect: false,
+        extensions: ['.pdf', '.doc', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.webp'],
+        sizeLimit: 100 * 1024 * 1024 // 100MB
+      });
+    } catch (error) {
+      console.error('Error processing Dropbox file:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process file"
+      });
+    }
+  };
+
+  // const handleOneDriveSelect = async () => {
+  //   try {
+  //     oneDriveService.openPicker({
+  //       success: async (response: OneDriveResponse) => {
+  //         if (response.value && response.value.length > 0) {
+  //           const file = response.value[0];
+            
+  //           // Create a placeholder
+  //           const placeholderBlob = new Blob([], { type: file.file.mimeType });
+  //           const placeholderUrl = URL.createObjectURL(placeholderBlob);
+            
+  //           const placeholderFile = new File([placeholderBlob], file.name, { 
+  //             type: file.file.mimeType 
+  //           });
+
+  //           // Show loading state
+  //           onUploadFromDrive(placeholderFile);
+
+  //           try {
+  //             // Download the actual file
+  //             const response = await fetch(file["@microsoft.graph.downloadUrl"]);
+  //             if (!response.ok) {
+  //               throw new Error(`Failed to download file: ${response.status}`);
+  //             }
+
+  //             const arrayBuffer = await response.arrayBuffer();
+  //             const oneDriveFile = new File(
+  //               [arrayBuffer], 
+  //               file.name, 
+  //               { type: file.file.mimeType }
+  //             );
+
+  //             // Validate the file
+  //             const validation = validateFile(oneDriveFile);
+  //             if (!validation.isValid) {
+  //               throw new Error(validation.error);
+  //             }
+
+  //             // Clean up placeholder
+  //             URL.revokeObjectURL(placeholderUrl);
+
+  //             // Process file
+  //             onUploadFromDrive(oneDriveFile);
+
+  //             toast({
+  //               title: "File Processed",
+  //               description: `${file.name} has been added successfully`,
+  //               className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+  //             });
+  //           } catch (error) {
+  //             throw error;
+  //           }
+  //         }
+  //       },
+  //       cancel: () => {
+  //         toast({
+  //           title: "Cancelled",
+  //           description: "File selection cancelled",
+  //           className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+  //         });
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error('Error processing OneDrive file:', error);
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Error",
+  //       description: error instanceof Error ? error.message : "Failed to process file"
+  //     });
+  //   }
+  // };
+
+  // Helper function to get mime type from file extension
+  
+  const handleOneDriveSelect = () => {
+    toast({
+      title: "Almost There",
+      description: "Client ID required",
+      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
+    });
+  }
+  
+  const getMimeType = (filename: string): string => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'txt': 'text/plain',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'webp': 'image/webp'
+    };
+    return mimeTypes[ext || ''] || 'application/octet-stream';
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -154,7 +325,6 @@ export function FileUploadButton({
               <Paperclip className="h-4 w-4" />
             </Button>
           )}
-          
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 bg-background">
           <DropdownMenuItem 
@@ -162,13 +332,36 @@ export function FileUploadButton({
             className="gap-2"
           >
             <Image 
-            src={'/icons/google-drive.png'}
-            alt="google-drive-logo"
-            width={100}
-            height={100}
-            className="w-4 h-4"
+              src={'/icons/google-drive.png'}
+              alt="google-drive-logo"
+              width={100}
+              height={100}
+              className="w-4 h-4"
             />
             <span>Add from Google Drive</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={handleDropboxSelect} 
+            className="gap-2"
+          >
+            <Image 
+              src="/icons/dropbox.png"
+              alt="dropbox-logo"
+              width={100}
+              height={100}
+              className="w-4 h-4"
+            />
+            <span>Add from Dropbox</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOneDriveSelect} className="gap-2">
+            <Image 
+              src="/icons/onedrive.png" 
+              alt="OneDrive" 
+              width={100} 
+              height={100} 
+              className="w-4 h-4"
+            />
+            <span>Add from OneDrive</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onUploadFromComputer} className="gap-2">
             <HardDrive className="h-4 w-4" />
