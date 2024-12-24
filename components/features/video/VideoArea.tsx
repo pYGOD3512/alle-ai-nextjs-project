@@ -944,7 +944,7 @@ const VideoArea = () => {
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="h-8 w-8 rounded-full hover:bg-accent/50"
+                        className="h-8 w-8 rounded-full hover:bg-accent/50 focus-visible:outline-none"
                         >
                         <Plus className="absolute top-1 h-5 w-5" />
                         </Button>
