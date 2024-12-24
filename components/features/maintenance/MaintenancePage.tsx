@@ -242,9 +242,9 @@ export function MaintenancePage({
               <Clock className="h-4 w-4 animate-pulse" />
               Estimated Time
             </AlertTitle>
-            <AlertDescription className="mt-2">
-              We expect to be back{' '}
-              <span className="font-semibold text-primary">in approximately {timeLeft}</span>
+            <AlertDescription className="mt-2 flex gap-1">
+              We expect to be back
+              <span className="font-semibold text-primary">{timeLeft}</span>
             </AlertDescription>
           </Alert>
 

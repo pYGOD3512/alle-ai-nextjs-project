@@ -9,11 +9,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Move these to a separate config file if you want to use them elsewhere
+export const publicRoutes = ['/', '/plans', '/pricing', '/login', '/register'];
+export const privateRoutes = ['/chat', '/image', '/video', '/audio', '/text', '/changelog'];
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isSubscribed, setIsSubscribed] = useState(true);
 
   return (
-    <AuthContext.Provider value={{ isSubscribed, setIsSubscribed }}>
+    <AuthContext.Provider value={{ 
+      isSubscribed, 
+      setIsSubscribed,
+    }}>
       {children}
     </AuthContext.Provider>
   );
