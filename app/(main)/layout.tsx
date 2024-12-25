@@ -5,10 +5,8 @@ import React from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import PlansArea from '@/components/features/plans/PlansArea';
-import { usePathname, useRouter } from 'next/navigation';
-import { privateRoutes, useAuth } from '@/components/providers/authTest';
+import { useAuth } from '@/components/providers/authTest';
 import { MaintenancePage } from '@/components/features/maintenance/MaintenancePage';
-import { useEffect } from 'react';
 
 const isMaintenance = false;
 
@@ -18,16 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const { isSubscribed } = useAuth();
-  const pathname = usePathname();
-  const router = useRouter();
 
-  const matchRoute = (route: string): boolean => {
-    if (route === pathname) return true;
-    if (route.endsWith('/*') && pathname.startsWith(route.slice(0, -2))) return true;
-    return false;
-  };
-
-  const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
+  const onRefresh = () => {
+    window.location.reload();
+  }
 
   // Handle maintenance mode first
   if (isMaintenance) {
@@ -36,17 +28,12 @@ export default function RootLayout({
         type="outage"
         title="Service Unavailable"
         description="Our service is currently undergoing maintenance. We apologize for the inconvenience."
+        estimatedTime="in approximately 24 hours"
         showRefreshButton={true}
+        onRefresh={onRefresh}
       />
     );
   }
-
-  // Redirect unsubscribed users trying to access private routes
-  useEffect(() => {
-    if (!isSubscribed && isPrivateRoute) {
-      router.replace('/');
-    }
-  }, [isSubscribed, isPrivateRoute, router]);
 
   return (
     <>

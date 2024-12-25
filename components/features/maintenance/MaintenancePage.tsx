@@ -261,12 +261,6 @@ export function MaintenancePage({
                 >
                   <RefreshCw className="h-4 w-4" />
                   Refresh Page
-                  {/* <motion.div
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </motion.div> */}
                 </Button>
               </motion.div>
             )}

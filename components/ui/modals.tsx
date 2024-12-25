@@ -82,9 +82,10 @@ import { useToast } from "@/hooks/use-toast";
 
 import { useDriveAuthStore } from "@/lib/constants";
 
-import { driveService } from '@/lib/driveServices';
-import { dropboxService } from '@/lib/dropboxServices';
+import { driveService } from '@/lib/services/driveServices';
+import { dropboxService } from '@/lib/services/dropboxServices';
 import { gapi } from "gapi-script";
+
 
 
 

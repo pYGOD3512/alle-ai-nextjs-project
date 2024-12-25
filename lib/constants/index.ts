@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { driveService } from '@/lib/driveServices';
+import { driveService } from '@/lib/services/driveServices';
 
 interface SidebarState {
   isOpen: boolean;
