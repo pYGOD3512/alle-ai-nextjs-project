@@ -3,8 +3,7 @@
 import { ChatInput } from "@/components/features/ChatInput";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { useState, useRef, useEffect } from "react";
-import { useSidebarStore } from "@/lib/constants";
-import { useContentStore } from "@/stores";
+import { useContentStore, useSidebarStore } from "@/stores";
 import { usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import Link from "next/link";

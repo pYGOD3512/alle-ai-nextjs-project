@@ -11,11 +11,11 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { GoogleDriveModal } from "@/components/ui/modals";
-import { driveService } from '@/lib/driveServices';
+import { driveService } from '@/lib/services/driveServices';
 import { validateFile } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast"; 
-import { dropboxService } from "@/lib/dropboxServices";
-import { oneDriveService, OneDriveResponse } from '@/lib/onedriveServices';
+import { dropboxService } from "@/lib/services/dropboxServices";
+import { oneDriveService, OneDriveResponse } from '@/lib/services/onedriveServices';
 
 interface FileUploadButtonProps {
   onUploadFromComputer: () => void;

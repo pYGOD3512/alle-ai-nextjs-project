@@ -6,17 +6,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  useSidebarStore,
   CHAT_MODELS,
   IMAGE_MODELS,
   AUDIO_MODELS,
   VIDEO_MODELS,
-  useSelectedModelsStore,
-  useHistoryStore,
   socialMediaOptions,
-  useLikedMediaStore,
-  LikedMediaItem
 } from "@/lib/constants";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -80,13 +76,7 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
-import { useDriveAuthStore } from "@/lib/constants";
-
-import { driveService } from '@/lib/driveServices';
-import { dropboxService } from '@/lib/dropboxServices';
-import { gapi } from "gapi-script";
-
-
+import { driveService } from '@/lib/services/driveServices';
 
 interface ModalProps {
   isOpen: boolean;

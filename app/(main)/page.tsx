@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { ChatInput } from "@/components/features/ChatInput";
-import { useSidebarStore } from "@/lib/constants";
+import { useSidebarStore, useContentStore } from "@/stores";
 import { useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -21,6 +21,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const { isOpen, setSectionId } = useSidebarStore();
+  const { setContent } = useContentStore();
   const router = useRouter();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
 
@@ -31,6 +32,7 @@ export default function Home() {
 
   const handleSend = () => {
     if (!input.trim()) return;
+
     //  to chatpage with id
     // static id for test
 
@@ -48,9 +50,11 @@ export default function Home() {
     with models
     
     */
-    const chatId = crypto.randomUUID();
-    setSectionId("chatId", chatId);
-    router.push(`/chat/res/${chatId}`);
+    
+    // Save the user's input to the content store
+    setContent("chat", "input", input);
+    
+    router.push(`/chat/`);
   };
 
   const handleClicked = (opt: { label: String }) => {

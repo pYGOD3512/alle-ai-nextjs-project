@@ -1,6 +1,6 @@
 import { gapi } from 'gapi-script';
 import { toast as showToast } from "@/hooks/use-toast";
-import { useDriveAuthStore } from '@/lib/constants';
+import { useDriveAuthStore } from '@/stores';
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;

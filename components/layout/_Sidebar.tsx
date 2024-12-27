@@ -16,9 +16,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine  } from "lucide-react";
 import Image from "next/image";
 import {
-  useSidebarStore,
   sidebarMenuItems,
 } from "@/lib/constants";
+import { useSidebarStore, useHistoryStore } from "@/stores";
 import {
   Tooltip,
   TooltipContent,
@@ -34,7 +34,6 @@ import {
 import { ModelSelectionModal, PlansModal, SearchHistoryModal } from "../ui/modals";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useHistoryStore } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 
 
