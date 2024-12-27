@@ -45,16 +45,16 @@ class DropboxService {
         // Add load event listener to track initialization
         script.onload = () => {
           this.isInitialized = true;
-          console.log('Dropbox SDK loaded successfully');
+          // console.log('Dropbox SDK loaded successfully');
         };
 
         script.onerror = (error) => {
-          console.error('Failed to load Dropbox SDK:', error);
+          // console.error('Failed to load Dropbox SDK:', error);
         };
 
         document.head.appendChild(script);
       } catch (error) {
-        console.error('Error initializing Dropbox SDK:', error);
+        // console.error('Error initializing Dropbox SDK:', error);
       }
     }
   }

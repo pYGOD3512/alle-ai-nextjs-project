@@ -20,7 +20,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSidebarStore, navItems, userMenuItems, notifications as notificationData, useSelectedModelsStore } from '@/lib/constants';
+import { navItems, userMenuItems, notifications as notificationData} from '@/lib/constants';
+import { useSidebarStore, useSelectedModelsStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal } from "../ui/modals";

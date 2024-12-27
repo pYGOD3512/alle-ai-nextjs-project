@@ -18,11 +18,11 @@ interface ModelSelectorProps {
 
 export function ModelSelector({ models, activeModel, onSelect }: ModelSelectorProps) {
   return (
-    <div className="grid grid-cols-5 gap-4 max-w-[90%] mx-auto">
+    <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
       {models.map((model) => (
         <Button
           key={model.id}
-          variant={activeModel === model.id ? "secondary" : "outline"}
+          variant={activeModel === model.id ? "active" : "outline"}
           className="flex flex-col items-start px-2 py-4 md:p-2 h-auto space-y-0 md:space-y-2 w-full"
           onClick={() => onSelect(model.id)}
         >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSidebarStore } from "@/lib/constants";
+import { useSidebarStore } from "@/stores";
 import { useEffect } from "react";
 import RenderPageContent from "@/components/RenderPageContent";
 

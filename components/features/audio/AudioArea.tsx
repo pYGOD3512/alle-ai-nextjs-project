@@ -12,9 +12,8 @@ import { Slider } from "@/components/ui/slider";
 import GreetingMessage from "../GreetingMessage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
-import { useContentStore } from "@/stores";
-import { useSelectedModelsStore, useGeneratedAudioStore, AUDIO_MODELS } from "@/lib/constants";
-import { useLikedMediaStore } from "@/lib/constants";
+import { useContentStore, useSelectedModelsStore, useGeneratedAudioStore, useLikedMediaStore } from "@/stores";
+import { AUDIO_MODELS } from "@/lib/constants";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { MicButton } from "@/components/ui/MicButton";
 import { FileUploadButton } from "@/components/ui/file-upload-button";

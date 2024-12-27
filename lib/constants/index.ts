@@ -8,202 +8,13 @@ import {
   Video,
   Music,
   ImageIcon,
-  Trash2,
-  Pencil,
   Bell,
   Handshake,
   LogOut,
   Braces,
   Heart,
 } from "lucide-react";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { driveService } from '@/lib/driveServices';
 
-interface SidebarState {
-  isOpen: boolean;
-  currentPage: string;
-  sectionIds: { [key: string]: string | null }; // Generalized section IDs
-  toggle: () => void;
-  setCurrentPage: (page: string) => void;
-  setSectionId: (section: string, id: string | null) => void; // Setter for dynamic IDs
-  setOpen: (value: boolean) => void;
-}
-
-interface ContentType {
-  input: string;
-  voice: string;
-  attachment: string;
-}
-
-interface ContentState {
-  chat: ContentType;
-  image: ContentType;
-  audio: ContentType;
-  video: ContentType;
-}
-
-interface ContentStore {
-  content: ContentState;
-  setContent: (
-    type: keyof ContentState,
-    key: keyof ContentType,
-    value: string
-  ) => void;
-}
-// SIDEBAR & HEADER CONSTANTS ----- START
-
-export const useSidebarStore = create<SidebarState>()(
-  persist(
-    (set) => ({
-      isOpen: true,
-      currentPage: "chat",
-      sectionIds: {
-        chatId: null,
-        imageId: null,
-        audioId: null,
-        videoId: null,
-      }, // Default section IDs
-      toggle: () => set((state) => ({ isOpen: !state.isOpen })),
-      setCurrentPage: (page) => set({ currentPage: page }),
-      setSectionId: (section, id) =>
-        set((state) => ({
-          sectionIds: {
-            ...state.sectionIds,
-            [section]: id, // Dynamically update the section ID
-          },
-        })),
-      setOpen: (value) => set({ isOpen: value }),
-    }),
-    {
-      name: "sidebar-storage",
-      partialize: (state) => ({
-        isOpen: state.isOpen,
-        sectionIds: state.sectionIds,
-      }),
-    }
-  )
-);
-
-interface SelectedModelsStore {
-  selectedModels: {
-    chat: string[];
-    image: string[];
-    audio: string[];
-    video: string[];
-  };
-  tempSelectedModels: string[]; // Here I'm using the tempSelectedModels to store the selected models before the user saves them.
-  setTempSelectedModels: (models: string[]) => void;
-  saveSelectedModels: (type: 'chat' | 'image' | 'audio' | 'video') => void;
-  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => string[];
-}
-
-export const useSelectedModelsStore = create<SelectedModelsStore>()(
-  persist(
-    (set, get) => ({
-      selectedModels: {
-        chat: [],
-        image: [],
-        audio: [],
-        video: [],
-      },
-      tempSelectedModels: [],
-      setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
-      saveSelectedModels: (type) => set((state) => ({
-        selectedModels: {
-          ...state.selectedModels,
-          [type]: state.tempSelectedModels
-        },
-        tempSelectedModels: [] // So here we empty the tempSelectedModels
-      })),
-      getSelectedModelNames: (type) => {
-        const state = get();
-        const modelList = type === 'chat' ? CHAT_MODELS 
-          : type === 'image' ? IMAGE_MODELS
-          : type === 'audio' ? AUDIO_MODELS
-          : VIDEO_MODELS;
-        
-        return state.selectedModels[type]
-          .map(id => modelList.find(model => model.id === id)?.name ?? '')
-          .filter(name => name !== '');
-      }
-    }),
-    {
-      name: 'selected-models-storage'
-    }
-  )
-);
-
-interface ImageResponse {
-  modelId: string;
-  liked: boolean;
-  imageUrl: string;
-}
-
-interface GeneratedImagesStore {
-  images: ImageResponse[];
-  lastPrompt: string | null;
-  setImages: (images: ImageResponse[]) => void;
-  updateImage: (modelId: string, updates: Partial<ImageResponse>) => void;
-  setLastPrompt: (prompt: string) => void;
-  clearImages: () => void;
-}
-
-export const useGeneratedImagesStore = create<GeneratedImagesStore>()(
-  persist(
-    (set, get) => ({
-      images: [],
-      lastPrompt: null,
-      setImages: (images) => set({ images }),
-      updateImage: (modelId, updates) => set((state) => ({
-        images: state.images.map(img => 
-          img.modelId === modelId ? { ...img, ...updates } : img
-        )
-      })),
-      setLastPrompt: (prompt) => set({ lastPrompt: prompt }),
-      clearImages: () => set({ images: [], lastPrompt: null }),
-    }),
-    {
-      name: 'generated-images-storage'
-    }
-  )
-);
-
-interface AudioResponse {
-  modelId: string;
-  content: string;
-  audioUrl: string;
-  liked?: boolean;
-}
-
-interface GeneratedAudioStore {
-  responses: AudioResponse[];
-  lastPrompt: string | null;
-  setResponses: (responses: AudioResponse[]) => void;
-  updateResponse: (modelId: string, updates: Partial<AudioResponse>) => void;
-  setLastPrompt: (prompt: string) => void;
-  clearResponses: () => void;
-}
-
-export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
-  persist(
-    (set) => ({
-      responses: [],
-      lastPrompt: null,
-      setResponses: (responses) => set({ responses }),
-      updateResponse: (modelId, updates) => set((state) => ({
-        responses: state.responses.map(res => 
-          res.modelId === modelId ? { ...res, ...updates } : res
-        )
-      })),
-      setLastPrompt: (prompt) => set({ lastPrompt: prompt }),
-      clearResponses: () => set({ responses: [], lastPrompt: null }),
-    }),
-    {
-      name: 'generated-audio-storage'
-    }
-  )
-);
 
 export const navItems = [
   {
@@ -331,82 +142,6 @@ export const videoHistory = [
   "Special effects compilation",
 ];
 
-interface HistoryItem {
-  id: string;
-  title: string;
-  createdAt: Date;
-  type: 'chat' | 'image' | 'audio' | 'video';
-}
-
-interface HistoryStore {
-  history: HistoryItem[];
-  addHistory: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
-  removeHistory: (id: string) => void;
-  renameHistory: (id: string, newTitle: string) => void;
-  getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
-}
-
-// So I'm using the state manager to handle the static history for each page.
-export const useHistoryStore = create<HistoryStore>()(
-  persist(
-    (set, get) => ({
-      history: [
-        ...chatHistory.map((title, index) => ({
-          id: `chat-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'chat' as const,
-        })),
-        ...imageHistory.map((title, index) => ({
-          id: `image-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'image' as const,
-        })),
-        ...audioHistory.map((title, index) => ({
-          id: `audio-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'audio' as const,
-        })),
-        ...videoHistory.map((title, index) => ({
-          id: `video-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'video' as const,
-        })),
-      ],
-      addHistory: (item) =>
-        set((state) => ({
-          history: [
-            {
-              ...item,
-              id: `${item.type}-${Date.now()}`,
-              createdAt: new Date(),
-            },
-            ...state.history,
-          ],
-        })),
-      removeHistory: (id) =>
-        set((state) => ({
-          history: state.history.filter((item) => item.id !== id),
-        })),
-      renameHistory: (id, newTitle) =>
-        set((state) => ({
-          history: state.history.map((item) =>
-            item.id === id ? { ...item, title: newTitle } : item
-          ),
-        })),
-      getHistoryByType: (type) => {
-        return get().history.filter((item) => item.type === type);
-      },
-    }),
-    {
-      name: 'history-storage',
-    }
-  )
-);
-
 export const userMenuItems = [
   {
     label: "Profile",
@@ -456,9 +191,7 @@ export const userMenuItems = [
     },
   },
 ];
-// SIDEBAR & HEADER CONSTANTS ----- END
 
-// CHAT AREA CONSTANTS ----- START
 
 export interface Message {
   id: string;
@@ -474,8 +207,8 @@ export interface Message {
 
 export const CHAT_MODELS = [
   {
-    id: "chatgpt",
-    name: "ChatGPT",
+    id: "chatgpt-3-5-turbo",
+    name: "ChatGPT 3.5",
     icon: "/models/gpt-3-5.png",
     provider: "OpenAI",
     type: "plus",
@@ -490,7 +223,7 @@ export const CHAT_MODELS = [
     preview: "Making one million dollars in just five...",
   },
   {
-    id: "gemini",
+    id: "gemini-1-5-pro",
     name: "Gemini 1.5 Pro",
     icon: "/models/gemini.png",
     provider: "Google",
@@ -498,7 +231,7 @@ export const CHAT_MODELS = [
     preview: "Making a million dollars in 5 days is...",
   },
   {
-    id: "llama",
+    id: "llama-3-70b-instruct",
     name: "Llama 3 70B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
@@ -506,7 +239,7 @@ export const CHAT_MODELS = [
     preview: "The elusive goal of making $1 million in...",
   },
   {
-    id: "llama3-1",
+    id: "llama-3-1-405b-instruct",
     name: "Llama 3.1 405B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
@@ -530,7 +263,7 @@ export const CHAT_MODELS = [
     preview: "Making $1 million in just 5 days is an...",
   },
   {
-    id: "claude",
+    id: "claude-3-5-sonnet",
     name: "Claude 3.5 Sonnet",
     icon: "/models/claude-3.png",
     provider: "Anthropic",
@@ -554,7 +287,7 @@ export const CHAT_MODELS = [
     preview: "Making $1 million in just 5 days is an...",
   },
   {
-    id: "GPT-4",
+    id: "llama-3-1-8b-instruct",
     name: "Llama 3.1 8B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
@@ -562,7 +295,7 @@ export const CHAT_MODELS = [
     preview: "Making $1 million in just 5 days is an...",
   },
   {
-    id: "llama3-1-70b-instruct",
+    id: "llama-3-1-70b-instruct",
     name: "Llama 3.1 70B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
@@ -570,7 +303,7 @@ export const CHAT_MODELS = [
     preview: "Making $1 million in just 5 days is an...",
   },
   {
-    id: "claude3",
+    id: "claude-3-opus",
     name: "Claude 3 Opus",
     icon: "/models/claude-3.png",
     provider: "Anthropic",
@@ -704,65 +437,29 @@ export const VIDEO_MODELS = [
   },
 ];
 
-export const initialMessages = [
-  {
-    id: "1",
-    content: "How do I make 1 million dollars in 5 days?",
-    sender: "user",
-    timestamp: new Date(),
-    responses: [
-      {
-        model: "GPT-4o",
-        content: `
-          SQL injection: Occurs when a user can input malicious SQL code into a web application, allowing them to execute unauthorized commands on the database.
-          Cross-site scripting (XSS): Allows attackers to inject malicious scripts into a web page, which can be used to steal user information, redirect traffic, or launch other attacks.
-          Input forgery: Occurs when an attacker can manipulate the input validation process to bypass security checks, such as changing a numerical input field to a text field.`,
-        icon: "/models/gpt-4o.png",
-      },
-      {
-        model: "Claude 3.5 Sonnet",
-        content: `
-          Weak passwords: Users often create passwords that are easy to guess or crack, allowing attackers to gain unauthorized access to accounts.
-          Unprotected login pages: Login pages may not be sufficiently protected against brute force attacks or password sniffing techniques.
-          Insufficient authorization: Users may be granted access to resources or functionality that they should not have, allowing them to perform unauthorized actions.`,
-        icon: "/models/claude-3.png",
-      },
-      {
-        model: "Gemini 1.5 Pro",
-        content: `
-          Default configurations: Web applications may be installed with default settings that are insecure, such as weak passwords or unpatched software.
-          Unpatched software: Web application software often requires regular updates to patch security vulnerabilities. Failure to apply these updates can leave the application vulnerable to attack.
-          Insecure server configurations: Web servers may be misconfigured, exposing sensitive data or allowing attackers to gain unauthorized access.`,
-        icon: "/models/gemini.png",
-      },
-      {
-        model: "Llama 3 70B Instruct",
-        content: `
-          Cross-site request forgery (CSRF): Occurs when an attacker can trick a user into submitting a request that they do not intend to, such as transferring funds or changing account settings.
-          Insecure direct object references (IDOR): Occurs when an attacker can guess or manipulate the URL of a web page to access sensitive information that they should not have access to.
-          Broken object-level authorization: Similar to IDOR, this vulnerability occurs when an attacker can bypass authorization checks to access objects that they should not have access to.`,
-        icon: "/models/meta.png",
-      },
-      {
-        model: "ChatGPT",
-        content: `
-        Outdated software: Web applications that are not kept up to date with the latest security patches may be vulnerable to known exploits.
-          Third-party libraries: Web applications often use third-party libraries, which can introduce vulnerabilities if not properly reviewed and updated.
-          Exploit kits: Attackers may use exploit kits to automate the process of exploiting common vulnerabilities.`,
-        icon: "/models/gpt-3-5.png",
-      },
-    ],
-  },
-];
+export const MODEL_RESPONSES: { [key: string]: string } = {
+  "chatgpt-3-5-turbo": "Making $1 million in 5 days is extremely challenging. Here's a realistic perspective: Start with identifying high-value opportunities, leverage existing networks, and focus on scalable solutions. However, remember that sustainable wealth building typically takes more time.",
+  
+  "gpt4": "While making $1 million in 5 days is an ambitious goal, let's break this down strategically: 1) Identify existing assets that can be leveraged 2) Look for high-return investment opportunities 3) Consider business acquisitions or mergers. However, I must emphasize that such rapid wealth creation carries significant risks.",
+  
+  "gemini-1-5-pro": "From a practical standpoint, generating $1 million in 5 days would require: 1. Exceptional market timing 2. Significant initial capital 3. High-risk opportunities. Consider more sustainable approaches to wealth building that align with your resources and risk tolerance.",
+  
+  "llama-3-70b-instruct": "The goal of making $1 million in 5 days requires careful consideration. Here's my analysis: First, evaluate your current resources. Second, identify potential high-return opportunities. Third, understand the associated risks. Remember, sustainable wealth building typically requires more time.",
+  
+  "claude-3-5-sonnet": "Let me provide a balanced perspective on making $1 million in 5 days. While technically possible, it would require: 1) Substantial initial capital 2) Extremely favorable market conditions 3) High-risk tolerance. Consider focusing on more sustainable long-term wealth building strategies.",
 
-// CHAT AREA CONSTANTS ----- END
+  "sonar-large-32k-online": "Making $1 million in 5 days is extremely challenging. Here's a realistic perspective: Start with identifying high-value opportunities, leverage existing networks, and focus on scalable solutions. However, remember that sustainable wealth building typically takes more time.",
 
+  "gpt-4o-mini": "While making $1 million in 5 days is an ambitious goal, let's break this down strategically: 1) Identify existing assets that can be leveraged 2) Look for high-return investment opportunities 3) Consider business acquisitions or mergers. However, I must emphasize that such rapid wealth creation carries significant risks.",
 
-// NAVIGATION CONTENT DATA MANAGEMENTS --- STARTS
-// NAVIGATION CONTENT DATA MANAGEMENTS --- ENDS
+  "claude-3-opus": "Let me provide a balanced perspective on making $1 million in 5 days. While technically possible, it would require: 1) Substantial initial capital 2) Extremely favorable market conditions 3) High-risk tolerance. Consider focusing on more sustainable long-term wealth building strategies.",
 
+  "yi-large": "The goal of making $1 million in 5 days requires careful consideration. Here's my analysis: First, evaluate your current resources. Second, identify potential high-return opportunities. Third, understand the associated risks. Remember, sustainable wealth building typically requires more time.",
 
-// SOCIAL MEDIA SHARE --- START
+  "gemini-1-0-pro": "From a practical standpoint, generating $1 million in 5 days would require: 1. Exceptional market timing 2. Significant initial capital 3. High-risk opportunities. Consider more sustainable approaches to wealth building that align with your resources and risk tolerance.",
+};
+
+export const initialMessages: Message[] = [];
 
 export const socialMediaOptions = [
   {
@@ -815,134 +512,4 @@ export const socialMediaOptions = [
   }
 ];
 
-// SOCIAL MEDIA SHARE --- END
 
-export interface LikedMediaItem {
-  id: string;
-  type: 'image' | 'video' | 'audio';
-  url: string;
-  modelName: string;
-  modelIcon: string;
-  modelId: string;
-  prompt: string;
-  timestamp: Date;
-  liked: boolean;
-}
-
-interface LikedMediaStore {
-  likedMedia: LikedMediaItem[];
-  addLikedMedia: (item: Omit<LikedMediaItem, 'id' | 'timestamp'>) => void;
-  removeLikedMedia: (id: string) => void;
-  getLikedMediaByType: (type: 'all' | 'image' | 'video' | 'audio') => LikedMediaItem[];
-}
-
-export const useLikedMediaStore = create<LikedMediaStore>()(
-  persist(
-    (set, get) => ({
-      likedMedia: [],
-      addLikedMedia: (item) =>
-        set((state) => ({
-          likedMedia: [
-            {
-              ...item,
-              id: `${item.type}-${Date.now()}`,
-              timestamp: new Date(),
-            },
-            ...state.likedMedia,
-          ],
-        })),
-      removeLikedMedia: (id) =>
-        set((state) => ({
-          likedMedia: state.likedMedia.filter((item) => item.id !== id),
-        })),
-      getLikedMediaByType: (type) => {
-        const media = get().likedMedia;
-        if (type === 'all') return media;
-        return media.filter((item) => item.type === type);
-      },
-    }),
-    {
-      name: 'liked-media-storage',
-    }
-  )
-);
-
-interface DriveAuthStore {
-  isAuthenticated: boolean;
-  accessToken: string | null;
-  expiresAt: number | null;
-  setAuth: (token: string, expiresIn: number) => void;
-  clearAuth: () => void;
-  checkAndRefreshAuth: () => Promise<boolean>;
-}
-
-export const useDriveAuthStore = create<DriveAuthStore>()(
-  persist(
-    (set, get) => ({
-      isAuthenticated: false,
-      accessToken: null,
-      expiresAt: null,
-
-      setAuth: (token: string, expiresIn: number) => {
-        const expiresAt = Date.now() + (expiresIn * 1000);
-        set({ 
-          isAuthenticated: true, 
-          accessToken: token,
-          expiresAt: expiresAt
-        });
-      },
-
-      clearAuth: () => {
-        set({ 
-          isAuthenticated: false, 
-          accessToken: null,
-          expiresAt: null 
-        });
-      },
-
-      checkAndRefreshAuth: async () => {
-        const state = get();
-        const now = Date.now();
-
-        // If we have a valid token that's not expired
-        if (state.accessToken && state.expiresAt && state.expiresAt > now) {
-          return true;
-        }
-
-        try {
-          // Get gapi instance from driveService
-          const gapi = driveService.getGapi();
-          if (!gapi) {
-            throw new Error('Google Drive API not initialized');
-          }
-
-          // Try to refresh the token using gapi
-          const authInstance = gapi.auth2.getAuthInstance();
-          if (authInstance.isSignedIn.get()) {
-            const currentUser = authInstance.currentUser.get();
-            const authResponse = currentUser.getAuthResponse();
-            
-            set({
-              isAuthenticated: true,
-              accessToken: authResponse.access_token,
-              expiresAt: authResponse.expires_at
-            });
-            
-            return true;
-          }
-          
-          // If not signed in, clear auth state
-          state.clearAuth();
-          return false;
-        } catch (error) {
-          console.error('Failed to refresh auth:', error);
-          state.clearAuth();
-          return false;
-        }
-      }
-    }),
-    {
-      name: 'drive-auth-storage'
-    }
-  )
-);

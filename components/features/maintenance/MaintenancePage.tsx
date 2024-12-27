@@ -52,8 +52,8 @@ export function MaintenancePage({
       const radius = 15 + (index % 3) * 15; // Creates 3 circular layers
       
       return {
-        x: 50 + Math.cos(angle) * radius, // 50 is center
-        y: 50 + Math.sin(angle) * radius  // 50 is center
+        x: 50 + Math.cos(angle) * radius, 
+        y: 50 + Math.sin(angle) * radius
       };
     } else {
       // Create an organic spread using golden ratio
@@ -261,12 +261,6 @@ export function MaintenancePage({
                 >
                   <RefreshCw className="h-4 w-4" />
                   Refresh Page
-                  <motion.div
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </motion.div>
                 </Button>
               </motion.div>
             )}

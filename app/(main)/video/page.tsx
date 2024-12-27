@@ -1,6 +1,6 @@
 "use client"
 import { useEffect } from "react";
-import { useSidebarStore } from "@/lib/constants";
+import { useSidebarStore } from "@/stores";
 import VideoArea from "@/components/features/video/VideoArea";
 export default function VideoGenerationPage() {
   const { isOpen } = useSidebarStore();

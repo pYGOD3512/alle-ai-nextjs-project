@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import { useContentStore } from "@/stores";
+import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
 import { Copy, Download, Share2, Heart, Plus } from "lucide-react";
-import { useSelectedModelsStore, IMAGE_MODELS } from '@/lib/constants';
+import { IMAGE_MODELS } from '@/lib/constants';
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -15,9 +15,7 @@ import {
 import { ShareDialog } from "@/components/ui/modals";
 
 import { Skeleton as AntdSkeleton} from 'antd';
-import { useGeneratedImagesStore } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { useLikedMediaStore } from '@/lib/constants';
 
 type SizeType = 'default' | 'small' | 'large';
 type ButtonShapeType = 'circle' | 'square' | 'round' | 'default';
