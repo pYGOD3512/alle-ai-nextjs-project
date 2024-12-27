@@ -27,11 +27,11 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
 
     // Route doesn't exist at all
-    if (!isPublicRoute && !isPrivateRoute) {
-      setIsValidRoute(false);
-      setAuthorized(true); // Set to true to show 404 page
-      return;
-    }
+    // if (!isPublicRoute && !isPrivateRoute) {
+    //   setIsValidRoute(false);
+    //   setAuthorized(true);
+    //   return;
+    // }
 
     // Route exists but is private and user isn't subscribed
     if (isPrivateRoute && !isSubscribed) {

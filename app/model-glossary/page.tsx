@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { useSidebarStore } from "@/lib/constants";
+import { useSidebarStore } from "@/stores";
 import ModelGlossary from '@/components/features/model-glossary/ModelGlossary';
 
 

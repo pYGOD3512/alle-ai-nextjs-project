@@ -43,3 +43,28 @@ export interface UploadedFile {
   status: 'loading' | 'ready' | 'error';
   progress?: number;
 }
+
+
+export interface ChatThread {
+  id: string;
+  messages: ChatMessage[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  sender: "user" | "ai";
+  timestamp: Date;
+  modelResponses: ModelResponse[];
+}
+
+export interface ModelResponse {
+  id: string;
+  modelId: string;
+  content: string;
+  status: 'loading' | 'complete' | 'error';
+  parentMessageId: string;
+  timestamp: Date;
+}

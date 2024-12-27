@@ -6,8 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { useContentStore } from "@/stores";
-import { useSelectedModelsStore, VIDEO_MODELS } from "@/lib/constants";
+import { useContentStore, useSelectedModelsStore, useLikedMediaStore } from "@/stores";
+import { VIDEO_MODELS } from "@/lib/constants";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff, Upload } from "lucide-react";
 import {
@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/carousel";
 import { VideoSettingsInfoModal } from "@/components/ui/modals";
 import { Progress } from "@/components/ui/progress";
-import { useLikedMediaStore } from "@/lib/constants";
 import { Textarea } from "@/components/ui/textarea";
 import { MicButton } from "@/components/ui/MicButton";
 import { FileUploadButton } from "@/components/ui/file-upload-button";
