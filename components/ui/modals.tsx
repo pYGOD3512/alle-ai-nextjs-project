@@ -63,6 +63,8 @@ import {
   Link,
   ExternalLink,
   Clock9,
+  MessageCircle,
+  Share2,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -2608,161 +2610,157 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
 
 export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   const { sharedLinks, removeSharedLink } = useSharedLinksStore();
-  // const router = useRouter();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"recent" | "oldest">("recent");
-  const [selectedLink, setSelectedLink] = useState<string | null>(null);
 
-  // Filter and sort shared links
   const filteredLinks = useMemo(() => {
-    return sharedLinks
-      .filter(link => 
-        link.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (sortBy === "recent") {
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        }
-        return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-      });
-  }, [sharedLinks, searchQuery, sortBy]);
+    return sharedLinks.filter(link => 
+      link.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [sharedLinks, searchQuery]);
 
   const copyToClipboard = async (link: string) => {
     try {
       await navigator.clipboard.writeText(link);
-      toast({
-        description: "Link copied to clipboard",
-      });
+      toast({ description: "Link copied to clipboard" });
     } catch (err) {
       toast({
         variant: "destructive",
-        description: "Failed to copy link",
+        description: "Failed to copy link"
       });
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Shared Links</DialogTitle>
-          <DialogDescription>
-            Manage and share your conversation links
-          </DialogDescription>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader className="flex flex-row items-center justify-between relative border-b pb-4">
+          <DialogTitle>Shared Links</DialogTitle>
+          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">esc</span>
+          </kbd>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Search and Sort Controls */}
-          <div className="flex items-center gap-4">
+          {/* Header with Search */}
+          <div className="flex items-center justify-between gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search shared links..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 focus-visible:outline-none"
+                className="pl-9 bg-background focus-visible:outline-none focus:border-borderColorPrimary"
               />
             </div>
-            <Select value={sortBy} onValueChange={(value: "recent" | "oldest") => setSortBy(value)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Most Recent</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
-          {/* Links List */}
-          <ScrollArea className="h-[400px] rounded-md border p-4">
-            {filteredLinks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                {/* <Share className="h-12 w-12 mb-2" /> */}
-                <p>No shared links found</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredLinks.map((item) => (
+          {/* Links Table */}
+          <div className="rounded-md border">
+            {/* Table Header */}
+            <div className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-4 border-b bg-muted/50">
+              <div className="text-sm font-medium">Name</div>
+              <div className="hidden md:block text-sm font-medium">Date shared</div>
+              <div className="text-sm font-medium text-right">Actions</div>
+            </div>
+
+            {/* Table Body */}
+            <ScrollArea className="h-[400px]">
+              {filteredLinks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+                  <Link className="h-8 w-8 mb-2 opacity-50" />
+                  <p className="text-sm">No shared links found</p>
+                </div>
+              ) : (
+                filteredLinks.map((item) => (
                   <div
                     key={item.id}
-                    className={cn(
-                      "group relative rounded-lg border p-4 transition-all hover:shadow-md"
-                    )}
-                    onClick={() => setSelectedLink(item.id)}
+                    className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-4 border-b last:border-0 items-center hover:bg-muted/50 group"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-1">
-                        <h4 className="font-medium">{item.title}</h4>
-                        <p className="text-sm text-muted-foreground truncate">{item.link}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock9 className="h-3 w-3" />
-                          <span>Updated {formatDistanceToNow(new Date(item.updatedAt))} ago</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {/* Share Button with Dropdown */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <ExternalLink className="h-4 w-4" />
+                    {/* Link Title */}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Link className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                      <span className="truncate text-sm">{item.title}</span>
+                    </div>
+
+                    {/* Date */}
+                    <div className="hidden md:flex items-center gap-2 text-muted-foreground">
+                      <Clock9 className="h-3 w-3" />
+                      <span className="text-xs">
+                        {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-2">
+                      <TooltipProvider>
+                        {/* Share Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Share2 className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[200px] bg-backgroundSecondary">
+                                {socialMediaOptions.map((platform) => (
+                                  <DropdownMenuItem
+                                    key={platform.name}
+                                    onClick={() => window.open(platform.handler(item.link), '_blank')}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <Image
+                                      src={platform.icon}
+                                      alt={platform.name}
+                                      width={16}
+                                      height={16}
+                                    />
+                                    <span>Share on {platform.name}</span>
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TooltipTrigger>
+                          <TooltipContent>Share</TooltipContent>
+                        </Tooltip>
+
+                        {/* Copy Link Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => copyToClipboard(item.link)}
+                            >
+                              <Copy className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-[200px]">
-                            {socialMediaOptions.map((platform) => (
-                              <DropdownMenuItem
-                                key={platform.name}
-                                onClick={() => window.open(platform.handler(item.link), '_blank')}
-                                className="flex items-center gap-2"
-                              >
-                                <Image
-                                  src={platform.icon}
-                                  alt={platform.name}
-                                  width={16}
-                                  height={16}
-                                />
-                                <span>Share on {platform.name}</span>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </TooltipTrigger>
+                          <TooltipContent>Copy link</TooltipContent>
+                        </Tooltip>
 
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(item.link)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            // router.push(`/share/${item.historyId}`);
-                            onClose();
-                          }}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => removeSharedLink(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        {/* Delete Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => removeSharedLink(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
+                ))
+              )}
+            </ScrollArea>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
