@@ -13,6 +13,7 @@ import {
   LogOut,
   Braces,
   Heart,
+  Share,
 } from "lucide-react";
 
 
@@ -84,62 +85,124 @@ export const sidebarMenuItems = [
   { icon: Video, label: "Video Generation", beta: true, href: "/video" },
 ];
 
+// Helper function to generate random IDs
+const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// Generate timestamps from newest to oldest
+const generateTimestamp = (index: number) => new Date(Date.now() - index * 1000 * 60 * 60);
+
 export const chatHistory = [
-  "Time to Build a Wall with Four: Key Insights on Effective Barrier Construction and Team Collaboration",
-  "Making $1 Million in 5 Days: Proven Strategies for Rapid Wealth Creation in a Short Timeframe",
-  "The Future of Generative AI in Business: How AI is Transforming Industries and Creating New Opportunities",
-  "Strategies to Improve Employee Productivity: Effective Methods to Enhance Workplace Efficiency and Focus",
-  "Making $1 Million in 5 Days: A Guide to Quick Financial Success and Smart Investment Approaches",
-  "The Future of Generative AI in Healthcare: Exploring AI's Potential in Revolutionizing Medical Practices",
-  "Strategies to Improve Employee Retention: Tips for Keeping Top Talent Engaged and Motivated Long-Term",
-  "Making $1 Million in 5 Days: Actionable Insights from Entrepreneurs Who Have Achieved Quick Financial Growth",
-  "The Future of Generative AI in Education: How AI is Shaping the Future of Learning and Personalized Teaching",
-  "Strategies to Improve Employee Engagement: Techniques to Build Stronger Connections and Motivation at Work",
-  "The Future of Generative AI in Business: How AI is Transforming Industries and Creating New Opportunities",
-  "Strategies to Improve Employee Productivity: Effective Methods to Enhance Workplace Efficiency and Focus",
-  "Making $1 Million in 5 Days: A Guide to Quick Financial Success and Smart Investment Approaches",
-  "The Future of Generative AI in Healthcare: Exploring AI's Potential in Revolutionizing Medical Practices",
-  "Strategies to Improve Employee Retention: Tips for Keeping Top Talent Engaged and Motivated Long-Term",
+  {
+    id: generateId(),
+    title: "Time to Build a Wall with Four: Key Insights on Effective Barrier Construction",
+    createdAt: generateTimestamp(0),
+    type: 'chat' as const
+  },
+  {
+    id: generateId(),
+    title: "Making $1 Million in 5 Days: Proven Strategies for Rapid Wealth Creation",
+    createdAt: generateTimestamp(1),
+    type: 'chat' as const
+  },
+  {
+    id: generateId(),
+    title: "The Future of Generative AI in Business: How AI is Transforming Industries and Creating New Opportunities",
+    createdAt: generateTimestamp(2),
+    type: 'chat' as const
+  },
+  {
+    id: generateId(),
+    title: "Strategies to Improve Employee Productivity: Effective Methods to Enhance Workplace Efficiency and Focus",
+    createdAt: generateTimestamp(3),
+    type: 'chat' as const
+  },
+  {
+    id: generateId(),
+    title: "Making $1 Million in 5 Days: A Guide to Quick Financial Success and Smart Investment Approaches",
+    createdAt: generateTimestamp(4),
+    type: 'chat' as const
+  },
 ];
 
-
 export const imageHistory = [
-  "Sunset over mountain landscape",
-  "Futuristic city skyline",
-  "Abstract geometric patterns",
-  "Cyberpunk character portrait",
-  "Magical forest scene",
-  "Underwater coral reef",
-  "Space station interior",
-  "Medieval castle at dawn",
-  "Neon-lit street market",
-  "Steampunk machinery",
+  {
+    id: generateId(),
+    title: "Sunset over mountain landscape",
+    createdAt: generateTimestamp(0),
+    type: 'image' as const
+  },
+  {
+    id: generateId(),
+    title: "Futuristic city skyline",
+    createdAt: generateTimestamp(1),
+    type: 'image' as const
+  },
+  {
+    id: generateId(),
+    title: "Abstract geometric patterns",
+    createdAt: generateTimestamp(2),
+    type: 'image' as const
+  },
+  {
+    id: generateId(),
+    title: "Cyberpunk character portrait",
+    createdAt: generateTimestamp(3),
+    type: 'image' as const
+  },
 ];
 
 export const audioHistory = [
-  "Epic orchestral soundtrack",
-  "Ambient nature sounds",
-  "Lo-fi beats composition",
-  "Jazz piano improvisation",
-  "Electronic dance track",
-  "Acoustic guitar melody",
-  "Cinematic sound effects",
-  "Meditation background music",
-  "Synthwave composition",
-  "Vocal harmony arrangement",
+  {
+    id: generateId(),
+    title: "Epic orchestral soundtrack",
+    createdAt: generateTimestamp(0),
+    type: 'audio' as const
+  },
+  {
+    id: generateId(),
+    title: "Lo-fi beats composition",
+    createdAt: generateTimestamp(1),
+    type: 'audio' as const
+  },
+  {
+    id: generateId(),
+    title: "Jazz piano improvisation",
+    createdAt: generateTimestamp(2),
+    type: 'audio' as const
+  },
+  {
+    id: generateId(),
+    title: "Electronic dance track",
+    createdAt: generateTimestamp(3),
+    type: 'audio' as const
+  },
 ];
 
 export const videoHistory = [
-  "Product showcase animation",
-  "Nature documentary clip",
-  "Character animation test",
-  "Particle effects demo",
-  "Architectural walkthrough",
-  "Logo reveal animation",
-  "Sci-fi scene rendering",
-  "Motion graphics intro",
-  "3D environment flythrough",
-  "Special effects compilation",
+  {
+    id: generateId(),
+    title: "Product showcase animation",
+    createdAt: generateTimestamp(0),
+    type: 'video' as const
+  },
+  {
+    id: generateId(),
+    title: "3D environment flythrough",
+    createdAt: generateTimestamp(1),
+    type: 'video' as const
+  },
+  {
+    id: generateId(),
+    title: "Motion graphics intro",
+    createdAt: generateTimestamp(2),
+    type: 'video' as const
+  },
+  {
+    id: generateId(),
+    title: "Character animation test",
+    createdAt: generateTimestamp(3),
+    type: 'video' as const
+  },
 ];
 
 export const userMenuItems = [

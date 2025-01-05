@@ -33,6 +33,7 @@ const config: Config = {
         sideBarBackground: 'var(--sideBarBackground)',
         borderColorPrimary: 'var(--borderColorPrimary)',
         bodyColor: 'var(--bodyColor)',
+        bodyColorAlt: 'var(--bodyColorAlt)',
         hoverColorPrimary: 'var(--hoverColorPrimary)',
         toastBackgroundColor: 'var(--toastBackgroundColor)',
         infoColorPrimary: 'hsl(var(--infoColorPrimary))',
@@ -75,6 +76,9 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+      },
+      opacity: {
+        '90': '.90',
       },
       keyframes: {
         'accordion-down': {

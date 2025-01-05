@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   CHAT_MODELS,
@@ -12,7 +13,7 @@ import {
   VIDEO_MODELS,
   socialMediaOptions,
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -59,6 +60,9 @@ import {
   ArrowLeft,
   LogIn,
   RefreshCw,
+  Link,
+  ExternalLink,
+  Clock9,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -77,6 +81,8 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
 import { driveService } from '@/lib/services/driveServices';
+import { useRouter } from "next/router";
+import { Share } from "next/dist/compiled/@next/font/dist/google";
 
 interface ModalProps {
   isOpen: boolean;
@@ -474,9 +480,9 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
-  const [deleteAccountModalOpen, setDeleteAccountModalOpen] =
-    React.useState(false);
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false);
   const [logoutAllModalOpen, setLogoutAllModalOpen] = React.useState(false);
+  const [manageSharedLinksOpen, setManageSharedLinksOpen] = React.useState(false);
   const { toast } = useToast();
   const { isAuthenticated } = useDriveAuthStore();
   const [showDriveModal, setShowDriveModal] = useState(false);
@@ -513,7 +519,12 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
       },
     },
     data_controls: {
-      extpertMyData: {
+      sharedLinks: {
+        title: "Shared links",
+        description: "",
+        action: "Manage",
+      },
+      extportMyData: {
         title: "Export data",
         description: "",
         action: "Export",
@@ -720,9 +731,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                         <h4 className="text-sm font-small">{setting.title}</h4>
                         <Button
                           variant={key === "google_drive" ? "outline" : setting.action === "Delete" ? "destructive" : "outline"}
-                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all ${
-                            key === "google_drive" && isAuthenticated ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""
-                          }`}
+                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
                             if (key === "google_drive") {
@@ -731,6 +740,8 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                               setDeleteAccountModalOpen(true);
                             } else if (setting.action === "Export") {
                               setExportModalOpen(true);
+                            } else if (setting.action === "Manage") {
+                              setManageSharedLinksOpen(true);
                             }
                           }}
                         >
@@ -799,6 +810,10 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
         isOpen={showDriveModal}
         onClose={() => setShowDriveModal(false)}
         onFileSelect={() => {}} // Empty function since we're just using it for authentication
+      />
+      <SharedLinksModal
+        isOpen={manageSharedLinksOpen}
+        onClose={() => setManageSharedLinksOpen(false)}
       />
     </>
   );
@@ -2376,6 +2391,379 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
             </div>
           )}
         </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDiscoverable, setIsDiscoverable] = useState(false);
+  const [isNewlyCreated, setIsNewlyCreated] = useState(false);
+  const { toast } = useToast();
+  const { currentConversationLink, setCurrentConversationLink } = useSidebarStore();
+  const { sectionIds } = useSidebarStore();
+  const { addSharedLink, updateSharedLink, getSharedLink } = useSharedLinksStore();
+  const { getHistoryByType } = useHistoryStore();
+
+  const generateLink = async () => {
+    setIsLoading(true);
+    
+    // Get current history type and ID
+    const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
+    
+    if (!currentTypeEntry || !currentTypeEntry[1]) {
+      toast({
+        variant: "destructive",
+        description: "Please select a conversation to share",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const [currentType, historyId] = currentTypeEntry;
+    const historyType = currentType.replace('Id', '') as 'chat' | 'image' | 'audio' | 'video';
+    
+    // Get the history item details
+    const history = getHistoryByType(historyType).find(item => item.id === historyId);
+
+    if (!history) {
+      toast({
+        variant: "destructive",
+        description: "Conversation not found",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if a link already exists for this history
+    const existingLink = getSharedLink(historyId);
+    
+    // Generate the share link
+    const baseUrl = window.location.origin;
+    const newLink = `${baseUrl}/share/${historyId}`;
+
+    if (existingLink) {
+      // Update existing link
+      updateSharedLink(existingLink.id, newLink);
+      toast({
+        description: "Share link has been updated",
+      });
+    } else {
+      // Create new link
+      addSharedLink(historyId, history.title, newLink);
+      toast({
+        description: "Share link has been created",
+      });
+    }
+
+    setCurrentConversationLink(newLink);
+    setIsNewlyCreated(true);
+    setIsLoading(false);
+  };
+
+  const copyToClipboard = async () => {
+    if (!currentConversationLink) return;
+    
+    try {
+      await navigator.clipboard.writeText(currentConversationLink);
+      toast({
+        title: "Copied",
+        description: "Link copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy link",
+      });
+    }
+  };
+
+  // Reset newly created state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsNewlyCreated(false);
+    }
+  }, [isOpen]);
+
+  // Reset state when section IDs change
+  useEffect(() => {
+    setCurrentConversationLink(null);
+    setIsNewlyCreated(false);
+  }, [sectionIds]);
+
+  const handleShare = (platform: typeof socialMediaOptions[0]) => {
+    if (!currentConversationLink) return;
+    window.open(platform.handler(currentConversationLink), '_blank');
+  };
+  
+  const getButtonConfig = () => {
+    if (isLoading) {
+      return {
+        text: "",
+        icon: <Loader className="h-4 w-4 animate-spin" />,
+        action: undefined
+      };
+    }
+
+    // Get current history ID
+    const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
+    const historyId = currentTypeEntry?.[1];
+    const existingLink = historyId ? getSharedLink(historyId) : null;
+
+    if (!currentConversationLink) {
+      return {
+        text: existingLink ? "Update link" : "Create link",
+        icon: <Link className="w-4 h-4" />,
+        action: generateLink
+      };
+    }
+
+    if (isNewlyCreated) {
+      return {
+        text: "Copy",
+        icon: <Copy className="w-4 h-4" />,
+        action: copyToClipboard
+      };
+    }
+
+    return {
+      text: "Update link",
+      icon: <Link className="w-4 h-4" />,
+      action: generateLink
+    };
+  };
+
+  const buttonConfig = getButtonConfig();
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader className="flex flex-row items-center justify-between relative">
+          <DialogTitle className="text-sm">
+            {currentConversationLink 
+              ? 'Update sharing link' 
+              : getSharedLink(Object.entries(sectionIds).find(([_, id]) => id !== null)?.[1] || '')
+                ? 'Regenerate sharing link'
+                : 'Create sharing link'
+            }
+            <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {isNewlyCreated 
+              ? "The public link to your chat has been updated. Manage previously shared chats via Settings."
+              : "Your name and any messages you add after sharing stay private."}
+          </p>
+
+          <div className="flex gap-2 bg-muted p-1 border border-borderColorPrimary rounded-full">
+            <Input
+              value={currentConversationLink || "https://alle-ai.com/share/..."}
+              readOnly
+              placeholder=""
+              className="bg-muted rounded-full focus-visible:outline-none border-none"
+            />
+            <Button
+              variant="outline"
+              onClick={buttonConfig.action}
+              disabled={isLoading}
+              className="bg-bodyColor text-xs text-bodyColorAlt shrink-0 gap-1 p-3 rounded-full border-none hover:bg-bodyColor hover:text-bodyColorAlt hover:opacity-90"
+            >
+              {buttonConfig.icon}
+              {buttonConfig.text}
+            </Button>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {buttonConfig.text === "Update link" && ("A past version of this chat has already been shared. Manage previously shared chats via Settings.")}
+          </div>
+
+          {isNewlyCreated && currentConversationLink && (
+            <div className="grid grid-cols-4 gap-4">
+              {socialMediaOptions.map((platform) => (
+                <Button
+                  key={platform.name}
+                  variant="outline"
+                  className="flex flex-col items-center gap-2 h-auto rounded-xl"
+                  onClick={() => handleShare(platform)}
+                >
+                  <Image
+                    src={platform.icon}
+                    alt={platform.name}
+                    width={20}
+                    height={20}
+                    className="w-4 h-4"
+                  />
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
+  const { sharedLinks, removeSharedLink } = useSharedLinksStore();
+  // const router = useRouter();
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest">("recent");
+  const [selectedLink, setSelectedLink] = useState<string | null>(null);
+
+  // Filter and sort shared links
+  const filteredLinks = useMemo(() => {
+    return sharedLinks
+      .filter(link => 
+        link.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortBy === "recent") {
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        }
+        return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      });
+  }, [sharedLinks, searchQuery, sortBy]);
+
+  const copyToClipboard = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      toast({
+        description: "Link copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy link",
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[800px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">Shared Links</DialogTitle>
+          <DialogDescription>
+            Manage and share your conversation links
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Search and Sort Controls */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search shared links..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 focus-visible:outline-none"
+              />
+            </div>
+            <Select value={sortBy} onValueChange={(value: "recent" | "oldest") => setSortBy(value)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Links List */}
+          <ScrollArea className="h-[400px] rounded-md border p-4">
+            {filteredLinks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                {/* <Share className="h-12 w-12 mb-2" /> */}
+                <p>No shared links found</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredLinks.map((item) => (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "group relative rounded-lg border p-4 transition-all hover:shadow-md"
+                    )}
+                    onClick={() => setSelectedLink(item.id)}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-1">
+                        <h4 className="font-medium">{item.title}</h4>
+                        <p className="text-sm text-muted-foreground truncate">{item.link}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock9 className="h-3 w-3" />
+                          <span>Updated {formatDistanceToNow(new Date(item.updatedAt))} ago</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        {/* Share Button with Dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-[200px]">
+                            {socialMediaOptions.map((platform) => (
+                              <DropdownMenuItem
+                                key={platform.name}
+                                onClick={() => window.open(platform.handler(item.link), '_blank')}
+                                className="flex items-center gap-2"
+                              >
+                                <Image
+                                  src={platform.icon}
+                                  alt={platform.name}
+                                  width={16}
+                                  height={16}
+                                />
+                                <span>Share on {platform.name}</span>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(item.link)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            // router.push(`/share/${item.historyId}`);
+                            onClose();
+                          }}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => removeSharedLink(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

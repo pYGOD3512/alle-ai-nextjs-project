@@ -24,6 +24,7 @@
     --borderColorPrimary: rgba(0, 0, 0, .1);
     --buttonBackground: #676767;
     --bodyColor: #0e0d0d;
+    --bodyColorAlt: #fcfbfb;
     --hoverColorPrimary: rgba(233, 231, 231, 0.664);
     --secondary: #ececec;
     --toastBackgroundColor: #f0fdf4;
@@ -62,6 +63,7 @@
     --borderColorPrimary: hsla(0, 0%, 100%, .1);
     --buttonBackground: #676767;
     --bodyColor: #fcfbfb;
+    --bodyColorAlt: #0e0d0d;
     --hoverColorPrimary: #424242;
     --secondary: #262626;
     --toastBackgroundColor: #171717;
