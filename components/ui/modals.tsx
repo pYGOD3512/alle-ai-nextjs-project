@@ -62,9 +62,13 @@ import {
   RefreshCw,
   Link,
   Clock9,
-  MessageCircle,
+  MessageSquare,
   Share2,
   Boxes,
+  Type,
+  Code,
+  PanelLeftClose,
+  Command as KeyboardCommand,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -2857,4 +2861,180 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
       </DialogContent>
     </Dialog>
   );
+}
+
+interface ShortcutItem {
+  action: string;
+  shortcut: {
+    keys: string[];
+  }[];
+}
+
+const shortcuts: ShortcutItem[] = [
+  {
+    action: "Open new chat",
+    shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
+  },
+  {
+    action: "Focus chat input",
+    shortcut: [{ keys: ["Shift", "Esc"] }]
+  },
+  {
+    action: "Copy last code block",
+    shortcut: [{ keys: ["Ctrl", "Shift", ";"] }]
+  },
+  {
+    action: "Copy last response",
+    shortcut: [{ keys: ["Ctrl", "Shift", "C"] }]
+  },
+  {
+    action: "Set custom instructions",
+    shortcut: [{ keys: ["Ctrl", "Shift", "I"] }]
+  },
+  {
+    action: "Toggle sidebar",
+    shortcut: [{ keys: ["Ctrl", "Shift", "S"] }]
+  },
+  {
+    action: "Delete chat",
+    shortcut: [{ keys: ["Ctrl", "Shift", "⌫"] }]
+  },
+  {
+    action: "Show shortcuts",
+    shortcut: [{ keys: ["Ctrl", "/"] }]
+  }
+];
+
+export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0">
+        {/* Header */}
+        <div className="border-b p-6 bg-background">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+              <div className="p-2 rounded-md bg-primary/10">
+                <KeyboardCommand className="h-5 w-5 text-primary" />
+              </div>
+              Keyboard shortcuts
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+
+        {/* Content */}
+        <ScrollArea className="max-h-[calc(80vh-8rem)]">
+          <div className="p-6 space-y-8">
+            {/* Essential Shortcuts */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Essential Commands</h3>
+              <div className="grid gap-3">
+                {shortcuts.slice(0, 4).map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                        {getIconForAction(item.action)}
+                      </div>
+                      <span className="text-sm font-medium group-hover:text-foreground transition-colors">
+                        {item.action}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.shortcut.map((combo, comboIndex) => (
+                        <div key={comboIndex} className="flex items-center gap-1">
+                          {combo.keys.map((key, keyIndex) => (
+                            <kbd
+                              key={keyIndex}
+                              className="px-2 py-1.5 text-[10px] font-medium bg-muted rounded-md border shadow-sm min-w-[28px] flex items-center justify-center uppercase"
+                            >
+                              {key}
+                            </kbd>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Additional Shortcuts */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Additional Shortcuts</h3>
+              <div className="grid gap-3">
+                {shortcuts.slice(4).map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                        {getIconForAction(item.action)}
+                      </div>
+                      <span className="text-sm font-medium group-hover:text-foreground transition-colors">
+                        {item.action}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.shortcut.map((combo, comboIndex) => (
+                        <div key={comboIndex} className="flex items-center gap-1">
+                          {combo.keys.map((key, keyIndex) => (
+                            <kbd
+                              key={keyIndex}
+                              className="px-2 py-1.5 text-[10px] font-medium bg-muted rounded-md border shadow-sm min-w-[28px] flex items-center justify-center uppercase"
+                            >
+                              {key}
+                            </kbd>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div className="border-t p-4 bg-background">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              <Info className="h-3 w-3" />
+              Press <kbd className="px-2 py-1 text-[10px] font-medium bg-muted rounded-md border shadow-sm">Ctrl</kbd> + <kbd className="px-2 py-1 text-[10px] font-medium bg-muted rounded-md border shadow-sm">/</kbd> anytime to view shortcuts
+            </p>
+            <Button variant="outline" size="sm" className="text-xs focus-visible:outline-none" onClick={onClose}>
+              Got it
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Helper function to get icons for actions
+function getIconForAction(action: string) {
+  switch (action) {
+    case "Open new chat":
+      return <MessageSquare className="h-4 w-4" />;
+    case "Focus chat input":
+      return <Type className="h-4 w-4" />;
+    case "Copy last code block":
+      return <Code className="h-4 w-4" />;
+    case "Copy last response":
+      return <Copy className="h-4 w-4" />;
+    case "Set custom instructions":
+      return <Settings className="h-4 w-4" />;
+    case "Toggle sidebar":
+      return <PanelLeftClose className="h-4 w-4" />;
+    case "Delete chat":
+      return <Trash2 className="h-4 w-4" />;
+    case "Show shortcuts":
+      return <KeyboardCommand className="h-4 w-4" />;
+    default:
+      return <KeyboardCommand className="h-4 w-4" />;
+  }
 }

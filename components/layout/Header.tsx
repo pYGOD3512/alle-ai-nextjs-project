@@ -377,9 +377,6 @@ export function Header() {
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />
                     {item.label}
-                    <DropdownMenuShortcut>
-                    {item.shortcut}
-                    </DropdownMenuShortcut>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

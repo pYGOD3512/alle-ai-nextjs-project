@@ -240,7 +240,6 @@ export const userMenuItems = [
     label: "Settings",
     icon: Settings,
     interactionType: "modal",
-    shortcut: "⌘ + K",
     onClick: () => {
       // console.log('Opening Settings Modal');
     },

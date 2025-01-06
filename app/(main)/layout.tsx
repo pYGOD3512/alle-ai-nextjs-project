@@ -4,6 +4,7 @@ import '../globals.css';
 import React from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import { HelpButton } from '@/components/HelpButton';
 import PlansArea from '@/components/features/plans/PlansArea';
 import { useAuth } from '@/components/providers/authTest';
 import { MaintenancePage } from '@/components/features/maintenance/MaintenancePage';
@@ -45,6 +46,7 @@ export default function RootLayout({
             <div className="flex-1 overflow-auto">
               {children}
             </div>
+            <HelpButton />
           </main>
         </div>
       ) : (
@@ -52,6 +54,7 @@ export default function RootLayout({
           <main className="flex-1 flex flex-col h-full relative">
             <Header />
             <PlansArea />
+            <HelpButton />
           </main>
         </div>
       )}
