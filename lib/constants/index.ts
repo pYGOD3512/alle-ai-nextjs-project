@@ -526,10 +526,10 @@ export const initialMessages: Message[] = [];
 export const socialMediaOptions = [
   {
     name: 'X',
-    icon: '/svgs/x-transparent.svg',
+    icon: '/svgs/x_white.png',
     color: 'bg-[#0088cc]/10',
     hoverColor: 'hover:bg-[#0088cc]/20',
-    textColor: 'text-black',
+    textColor: 'text-[#4267B2]',
     handler: (url: string) => `https://x.com/intent/tweet?url=${encodeURIComponent(url)}`
   },
   {

@@ -8,13 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ShortcutsModal } from './ui/modals';
+import { ReportContentModal, ShortcutsModal } from './ui/modals';
 import { useSidebarStore, useSelectedModelsStore } from "@/stores";
 
 
 export function HelpButton() {
 
 const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+const [reportModalOpen, setReportModalOpen] = useState(false);
 const { isOpen, toggle } = useSidebarStore();
 
 
@@ -58,8 +59,8 @@ useEffect(() => {
     {
       icon: AlertTriangle,
       label: 'Report Illegal Content',
-      onClick: () => window.open('/report', '_blank')
-    }
+      onClick: () => {setReportModalOpen(true)}
+    },
   ];
 
   return (
@@ -100,6 +101,13 @@ useEffect(() => {
       <ShortcutsModal 
         isOpen={shortcutsModalOpen} 
         onClose={() => setShortcutsModalOpen(false)} 
+        />
+        <ReportContentModal 
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        contentId="123"
+        contentType="image"
+        contentPreview="AI-generated image of a landscape..."
         />
     </div>
   );

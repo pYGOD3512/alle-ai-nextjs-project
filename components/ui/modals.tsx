@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   CHAT_MODELS,
@@ -31,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";  // Add this import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings,
@@ -69,6 +71,8 @@ import {
   Code,
   PanelLeftClose,
   Command as KeyboardCommand,
+  AlertTriangle,
+  Radio,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -117,6 +121,104 @@ interface SubscriptionConfirmModalProps {
   currentBalance: number;
   onConfirm: () => void;
 }
+
+interface ShareDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  modelName: string;
+}
+
+interface GoogleDriveModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onFileSelect: (file: DriveFile) => void;
+}
+
+interface DriveFile {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  mimeType: string;
+  thumbnailUrl?: string;
+  size?: string;
+}
+
+interface ShortcutItem {
+  action: string;
+  shortcut: {
+    keys: string[];
+  }[];
+}
+
+const shortcuts: ShortcutItem[] = [
+  {
+    action: "Open new chat",
+    shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
+  },
+  {
+    action: "Focus chat input",
+    shortcut: [{ keys: ["Shift", "Esc"] }]
+  },
+  {
+    action: "Copy last code block",
+    shortcut: [{ keys: ["Ctrl", "Shift", ";"] }]
+  },
+  {
+    action: "Copy last response",
+    shortcut: [{ keys: ["Ctrl", "Shift", "C"] }]
+  },
+  {
+    action: "Set custom instructions",
+    shortcut: [{ keys: ["Ctrl", "Shift", "I"] }]
+  },
+  {
+    action: "Toggle sidebar",
+    shortcut: [{ keys: ["Ctrl", "Shift", "S"] }]
+  },
+  {
+    action: "Delete chat",
+    shortcut: [{ keys: ["Ctrl", "Shift", "⌫"] }]
+  },
+  {
+    action: "Show shortcuts",
+    shortcut: [{ keys: ["Ctrl", "/"] }]
+  }
+];
+
+interface ReportModalProps extends ModalProps {
+  contentId: string;
+  contentType: 'image' | 'text' | 'audio' | 'video';
+  contentPreview?: string;
+}
+
+const reportCategories = [
+  {
+    id: 'illegal',
+    label: 'Illegal content',
+    description: 'Content that violates laws or regulations'
+  },
+  {
+    id: 'explicit',
+    label: 'Explicit or inappropriate',
+    description: 'NSFW, violence, or disturbing content'
+  },
+  {
+    id: 'harmful',
+    label: 'Harmful or dangerous',
+    description: 'Content promoting harm or dangerous activities'
+  },
+  {
+    id: 'misuse',
+    label: 'AI misuse',
+    description: 'Malicious use of AI technology'
+  },
+  {
+    id: 'other',
+    label: 'Other',
+    description: 'Other violations not listed above'
+  }
+];
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [selectedRating, setSelectedRating] = React.useState<number | null>(
@@ -1759,18 +1861,14 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   );
 }
 
-interface ShareDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  imageUrl: string;
-  modelName: string;
-}
-
 export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialogProps) {
   const handleShare = (platform: typeof socialMediaOptions[0]) => {
     window.open(platform.handler(imageUrl), '_blank');
     onClose();
   };
+
+  const { theme } = useTheme();
+  const dark = theme === "dark";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -1786,7 +1884,7 @@ export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialo
               className={`flex flex-col items-center gap-2 p-4 rounded-lg ${platform.color} ${platform.hoverColor} transition-colors duration-200`}
             >
               <Image
-                src={platform.icon}
+                src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
                 alt={platform.name}
                 width={24}
                 height={24}
@@ -2156,21 +2254,6 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-interface GoogleDriveModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onFileSelect: (file: DriveFile) => void;
-}
-
-interface DriveFile {
-  id: string;
-  name: string;
-  type: 'folder' | 'file';
-  mimeType: string;
-  thumbnailUrl?: string;
-  size?: string;
-}
-
 export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveModalProps) {
   const { isAuthenticated, checkAndRefreshAuth } = useDriveAuthStore();
   const [pathHistory, setPathHistory] = useState<Array<{ name: string; id: string }>>([]);
@@ -2463,6 +2546,9 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
   const { addSharedLink, updateSharedLink, getSharedLink } = useSharedLinksStore();
   const { getHistoryByType } = useHistoryStore();
 
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+
   const generateLink = async () => {
     setIsLoading(true);
 
@@ -2682,7 +2768,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
                     onClick={() => handleShare(platform)}
                   >
                     <Image
-                      src={platform.icon}
+                      src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
                       alt={platform.name}
                       width={20}
                       height={20}
@@ -2863,48 +2949,6 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-interface ShortcutItem {
-  action: string;
-  shortcut: {
-    keys: string[];
-  }[];
-}
-
-const shortcuts: ShortcutItem[] = [
-  {
-    action: "Open new chat",
-    shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
-  },
-  {
-    action: "Focus chat input",
-    shortcut: [{ keys: ["Shift", "Esc"] }]
-  },
-  {
-    action: "Copy last code block",
-    shortcut: [{ keys: ["Ctrl", "Shift", ";"] }]
-  },
-  {
-    action: "Copy last response",
-    shortcut: [{ keys: ["Ctrl", "Shift", "C"] }]
-  },
-  {
-    action: "Set custom instructions",
-    shortcut: [{ keys: ["Ctrl", "Shift", "I"] }]
-  },
-  {
-    action: "Toggle sidebar",
-    shortcut: [{ keys: ["Ctrl", "Shift", "S"] }]
-  },
-  {
-    action: "Delete chat",
-    shortcut: [{ keys: ["Ctrl", "Shift", "⌫"] }]
-  },
-  {
-    action: "Show shortcuts",
-    shortcut: [{ keys: ["Ctrl", "/"] }]
-  }
-];
-
 export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -3014,7 +3058,6 @@ export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
     </Dialog>
   );
 }
-
 // Helper function to get icons for actions
 function getIconForAction(action: string) {
   switch (action) {
@@ -3037,4 +3080,166 @@ function getIconForAction(action: string) {
     default:
       return <KeyboardCommand className="h-4 w-4" />;
   }
+}
+
+export function ReportContentModal({ 
+  isOpen, 
+  onClose, 
+  contentId,
+  contentType,
+  contentPreview 
+}: ReportModalProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [includeContent, setIncludeContent] = useState(true);
+  const { toast } = useToast();
+
+  const handleSubmit = async () => {
+    if (!selectedCategory) {
+      toast({
+        title: "Please select a category",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Report submitted",
+        description: "Thank you for helping keep our platform safe.",
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error submitting report",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] p-0 h-[calc(100vh-40px)] flex flex-col gap-0">
+        {/* Fixed Header */}
+        <div className="shrink-0 p-6 border-b bg-background">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Report Content
+            </DialogTitle>
+            <DialogDescription>
+              Help us maintain a safe environment by reporting inappropriate or illegal content.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        {/* Scrollable Content */}
+        <ScrollArea className="flex-1 px-6 py-4">
+          <div className="space-y-6 pr-4">
+            {/* Content Preview */}
+            {contentPreview && (
+              <div className="p-3 rounded-lg bg-yellow-500/20 border border-borderColorPrimary">
+                <div className="text-xs text-muted-foreground mb-2">Content being reported:</div>
+                <div className="text-sm line-clamp-3">{contentPreview}</div>
+              </div>
+            )}
+
+            {/* Category Selection */}
+            <div className="space-y-4">
+              <label className="text-sm font-medium">
+                What type of violation are you reporting?
+              </label>
+              <RadioGroup
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+                className="grid gap-3"
+              >
+                {reportCategories.map((category) => (
+                  <div
+                    key={category.id}
+                    className={cn(
+                      "flex items-start space-x-3 rounded-lg border p-3 cursor-pointer transition-colors",
+                      selectedCategory === category.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                    )}
+                  >
+                    <RadioGroupItem
+                      value={category.id}
+                      id={category.id}
+                      className="mt-1"
+                    />
+                    <label
+                      htmlFor={category.id}
+                      className="flex-1 cursor-pointer space-y-1"
+                    >
+                      <div className="text-sm font-medium leading-none">
+                        {category.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {category.description}
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
+            {/* Additional Details */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Additional details <span className="text-muted-foreground">(Optional)</span>
+              </label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Please provide any additional context..."
+                className="min-h-[100px] resize-none border border-borderColorPrimary focus-visible:outline-none focus:border-2"
+                maxLength={500}
+              />
+              <div className="text-xs text-muted-foreground text-right">
+                {description.length}/500 characters
+              </div>
+            </div>
+
+            {/* Include Content Option */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="include-content"
+                checked={includeContent}
+                onCheckedChange={(checked) => setIncludeContent(checked as boolean)}
+              />
+              <label htmlFor="include-content" className="text-sm text-muted-foreground leading-none">
+                Include content in report for review
+              </label>
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Fixed Footer */}
+        <div className="shrink-0 p-4 border-t bg-background">
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!selectedCategory || isSubmitting}
+              className="gap-2"
+              variant="destructive"
+            >
+              {isSubmitting && <Loader className="h-4 w-4 animate-spin" />}
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
