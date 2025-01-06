@@ -63,10 +63,12 @@ interface SidebarState {
   isOpen: boolean;
   currentPage: string;
   sectionIds: { [key: string]: string | null }; // Generalized section IDs
+  currentConversationLink: string | null; // Add this
   toggle: () => void;
   setCurrentPage: (page: string) => void;
   setSectionId: (section: string, id: string | null) => void; // Setter for dynamic IDs
   setOpen: (value: boolean) => void;
+  setCurrentConversationLink: (link: string | null) => void; // Add this
 }
 
 export const useSidebarStore = create<SidebarState>()(
@@ -80,6 +82,7 @@ export const useSidebarStore = create<SidebarState>()(
         audioId: null,
         videoId: null,
       }, // Default section IDs
+      currentConversationLink: null,
       toggle: () => set((state) => ({ isOpen: !state.isOpen })),
       setCurrentPage: (page) => set({ currentPage: page }),
       setSectionId: (section, id) =>
@@ -90,12 +93,14 @@ export const useSidebarStore = create<SidebarState>()(
           },
         })),
       setOpen: (value) => set({ isOpen: value }),
+      setCurrentConversationLink: (link) => set({ currentConversationLink: link }),
     }),
     {
       name: "sidebar-storage",
       partialize: (state) => ({
         isOpen: state.isOpen,
         sectionIds: state.sectionIds,
+        currentConversationLink: state.currentConversationLink,
       }),
     }
   )
@@ -240,37 +245,17 @@ export const useHistoryStore = create<HistoryStore>()(
   persist(
     (set, get) => ({
       history: [
-        ...chatHistory.map((title, index) => ({
-          id: `chat-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'chat' as const,
-        })),
-        ...imageHistory.map((title, index) => ({
-          id: `image-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'image' as const,
-        })),
-        ...audioHistory.map((title, index) => ({
-          id: `audio-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'audio' as const,
-        })),
-        ...videoHistory.map((title, index) => ({
-          id: `video-${index}`,
-          title,
-          createdAt: new Date(Date.now() - index * 1000 * 60 * 60),
-          type: 'video' as const,
-        })),
+        ...chatHistory,
+        ...imageHistory,
+        ...audioHistory,
+        ...videoHistory
       ],
       addHistory: (item) =>
         set((state) => ({
           history: [
             {
               ...item,
-              id: `${item.type}-${Date.now()}`,
+              id: generateId(),
               createdAt: new Date(),
             },
             ...state.history,
@@ -422,6 +407,61 @@ export const useDriveAuthStore = create<DriveAuthStore>()(
     }),
     {
       name: 'drive-auth-storage'
+    }
+  )
+);
+
+interface SharedLink {
+  id: string;
+  historyId: string;
+  title: string;
+  link: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface SharedLinksStore {
+  sharedLinks: SharedLink[];
+  addSharedLink: (historyId: string, title: string, link: string) => void;
+  updateSharedLink: (id: string, link: string) => void;
+  removeSharedLink: (id: string) => void;
+  getSharedLink: (historyId: string) => SharedLink | undefined;
+}
+
+export const useSharedLinksStore = create<SharedLinksStore>()(
+  persist(
+    (set, get) => ({
+      sharedLinks: [],
+      addSharedLink: (historyId, title, link) => 
+        set((state) => ({
+          sharedLinks: [
+            {
+              id: `share-${Date.now()}`,
+              historyId,
+              title,
+              link,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            ...state.sharedLinks,
+          ],
+        })),
+      updateSharedLink: (id, link) =>
+        set((state) => ({
+          sharedLinks: state.sharedLinks.map((item) =>
+            item.id === id ? { ...item, link, updatedAt: new Date() } : item
+          ),
+        })),
+      removeSharedLink: (id) =>
+        set((state) => ({
+          sharedLinks: state.sharedLinks.filter((item) => item.id !== id),
+        })),
+      getSharedLink: (historyId) => {
+        return get().sharedLinks.find((item) => item.historyId === historyId);
+      },
+    }),
+    {
+      name: 'shared-links-storage',
     }
   )
 );

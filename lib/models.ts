@@ -4,7 +4,7 @@ export interface ModelDetails {
   provider: string
   description: string
   image: string
-  type: "chat" | "image" | "multimodal"
+  type: "chat" | "image" | "audio" | "video" | "multimodal"
   version: string
   releaseDate: string
   capabilities: string[]
@@ -621,8 +621,7 @@ export const models: ModelDetails[] = [
       "Limited real-time knowledge",
       "Resource-intensive processing"
     ]
-  },
-  
+  },  
   {
     id: "chatgpt-3-5",
     name: "ChatGPT 3.5",
@@ -1053,6 +1052,421 @@ export const models: ModelDetails[] = [
       "Performance can vary with highly abstract or unconventional prompts",
       "Limited by the resolution ceiling (2048x2048 pixels) for extremely high-quality or professional uses"
     ]
+  },
+
+  {
+    id: "whisper-ai",
+    name: "Whisper AI",
+    provider: "OpenAI",
+    description: "Whisper AI is a robust automatic speech recognition (ASR) model developed by OpenAI. Capable of transcribing audio into text with high accuracy, it supports multiple languages and dialects. Whisper is designed to work in noisy environments, making it ideal for real-world applications such as transcription, voice commands, and accessibility services.",
+    image: "/models/gpt-4.png",
+    type: "audio",
+    version: "1.0",
+    releaseDate: "2022",
+    capabilities: [
+      "High-accuracy transcription in multiple languages",
+      "Real-time speech recognition with low latency",
+      "Noise-robust transcription in challenging environments",
+      "Support for both short and long-form audio transcription",
+      "Multi-speaker transcription",
+      "Automatic language detection and transcription",
+      "Preprocessing of noisy or distorted audio for improved accuracy"
+    ],
+    technicalSpecs: {
+      parameters: "400 Million+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2022",
+      architecture: "Transformer-based model trained on diverse multilingual datasets"
+    },
+    benchmarks: [
+      { name: "Word Error Rate (WER)", score: 5.2, maxScore: 10 },
+      { name: "Language Support", score: 9.5, maxScore: 10 },
+      { name: "Noise Resilience", score: 9.0, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Real-Time Transcription",
+        description: "Provide live transcription services for meetings, lectures, webinars, and more, offering accurate text representation of spoken language."
+      },
+      {
+        title: "Multilingual Support",
+        description: "Translate and transcribe speech from various languages to text, making it an ideal tool for global communication and content accessibility."
+      },
+      {
+        title: "Speech-to-Text for Accessibility",
+        description: "Enhance accessibility by providing real-time captions and transcriptions for individuals with hearing impairments, enabling more inclusive experiences."
+      },
+      {
+        title: "Voice Commands and Control",
+        description: "Integrate Whisper AI into voice-activated systems, enabling efficient voice control and interaction for applications ranging from smart homes to virtual assistants."
+      },
+      {
+        title: "Audio Search and Indexing",
+        description: "Enable text search and indexing of large audio or video archives by transcribing speech and providing searchable text outputs."
+      }
+    ],
+    limitations: [
+      "Transcription accuracy may be lower for non-standard speech, heavy accents, or specialized jargon",
+      "May struggle with very long audio segments or poor-quality recordings",
+      "Requires a clean environment for optimal transcription performance"
+    ]
+  },
+  {
+    id: "musicgen-ai",
+    name: "MusicGen AI",
+    provider: "Meta",
+    description: "MusicGen AI is an advanced generative model by Meta designed to create high-quality music from text prompts. Capable of producing a variety of genres and styles, MusicGen allows for creative exploration in music composition. Its deep learning architecture allows users to input simple text descriptions and generate complex, multi-instrumental pieces of music.",
+    image: "/models/meta.png",
+    type: "audio",
+    version: "1.0",
+    releaseDate: "2023",
+    capabilities: [
+      "Generate music compositions based on text descriptions",
+      "Support for multiple genres including classical, jazz, rock, and electronic",
+      "Create melodies, harmonies, and full compositions",
+      "Real-time music generation with minimal latency",
+      "Multi-instrumental compositions with dynamic arrangement",
+      "High-quality sound production suitable for professional music production",
+      "Customizable generation parameters for style, tempo, and mood"
+    ],
+    technicalSpecs: {
+      parameters: "1 Billion+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2023",
+      architecture: "Transformer-based model trained on a diverse collection of musical datasets"
+    },
+    benchmarks: [
+      { name: "Melody Coherence", score: 8.7, maxScore: 10 },
+      { name: "Genre Adaptation", score: 8.4, maxScore: 10 },
+      { name: "Tempo and Rhythm Control", score: 9.0, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Creative Music Composition",
+        description: "Generate original music tracks from scratch based on descriptive text prompts, providing an innovative tool for musicians and content creators."
+      },
+      {
+        title: "Film and Game Scoring",
+        description: "Create soundtrack music for films, games, and media projects, allowing for flexible composition that fits specific themes, moods, or scenes."
+      },
+      {
+        title: "Jingles and Commercial Music",
+        description: "Generate catchy, brand-appropriate music for advertising, commercials, and promotional content."
+      },
+      {
+        title: "Music for Video Content",
+        description: "Generate background music for videos, YouTube channels, and social media content, ensuring a unique, royalty-free soundtrack."
+      },
+      {
+        title: "Music Remixing and Arrangement",
+        description: "Modify existing compositions by rearranging elements, changing instruments, or adapting the style to suit different genres or preferences."
+      }
+    ],
+    limitations: [
+      "Generated music may lack the depth and emotional nuance of human compositions",
+      "MusicGen may struggle with complex rhythmic patterns or very specific stylistic requests",
+      "Performance may vary when creating highly experimental or niche music genres"
+    ]
+  },
+
+  {
+    id: "sora-ai",
+    name: "Sora AI",
+    provider: "Sora Labs",
+    description: "Sora AI is an advanced generative model that creates highly realistic avatars and animated characters based on simple text descriptions. With a focus on animation, Sora can generate characters, facial expressions, and complex motions suitable for gaming, animation, and virtual reality environments.",
+    image: "/models/gpt-4.png",
+    type: "video",
+    version: "1.0",
+    releaseDate: "2023",
+    capabilities: [
+      "Create animated avatars and characters from text prompts",
+      "Generate realistic facial expressions and gestures",
+      "High-quality 3D animation with advanced motion synthesis",
+      "Support for a wide range of character designs, from realistic to stylized",
+      "Full-body motion capture and animation generation",
+      "Integrate with game engines and virtual environments",
+      "Real-time animation generation for interactive applications"
+    ],
+    technicalSpecs: {
+      parameters: "2 Billion+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2023",
+      architecture: "Transformer-based models for motion synthesis and avatar generation"
+    },
+    benchmarks: [
+      { name: "Avatar Realism", score: 8.8, maxScore: 10 },
+      { name: "Facial Expression Accuracy", score: 9.2, maxScore: 10 },
+      { name: "Motion Fluidity", score: 8.5, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Character Creation for Games",
+        description: "Generate realistic characters with diverse visual styles, suitable for integration into games, animated films, or virtual worlds."
+      },
+      {
+        title: "Virtual Reality Avatars",
+        description: "Create personalized avatars for virtual reality platforms that adapt dynamically to user interactions and real-time scenarios."
+      },
+      {
+        title: "Motion Capture and Animation",
+        description: "Generate lifelike animations for characters, reducing the need for manual animation by using text prompts for automated creation."
+      },
+      {
+        title: "Film and Animation Production",
+        description: "Generate animated characters for films and animations, saving time in character design and animation processes."
+      },
+      {
+        title: "Interactive Virtual Assistants",
+        description: "Generate real-time animated avatars for virtual assistants that can mimic human interactions in a more dynamic and engaging way."
+      }
+    ],
+    limitations: [
+      "Generated avatars may have limited diversity in appearance",
+      "Performance may degrade when handling very complex or highly detailed prompts",
+      "Realism is dependent on the training dataset, so highly stylized characters may vary in quality"
+    ]
+  },
+  {
+    id: "runway-gen-2",
+    name: "Runway Gen-2",
+    provider: "Runway",
+    description: "Runway Gen-2 is a powerful generative model designed to produce high-quality video content from text prompts. Combining advanced AI with video processing, it allows for seamless creation of videos, animations, and visual content in various styles, from photorealistic to abstract.",
+    image: "/models/runway.png",
+    type: "video",
+    version: "2.0",
+    releaseDate: "2023",
+    capabilities: [
+      "Generate video content from text prompts",
+      "Create photorealistic and stylized animations",
+      "Support for multiple video genres, including short clips, music videos, and experimental art",
+      "Seamless video generation with smooth transitions and effects",
+      "Ability to modify existing video footage with text-based edits",
+      "Support for video-to-video synthesis (i.e., transforming an input video into a new style)",
+      "High-level customization for visual effects, color grading, and more"
+    ],
+    technicalSpecs: {
+      parameters: "3 Billion+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2023",
+      architecture: "Combination of generative adversarial networks (GANs) and diffusion models"
+    },
+    benchmarks: [
+      { name: "Video Quality", score: 9.0, maxScore: 10 },
+      { name: "Animation Fluidity", score: 8.8, maxScore: 10 },
+      { name: "Creativity and Novelty", score: 8.5, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Content Creation for Social Media",
+        description: "Create dynamic and engaging video content for social media platforms, from quick clips to high-quality productions."
+      },
+      {
+        title: "Advertising and Marketing",
+        description: "Generate customized video ads and promotional material based on brand guidelines or creative briefs."
+      },
+      {
+        title: "Music Video Generation",
+        description: "Generate music videos from song lyrics and prompts, producing visually striking and creative visual representations."
+      },
+      {
+        title: "Film and Animation Production",
+        description: "Assist in the production of films and animations by automating video synthesis, reducing production times and costs."
+      },
+      {
+        title: "Interactive Video Experiences",
+        description: "Create interactive and immersive video content for VR, AR, and web-based platforms."
+      }
+    ],
+    limitations: [
+      "Complex scenes may result in less fluid transitions or artifacts",
+      "Longer videos may require higher compute resources or longer generation times",
+      "Performance can vary with very abstract or unclear prompts"
+    ]
+  },
+  {
+    id: "luma-ai-video",
+    name: "Luma AI",
+    provider: "Luma Labs",
+    description: "Luma AI (Video) is a powerful generative model designed to create high-quality, photorealistic video content from text descriptions. This AI can synthesize entire video scenes, generate dynamic environments, animate objects, and control lighting in a fully generative manner, making it ideal for virtual production, cinematic content creation, and immersive media experiences.",
+    image: "/models/luma.png",
+    type: "video",
+    version: "1.0",
+    releaseDate: "2023",
+    capabilities: [
+      "Generate realistic video content from text prompts",
+      "Create dynamic 3D environments with photorealistic lighting and animation",
+      "Support for action sequences, object movement, and character animation",
+      "High-quality visual effects including smoke, fire, and weather effects",
+      "Synthesize full video scenes with varying camera angles and transitions",
+      "Real-time video generation for interactive experiences",
+      "Generate virtual cinematography with camera control (angles, zoom, focus)"
+    ],
+    technicalSpecs: {
+      parameters: "5 Billion+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2023",
+      architecture: "Generative networks combined with advanced video synthesis and dynamic scene rendering"
+    },
+    benchmarks: [
+      { name: "Video Quality", score: 9.4, maxScore: 10 },
+      { name: "Scene Realism", score: 9.1, maxScore: 10 },
+      { name: "Action Fluidity", score: 8.8, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Cinematic Production",
+        description: "Generate high-quality video content for films, commercials, and music videos, including complex scenes with dynamic action and camera movements."
+      },
+      {
+        title: "Virtual Environments",
+        description: "Create immersive virtual environments for VR, AR, and simulation applications, with full control over scene composition and dynamic elements."
+      },
+      {
+        title: "Game Development",
+        description: "Automate video cutscenes, trailers, and in-game cinematics by generating realistic, high-quality video from game scripts or concepts."
+      },
+      {
+        title: "Advertising and Marketing",
+        description: "Produce customized video ads, product videos, and promotional material with dynamic visual effects and seamless transitions."
+      },
+      {
+        title: "Interactive Media",
+        description: "Enable real-time video generation for interactive media experiences like virtual events, live-streaming, and social media content."
+      }
+    ],
+    limitations: [
+      "May struggle with generating highly abstract or very specific visual concepts",
+      "Video generation can be resource-intensive and time-consuming for long or complex clips",
+      "Performance varies with scene complexity and desired level of detail"
+    ]
+  },
+  {
+    id: "kling-ai-video",
+    name: "Kling AI",
+    provider: "Kling Labs",
+    description: "Kling AI (Video) is an advanced generative video model designed to create contextually rich, high-quality video content from simple text prompts. With its ability to generate entire video sequences with dynamic environments, actions, and nuanced dialogue, it’s an ideal tool for content creators, filmmakers, and virtual assistants seeking immersive video production.",
+    image: "/models/kling.png",
+    type: "video",
+    version: "1.0",
+    releaseDate: "2023",
+    capabilities: [
+      "Generate full video sequences from text descriptions",
+      "Realistic video synthesis with complex environments and motion",
+      "Contextual dialogue generation, including video-based conversation",
+      "Ability to generate interactive video content for entertainment or educational purposes",
+      "Create dynamic action scenes, character interactions, and cinematic storytelling",
+      "Support for multiple video styles, from realistic to stylized animations",
+      "Real-time video generation for virtual assistants and media production"
+    ],
+    technicalSpecs: {
+      parameters: "4 Billion+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2023",
+      architecture: "Transformer-based models with video synthesis and advanced language-video generation techniques"
+    },
+    benchmarks: [
+      { name: "Video Realism", score: 9.3, maxScore: 10 },
+      { name: "Action Fluidity", score: 8.8, maxScore: 10 },
+      { name: "Dialog Contextualization", score: 9.0, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Automated Video Production",
+        description: "Generate video content directly from written scripts or text descriptions, ideal for filmmakers, advertisers, and digital content creators."
+      },
+      {
+        title: "Virtual Assistants",
+        description: "Create interactive video responses for virtual assistants, integrating voice, actions, and real-time content generation."
+      },
+      {
+        title: "Educational Content",
+        description: "Generate instructional videos, explainer videos, or interactive educational content tailored to specific learning objectives."
+      },
+      {
+        title: "Gaming and Entertainment",
+        description: "Create in-game cinematics, trailers, and interactive storylines that adapt to user choices or random events."
+      },
+      {
+        title: "Creative Storytelling",
+        description: "Generate narrative-driven content with complex character interactions, rich environments, and high-quality visuals."
+      }
+    ],
+    limitations: [
+      "Realism may be compromised with highly abstract or complex prompts",
+      "Generating full-length, high-quality videos may require significant computational resources",
+      "Performance may vary depending on scene complexity and desired motion detail"
+    ]
+  },
+  {
+    id: "animate-diff-video",
+    name: "Animate Diff (Video)",
+    provider: "Stability AI",
+    description: "Animate Diff (Video) uses advanced diffusion-based models to generate fluid and lifelike video animations from a sequence of images or a single image. The model excels at producing dynamic movements, object transformations, and scene evolution, making it ideal for enhancing art, marketing visuals, and game assets with motion and cinematic effects.",
+    image: "/models/stability-ai.png",
+    type: "video",
+    version: "1.0",
+    releaseDate: "2023",
+    capabilities: [
+      "Transform static images into realistic video animations",
+      "Generate fluid motion and dynamic transitions between objects and scenes",
+      "Support for complex animations with detailed lighting, shadows, and effects",
+      "Ability to animate a wide variety of objects, characters, and environments",
+      "Create interactive animations for advertising, social media, and video games",
+      "Enable object tracking and motion synthesis for more dynamic video outputs",
+      "Real-time animation generation suitable for content creators and visual designers"
+    ],
+    technicalSpecs: {
+      parameters: "2 Billion+",
+      inputCost: "TBD",
+      outputCost: "TBD",
+      trainingData: "Up to 2023",
+      architecture: "Diffusion model with advanced temporal motion synthesis"
+    },
+    benchmarks: [
+      { name: "Animation Fluidity", score: 9.1, maxScore: 10 },
+      { name: "Motion Realism", score: 8.9, maxScore: 10 },
+      { name: "Visual Quality", score: 9.3, maxScore: 10 }
+    ],
+    useCases: [
+      {
+        title: "Animation from Images",
+        description: "Create animations and motion sequences from single or multiple images, ideal for adding movement to still art, product images, or characters."
+      },
+      {
+        title: "Marketing Video Content",
+        description: "Enhance marketing materials by turning static product images or promotional visuals into engaging animated videos."
+      },
+      {
+        title: "Interactive Media and Social Media Content",
+        description: "Generate dynamic video content for social media platforms, including short animated ads, gifs, and creative clips."
+      },
+      {
+        title: "Game Asset Animation",
+        description: "Animate game assets, objects, and characters from concept art or static 3D models to bring them to life in motion."
+      },
+      {
+        title: "Creative Video Effects",
+        description: "Apply cinematic effects such as camera movements, slow motion, and lighting changes to enhance video production quality."
+      }
+    ],
+    limitations: [
+      "Animation quality can be affected by overly complex or abstract input images",
+      "Performance may vary depending on the type of animation requested (e.g., character animations vs environmental effects)",
+      "Rendering longer or more complex animations may require high processing power"
+    ]
   }
+  
+  
+  
+  
+  
+  
+  
   
 ];

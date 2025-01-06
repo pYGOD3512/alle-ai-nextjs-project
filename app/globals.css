@@ -24,6 +24,7 @@
     --borderColorPrimary: rgba(0, 0, 0, .1);
     --buttonBackground: #676767;
     --bodyColor: #0e0d0d;
+    --bodyColorAlt: #fcfbfb;
     --hoverColorPrimary: rgba(233, 231, 231, 0.664);
     --secondary: #ececec;
     --toastBackgroundColor: #f0fdf4;
@@ -62,6 +63,7 @@
     --borderColorPrimary: hsla(0, 0%, 100%, .1);
     --buttonBackground: #676767;
     --bodyColor: #fcfbfb;
+    --bodyColorAlt: #0e0d0d;
     --hoverColorPrimary: #424242;
     --secondary: #262626;
     --toastBackgroundColor: #171717;
@@ -116,4 +118,47 @@
   .animate-progress {
     animation: progress 2s linear;
   }
+}
+
+.prose {
+  @apply text-foreground;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  @apply text-foreground scroll-m-20;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold mb-4 mt-8;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mb-4 mt-8;
+}
+
+.prose p {
+  @apply leading-7 mb-4;
+}
+
+.prose code {
+  @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm font-semibold;
+}
+
+.prose pre {
+  @apply rounded-lg p-4 overflow-x-auto;
+}
+
+.prose ul {
+  @apply list-disc list-inside mb-4;
+}
+
+.prose ol {
+  @apply list-decimal list-inside mb-4;
+}
+
+.prose li {
+  @apply mb-2;
 }

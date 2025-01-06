@@ -1,3 +1,5 @@
+import { LucideProps } from "lucide-react";
+
 export type Benchmark = {
   name: string;
   score: number;
@@ -68,3 +70,52 @@ export interface ModelResponse {
   parentMessageId: string;
   timestamp: Date;
 }
+
+export interface Article {
+  id: string;
+  title: string;
+  description: string;
+  readingTime: string;
+}
+
+export interface Section {
+  title: string;
+  articles: Article[];
+}
+
+export interface HelpCategory {
+  id: string;
+  iconName: IconName;
+  title: string;
+  description: string;
+  sections: Section[];
+}
+
+export type IconName = 
+| "Settings"
+| "BriefcaseBusiness"
+| "Code"
+| "MessageCircleMore"
+| "FolderCog"
+| "Users"
+| "Building2"
+| "AlertTriangle"
+| "Clock"
+| "ChevronRight"
+| "Search"
+| "ArrowLeft"
+| "ThumbsUp"
+| "ThumbsDown";
+
+export type CategoryKeys = 
+  | "3943089-account-login-and-billing"
+  | "6864268-privacy-and-policies"
+  | "3675931-api"
+  | "3742473-alle-ai"
+  | "7835004-alle-ai-custom"
+  | "5688074-alle-ai-teams"
+  | "11106745-alle-ai-enterprise";
+
+export type HelpCategories = {
+  [K in CategoryKeys]: HelpCategory;
+};
