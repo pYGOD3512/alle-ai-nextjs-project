@@ -38,7 +38,7 @@ import { Input } from "@/components/ui/input";
 
 
 export function Sidebar() {
-  const { isOpen, setCurrentPage, toggle } = useSidebarStore();
+  const { isOpen, setCurrentPage, toggle, setCurrentConversationLink, setSectionId } = useSidebarStore();
   const pathname = usePathname();
   const router = useRouter();
   const isMobile = useMediaQuery('(max-width: 1024px)');
@@ -59,6 +59,9 @@ export function Sidebar() {
   }, [isMobile]);
 
   const handleNewChat = () => {
+    // Clear the conversation link when starting a new chat
+    setCurrentConversationLink(null);
+    
     // other logics later
     switch (true) {
       case pathname.startsWith("/chat"):
@@ -164,6 +167,15 @@ export function Sidebar() {
   };
 
   const CurrentIcon = getCurrentSectionIcon();
+
+  // Add this function to handle history item clicks
+  const handleHistoryItemClick = (itemId: string) => {
+    // Clear the conversation link when switching to a different conversation
+    setCurrentConversationLink(null);
+    
+    // Set the current section ID based on the type
+    setSectionId(`${currentType}Id`, itemId);
+  };
 
   return (
     <>
@@ -290,7 +302,10 @@ export function Sidebar() {
                   {currentHistory.map((item) => (
                     <ContextMenu key={item.id}>
                       <ContextMenuTrigger>
-                        <div className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md">
+                        <div 
+                          className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md"
+                          onClick={() => handleHistoryItemClick(item.id)}
+                        >
                           {editingId === item.id ? (
                             <Input
                               value={editingTitle}

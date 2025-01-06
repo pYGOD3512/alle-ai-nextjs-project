@@ -4,6 +4,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   CHAT_MODELS,
@@ -12,7 +14,7 @@ import {
   VIDEO_MODELS,
   socialMediaOptions,
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -30,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";  // Add this import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings,
@@ -59,6 +62,17 @@ import {
   ArrowLeft,
   LogIn,
   RefreshCw,
+  Link,
+  Clock9,
+  MessageSquare,
+  Share2,
+  Boxes,
+  Type,
+  Code,
+  PanelLeftClose,
+  Command as KeyboardCommand,
+  AlertTriangle,
+  Radio,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -77,10 +91,13 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
 import { driveService } from '@/lib/services/driveServices';
+import { useRouter } from "next/router";
+import { Share } from "next/dist/compiled/@next/font/dist/google";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultTabValue?: string;
 }
 
 interface SearchHistoryModalProps extends ModalProps {
@@ -104,6 +121,104 @@ interface SubscriptionConfirmModalProps {
   currentBalance: number;
   onConfirm: () => void;
 }
+
+interface ShareDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  modelName: string;
+}
+
+interface GoogleDriveModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onFileSelect: (file: DriveFile) => void;
+}
+
+interface DriveFile {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  mimeType: string;
+  thumbnailUrl?: string;
+  size?: string;
+}
+
+interface ShortcutItem {
+  action: string;
+  shortcut: {
+    keys: string[];
+  }[];
+}
+
+const shortcuts: ShortcutItem[] = [
+  {
+    action: "Open new chat",
+    shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
+  },
+  {
+    action: "Focus chat input",
+    shortcut: [{ keys: ["Shift", "Esc"] }]
+  },
+  {
+    action: "Copy last code block",
+    shortcut: [{ keys: ["Ctrl", "Shift", ";"] }]
+  },
+  {
+    action: "Copy last response",
+    shortcut: [{ keys: ["Ctrl", "Shift", "C"] }]
+  },
+  {
+    action: "Set custom instructions",
+    shortcut: [{ keys: ["Ctrl", "Shift", "I"] }]
+  },
+  {
+    action: "Toggle sidebar",
+    shortcut: [{ keys: ["Ctrl", "Shift", "S"] }]
+  },
+  {
+    action: "Delete chat",
+    shortcut: [{ keys: ["Ctrl", "Shift", "⌫"] }]
+  },
+  {
+    action: "Show shortcuts",
+    shortcut: [{ keys: ["Ctrl", "/"] }]
+  }
+];
+
+interface ReportModalProps extends ModalProps {
+  contentId: string;
+  contentType: 'image' | 'text' | 'audio' | 'video';
+  contentPreview?: string;
+}
+
+const reportCategories = [
+  {
+    id: 'illegal',
+    label: 'Illegal content',
+    description: 'Content that violates laws or regulations'
+  },
+  {
+    id: 'explicit',
+    label: 'Explicit or inappropriate',
+    description: 'NSFW, violence, or disturbing content'
+  },
+  {
+    id: 'harmful',
+    label: 'Harmful or dangerous',
+    description: 'Content promoting harm or dangerous activities'
+  },
+  {
+    id: 'misuse',
+    label: 'AI misuse',
+    description: 'Malicious use of AI technology'
+  },
+  {
+    id: 'other',
+    label: 'Other',
+    description: 'Other violations not listed above'
+  }
+];
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [selectedRating, setSelectedRating] = React.useState<number | null>(
@@ -469,14 +584,14 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-export function SettingsModal({ isOpen, onClose }: ModalProps) {
+export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) {
   const { theme, setTheme } = useTheme();
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
-  const [deleteAccountModalOpen, setDeleteAccountModalOpen] =
-    React.useState(false);
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false);
   const [logoutAllModalOpen, setLogoutAllModalOpen] = React.useState(false);
+  const [manageSharedLinksOpen, setManageSharedLinksOpen] = React.useState(false);
   const { toast } = useToast();
   const { isAuthenticated } = useDriveAuthStore();
   const [showDriveModal, setShowDriveModal] = useState(false);
@@ -513,22 +628,40 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
       },
     },
     data_controls: {
-      extpertMyData: {
+      sharedLinks: {
+        title: "Shared links",
+        description: "",
+        action: "Manage",
+      },
+      extportMyData: {
         title: "Export data",
         description: "",
         action: "Export",
-      },
-      google_drive: {
-        title: "Google Drive",
-        description: isAuthenticated 
-          ? ""
-          : "",
-        action: isAuthenticated ? "Unlink" : "Link"
       },
       deleteMyAccount: {
         title: "Delete account",
         description: "",
         action: "Delete",
+      },
+    },
+    connected_apps: {
+      google_drive: {
+        title: "Google Drive",
+        icon: <Image src={'/icons/google-drive.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        description: "Upload Google Docs, Sheets, Slides and other files.",
+        action: isAuthenticated ? "Unlink" : "Link"
+      },
+      one_drive: {
+        title: "One Drive",
+        icon: <Image src={'/icons/onedrive.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        description: "Upload Microsoft Word, Excel, PowerPoint and other files.",
+        action: "Link"
+      },
+      dropbox: {
+        title: "Dropbox",
+        icon: <Image src={'/icons/dropbox.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        description: "Upload Docs and other files.",
+        action: "Link"
       },
     },
     analytics: {
@@ -563,6 +696,11 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
       value: "data controls",
       label: "Data controls",
       icon: <DatabaseBackup className="h-4 w-4" />,
+    },
+    {
+      value: "connected apps",
+      label: "Connected apps",
+      icon: <Boxes className="h-4 w-4" />,
     },
     {
       value: "analytics",
@@ -613,7 +751,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
             </kbd>
           </DialogHeader>
 
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs defaultValue={`${defaultTabValue ? defaultTabValue : 'general'}`} className="w-full">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Sidebar */}
               <div className="w-48 space-y-1">
@@ -720,17 +858,15 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                         <h4 className="text-sm font-small">{setting.title}</h4>
                         <Button
                           variant={key === "google_drive" ? "outline" : setting.action === "Delete" ? "destructive" : "outline"}
-                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all ${
-                            key === "google_drive" && isAuthenticated ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""
-                          }`}
+                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            if (key === "google_drive") {
-                              handleGoogleDriveAction();
-                            } else if (setting.action === "Delete") {
+                            if (setting.action === "Delete") {
                               setDeleteAccountModalOpen(true);
                             } else if (setting.action === "Export") {
                               setExportModalOpen(true);
+                            } else if (setting.action === "Manage") {
+                              setManageSharedLinksOpen(true);
                             }
                           }}
                         >
@@ -738,6 +874,38 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                         </Button>
                       </div>
                       <p className="text-[0.75rem] text-muted-foreground">
+                        {setting.description}
+                      </p>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="connected apps" className="space-y-2">
+                  {Object.entries(settingsData.connected_apps).map(([key, setting]) => (
+                    <div
+                      key={key}
+                      className="border-b border-borderColorPrimary last:border-none"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-small flex items-center gap-2">{setting.icon}{setting.title}</h4>
+                        <Button
+                          variant={setting.action === 'Unlink' ? 'destructive' : 'outline'}
+                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
+                          size="sm"
+                          onClick={() => {
+                            if (key === "google_drive") {
+                              handleGoogleDriveAction();
+                            } else if (key === "one_drive"){
+                              console.log('One Drive')
+                            } else if (key === "dropbox"){
+                              console.log('Dropbox')
+                            }
+                          }}
+                        >
+                          {setting.action}
+                        </Button>
+                      </div>
+                      <p className="text-[0.75rem] text-muted-foreground mb-2">
                         {setting.description}
                       </p>
                     </div>
@@ -799,6 +967,10 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
         isOpen={showDriveModal}
         onClose={() => setShowDriveModal(false)}
         onFileSelect={() => {}} // Empty function since we're just using it for authentication
+      />
+      <SharedLinksModal
+        isOpen={manageSharedLinksOpen}
+        onClose={() => setManageSharedLinksOpen(false)}
       />
     </>
   );
@@ -1689,18 +1861,14 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   );
 }
 
-interface ShareDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  imageUrl: string;
-  modelName: string;
-}
-
 export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialogProps) {
   const handleShare = (platform: typeof socialMediaOptions[0]) => {
     window.open(platform.handler(imageUrl), '_blank');
     onClose();
   };
+
+  const { theme } = useTheme();
+  const dark = theme === "dark";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -1716,7 +1884,7 @@ export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialo
               className={`flex flex-col items-center gap-2 p-4 rounded-lg ${platform.color} ${platform.hoverColor} transition-colors duration-200`}
             >
               <Image
-                src={platform.icon}
+                src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
                 alt={platform.name}
                 width={24}
                 height={24}
@@ -2086,21 +2254,6 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-interface GoogleDriveModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onFileSelect: (file: DriveFile) => void;
-}
-
-interface DriveFile {
-  id: string;
-  name: string;
-  type: 'folder' | 'file';
-  mimeType: string;
-  thumbnailUrl?: string;
-  size?: string;
-}
-
 export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveModalProps) {
   const { isAuthenticated, checkAndRefreshAuth } = useDriveAuthStore();
   const [pathHistory, setPathHistory] = useState<Array<{ name: string; id: string }>>([]);
@@ -2376,6 +2529,716 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
             </div>
           )}
         </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDiscoverable, setIsDiscoverable] = useState(false);
+  const [isNewlyCreated, setIsNewlyCreated] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+
+  const { toast } = useToast();
+  const { currentConversationLink, setCurrentConversationLink } = useSidebarStore();
+  const { sectionIds } = useSidebarStore();
+  const { addSharedLink, updateSharedLink, getSharedLink } = useSharedLinksStore();
+  const { getHistoryByType } = useHistoryStore();
+
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+
+  const generateLink = async () => {
+    setIsLoading(true);
+
+
+    
+    // Get current history type and ID
+    const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
+    
+    if (!currentTypeEntry || !currentTypeEntry[1]) {
+      toast({
+        variant: "destructive",
+        description: "Please select a conversation to share",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const [currentType, historyId] = currentTypeEntry;
+    const historyType = currentType.replace('Id', '') as 'chat' | 'image' | 'audio' | 'video';
+    
+    // Get the history item details
+    const history = getHistoryByType(historyType).find(item => item.id === historyId);
+
+    if (!history) {
+      toast({
+        variant: "destructive",
+        description: "Conversation not found",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if a link already exists for this history
+    const existingLink = getSharedLink(historyId);
+    
+    // Generate the share link
+    const baseUrl = window.location.origin;
+    const newLink = `${baseUrl}/share/${historyId}`;
+
+    if (existingLink) {
+      // Update existing link
+      updateSharedLink(existingLink.id, newLink);
+      toast({
+        description: "Share link has been updated",
+      });
+    } else {
+      // Create new link
+      addSharedLink(historyId, history.title, newLink);
+      toast({
+        description: "Share link has been created",
+      });
+    }
+
+    setCurrentConversationLink(newLink);
+    setIsNewlyCreated(true);
+    setIsLoading(false);
+  };
+
+  const copyToClipboard = async () => {
+    if (!currentConversationLink) return;
+    
+    try {
+      await navigator.clipboard.writeText(currentConversationLink);
+      toast({
+        title: "Copied",
+        description: "Link copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy link",
+      });
+    }
+  };
+
+  // Reset newly created state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsNewlyCreated(false);
+    }
+  }, [isOpen]);
+
+  // Reset state when section IDs change
+  useEffect(() => {
+    setCurrentConversationLink(null);
+    setIsNewlyCreated(false);
+  }, [sectionIds]);
+
+  const handleShare = (platform: typeof socialMediaOptions[0]) => {
+    if (!currentConversationLink) return;
+    window.open(platform.handler(currentConversationLink), '_blank');
+  };
+  
+  const getButtonConfig = () => {
+    if (isLoading) {
+      return {
+        text: "",
+        icon: <Loader className="h-4 w-4 animate-spin" />,
+        action: undefined
+      };
+    }
+
+    // Get current history ID
+    const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
+    const historyId = currentTypeEntry?.[1];
+    const existingLink = historyId ? getSharedLink(historyId) : null;
+
+    if (!currentConversationLink) {
+      return {
+        text: existingLink ? "Update link" : "Create link",
+        icon: <Link className="w-4 h-4" />,
+        action: generateLink
+      };
+    }
+
+    if (isNewlyCreated) {
+      return {
+        text: "Copy",
+        icon: <Copy className="w-4 h-4" />,
+        action: copyToClipboard
+      };
+    }
+
+    return {
+      text: "Update link",
+      icon: <Link className="w-4 h-4" />,
+      action: generateLink
+    };
+  };
+
+  const buttonConfig = getButtonConfig();
+
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader className="flex flex-row items-center justify-between relative">
+            <DialogTitle className="text-sm">
+              {currentConversationLink 
+                ? 'Update sharing link' 
+                : getSharedLink(Object.entries(sectionIds).find(([_, id]) => id !== null)?.[1] || '')
+                  ? 'Regenerate sharing link'
+                  : 'Create sharing link'
+              }
+              <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">esc</span>
+              </kbd>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {isNewlyCreated 
+                ? (
+                  <>
+                    The public link to your chat has been updated. Manage previously shared chats via {" "}
+                    <span 
+                  onClick={() => {
+                    onClose();
+                    setSettingsModalOpen(true);
+                  }}
+                  className="underline font-semibold cursor-pointer">Settings</span>.
+                  </>
+                ) : "Your name and any messages you add after sharing stay private."}
+            </p>
+
+            <div className="flex gap-2 bg-muted p-1 border border-borderColorPrimary rounded-full">
+              <Input
+                value={currentConversationLink || "https://alle-ai.com/share/..."}
+                readOnly
+                placeholder=""
+                className="bg-muted rounded-full focus-visible:outline-none border-none"
+              />
+              <Button
+                variant="outline"
+                onClick={buttonConfig.action}
+                disabled={isLoading}
+                className={cn(
+                  "bg-bodyColor text-xs text-bodyColorAlt shrink-0 gap-2 p-3 rounded-full border-none hover:bg-bodyColor hover:text-bodyColorAlt hover:opacity-90",
+                  isLoading && "cursor-not-allowed opacity-50"
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    {buttonConfig.icon}
+                    {buttonConfig.text}
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {buttonConfig.text === "Update link" && (
+                <>
+                  A past version of this chat has already been shared. Manage previously shared chats via{" "}
+                  <span 
+                  onClick={() => {
+                    onClose();
+                    setSettingsModalOpen(true);
+                  }}
+                  className="underline font-semibold cursor-pointer">Settings</span>.
+                </>
+              )}
+            </div>
+
+            {isNewlyCreated && currentConversationLink && (
+              <div className="grid grid-cols-4 gap-4">
+                {socialMediaOptions.map((platform) => (
+                  <Button
+                    key={platform.name}
+                    variant="outline"
+                    className="flex flex-col items-center gap-2 h-auto rounded-xl"
+                    onClick={() => handleShare(platform)}
+                  >
+                    <Image
+                      src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
+                      alt={platform.name}
+                      width={20}
+                      height={20}
+                      className="w-4 h-4"
+                    />
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <SettingsModal 
+        isOpen={settingsModalOpen} 
+        onClose={() => setSettingsModalOpen(false)}
+        defaultTabValue = {'data controls'} 
+      />
+    </>
+  );
+}
+
+export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
+  const { sharedLinks, removeSharedLink } = useSharedLinksStore();
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredLinks = useMemo(() => {
+    return sharedLinks.filter(link => 
+      link.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [sharedLinks, searchQuery]);
+
+  const copyToClipboard = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      toast({ description: "Link copied to clipboard" });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy link"
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader className="flex flex-row items-center justify-between relative border-b pb-4">
+          <DialogTitle>Shared Links</DialogTitle>
+          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">esc</span>
+          </kbd>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Header with Search */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search shared links..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-background focus-visible:outline-none focus:border-borderColorPrimary"
+              />
+            </div>
+          </div>
+
+          {/* Links Table */}
+          <div className="rounded-md border">
+            {/* Table Header */}
+            <div className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-2 border-b bg-muted/50">
+              <div className="text-sm font-medium">Name</div>
+              <div className="hidden md:block text-sm font-medium">Date shared</div>
+              <div className="text-sm font-medium text-right">Actions</div>
+            </div>
+
+            {/* Table Body */}
+            <ScrollArea className="h-[400px]">
+              {filteredLinks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+                  <Link className="h-8 w-8 mb-2 opacity-50" />
+                  <p className="text-sm">No shared links found</p>
+                </div>
+              ) : (
+                filteredLinks.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-2 border-b last:border-0 items-center hover:bg-muted/50 group"
+                  >
+                    {/* Link Title */}
+                    <div className="flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-90 hover:underline transition-all">
+                      <Link className="h-3 w-3 flex-shrink-0 text-blue-500" />
+                      <span className="truncate text-xs">{item.title}</span>
+                    </div>
+
+                    {/* Date */}
+                    <div className="hidden md:flex items-center gap-2 text-muted-foreground">
+                      <Clock9 className="h-3 w-3" />
+                      <span className="text-xs">
+                        {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-2">
+                      <TooltipProvider>
+                        {/* Share Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Share2 className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[200px] bg-backgroundSecondary">
+                                {socialMediaOptions.map((platform) => (
+                                  <DropdownMenuItem
+                                    key={platform.name}
+                                    onClick={() => window.open(platform.handler(item.link), '_blank')}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <Image
+                                      src={platform.icon}
+                                      alt={platform.name}
+                                      width={16}
+                                      height={16}
+                                    />
+                                    <span>Share on {platform.name}</span>
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TooltipTrigger>
+                          <TooltipContent>Share</TooltipContent>
+                        </Tooltip>
+
+                        {/* Copy Link Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => copyToClipboard(item.link)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Copy link</TooltipContent>
+                        </Tooltip>
+
+                        {/* Delete Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => removeSharedLink(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                ))
+              )}
+            </ScrollArea>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0">
+        {/* Header */}
+        <div className="border-b p-6 bg-background">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+              <div className="p-2 rounded-md bg-primary/10">
+                <KeyboardCommand className="h-5 w-5 text-primary" />
+              </div>
+              Keyboard shortcuts
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+
+        {/* Content */}
+        <ScrollArea className="max-h-[calc(80vh-8rem)]">
+          <div className="p-6 space-y-8">
+            {/* Essential Shortcuts */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Essential Commands</h3>
+              <div className="grid gap-3">
+                {shortcuts.slice(0, 4).map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                        {getIconForAction(item.action)}
+                      </div>
+                      <span className="text-sm font-medium group-hover:text-foreground transition-colors">
+                        {item.action}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.shortcut.map((combo, comboIndex) => (
+                        <div key={comboIndex} className="flex items-center gap-1">
+                          {combo.keys.map((key, keyIndex) => (
+                            <kbd
+                              key={keyIndex}
+                              className="px-2 py-1.5 text-[10px] font-medium bg-muted rounded-md border shadow-sm min-w-[28px] flex items-center justify-center uppercase"
+                            >
+                              {key}
+                            </kbd>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Additional Shortcuts */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Additional Shortcuts</h3>
+              <div className="grid gap-3">
+                {shortcuts.slice(4).map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                        {getIconForAction(item.action)}
+                      </div>
+                      <span className="text-sm font-medium group-hover:text-foreground transition-colors">
+                        {item.action}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.shortcut.map((combo, comboIndex) => (
+                        <div key={comboIndex} className="flex items-center gap-1">
+                          {combo.keys.map((key, keyIndex) => (
+                            <kbd
+                              key={keyIndex}
+                              className="px-2 py-1.5 text-[10px] font-medium bg-muted rounded-md border shadow-sm min-w-[28px] flex items-center justify-center uppercase"
+                            >
+                              {key}
+                            </kbd>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div className="border-t p-4 bg-background">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              <Info className="h-3 w-3" />
+              Press <kbd className="px-2 py-1 text-[10px] font-medium bg-muted rounded-md border shadow-sm">Ctrl</kbd> + <kbd className="px-2 py-1 text-[10px] font-medium bg-muted rounded-md border shadow-sm">/</kbd> anytime to view shortcuts
+            </p>
+            <Button variant="outline" size="sm" className="text-xs focus-visible:outline-none" onClick={onClose}>
+              Got it
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+// Helper function to get icons for actions
+function getIconForAction(action: string) {
+  switch (action) {
+    case "Open new chat":
+      return <MessageSquare className="h-4 w-4" />;
+    case "Focus chat input":
+      return <Type className="h-4 w-4" />;
+    case "Copy last code block":
+      return <Code className="h-4 w-4" />;
+    case "Copy last response":
+      return <Copy className="h-4 w-4" />;
+    case "Set custom instructions":
+      return <Settings className="h-4 w-4" />;
+    case "Toggle sidebar":
+      return <PanelLeftClose className="h-4 w-4" />;
+    case "Delete chat":
+      return <Trash2 className="h-4 w-4" />;
+    case "Show shortcuts":
+      return <KeyboardCommand className="h-4 w-4" />;
+    default:
+      return <KeyboardCommand className="h-4 w-4" />;
+  }
+}
+
+export function ReportContentModal({ 
+  isOpen, 
+  onClose, 
+  contentId,
+  contentType,
+  contentPreview 
+}: ReportModalProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [includeContent, setIncludeContent] = useState(true);
+  const { toast } = useToast();
+
+  const handleSubmit = async () => {
+    if (!selectedCategory) {
+      toast({
+        title: "Please select a category",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Report submitted",
+        description: "Thank you for helping keep our platform safe.",
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error submitting report",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] p-0 h-[calc(100vh-40px)] flex flex-col gap-0">
+        {/* Fixed Header */}
+        <div className="shrink-0 p-6 border-b bg-background">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Report Content
+            </DialogTitle>
+            <DialogDescription>
+              Help us maintain a safe environment by reporting inappropriate or illegal content.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        {/* Scrollable Content */}
+        <ScrollArea className="flex-1 px-6 py-4">
+          <div className="space-y-6 pr-4">
+            {/* Content Preview */}
+            {contentPreview && (
+              <div className="p-3 rounded-lg bg-yellow-500/20 border border-borderColorPrimary">
+                <div className="text-xs text-muted-foreground mb-2">Content being reported:</div>
+                <div className="text-sm line-clamp-3">{contentPreview}</div>
+              </div>
+            )}
+
+            {/* Category Selection */}
+            <div className="space-y-4">
+              <label className="text-sm font-medium">
+                What type of violation are you reporting?
+              </label>
+              <RadioGroup
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+                className="grid gap-3"
+              >
+                {reportCategories.map((category) => (
+                  <div
+                    key={category.id}
+                    className={cn(
+                      "flex items-start space-x-3 rounded-lg border p-3 cursor-pointer transition-colors",
+                      selectedCategory === category.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                    )}
+                  >
+                    <RadioGroupItem
+                      value={category.id}
+                      id={category.id}
+                      className="mt-1"
+                    />
+                    <label
+                      htmlFor={category.id}
+                      className="flex-1 cursor-pointer space-y-1"
+                    >
+                      <div className="text-sm font-medium leading-none">
+                        {category.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {category.description}
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
+            {/* Additional Details */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Additional details <span className="text-muted-foreground">(Optional)</span>
+              </label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Please provide any additional context..."
+                className="min-h-[100px] resize-none border border-borderColorPrimary focus-visible:outline-none focus:border-2"
+                maxLength={500}
+              />
+              <div className="text-xs text-muted-foreground text-right">
+                {description.length}/500 characters
+              </div>
+            </div>
+
+            {/* Include Content Option */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="include-content"
+                checked={includeContent}
+                onCheckedChange={(checked) => setIncludeContent(checked as boolean)}
+              />
+              <label htmlFor="include-content" className="text-sm text-muted-foreground leading-none">
+                Include content in report for review
+              </label>
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Fixed Footer */}
+        <div className="shrink-0 p-4 border-t bg-background">
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!selectedCategory || isSubmitting}
+              className="gap-2"
+              variant="destructive"
+            >
+              {isSubmitting && <Loader className="h-4 w-4 animate-spin" />}
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

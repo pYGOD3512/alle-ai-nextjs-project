@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@radix-ui/themes";
 import Image from 'next/image';
@@ -13,6 +13,7 @@ import {
   MessagesSquare,
   HelpCircle,
   LogOut,
+  Share,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -24,7 +25,7 @@ import { navItems, userMenuItems, notifications as notificationData} from '@/lib
 import { useSidebarStore, useSelectedModelsStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
-import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal } from "../ui/modals";
+import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
@@ -47,6 +48,7 @@ export function Header() {
   const [userProfileModalOpen, setUserProfileModalOpen] = React.useState(false);
   const [referModalOpen, setReferModalOpen] = React.useState(false);
   const [albumModalOpen, setAlbumModalOpen] = React.useState(false);
+  const [shareLinkModalOpen, setShareLinkModalOpen] = useState(false);
 
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
@@ -330,6 +332,14 @@ export function Header() {
 
           <div className={`flex items-center gap-2 ${isSubscribed ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
             {/* <AuthSwitch /> */}
+            <Button
+            variant={'outline'}
+            className="h-8 rounded-full gap-1 p-2 text-muted-foreground"
+            onClick={() => setShareLinkModalOpen(true)}
+            >
+              <Share className="w-4 h-4"/>
+              Share
+            </Button>
             <ThemeToggle />
             {navItems.filter(item => 
               isSubscribed || 
@@ -367,9 +377,6 @@ export function Header() {
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />
                     {item.label}
-                    <DropdownMenuShortcut>
-                    {item.shortcut}
-                    </DropdownMenuShortcut>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -400,6 +407,10 @@ export function Header() {
       <AlbumModal 
         isOpen={albumModalOpen} 
         onClose={() => setAlbumModalOpen(false)} 
+      />
+      <ShareLinkModal 
+        isOpen={shareLinkModalOpen} 
+        onClose={() => setShareLinkModalOpen(false)} 
       />
     </>
   );
