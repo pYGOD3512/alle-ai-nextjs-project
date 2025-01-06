@@ -2750,7 +2750,7 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
           {/* Links Table */}
           <div className="rounded-md border">
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-4 border-b bg-muted/50">
+            <div className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-2 border-b bg-muted/50">
               <div className="text-sm font-medium">Name</div>
               <div className="hidden md:block text-sm font-medium">Date shared</div>
               <div className="text-sm font-medium text-right">Actions</div>
@@ -2767,12 +2767,12 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
                 filteredLinks.map((item) => (
                   <div
                     key={item.id}
-                    className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-4 border-b last:border-0 items-center hover:bg-muted/50 group"
+                    className="grid grid-cols-[1fr,auto] md:grid-cols-[1fr,200px,auto] gap-4 p-2 border-b last:border-0 items-center hover:bg-muted/50 group"
                   >
                     {/* Link Title */}
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Link className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                      <span className="truncate text-sm">{item.title}</span>
+                    <div className="flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-90 hover:underline transition-all">
+                      <Link className="h-3 w-3 flex-shrink-0 text-blue-500" />
+                      <span className="truncate text-xs">{item.title}</span>
                     </div>
 
                     {/* Date */}
