@@ -61,10 +61,10 @@ import {
   LogIn,
   RefreshCw,
   Link,
-  ExternalLink,
   Clock9,
   MessageCircle,
   Share2,
+  Boxes,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -89,6 +89,7 @@ import { Share } from "next/dist/compiled/@next/font/dist/google";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultTabValue?: string;
 }
 
 interface SearchHistoryModalProps extends ModalProps {
@@ -477,7 +478,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-export function SettingsModal({ isOpen, onClose }: ModalProps) {
+export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) {
   const { theme, setTheme } = useTheme();
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
@@ -531,17 +532,30 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
         description: "",
         action: "Export",
       },
-      google_drive: {
-        title: "Google Drive",
-        description: isAuthenticated 
-          ? ""
-          : "",
-        action: isAuthenticated ? "Unlink" : "Link"
-      },
       deleteMyAccount: {
         title: "Delete account",
         description: "",
         action: "Delete",
+      },
+    },
+    connected_apps: {
+      google_drive: {
+        title: "Google Drive",
+        icon: <Image src={'/icons/google-drive.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        description: "Upload Google Docs, Sheets, Slides and other files.",
+        action: isAuthenticated ? "Unlink" : "Link"
+      },
+      one_drive: {
+        title: "One Drive",
+        icon: <Image src={'/icons/onedrive.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        description: "Upload Microsoft Word, Excel, PowerPoint and other files.",
+        action: "Link"
+      },
+      dropbox: {
+        title: "Dropbox",
+        icon: <Image src={'/icons/dropbox.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        description: "Upload Docs and other files.",
+        action: "Link"
       },
     },
     analytics: {
@@ -576,6 +590,11 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
       value: "data controls",
       label: "Data controls",
       icon: <DatabaseBackup className="h-4 w-4" />,
+    },
+    {
+      value: "connected apps",
+      label: "Connected apps",
+      icon: <Boxes className="h-4 w-4" />,
     },
     {
       value: "analytics",
@@ -626,7 +645,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
             </kbd>
           </DialogHeader>
 
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs defaultValue={`${defaultTabValue ? defaultTabValue : 'general'}`} className="w-full">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Sidebar */}
               <div className="w-48 space-y-1">
@@ -736,9 +755,7 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                           className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            if (key === "google_drive") {
-                              handleGoogleDriveAction();
-                            } else if (setting.action === "Delete") {
+                            if (setting.action === "Delete") {
                               setDeleteAccountModalOpen(true);
                             } else if (setting.action === "Export") {
                               setExportModalOpen(true);
@@ -751,6 +768,38 @@ export function SettingsModal({ isOpen, onClose }: ModalProps) {
                         </Button>
                       </div>
                       <p className="text-[0.75rem] text-muted-foreground">
+                        {setting.description}
+                      </p>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="connected apps" className="space-y-2">
+                  {Object.entries(settingsData.connected_apps).map(([key, setting]) => (
+                    <div
+                      key={key}
+                      className="border-b border-borderColorPrimary last:border-none"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-small flex items-center gap-2">{setting.icon}{setting.title}</h4>
+                        <Button
+                          variant={setting.action === 'Unlink' ? 'destructive' : 'outline'}
+                          className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
+                          size="sm"
+                          onClick={() => {
+                            if (key === "google_drive") {
+                              handleGoogleDriveAction();
+                            } else if (key === "one_drive"){
+                              console.log('One Drive')
+                            } else if (key === "dropbox"){
+                              console.log('Dropbox')
+                            }
+                          }}
+                        >
+                          {setting.action}
+                        </Button>
+                      </div>
+                      <p className="text-[0.75rem] text-muted-foreground mb-2">
                         {setting.description}
                       </p>
                     </div>
@@ -2402,6 +2451,8 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDiscoverable, setIsDiscoverable] = useState(false);
   const [isNewlyCreated, setIsNewlyCreated] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+
   const { toast } = useToast();
   const { currentConversationLink, setCurrentConversationLink } = useSidebarStore();
   const { sectionIds } = useSidebarStore();
@@ -2410,6 +2461,8 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
 
   const generateLink = async () => {
     setIsLoading(true);
+
+
     
     // Get current history type and ID
     const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
@@ -2422,6 +2475,8 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
       setIsLoading(false);
       return;
     }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const [currentType, historyId] = currentTypeEntry;
     const historyType = currentType.replace('Id', '') as 'chat' | 'image' | 'audio' | 'video';
@@ -2539,72 +2594,109 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
   const buttonConfig = getButtonConfig();
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader className="flex flex-row items-center justify-between relative">
-          <DialogTitle className="text-sm">
-            {currentConversationLink 
-              ? 'Update sharing link' 
-              : getSharedLink(Object.entries(sectionIds).find(([_, id]) => id !== null)?.[1] || '')
-                ? 'Regenerate sharing link'
-                : 'Create sharing link'
-            }
-            <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">esc</span>
-            </kbd>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {isNewlyCreated 
-              ? "The public link to your chat has been updated. Manage previously shared chats via Settings."
-              : "Your name and any messages you add after sharing stay private."}
-          </p>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader className="flex flex-row items-center justify-between relative">
+            <DialogTitle className="text-sm">
+              {currentConversationLink 
+                ? 'Update sharing link' 
+                : getSharedLink(Object.entries(sectionIds).find(([_, id]) => id !== null)?.[1] || '')
+                  ? 'Regenerate sharing link'
+                  : 'Create sharing link'
+              }
+              <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">esc</span>
+              </kbd>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {isNewlyCreated 
+                ? (
+                  <>
+                    The public link to your chat has been updated. Manage previously shared chats via {" "}
+                    <span 
+                  onClick={() => {
+                    onClose();
+                    setSettingsModalOpen(true);
+                  }}
+                  className="underline font-semibold cursor-pointer">Settings</span>.
+                  </>
+                ) : "Your name and any messages you add after sharing stay private."}
+            </p>
 
-          <div className="flex gap-2 bg-muted p-1 border border-borderColorPrimary rounded-full">
-            <Input
-              value={currentConversationLink || "https://alle-ai.com/share/..."}
-              readOnly
-              placeholder=""
-              className="bg-muted rounded-full focus-visible:outline-none border-none"
-            />
-            <Button
-              variant="outline"
-              onClick={buttonConfig.action}
-              disabled={isLoading}
-              className="bg-bodyColor text-xs text-bodyColorAlt shrink-0 gap-1 p-3 rounded-full border-none hover:bg-bodyColor hover:text-bodyColorAlt hover:opacity-90"
-            >
-              {buttonConfig.icon}
-              {buttonConfig.text}
-            </Button>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {buttonConfig.text === "Update link" && ("A past version of this chat has already been shared. Manage previously shared chats via Settings.")}
-          </div>
-
-          {isNewlyCreated && currentConversationLink && (
-            <div className="grid grid-cols-4 gap-4">
-              {socialMediaOptions.map((platform) => (
-                <Button
-                  key={platform.name}
-                  variant="outline"
-                  className="flex flex-col items-center gap-2 h-auto rounded-xl"
-                  onClick={() => handleShare(platform)}
-                >
-                  <Image
-                    src={platform.icon}
-                    alt={platform.name}
-                    width={20}
-                    height={20}
-                    className="w-4 h-4"
-                  />
-                </Button>
-              ))}
+            <div className="flex gap-2 bg-muted p-1 border border-borderColorPrimary rounded-full">
+              <Input
+                value={currentConversationLink || "https://alle-ai.com/share/..."}
+                readOnly
+                placeholder=""
+                className="bg-muted rounded-full focus-visible:outline-none border-none"
+              />
+              <Button
+                variant="outline"
+                onClick={buttonConfig.action}
+                disabled={isLoading}
+                className={cn(
+                  "bg-bodyColor text-xs text-bodyColorAlt shrink-0 gap-2 p-3 rounded-full border-none hover:bg-bodyColor hover:text-bodyColorAlt hover:opacity-90",
+                  isLoading && "cursor-not-allowed opacity-50"
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    {buttonConfig.icon}
+                    {buttonConfig.text}
+                  </>
+                )}
+              </Button>
             </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            <div className="text-xs text-muted-foreground">
+              {buttonConfig.text === "Update link" && (
+                <>
+                  A past version of this chat has already been shared. Manage previously shared chats via{" "}
+                  <span 
+                  onClick={() => {
+                    onClose();
+                    setSettingsModalOpen(true);
+                  }}
+                  className="underline font-semibold cursor-pointer">Settings</span>.
+                </>
+              )}
+            </div>
+
+            {isNewlyCreated && currentConversationLink && (
+              <div className="grid grid-cols-4 gap-4">
+                {socialMediaOptions.map((platform) => (
+                  <Button
+                    key={platform.name}
+                    variant="outline"
+                    className="flex flex-col items-center gap-2 h-auto rounded-xl"
+                    onClick={() => handleShare(platform)}
+                  >
+                    <Image
+                      src={platform.icon}
+                      alt={platform.name}
+                      width={20}
+                      height={20}
+                      className="w-4 h-4"
+                    />
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <SettingsModal 
+        isOpen={settingsModalOpen} 
+        onClose={() => setSettingsModalOpen(false)}
+        defaultTabValue = {'data controls'} 
+      />
+    </>
   );
 }
 
