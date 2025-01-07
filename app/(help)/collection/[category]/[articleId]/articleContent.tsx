@@ -1,12 +1,22 @@
 "use client";
 
-import { ChevronRight, Clock, ThumbsUp, ThumbsDown, ArrowLeft } from "lucide-react";
+import { ChevronRight, Clock, ThumbsUp, ThumbsDown, ArrowLeft, Globe, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { HelpCategory, Article } from "@/lib/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconComponent } from "@/components/IconComponent";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { languages } from "@/lib/constants"
+import { toast, useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 
 type FeedbackType = 'helpful' | 'not-helpful' | null;
 
@@ -20,7 +30,19 @@ export function ArticleContent({
   categorySlug: string;
 }) {
   const [feedbackGiven, setFeedbackGiven] = useState<FeedbackType>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  const { toast } = useToast();
 
+
+  useEffect(() => {
+    if(selectedLanguage.code !== "en"){
+      toast({
+        title: "Coming soon!",
+        description: "This language translation will be available soon"
+      });
+    }
+  }, [selectedLanguage.code, toast]);
+  
   const handleFeedback = (type: FeedbackType) => {
     setFeedbackGiven(type);
   };
@@ -41,6 +63,37 @@ export function ArticleContent({
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to {category.title}
           </Link>
+
+          {/* Add this right after the back button */}
+          <div className="flex justify-end mb-6">
+            <ThemeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                <Globe className="h-4 w-4" />
+                <span className="text-sm">{selectedLanguage.code.toUpperCase()}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {languages.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => setSelectedLanguage(lang)}
+                    className="flex items-center gap-2"
+                  >
+                    <span className="text-sm font-medium">{lang.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({lang.code.toUpperCase()})
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link
+            href={'/'}
+            className="p-2 rounded-lg hover:bg-primary/10"
+          >
+            <Home />
+          </Link>
+          </div>
 
           {/* Article Header */}
           <div className="flex items-start gap-6">

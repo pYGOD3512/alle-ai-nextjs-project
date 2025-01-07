@@ -44,7 +44,7 @@ useEffect(() => {
     {
       icon: FileText,
       label: 'Release notes',
-      onClick: () => window.open('/releases', '_blank')
+      onClick: () => window.open('/release-notes', '_blank')
     },
     {
       icon: FileText,

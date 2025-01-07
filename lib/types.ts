@@ -105,7 +105,7 @@ export type IconName =
 | "Search"
 | "ArrowLeft"
 | "ThumbsUp"
-| "ThumbsDown";
+| "ThumbsDown"
 
 export type CategoryKeys = 
   | "3943089-account-login-and-billing"
