@@ -118,9 +118,12 @@ export default function Changelog() {
                 <div
                     key={entry.id}
                     className={cn(
-                    "relative flex gap-8",
+                    "relative flex gap-8 cursor-pointer hover:opacity-80 transition-opacity",
                     index % 2 === 0 ? "flex-row-reverse" : "flex-row"
                     )}
+                    onClick={() => {
+                        window.location.href = `/release-notes#${entry.id}`
+                    }}
                 >
                     {/* Content */}
                     <div className="flex-1">

@@ -224,4 +224,4 @@ export const helpCategories: HelpCategories = {
       ]
     },
     // Add other categories...
-  };
+};

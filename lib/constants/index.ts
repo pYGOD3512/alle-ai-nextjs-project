@@ -574,4 +574,646 @@ export const socialMediaOptions = [
   }
 ];
 
+export interface ReleaseNote {
+  id: string
+  version: string
+  date: string
+  translations: {
+    [key: string]: {
+      title: string
+      description: string
+      details: {
+        summary: string
+        changes: string[]
+        impact?: string
+        technicalNotes?: string[]
+      }
+    }
+  }
+  type: "security" | "solve" | "error" | "testing"| "feature" | "fix" | "bug" | "improvement"
+  image?: string
+}
+
+export const languages = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+]
+
+export function getLocalizedContent(release: ReleaseNote, language: string) {
+  return release.translations[language] || release.translations['en'];
+}
+
+export const releaseNotesData: ReleaseNote[] = [
+  {
+    id: "1",
+    version: "v2.1.0",
+    date: "2024-12-01",
+    type: "feature",
+    translations: {
+      en: {
+        title: "Launch New User Authentication System",
+        description: "Introduced a secure, modern authentication system with multi-factor authentication and social media login integration.",
+        details: {
+          summary: "A complete overhaul of our authentication system to provide enhanced security and user convenience.",
+          changes: [
+            "Implemented OAuth 2.0 protocol for social media login",
+            "Added support for TOTP-based 2FA",
+            "Introduced session management with automatic timeout",
+            "Enhanced password policy enforcement"
+          ],
+          impact: "This update significantly improves platform security while making the login process more convenient for users.",
+          technicalNotes: [
+            "Migration required for existing authentication tokens",
+            "New environment variables needed for OAuth providers",
+            "Updated API endpoints for authentication flows"
+          ]
+        }
+      },
+      es: {
+        title: "Lanzamiento del Nuevo Sistema de Autenticación",
+        description: "Se introdujo un sistema de autenticación moderno y seguro con autenticación multifactor e integración de inicio de sesión con redes sociales.",
+        details: {
+          summary: "Una renovación completa de nuestro sistema de autenticación para mejorar la seguridad y la comodidad del usuario.",
+          changes: [
+            "Implementación del protocolo OAuth 2.0 para inicio de sesión con redes sociales",
+            "Añadido soporte para 2FA basado en TOTP",
+            "Introducción de gestión de sesiones con tiempo de espera automático",
+            "Mejora en la política de contraseñas"
+          ],
+          impact: "Esta actualización mejora significativamente la seguridad de la plataforma mientras hace más conveniente el proceso de inicio de sesión.",
+          technicalNotes: [
+            "Migración requerida para tokens de autenticación existentes",
+            "Nuevas variables de entorno necesarias para proveedores OAuth",
+            "Endpoints de API actualizados para flujos de autenticación"
+          ]
+        }
+      },
+      //other language translations...
+    }
+  },
+  {
+    "id": "2",
+    "version": "v2.2.0",
+    "date": "2024-12-15",
+    "type": "feature",
+    "translations": {
+      "en": {
+        "title": "Improved Search Functionality",
+        "description": "Enhanced search engine with advanced filtering options and faster response time.",
+        "details": {
+          "summary": "We have revamped the search functionality, making it faster and more intuitive.",
+          "changes": [
+            "Added advanced filters (category, price range, rating)",
+            "Improved search indexing for faster results",
+            "Optimized search algorithm for better accuracy",
+            "Introduced an auto-complete feature for search suggestions"
+          ],
+          "impact": "This update improves the accuracy and speed of search results, offering a better user experience.",
+          "technicalNotes": [
+            "New search indexing system implemented",
+            "Minor database schema changes to support new filters",
+            "Improved search query performance"
+          ]
+        }
+      },
+      "es": {
+        "title": "Funcionalidad de Búsqueda Mejorada",
+        "description": "Motor de búsqueda mejorado con opciones avanzadas de filtrado y tiempos de respuesta más rápidos.",
+        "details": {
+          "summary": "Hemos renovado la funcionalidad de búsqueda, haciéndola más rápida e intuitiva.",
+          "changes": [
+            "Añadidos filtros avanzados (categoría, rango de precio, calificación)",
+            "Mejorada la indexación de búsqueda para obtener resultados más rápidos",
+            "Optimizando el algoritmo de búsqueda para mayor precisión",
+            "Introducción de la función de autocompletado para sugerencias de búsqueda"
+          ],
+          "impact": "Esta actualización mejora la precisión y la velocidad de los resultados de búsqueda, ofreciendo una mejor experiencia al usuario.",
+          "technicalNotes": [
+            "Nuevo sistema de indexación de búsqueda implementado",
+            "Pequeños cambios en el esquema de la base de datos para soportar los nuevos filtros",
+            "Mejora en el rendimiento de las consultas de búsqueda"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "3",
+    "version": "v2.1.1",
+    "date": "2024-12-05",
+    "type": "fix",
+    "translations": {
+      "en": {
+        "title": "Bug Fix for Checkout Process",
+        "description": "Resolved an issue where users were unable to complete their purchase due to a payment gateway error.",
+        "details": {
+          "summary": "A bug was fixed in the checkout flow that was preventing users from finalizing their purchases.",
+          "changes": [
+            "Fixed an issue causing payment gateway errors during checkout",
+            "Improved error handling for failed transactions",
+            "Enhanced user feedback during payment processing"
+          ],
+          "impact": "Users can now complete their purchases without errors, improving overall customer satisfaction.",
+          "technicalNotes": [
+            "Payment gateway API updated to handle errors more gracefully",
+            "Improved logging for transaction failures"
+          ]
+        }
+      },
+      "es": {
+        "title": "Corrección de Error en el Proceso de Pago",
+        "description": "Se resolvió un problema donde los usuarios no podían completar su compra debido a un error en la pasarela de pago.",
+        "details": {
+          "summary": "Se corrigió un error en el flujo de pago que impedía a los usuarios finalizar sus compras.",
+          "changes": [
+            "Corrección de un error que causaba fallos en la pasarela de pago durante el proceso de pago",
+            "Mejora en el manejo de errores para transacciones fallidas",
+            "Mejora en la retroalimentación al usuario durante el procesamiento del pago"
+          ],
+          "impact": "Los usuarios ahora pueden completar sus compras sin errores, mejorando la satisfacción general del cliente.",
+          "technicalNotes": [
+            "API de la pasarela de pago actualizada para manejar errores de manera más eficiente",
+            "Mejoras en el registro de fallos de transacciones"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "4",
+    "version": "v2.3.0",
+    "date": "2024-12-20",
+    "type": "feature",
+    "translations": {
+      "en": {
+        "title": "Mobile App Interface Overhaul",
+        "description": "The mobile app interface has been redesigned to provide a more modern and user-friendly experience.",
+        "details": {
+          "summary": "The user interface of the mobile app has been completely updated for a fresh, clean look and better usability.",
+          "changes": [
+            "Revamped app navigation with simplified menu structure",
+            "Updated design with a more consistent color scheme",
+            "Introduced bottom navigation bar for easier access to key features",
+            "Redesigned user profiles with updated layout and options"
+          ],
+          "impact": "The new interface improves overall usability and aesthetic appeal, providing a more modern and streamlined experience.",
+          "technicalNotes": [
+            "UI/UX team collaborated on new design system",
+            "Reworked app components to follow modern design guidelines",
+            "Performance optimizations for smoother animations"
+          ]
+        }
+      },
+      "es": {
+        "title": "Renovación de la Interfaz de la App Móvil",
+        "description": "La interfaz de la app móvil ha sido rediseñada para ofrecer una experiencia más moderna y fácil de usar.",
+        "details": {
+          "summary": "La interfaz de usuario de la app móvil ha sido completamente actualizada para ofrecer un aspecto fresco, limpio y mejor usabilidad.",
+          "changes": [
+            "Renovación de la navegación de la app con una estructura de menú simplificada",
+            "Diseño actualizado con una paleta de colores más consistente",
+            "Introducción de una barra de navegación inferior para un acceso más fácil a las funciones clave",
+            "Rediseño de perfiles de usuario con un nuevo diseño y opciones"
+          ],
+          "impact": "La nueva interfaz mejora la usabilidad general y el atractivo estético, ofreciendo una experiencia más moderna y fluida.",
+          "technicalNotes": [
+            "El equipo de UI/UX colaboró en el nuevo sistema de diseño",
+            "Reestructuración de componentes de la app siguiendo las pautas de diseño modernas",
+            "Optimizaciones de rendimiento para animaciones más fluidas"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "5",
+    "version": "v2.1.2",
+    "date": "2024-12-10",
+    "type": "testing",
+    "translations": {
+      "en": {
+        "title": "New Unit Tests for User Registration",
+        "description": "Added unit tests to validate user registration and error handling for new accounts.",
+        "details": {
+          "summary": "New unit tests were created to ensure the user registration flow works correctly and catches errors.",
+          "changes": [
+            "Created unit tests for user registration functionality",
+            "Tested various edge cases, including duplicate accounts and invalid inputs",
+            "Added mock data for testing API responses"
+          ],
+          "impact": "This ensures that user registration works smoothly and errors are properly handled, improving code quality.",
+          "technicalNotes": [
+            "New testing framework implemented for unit testing",
+            "Test suite integrated into the CI pipeline for continuous validation"
+          ]
+        }
+      },
+      "es": {
+        "title": "Nuevas Pruebas Unitarias para el Registro de Usuario",
+        "description": "Se añadieron pruebas unitarias para validar el registro de usuario y el manejo de errores para nuevas cuentas.",
+        "details": {
+          "summary": "Se crearon nuevas pruebas unitarias para garantizar que el flujo de registro de usuario funcione correctamente y maneje errores.",
+          "changes": [
+            "Creación de pruebas unitarias para la funcionalidad de registro de usuario",
+            "Se probaron varios casos extremos, incluidos cuentas duplicadas y entradas no válidas",
+            "Añadidos datos simulados para probar las respuestas de la API"
+          ],
+          "impact": "Esto garantiza que el registro de usuarios funcione sin problemas y que los errores se manejen correctamente, mejorando la calidad del código.",
+          "technicalNotes": [
+            "Nuevo marco de pruebas implementado para pruebas unitarias",
+            "La suite de pruebas se integró en la pipeline de CI para validación continua"
+          ]
+        }
+      }
+    }
+  },  
+  {
+    "id": "6",
+    "version": "v2.4.0",
+    "date": "2024-12-25",
+    "type": "feature",
+    "translations": {
+      "en": {
+        "title": "Enhanced Email Notifications System",
+        "description": "New customizable email notifications with better tracking and user preferences.",
+        "details": {
+          "summary": "The email notifications system has been improved to give users more control over the emails they receive.",
+          "changes": [
+            "Added user preferences for customizing notification types",
+            "Introduced email tracking to confirm delivery and open rates",
+            "Improved email content design for better readability",
+            "Added support for rich media in email templates"
+          ],
+          "impact": "This update allows users to have more control over email communication and improves email engagement.",
+          "technicalNotes": [
+            "New user preference settings added to profile page",
+            "Tracking integration added to the email sending system",
+            "Email templates now support HTML5 and embedded media"
+          ]
+        }
+      },
+      "es": {
+        "title": "Sistema Mejorado de Notificaciones por Correo Electrónico",
+        "description": "Nuevas notificaciones por correo electrónico personalizables con mejor seguimiento y preferencias del usuario.",
+        "details": {
+          "summary": "El sistema de notificaciones por correo electrónico ha sido mejorado para dar a los usuarios más control sobre los correos que reciben.",
+          "changes": [
+            "Añadidas preferencias de usuario para personalizar los tipos de notificaciones",
+            "Introducción de seguimiento de correos electrónicos para confirmar entrega y tasa de aperturas",
+            "Mejora en el diseño del contenido de los correos para mayor legibilidad",
+            "Añadido soporte para medios enriquecidos en plantillas de correos"
+          ],
+          "impact": "Esta actualización permite a los usuarios tener más control sobre las comunicaciones por correo electrónico y mejora el compromiso con los correos.",
+          "technicalNotes": [
+            "Nuevas configuraciones de preferencias de usuario añadidas a la página de perfil",
+            "Integración de seguimiento añadida al sistema de envío de correos",
+            "Las plantillas de correo ahora soportan HTML5 y medios incrustados"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "8",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "9",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "10",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "11",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "12",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "13",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "14",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "7",
+    "version": "v2.1.3",
+    "date": "2024-12-12",
+    "type": "security",
+    "translations": {
+      "en": {
+        "title": "Security Patch for Data Encryption Vulnerability",
+        "description": "Fixed a vulnerability related to weak data encryption in user communications and storage.",
+        "details": {
+          "summary": "A security vulnerability was identified and patched to strengthen encryption methods for user data.",
+          "changes": [
+            "Upgraded encryption algorithms for data at rest and in transit",
+            "Implemented AES-256 encryption for sensitive user data",
+            "Added additional encryption for API communication and database storage"
+          ],
+          "impact": "This patch ensures that user data is now better protected against potential attacks, enhancing overall security.",
+          "technicalNotes": [
+            "Encryption keys were rotated as part of the update",
+            "New security protocols were applied for API communications"
+          ]
+        }
+      },
+      "es": {
+        "title": "Parché de Seguridad para Vulnerabilidad de Cifrado de Datos",
+        "description": "Se solucionó una vulnerabilidad relacionada con un cifrado débil de datos en las comunicaciones y almacenamiento de usuarios.",
+        "details": {
+          "summary": "Se identificó y corrigió una vulnerabilidad de seguridad para fortalecer los métodos de cifrado de los datos de los usuarios.",
+          "changes": [
+            "Actualización de los algoritmos de cifrado para los datos en reposo y en tránsito",
+            "Implementación de cifrado AES-256 para los datos sensibles de los usuarios",
+            "Añadido cifrado adicional para la comunicación API y el almacenamiento en base de datos"
+          ],
+          "impact": "Este parche garantiza que los datos de los usuarios ahora estén mejor protegidos contra posibles ataques, mejorando la seguridad general.",
+          "technicalNotes": [
+            "Las claves de cifrado fueron rotadas como parte de la actualización",
+            "Se aplicaron nuevos protocolos de seguridad para las comunicaciones API"
+          ]
+        }
+      }
+    }
+  },
+  
+  
+  
+  
+  //more release notes...
+]
+
 
