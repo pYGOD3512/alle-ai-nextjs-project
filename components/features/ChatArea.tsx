@@ -285,6 +285,7 @@ export function ChatArea() {
         onSend={handleSendMessage}
         inputRef={useRef<HTMLTextAreaElement>(null)}
         isLoading={false}
+        isWeb={true}
       />
     </RenderPageContent>
   );
