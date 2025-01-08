@@ -321,7 +321,7 @@ export function FileUploadButton({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {buttonIcon ? buttonIcon : (
-            <Button variant="ghost" size="icon" className="flex-shrink-0 focus-visible:outline-none" aria-label="Upload File">
+            <Button variant="ghost" size="icon" className=" p-2 flex-shrink-0 focus-visible:outline-none rounded-full" aria-label="Upload File">
               <Paperclip className="h-4 w-4" />
             </Button>
           )}

@@ -644,7 +644,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         action: "Delete",
       },
     },
-    connected_apps: {
+    linked_apps: {
       google_drive: {
         title: "Google Drive",
         icon: <Image src={'/icons/google-drive.png'} alt="google_drive_logo" width={16} height={16} /> ,
@@ -698,8 +698,8 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       icon: <DatabaseBackup className="h-4 w-4" />,
     },
     {
-      value: "connected apps",
-      label: "Connected apps",
+      value: "linked apps",
+      label: "Linked apps",
       icon: <Boxes className="h-4 w-4" />,
     },
     {
@@ -880,8 +880,8 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                   ))}
                 </TabsContent>
 
-                <TabsContent value="connected apps" className="space-y-2">
-                  {Object.entries(settingsData.connected_apps).map(([key, setting]) => (
+                <TabsContent value="linked apps" className="space-y-2">
+                  {Object.entries(settingsData.linked_apps).map(([key, setting]) => (
                     <div
                       key={key}
                       className="border-b border-borderColorPrimary last:border-none"

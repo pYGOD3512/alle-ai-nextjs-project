@@ -37,7 +37,7 @@ export function MicButton({ isListening, onClick, className }: MicButtonProps) {
           </div>
         </TooltipTrigger>
         <TooltipContent side="top">
-          <p>{isListening ? "Stop recording" : "Start recording"}</p>
+          <p>{isListening ? "Stop speaking" : "Start speaking"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
