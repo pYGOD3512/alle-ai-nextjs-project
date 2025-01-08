@@ -3114,6 +3114,7 @@ export function ReportContentModal({
         description: "Thank you for helping keep our platform safe.",
       });
       onClose();
+      setSelectedCategory('');
     } catch (error) {
       toast({
         title: "Error submitting report",
@@ -3126,7 +3127,10 @@ export function ReportContentModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => {
+      setSelectedCategory('');
+      onClose();
+      }}>
       <DialogContent className="sm:max-w-[500px] p-0 h-[calc(100vh-40px)] flex flex-col gap-0">
         {/* Fixed Header */}
         <div className="shrink-0 p-6 border-b bg-background">
@@ -3225,7 +3229,10 @@ export function ReportContentModal({
         {/* Fixed Footer */}
         <div className="shrink-0 p-4 border-t bg-background">
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="ghost" onClick={() => {
+              setSelectedCategory('');
+              onClose();
+              }}>
               Cancel
             </Button>
             <Button 
@@ -3234,8 +3241,12 @@ export function ReportContentModal({
               className="gap-2"
               variant="destructive"
             >
-              {isSubmitting && <Loader className="h-4 w-4 animate-spin" />}
-              Submit Report
+              {isSubmitting ? (
+                <>
+                <Loader className="h-4 w-4 animate-spin" />
+                Submitting
+                </>
+                ) : "Submit Report"}
             </Button>
           </DialogFooter>
         </div>

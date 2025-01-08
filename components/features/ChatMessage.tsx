@@ -66,31 +66,33 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
                   ref={textareaRef}
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full p-3 rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
+                  className="w-full p-3 bg-backgroundSecondary rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
                   placeholder="Edit message..."
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={handleCancelEdit}
-                  className="px-3 py-1 text-sm rounded-full hover:bg-gray-700 text-gray-300 transition-colors"
+                  className="px-3 py-1 text-sm rounded-full bg-black text-white dark:bg-white dark:text-black hover:bg-gray-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="px-3 py-1 text-sm rounded-full bg-white text-black hover:bg-gray-200 transition-colors"
+                  className="px-3 py-1 text-sm rounded-full bg-white text-black dark:bg-black dark:text-white hover:bg-gray-700 transition-colors"
                 >
                   Save
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center">
-              <p className="text-sm flex-1 pr-2">{content}</p>
+            <div className="flex-1 flex items-start">
+              <div className="flex-1 pr-2">
+                <p className="text-sm whitespace-pre-wrap break-words">{content}</p>
+              </div>
               <button
                 onClick={handleEditClick}
-                className="text-gray-500 hover:bg-gray-100 p-1 rounded-full transition-colors"
+                className="text-gray-500 hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"
                 aria-label="Edit message"
               >
                 <Edit size={16} />
