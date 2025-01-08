@@ -65,14 +65,14 @@ export function ArticleContent({
           </Link>
 
           {/* Add this right after the back button */}
-          <div className="flex justify-end mb-6">
+          <div className="flex items-center justify-end mb-6 gap-1">
             <ThemeToggle />
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">
+              <DropdownMenuTrigger className="flex items-center gap-2 p-2 rounded-md hover:bg-primary/10 transition-colors">
                 <Globe className="h-4 w-4" />
                 <span className="text-sm">{selectedLanguage.code.toUpperCase()}</span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-backgroundSecondary">
                 {languages.map((lang) => (
                   <DropdownMenuItem
                     key={lang.code}

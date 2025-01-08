@@ -5,7 +5,7 @@ import Link from "next/link";
 import { HelpCategory, Article } from "@/lib/types";
 import { IconComponent } from "@/components/IconComponent";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,7 +60,7 @@ export function CategoryContent({
           </div>
 
           {/* Add this right after the breadcrumb */}
-          <div className="flex justify-end mb-8">
+          <div className="flex items-center justify-end mb-8 gap-1">
           <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">

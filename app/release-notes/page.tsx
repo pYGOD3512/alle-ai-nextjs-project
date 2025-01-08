@@ -94,7 +94,7 @@ export default function ReleaseNotesContent() {
             </div>
             
             {/* Add this new section */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
                 <ThemeToggle />
 
               {/* Search Dropdown */}
@@ -102,12 +102,12 @@ export default function ReleaseNotesContent() {
                 <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">
                   <Search className="h-4 w-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[300px] p-4">
+                <DropdownMenuContent align="end" className="w-[300px] bg-backgroundSecondary">
                   <Input
                     placeholder="Search releases..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="mb-2"
+                    className="focus-visible:outline-none focus:border-borderColorPrimary"
                   />
                   {searchQuery && (
                     <div className="max-h-[300px] overflow-y-auto">
