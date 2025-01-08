@@ -122,7 +122,7 @@ export default function Changelog() {
                     index % 2 === 0 ? "flex-row-reverse" : "flex-row"
                     )}
                     onClick={() => {
-                        window.location.href = `/release-notes#${entry.id}`
+                        window.open(`/release-notes#${entry.id}`, '_blank')
                     }}
                 >
                     {/* Content */}

@@ -273,7 +273,15 @@ export function ChatInput({
             e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
             onChange(e.target.value);
           }}
-          onKeyDown={(e) => e.key === "Enter" && !isInputEmpty && onSend()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && !isInputEmpty) {
+              e.preventDefault();
+              onSend();
+              if (inputRef?.current) {
+                inputRef.current.style.height = 'inherit';
+              }
+            }
+          }}
           rows={1}
           style={{
             overflow: value.split('\n').length > 4 ? 'auto' : 'hidden',

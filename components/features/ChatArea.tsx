@@ -16,6 +16,7 @@ import {
 import { useSidebarStore, useSelectedModelsStore, useContentStore } from "@/stores";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollToBottom } from "@/components/ScrollToBottom";
 
 interface ChatSession {
   id: string;
@@ -179,9 +180,14 @@ export function ChatArea() {
     setInput("");
   };
 
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
   return (
     <RenderPageContent>
-      <ScrollArea className="flex-1">
+      <ScrollArea 
+        ref={scrollAreaRef} 
+        className="flex-1"
+      >
         <div className="max-w-xl sm:max-w-2xl md:max-w-5xl mt-4 mx-auto px-4">
           {chatSessions.map((session) => (
             <div key={session.id} className="mb-8">
@@ -268,6 +274,11 @@ export function ChatArea() {
           ))}
         </div>
       </ScrollArea>
+      <ScrollToBottom 
+        scrollAreaRef={scrollAreaRef}
+        className="z-50 w-8 h-8"
+        content={chatSessions}
+      />
       <ChatInput
         value={input}
         onChange={handleInputChange}
