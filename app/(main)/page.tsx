@@ -76,6 +76,7 @@ export default function Home() {
         onChange={setInput}
         onSend={handleSend}
         inputRef={inputRef}
+        isWeb={true}
       />
     </RenderPageContent>
   );
