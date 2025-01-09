@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff } from "lucide-react";
+import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff, Headphones } from "lucide-react";
 import { ALLOWED_FILE_TYPES, cn, validateFile } from "@/lib/utils";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Slider } from "@/components/ui/slider";
@@ -36,6 +36,20 @@ interface AudioPlayerState {
   duration: number;
   playbackRate: number;
 }
+
+// static options
+const options = [
+  {
+    label: "Generate a cinematic soundtrack",
+    icon: <Headphones className="w-4 h-4" />,
+    description: "Create dramatic music with epic orchestral sounds"
+  },
+  {
+    label: "Create a lo-fi chill beats track",
+    icon: <Headphones className="w-4 h-4" />,
+    description: "Generate a smooth and mellow lo-fi music track for studying or relaxation"
+  },
+];
 
 export function AudioArea() {
   const { content } = useContentStore();
@@ -538,6 +552,11 @@ export function AudioArea() {
     };
   }, []);
 
+  const handleClicked = (option: { label: String; icon?: React.ReactNode; description?: string }) => {
+    setPrompt(option.label as string);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
   return (
     <RenderPageContent>
       <div className={cn(
@@ -548,7 +567,14 @@ export function AudioArea() {
           "flex flex-col transition-all duration-300 mx-auto w-full sm:w-2/3 md:w-2/3 lg:w-1/2",
           hasResponse ? "" : "h-[calc(100svh-14rem)] my-auto"
         )}>
-          {!hasResponse && <GreetingMessage username="Pascal" questionText=" What sound are you thinking of today?"/>}
+          {!hasResponse && 
+
+          <GreetingMessage 
+            username="Pascal" 
+            questionText=" What sound are you thinking of today?" 
+            options={options}
+            handlePressed={handleClicked}
+          />}
           <div className="flex flex-col flex-1 p-4 space-y-4">
 
             <div className="flex flex-col space-y-2">
@@ -558,7 +584,7 @@ export function AudioArea() {
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Describe your audio..."
-                className="flex-1 min-h-[100px] resize-none border-borderColorPrimary focus-visible:outline-none focus:border-2 scrollbar-thin scrollbar-webkit"
+                className="bg-backgroundSecondary flex-1 min-h-[100px] resize-none border-borderColorPrimary focus-visible:outline-none focus:border-2 scrollbar-thin scrollbar-webkit"
               />
             </div>
 
@@ -589,7 +615,7 @@ export function AudioArea() {
                 }
               />
 
-              <MicButton className="w-10 h-10 rounded-md border border-borderColorPrimary" isListening={isListening} onClick={toggleListening} />
+              <MicButton className={`w-10 h-10 rounded-md ${isListening ? "border-none" : "border border-borderColorPrimary"} `} isListening={isListening} onClick={toggleListening} />
               
               <div className="ml-auto text-sm text-muted-foreground">
                 {/* Requests left: {credits} */}
