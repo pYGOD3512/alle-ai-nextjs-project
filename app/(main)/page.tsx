@@ -8,13 +8,18 @@ import { useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { MessageSquarePlus, Sparkles, Code, Lightbulb } from "lucide-react";
 // static options
 const options = [
   {
-    label: "What does Santa do on his day off?",
+    label: "Help me debug my React code",
+    icon: <Code className="w-4 h-4" />,
+    description: "Get programming assistance"
   },
   {
-    label: "Why is christmas gift wrapping harder than math?",
+    label: "Explain quantum computing simply",
+    icon: <Lightbulb className="w-4 h-4" />,
+    description: "Break down complex concepts"
   },
 ];
 export default function Home() {
@@ -24,6 +29,7 @@ export default function Home() {
   const { setContent } = useContentStore();
   const router = useRouter();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+  
 
   useEffect(() => {
     setCurrentPage("chat");
@@ -62,7 +68,10 @@ export default function Home() {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
   return (
-    <RenderPageContent
+    <div
+    className={`transition-all duration-300 ${
+      isOpen ? "pl-60" : "pl-0"
+    }`}
     >
       <div className="flex-1 mt-20 py-4">
         <GreetingMessage
@@ -78,6 +87,6 @@ export default function Home() {
         inputRef={inputRef}
         isWeb={true}
       />
-    </RenderPageContent>
+    </div>
   );
 }
