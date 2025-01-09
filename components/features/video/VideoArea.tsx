@@ -9,7 +9,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useContentStore, useSelectedModelsStore, useLikedMediaStore } from "@/stores";
 import { VIDEO_MODELS } from "@/lib/constants";
 import RenderPageContent from "@/components/RenderPageContent";
-import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff, Upload } from "lucide-react";
+import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff, Upload, Film } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +51,30 @@ interface VideoSettings {
   duration: number;
   display: "column" | "grid" | "carousel";
 }
+
+// static options
+const options = [
+  {
+    label: "Make a time-lapse video",
+    icon: <Film className="w-4 h-4" />,
+    description: "Generate a time-lapse video of a natural or urban scene"
+  },
+  {
+    label: "Generate a deepfake video",
+    icon: <Film className="w-4 h-4" />,
+    description: "Create a hyper-realistic deepfake video of a person saying or doing something"
+  },
+  {
+    label: "Make a time-lapse video",
+    icon: <Film className="w-4 h-4" />,
+    description: "Generate a time-lapse video of a natural or urban scene"
+  },
+  {
+    label: "Generate a deepfake video",
+    icon: <Film className="w-4 h-4" />,
+    description: "Create a hyper-realistic deepfake video of a person saying or doing something"
+  },
+];
 
 const VideoSkeleton = () => (
   <div className="border border-borderColorPrimary rounded-lg p-4 space-y-4">
@@ -832,6 +856,11 @@ const VideoArea = () => {
     };
   }, []);
 
+    const handleClicked = (option: { label: String; icon?: React.ReactNode; description?: string }) => {
+    setPrompt(option.label as string);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
+
   return (
     <RenderPageContent>
       <div className="flex flex-col h-full">
@@ -844,6 +873,8 @@ const VideoArea = () => {
                     <GreetingMessage
                     username="Pascal" 
                     questionText="Ready to create your next video masterpiece?"
+                    options={options}
+                    handlePressed={handleClicked}
                     />
                 </div>
               ) : (
@@ -932,7 +963,7 @@ const VideoArea = () => {
                   .join(',')}
               />
               
-              <div className="flex-1 flex items-end gap-2 px-4 py-3 rounded-2xl border border-borderColorPrimary transition-colors">
+              <div className="flex-1 flex items-end gap-2 px-4 py-3 rounded-xl border bg-backgroundSecondary border-borderColorPrimary transition-colors shadow-lg relative">
                 <div className="flex justify-center items-center relative">
                     
 

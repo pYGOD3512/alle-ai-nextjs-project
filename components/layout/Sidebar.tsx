@@ -252,7 +252,7 @@ export function Sidebar() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
                   onClick={() => setModelSelectionModalOpen(true)}
                 >
                   <LayoutGrid className="h-4 w-4" />
