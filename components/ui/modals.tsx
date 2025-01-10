@@ -724,7 +724,6 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         toast({
           title: "Success",
           description: "Google Drive has been unlinked successfully",
-          className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
         });
       } catch (error) {
         console.error('Failed to unlink Google Drive:', error);
@@ -1152,7 +1151,6 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
       title: "Copied",
       description: `Referral link copied to clipboard`,
       duration: 3000,
-      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
     });
   };
 
@@ -1336,7 +1334,6 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
               title: "Success",
               description: `You've subscribed to Alle-AI ${selectedPlan}`,
               duration: 3000,
-              className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
             });
             onClose();
           }}

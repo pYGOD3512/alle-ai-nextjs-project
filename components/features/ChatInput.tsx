@@ -115,7 +115,6 @@ export function ChatInput({
         toast({
           title: "File Processed",
           description: `${file.name} has been added successfully`,
-          className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
         });
       }
     } catch (error) {
@@ -191,7 +190,6 @@ export function ChatInput({
       toast({
         title: "File Processed",
         description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       if (uploadedFile?.url) {

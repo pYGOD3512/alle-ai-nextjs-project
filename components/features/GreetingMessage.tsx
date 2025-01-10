@@ -104,9 +104,9 @@ const GreetingMessage = ({
               }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handlePressed(option)}
-              className="group relative flex items-center gap-3 p-4 bg-background/50 hover:bg-primary/5 border border-borderColorPrimary hover:border-primary/30 rounded-xl transition-all duration-200"
+              className="group relative flex items-center gap-2 p-2 sm:p-3 bg-background/50 hover:bg-primary/5 border border-borderColorPrimary hover:border-primary/30 rounded-xl transition-all duration-200"
             >
-              <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <div className="flex-shrink-0 p-2 rounded-lg text-primary group-hover:bg-primary/20 transition-colors">
                 {option.icon}
               </div>
               <span className="font-medium text-sm text-foreground/80 group-hover:text-foreground transition-colors">

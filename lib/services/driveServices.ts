@@ -87,7 +87,6 @@ class GoogleDriveService {
         title: "Success",
         description: "Successfully signed in to Google Drive",
         duration: 3000,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
       return true;
     } catch (error) {
