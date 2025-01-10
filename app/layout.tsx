@@ -7,6 +7,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/components/providers/authTest';
 import { RouteGuard } from '@/components/providers/RouteGuard';
 
+
+
 const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({
@@ -24,9 +26,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <RouteGuard>
-              {children}
-            </RouteGuard>
+            
+              <RouteGuard>
+                {children}
+              </RouteGuard>
           </AuthProvider>
           <Toaster />
         </ThemeProvider>
