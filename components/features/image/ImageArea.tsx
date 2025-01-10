@@ -107,7 +107,6 @@ const ImageArea = () => {
         title: "Liked",
         description: `${modelInfo?.name} image liked`,
         duration: 3000,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } else {
       // Remove from liked media store - find the image's ID first
@@ -124,7 +123,6 @@ const ImageArea = () => {
         title: "Unliked",
         description: `${modelInfo?.name} image unliked`,
         duration: 3000,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     }
   };
@@ -135,7 +133,6 @@ const ImageArea = () => {
       title: "Copied",
       description: "Image URL copied to clipboard",
       duration: 3000,
-      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
     });
   };
 
@@ -156,7 +153,6 @@ const ImageArea = () => {
         title: "Success",
         description: "Image downloaded successfully",
         duration: 3000,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       toast({
@@ -164,7 +160,6 @@ const ImageArea = () => {
         description: "Failed to download image",
         variant: "destructive",
         duration: 3000,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     }
   };
