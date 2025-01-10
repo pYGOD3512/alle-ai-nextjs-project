@@ -246,11 +246,6 @@ export function ChatInput({
       description: isWebSearch 
         ? "Messages will be processed without web search" 
         : "Your messages will now include web search results",
-      className: `${
-        isWebSearch 
-          ? "bg-backgroundSecondary border-borderColorPrimary" 
-          : "bg-primary/10 border-primary/20"
-      } text-foreground`,
     });
   };
 
