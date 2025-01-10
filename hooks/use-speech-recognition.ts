@@ -81,7 +81,6 @@ export function useSpeechRecognition({
       toast({
         title: "Listening...",
         description: "Speak now to convert your speech to text.",
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     }
   };
