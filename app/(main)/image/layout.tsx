@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Image  } from "lucide-react"
+import { Lightbulb , Image, Anchor, TreePalm } from 'lucide-react';
 
 
 
@@ -16,24 +16,24 @@ import { Image  } from "lucide-react"
 const options = [
   {
     label: "Generate a futuristic cityscape",
-    icon: <Image className="w-4 h-4" />,
+    icon: <Lightbulb className="w-4 h-4 text-amber-400"/>,
     description: "Create a stunning digital artwork of a city of the future"
   },
   {
     label: "Design a surreal landscape",
-    icon: <Image className="w-4 h-4" />,
+    icon: <Image className="w-4 h-4 text-purple-500" />,
     description: "Produce an abstract, dreamlike scene with vibrant colors"
   },
   {
-    label: "Generate a futuristic cityscape",
-    icon: <Image className="w-4 h-4" />,
-    description: "Create a stunning digital artwork of a city of the future"
+    label: "Design an underwater kingdom",
+    icon: <Anchor className="w-4 h-4 text-teal-500" />,
+    description: "Imagine a deep-sea civilization full of mysterious sea creatures, glowing coral reefs, and submerged castles."
   },
   {
-    label: "Design a surreal landscape",
-    icon: <Image className="w-4 h-4" />,
-    description: "Produce an abstract, dreamlike scene with vibrant colors"
-  },
+    label: "Generate a magical forest",
+    icon: <TreePalm className="w-4 h-4 text-green-500" />,
+    description: "Create a mystical forest with glowing trees, enchanted animals, and an ethereal atmosphere."
+  }
 ];
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState("");
@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setContent, resetContent } = useContentStore();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   const handleClicked = (opt: { label: String }) => {
     setInput(opt.label as String);
     setTimeout(() => inputRef.current?.focus(), 0);

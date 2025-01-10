@@ -9,7 +9,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useContentStore, useSelectedModelsStore, useLikedMediaStore } from "@/stores";
 import { VIDEO_MODELS } from "@/lib/constants";
 import RenderPageContent from "@/components/RenderPageContent";
-import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff, Upload, Film } from "lucide-react";
+import { Plus, Copy, Info, Play, Pause, Volume2, VolumeX, Maximize2, Download, Heart, Grid2x2, RectangleHorizontal, TvMinimalPlay, RectangleVertical, Square, GalleryHorizontal, GalleryVerticalEnd, Clock8, ChevronLeft, ChevronRight, Mic, MicOff, Upload, Film, Clock9, Clapperboard, Aperture } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,24 +56,24 @@ interface VideoSettings {
 const options = [
   {
     label: "Make a time-lapse video",
-    icon: <Film className="w-4 h-4" />,
+    icon: <Clock9 className="w-4 h-4 text-blue-500" />, // Blue for time and clarity
     description: "Generate a time-lapse video of a natural or urban scene"
   },
   {
     label: "Generate a deepfake video",
-    icon: <Film className="w-4 h-4" />,
+    icon: <Clapperboard className="w-4 h-4 text-green-500" />, // Green for tech and AI theme
     description: "Create a hyper-realistic deepfake video of a person saying or doing something"
   },
   {
-    label: "Make a time-lapse video",
-    icon: <Film className="w-4 h-4" />,
-    description: "Generate a time-lapse video of a natural or urban scene"
+    label: "Make a cinematic music video",
+    icon: <Film className="w-4 h-4 text-red-500" />, // Red for dramatic video themes
+    description: "Create a music video with a cinematic vibe and compelling storytelling"
   },
   {
-    label: "Generate a deepfake video",
-    icon: <Film className="w-4 h-4" />,
-    description: "Create a hyper-realistic deepfake video of a person saying or doing something"
-  },
+    label: "Create a drone footage video",
+    icon: <Aperture className="w-4 h-4 text-teal-500" />, // Teal for aerial and futuristic feel
+    description: "Generate stunning aerial views captured by a drone"
+  }
 ];
 
 const VideoSkeleton = () => (
@@ -743,7 +743,6 @@ const VideoArea = () => {
       toast({
         title: "File Processed",
         description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       if (uploadedFile?.url) {
@@ -825,7 +824,6 @@ const VideoArea = () => {
       toast({
         title: "File Processed",
         description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       if (uploadedFile?.url) {

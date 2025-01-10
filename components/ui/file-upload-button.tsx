@@ -120,7 +120,6 @@ export function FileUploadButton({
       toast({
         title: "File Processed",
         description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       console.error('Error processing Drive file:', error);
@@ -189,7 +188,6 @@ export function FileUploadButton({
               toast({
                 title: "File Processed",
                 description: `${file.name} has been added successfully`,
-                className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
               });
             } catch (error) {
               throw error;
@@ -200,7 +198,6 @@ export function FileUploadButton({
           toast({
             title: "Cancelled",
             description: `File upload cancelled`,
-            className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
           });
         },
         linkType: 'direct',
@@ -219,85 +216,10 @@ export function FileUploadButton({
     }
   };
 
-  // const handleOneDriveSelect = async () => {
-  //   try {
-  //     oneDriveService.openPicker({
-  //       success: async (response: OneDriveResponse) => {
-  //         if (response.value && response.value.length > 0) {
-  //           const file = response.value[0];
-            
-  //           // Create a placeholder
-  //           const placeholderBlob = new Blob([], { type: file.file.mimeType });
-  //           const placeholderUrl = URL.createObjectURL(placeholderBlob);
-            
-  //           const placeholderFile = new File([placeholderBlob], file.name, { 
-  //             type: file.file.mimeType 
-  //           });
-
-  //           // Show loading state
-  //           onUploadFromDrive(placeholderFile);
-
-  //           try {
-  //             // Download the actual file
-  //             const response = await fetch(file["@microsoft.graph.downloadUrl"]);
-  //             if (!response.ok) {
-  //               throw new Error(`Failed to download file: ${response.status}`);
-  //             }
-
-  //             const arrayBuffer = await response.arrayBuffer();
-  //             const oneDriveFile = new File(
-  //               [arrayBuffer], 
-  //               file.name, 
-  //               { type: file.file.mimeType }
-  //             );
-
-  //             // Validate the file
-  //             const validation = validateFile(oneDriveFile);
-  //             if (!validation.isValid) {
-  //               throw new Error(validation.error);
-  //             }
-
-  //             // Clean up placeholder
-  //             URL.revokeObjectURL(placeholderUrl);
-
-  //             // Process file
-  //             onUploadFromDrive(oneDriveFile);
-
-  //             toast({
-  //               title: "File Processed",
-  //               description: `${file.name} has been added successfully`,
-  //               className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
-  //             });
-  //           } catch (error) {
-  //             throw error;
-  //           }
-  //         }
-  //       },
-  //       cancel: () => {
-  //         toast({
-  //           title: "Cancelled",
-  //           description: "File selection cancelled",
-  //           className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
-  //         });
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error('Error processing OneDrive file:', error);
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Error",
-  //       description: error instanceof Error ? error.message : "Failed to process file"
-  //     });
-  //   }
-  // };
-
-  // Helper function to get mime type from file extension
-  
   const handleOneDriveSelect = () => {
     toast({
       title: "Almost There",
       description: "Client ID required",
-      className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
     });
   }
   

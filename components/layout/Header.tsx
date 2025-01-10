@@ -36,7 +36,7 @@ export function Header() {
   const { isSubscribed } = useAuth();
 
   const { isOpen, toggle } = useSidebarStore();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 1024px)');
   const pathname = usePathname();
 
@@ -246,7 +246,7 @@ export function Header() {
           {isOpen ? (
             mounted && (
               <Image 
-                src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
                 alt="Logo"
                 width={100}
                 height={100}
@@ -256,7 +256,7 @@ export function Header() {
           ) : (
             mounted && (
               <Image 
-                src={theme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
                 alt="Logo"
                 width={100}
                 height={100}

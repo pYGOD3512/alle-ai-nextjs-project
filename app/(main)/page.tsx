@@ -8,17 +8,17 @@ import { useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
-import { MessageSquarePlus, Sparkles, Code, Lightbulb } from "lucide-react";
+import { MessageSquarePlus, Sparkles, SquareTerminal, Lightbulb } from "lucide-react";
 // static options
 const options = [
   {
     label: "Help me debug my React code",
-    icon: <Code className="w-4 h-4" />,
+    icon: <SquareTerminal className="w-4 h-4 text-violet-600" />,
     description: "Get programming assistance"
   },
   {
     label: "Explain quantum computing simply",
-    icon: <Lightbulb className="w-4 h-4" />,
+    icon: <Lightbulb className="w-4 h-4 text-amber-400"/>,
     description: "Break down complex concepts"
   },
 ];

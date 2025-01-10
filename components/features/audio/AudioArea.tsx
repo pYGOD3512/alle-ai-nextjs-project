@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff, Headphones } from "lucide-react";
+import { Upload, Play, Pause, RotateCcw as Replay, Square, FastForward, Rewind, Mic, Download, Heart, Copy, MicOff, Headphones, MicVocal } from "lucide-react";
 import { ALLOWED_FILE_TYPES, cn, validateFile } from "@/lib/utils";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Slider } from "@/components/ui/slider";
@@ -41,12 +41,12 @@ interface AudioPlayerState {
 const options = [
   {
     label: "Generate a cinematic soundtrack",
-    icon: <Headphones className="w-4 h-4" />,
+    icon: <Headphones className="w-4 h-4 text-yellow-500" />,
     description: "Create dramatic music with epic orchestral sounds"
   },
   {
     label: "Create a lo-fi chill beats track",
-    icon: <Headphones className="w-4 h-4" />,
+    icon: <MicVocal className="w-4 h-4 text-blue-400" />,
     description: "Generate a smooth and mellow lo-fi music track for studying or relaxation"
   },
 ];
@@ -146,7 +146,6 @@ export function AudioArea() {
           title: "Copied!",
           description: "Prompt copied to clipboard",
           duration: 3000,
-          className: "bg-toastBackgroundColor border border-borderColorPrimary text-foreground",
         });
       }, 0);
     } catch (err) {
@@ -461,7 +460,6 @@ export function AudioArea() {
       toast({
         title: "File Processed",
         description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       handleFileError(error);
@@ -518,7 +516,6 @@ export function AudioArea() {
       toast({
         title: "File Processed",
         description: `${file.name} has been added successfully`,
-        className: "bg-toastBackgroundColor border-borderColorPrimary text-foreground"
       });
     } catch (error) {
       handleFileError(error);
