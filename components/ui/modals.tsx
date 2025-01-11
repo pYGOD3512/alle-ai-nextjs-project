@@ -62,6 +62,7 @@ import {
   ArrowLeft,
   LogIn,
   RefreshCw,
+  RefreshCcw,
   Link,
   Clock9,
   MessageSquare,
@@ -72,7 +73,11 @@ import {
   PanelLeftClose,
   Command as KeyboardCommand,
   AlertTriangle,
-  Radio,
+  Receipt,
+  Users,
+  CircleDot,
+  Wallet,
+  CreditCard,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -84,7 +89,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
@@ -142,6 +147,18 @@ interface DriveFile {
   mimeType: string;
   thumbnailUrl?: string;
   size?: string;
+}
+
+interface Transaction {
+  id: string;
+  type: 'subscription' | 'referral' | 'refund';
+  amount: number;
+  mode: 'platform' | 'card';
+  status: 'completed' | 'pending' | 'failed';
+  plan?: string;
+  date: Date;
+  cardLast4?: string;
+  description: string;
 }
 
 interface ShortcutItem {
@@ -632,6 +649,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const { toast } = useToast();
   const { isAuthenticated } = useDriveAuthStore();
   const [showDriveModal, setShowDriveModal] = useState(false);
+  const [isTransactionHistoryOpen, setIsTransactionHistoryOpen] = useState(false);
 
   const settingsData = {
     general: {
@@ -669,6 +687,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         title: "Shared links",
         description: "",
         action: "Manage",
+      },
+      transactionHistory: {
+        title: "Transactions",
+        description: "",
+        action: "View",
       },
       extportMyData: {
         title: "Export data",
@@ -903,6 +926,8 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                               setExportModalOpen(true);
                             } else if (setting.action === "Manage") {
                               setManageSharedLinksOpen(true);
+                            } else if (setting.action === "View") {
+                              setIsTransactionHistoryOpen(true);
                             }
                           }}
                         >
@@ -1007,6 +1032,10 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       <SharedLinksModal
         isOpen={manageSharedLinksOpen}
         onClose={() => setManageSharedLinksOpen(false)}
+      />
+      <TransactionHistoryModal 
+        isOpen={isTransactionHistoryOpen} 
+        onClose={() => setIsTransactionHistoryOpen(false)} 
       />
     </>
   );
@@ -3283,6 +3312,235 @@ export function ReportContentModal({
                 ) : "Submit Report"}
             </Button>
           </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function TransactionHistoryModal({ isOpen, onClose }: ModalProps) {
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterMode, setFilterMode] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Dummy data - replace with actual data
+  const transactions: Transaction[] = [
+    {
+      id: 'txn_1',
+      type: 'subscription',
+      amount: 20.00,
+      mode: 'card',
+      status: 'completed',
+      plan: 'Standard Monthly',
+      date: new Date('2024-03-15'),
+      cardLast4: '4242',
+      description: 'Monthly subscription payment'
+    },
+    {
+      id: 'txn_2',
+      type: 'referral',
+      amount: 5.00,
+      mode: 'platform',
+      status: 'completed',
+      date: new Date('2024-03-14'),
+      description: 'Referral bonus from user@example.com'
+    },
+    {
+      id: 'txn_3',
+      type: 'subscription',
+      amount: 300.00,
+      mode: 'platform',
+      status: 'completed',
+      plan: 'Plus Yearly',
+      date: new Date('2024-03-10'),
+      description: 'Yearly subscription using platform credits'
+    },
+    {
+      id: 'txn_4',
+      type: 'refund',
+      amount: -20.00,
+      mode: 'card',
+      status: 'completed',
+      date: new Date('2024-03-05'),
+      cardLast4: '4242',
+      description: 'Refund for cancelled subscription'
+    },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'pending':
+        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'failed':
+        return 'bg-red-500/10 text-red-500 border-red-500/20';
+      default:
+        return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'subscription':
+        return <Gem className="h-4 w-4" />;
+      case 'referral':
+        return <Users className="h-4 w-4" />;
+      case 'refund':
+        return <RefreshCcw className="h-4 w-4" />;
+      default:
+        return <CircleDot className="h-4 w-4" />;
+    }
+  };
+
+  const getModeIcon = (mode: string) => {
+    switch (mode) {
+      case 'platform':
+        return <Wallet className="h-4 w-4 text-primary" />;
+      case 'card':
+        return <CreditCard className="h-4 w-4 text-blue-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const filteredTransactions = transactions.filter(transaction => {
+    const matchesType = filterType === 'all' || transaction.type === filterType;
+    const matchesMode = filterMode === 'all' || transaction.mode === filterMode;
+    const matchesSearch = 
+      transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      transaction.id.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesType && matchesMode && matchesSearch;
+  });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[800px]">
+        <DialogHeader className="space-y-4">
+          <div className="flex items-center justify-between">
+            <DialogTitle>Transaction History</DialogTitle>
+            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search transactions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 w-full focus-visible:ring-0 focus:border-borderColorPrimary focus-visible:outline-none focus:border-borderColorPrimary"
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2">
+              <Select defaultValue="all" onValueChange={setFilterType}>
+                <SelectTrigger className="w-[130px] border border-borderColorPrimary">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-backgroundSecondary">
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="referral">Referral</SelectItem>
+                  <SelectItem value="refund">Refund</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select defaultValue="all" onValueChange={setFilterMode}>
+                <SelectTrigger className="w-[130px] border border-borderColorPrimary">
+                  <SelectValue placeholder="Payment Mode" />
+                </SelectTrigger>
+                <SelectContent className="bg-backgroundSecondary">
+                  <SelectItem value="all">All Modes</SelectItem>
+                  <SelectItem value="platform">Platform Cash</SelectItem>
+                  <SelectItem value="card">Card Payment</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <ScrollArea className="h-[400px] mt-4">
+          <div className="space-y-4">
+            {filteredTransactions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+                <Receipt className="h-8 w-8 mb-2 opacity-50" />
+                <p className="text-sm">No transactions found</p>
+              </div>
+            ) : (
+              filteredTransactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                >
+                  {/* Left side - Transaction info */}
+                  <div className="flex items-start gap-4">
+                    <div className={cn(
+                      "p-2 rounded-full",
+                      transaction.type === 'subscription' ? 'bg-primary/10' :
+                      transaction.type === 'referral' ? 'bg-green-500/10' :
+                      'bg-blue-500/10'
+                    )}>
+                      {getTypeIcon(transaction.type)}
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{transaction.description}</p>
+                        {getModeIcon(transaction.mode)}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{format(transaction.date, 'MMM d, yyyy')}</span>
+                        <span>•</span>
+                        <span>ID: {transaction.id}</span>
+                        {transaction.cardLast4 && (
+                          <>
+                            <span>•</span>
+                            <span>Card ending in {transaction.cardLast4}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right side - Amount and status */}
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={cn(
+                      "font-medium",
+                      transaction.amount < 0 ? "text-red-500" : "text-green-500"
+                    )}>
+                      {transaction.amount < 0 ? "-" : "+"}£{Math.abs(transaction.amount).toFixed(2)}
+                    </span>
+                    
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "text-xs",
+                        getStatusColor(transaction.status)
+                      )}
+                    >
+                      {transaction.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="flex justify-between items-center pt-4 border-t">
+          <div className="text-sm text-muted-foreground">
+            Showing {filteredTransactions.length} of {transactions.length} transactions
+          </div>
+          <Button variant="outline" className="focus-visible:outline-none" onClick={onClose}>
+            Close
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
