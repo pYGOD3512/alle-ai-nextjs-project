@@ -367,6 +367,43 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
+export function LogoutModal({ isOpen, onClose }: ModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="flex flex-row items-center justify-between relative">
+          <DialogTitle>Logout - are you sure?</DialogTitle>
+          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">esc</span>
+          </kbd>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            You will be logged out of your current session. You&apos;ll need to log in again to access your account.
+          </p>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                // Handle logout logic here
+                console.log("Logging out...");
+                onClose();
+              }}
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const currentPage = useSidebarStore((state) => state.currentPage);
   const { selectedModels, tempSelectedModels, setTempSelectedModels, saveSelectedModels, getSelectedModelNames } = useSelectedModelsStore();

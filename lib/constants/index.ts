@@ -1209,11 +1209,34 @@ export const releaseNotesData: ReleaseNote[] = [
       }
     }
   },
-  
-  
-  
-  
   //more release notes...
 ]
+
+export const SAMPLE_ADS = [
+  {
+    id: "1",
+    title: "Boost Your Business with AI-Powered Automation",
+    description: "Automate tasks and scale your business faster with AI-driven solutions. Get started today!",
+    imageUrl: "https://plus.unsplash.com/premium_photo-1679397476740-a236a0c87fad?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9uZXl8ZW58MHx8MHx8fDA%3D",
+    link: "https://automation.ai",
+    pill: "🤖 Try Automation Tools"
+  },
+  {
+    id: "2",
+    title: "Transform Your Marketing with AI Insights",
+    description: "Leverage AI to unlock deep marketing insights, optimize your strategy, and grow your brand.",
+    imageUrl: "https://images.unsplash.com/photo-1518183214770-9cffbec72538?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bW9uZXl8ZW58MHx8MHx8fDA%3D",
+    link: "https://marketing.ai",
+    pill: "📊 Discover Marketing AI"
+  },
+  {
+    id: "3",
+    title: "AI Tools for Data-Driven Decisions",
+    description: "Make smarter business decisions with powerful AI analytics and data-driven insights.",
+    imageUrl: "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG1vbmV5fGVufDB8fDB8fHww",
+    link: "https://data.ai",
+    pill: "📈 Try Data Analytics Tools"
+  }
+];
 
 
