@@ -211,12 +211,13 @@ export function Sidebar() {
                   className={`${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
                   onClick={() => setModelSelectionModalOpen(true)}
                   aria-label="Model Selection"
+                  id="tooltip-select-selector"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="mt-4 px-2 space-y-1">
+              <div className="mt-4 px-2 space-y-1" id="tooltip-select-ais">
                 {sidebarMenuItems.map((item, i) => {
                   const isActive = isActiveRoute(item.href, pathname);
                   const type = item.href === "/" ? "chat" 
@@ -254,6 +255,7 @@ export function Sidebar() {
                   variant="outline"
                   className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
                   onClick={() => setModelSelectionModalOpen(true)}
+                  id="tooltip-select-selector"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
@@ -273,6 +275,7 @@ export function Sidebar() {
                     className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
                       ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
                       ${styles.hoverBg}`}
+                    id="tooltip-select-ais"
                   >
                     <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
                   </Link>

@@ -248,7 +248,7 @@ export function FileUploadButton({
             </Button>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-background">
+        <DropdownMenuContent align="start" className="w-56 bg-backgroundSecondary border-borderColorPrimary">
           <DropdownMenuItem 
             onClick={() => setShowDriveModal(true)} 
             className="gap-2"
