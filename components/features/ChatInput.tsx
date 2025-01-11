@@ -258,103 +258,89 @@ export function ChatInput({
       )}
       
       <div className="max-w-xl md:max-w-3xl mx-auto">
-        <div className="flex items-end gap-2 px-4 py-3 rounded-xl bg-backgroundSecondary border border-borderColorPrimary shadow-lg relative">
-          <div className="flex gap-1">
-            <FileUploadButton
-              onUploadFromComputer={handleUploadFromComputer}
-              onUploadFromDrive={handleUploadFromDrive}
-            />
-            
-            {isWeb && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={handleWebSearchToggle}
-                      className={`relative flex items-center gap-1.5 rounded-full transition-all duration-300 px-1 ${
-                        isWebSearch 
-                          ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' 
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      <Globe size={16} />
-                      {isWebSearch && (
-                        <span className="text-xs">
-                            Search
-                        </span>
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isWebSearch ? "Web search enabled" : "Enable web search"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-
-          <div className="flex-1 relative">
-            <Textarea 
-              ref={inputRef}
-              placeholder={"Message multiple models..."}
-              className="flex-1 bg-transparent border-0 outline-none text-base resize-none overflow-auto min-h-[2rem] max-h-[10rem] p-0 focus:border-0 focus:ring-0 scrollbar-thin scrollbar-thumb-gray-300"
-              value={value}
-              onChange={(e) => {
-                e.target.style.height = 'inherit';
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
-                onChange(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !isInputEmpty) {
-                  e.preventDefault();
-                  onSend();
-                  if (inputRef?.current) {
-                    inputRef.current.style.height = 'inherit';
-                  }
+        <div className="flex flex-col p-1 border bg-backgroundSecondary border-borderColorPrimary rounded-xl focus-within:border-borderColorPrimary">
+          <Textarea 
+            ref={inputRef}
+            placeholder={"Message multiple models..."}
+            className="w-full bg-transparent min-h-[2rem] max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
+            value={value}
+            onChange={(e) => {
+              const target = e.target;
+              target.style.height = 'auto';
+              const newHeight = Math.min(target.scrollHeight, 150);
+              target.style.height = `${newHeight}px`;
+              onChange(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey && !isInputEmpty) {
+                e.preventDefault();
+                onSend();
+                if (inputRef?.current) {
+                  inputRef.current.style.height = 'auto';
                 }
-              }}
-              rows={1}
-              style={{
-                overflow: value.split('\n').length > 4 ? 'auto' : 'hidden',
-              }}
-            />
-          </div>
+              }
+            }}
+            rows={1}
+            style={{
+              overflowY: value.split('\n').length > 4 || (inputRef?.current?.scrollHeight || 0) > 150 ? 'auto' : 'hidden'
+            }}
+          />
+          
+          <div className="flex items-center justify-between px-4">
+            <div className="flex items-center gap-2">
+              <FileUploadButton
+                onUploadFromComputer={handleUploadFromComputer}
+                onUploadFromDrive={handleUploadFromDrive}
+              />
+              
+              {isWeb && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleWebSearchToggle}
+                        className={`relative flex items-center gap-1 rounded-full transition-all duration-300 px-2 py-1 ${
+                          isWebSearch 
+                            ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' 
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <Globe size={16} />
+                        <span className="text-xs">
+                          {isWebSearch ? "Web search" : ""}
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isWebSearch ? "Web search enabled" : "Enable web search"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
 
-          <div className="flex items-center gap-2">
-            <MicButton 
-              isListening={isListening} 
-              onClick={toggleListening}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            />
-            
-            {pathname === "/" || pathname.startsWith("/chat") ? (
+            <div className="flex items-center gap-2">
+              <MicButton 
+                isListening={isListening} 
+                onClick={toggleListening}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              />
+              
               <Button
                 onClick={onSend}
                 size="icon"
                 className={`flex-shrink-0 rounded-full h-8 w-8 ${
                   isInputEmpty
-                  ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
-                  : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
-                }`}
-                disabled={isInputEmpty}
-              >
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                onClick={onSend}
-                className={`flex-shrink-0 rounded-md ${
-                  isInputEmpty || isLoading
                     ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
                     : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
                 }`}
                 disabled={isInputEmpty || isLoading}
               >
-                Generate
+                <ArrowUp className="h-4 w-4" />
               </Button>
-            )}
+            </div>
           </div>
-
+          
           <input
             type="file"
             ref={fileInputRef}

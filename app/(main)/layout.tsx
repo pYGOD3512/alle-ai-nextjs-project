@@ -8,7 +8,7 @@ import { HelpButton } from '@/components/HelpButton';
 import PlansArea from '@/components/features/plans/PlansArea';
 import { useAuth } from '@/components/providers/authTest';
 import { MaintenancePage } from '@/components/features/maintenance/MaintenancePage';
-// import * as Frigade from '@frigade/react';
+import * as Frigade from '@frigade/react';
 
 const isMaintenance = false;
 
@@ -40,6 +40,12 @@ export default function RootLayout({
   return (
     <>
       {isSubscribed ? (
+        <Frigade.Provider
+        apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
+        userId="my-user-id">
+          <Frigade.Tour
+            flowId="flow_Nx0Q4Shx" 
+          />
           <div className="h-screen flex overflow-hidden">
             <Sidebar />
             <main className="flex-1 flex flex-col h-full relative">
@@ -50,6 +56,7 @@ export default function RootLayout({
               <HelpButton />
             </main>
           </div>
+          </Frigade.Provider>
       ) : (
         <div className="h-screen flex overflow-hidden">
           <main className="flex-1 flex flex-col h-full relative">
