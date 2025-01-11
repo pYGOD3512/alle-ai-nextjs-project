@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AdCard } from "@/components/features/AdCard";
+import { SAMPLE_ADS } from "@/lib/constants"
 
 interface ModelResponseProps {
   model: string;
@@ -17,33 +18,6 @@ interface ModelResponseProps {
   onRegenerate?: (responseId: string) => void;
   feedback?: 'like' | 'dislike' | null;
 }
-
-const SAMPLE_ADS = [
-  {
-    id: "1",
-    title: "Boost Your Business with AI-Powered Automation",
-    description: "Automate tasks and scale your business faster with AI-driven solutions. Get started today!",
-    imageUrl: "https://plus.unsplash.com/premium_photo-1679397476740-a236a0c87fad?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9uZXl8ZW58MHx8MHx8fDA%3D",
-    link: "https://automation.ai",
-    pill: "🤖 Try Automation Tools"
-  },
-  {
-    id: "2",
-    title: "Transform Your Marketing with AI Insights",
-    description: "Leverage AI to unlock deep marketing insights, optimize your strategy, and grow your brand.",
-    imageUrl: "https://images.unsplash.com/photo-1518183214770-9cffbec72538?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bW9uZXl8ZW58MHx8MHx8fDA%3D",
-    link: "https://marketing.ai",
-    pill: "📊 Discover Marketing AI"
-  },
-  {
-    id: "3",
-    title: "AI Tools for Data-Driven Decisions",
-    description: "Make smarter business decisions with powerful AI analytics and data-driven insights.",
-    imageUrl: "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG1vbmV5fGVufDB8fDB8fHww",
-    link: "https://data.ai",
-    pill: "📈 Try Data Analytics Tools"
-  }
-];
 
 export function ModelResponse({ 
   model_img, 
@@ -100,14 +74,14 @@ export function ModelResponse({
   return (
     <Card className="bg-transparent border-none shadow-none p-4">
       <div className="flex items-start gap-4 mb-3">
-        <div className="rounded-full flex items-center justify-center">
-          <Image className="rounded-full hidden sm:flex" src={model_img} alt={model} width={80} height={80} />
+        <div className="w-8 h-8 rounded-full flex items-center justify-center">
+          <Image className="rounded-full hidden sm:flex" src={model_img} alt={model} width={32} height={32} />
         </div>
         <div className="flex flex-col flex-1">
           <span className="font-medium text-sm mb-3">{model}</span>
           <p className="text-sm text-muted-foreground">{content}</p>
           
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex items-center gap-1 mt-4">
             <Button
               variant="ghost"
               size="icon"
