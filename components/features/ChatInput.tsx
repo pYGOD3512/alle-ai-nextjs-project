@@ -259,40 +259,38 @@ export function ChatInput({
       
       <div className="max-w-xl md:max-w-3xl mx-auto">
         <div className="flex items-end gap-2 px-4 py-3 rounded-xl bg-backgroundSecondary border border-borderColorPrimary shadow-lg relative">
-        
-          {isWeb && (
-            <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleWebSearchToggle}
-                  className={`absolute -top-3 left-6 p-1 rounded-full transition-all duration-300 ${
-                    isWebSearch 
-                      ? 'bg-primary dark:bg-transparent dark:border-borderColorPrimary text-white shadow-lg scale-110' 
-                      : 'bg-backgroundSecondary/80 text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Globe  size={16} className="transition-transform duration-300" />
-                  
-                  {isWebSearch && (
-                    <span className="absolute -top-1 right-0 w-2 h-2 bg-green-400 rounded-full">
-                      <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-75"></span>
-                    </span>
-                  )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isWebSearch ? "Web search enabled" : "Enable web search"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          )}
-
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <FileUploadButton
               onUploadFromComputer={handleUploadFromComputer}
               onUploadFromDrive={handleUploadFromDrive}
             />
+            
+            {isWeb && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleWebSearchToggle}
+                      className={`relative flex items-center gap-1.5 rounded-full transition-all duration-300 px-1 ${
+                        isWebSearch 
+                          ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' 
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Globe size={16} />
+                      {isWebSearch && (
+                        <span className="text-xs">
+                            Search
+                        </span>
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isWebSearch ? "Web search enabled" : "Enable web search"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
 
           <div className="flex-1 relative">
