@@ -17,6 +17,7 @@ import { useSidebarStore, useSelectedModelsStore, useContentStore } from "@/stor
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatSession {
   id: string;
@@ -42,6 +43,7 @@ interface ModelResponse {
 }
 
 export function ChatArea() {
+  const { toast } = useToast();
   const { content } = useContentStore();
   const { selectedModels } = useSelectedModelsStore();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
@@ -106,6 +108,7 @@ export function ChatArea() {
 
   const [activeSessionId, setActiveSessionId] = useState<string>();
   const [input, setInput] = useState("");
+  const [responseFeedback, setResponseFeedback] = useState<Record<string, 'like' | 'dislike' | null>>({});
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -181,6 +184,13 @@ export function ChatArea() {
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const handleFeedbackChange = (responseId: string, feedback: 'like' | 'dislike' | null) => {
+    setResponseFeedback(prev => ({
+      ...prev,
+      [responseId]: feedback
+    }));
+  };
 
   return (
     <RenderPageContent>
@@ -265,6 +275,20 @@ export function ChatArea() {
                           )?.content || ""
                         }
                         model_img={MODELS.find(m => m.id === session.activeModel)?.icon || ""}
+                        responseId={session.messages[0].responses.find(r => 
+                          r.modelId === session.activeModel
+                        )?.id || ""}
+                        feedback={responseFeedback[session.messages[0].responses.find(r => 
+                          r.modelId === session.activeModel
+                        )?.id || ""]}
+                        onFeedbackChange={handleFeedbackChange}
+                        onRegenerate={(responseId) => {
+                          // Add regeneration logic here
+                          toast({
+                            title: "Regenerating response",
+                            description: "Please wait while we generate a new response.",
+                          });
+                        }}
                       />
                     )}
                   </div>
