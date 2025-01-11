@@ -25,7 +25,7 @@ import { navItems, userMenuItems, notifications as notificationData} from '@/lib
 import { useSidebarStore, useSelectedModelsStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
-import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal } from "../ui/modals";
+import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal, LogoutModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
@@ -50,6 +50,7 @@ export function Header() {
   const [referModalOpen, setReferModalOpen] = React.useState(false);
   const [albumModalOpen, setAlbumModalOpen] = React.useState(false);
   const [shareLinkModalOpen, setShareLinkModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
@@ -231,7 +232,7 @@ export function Header() {
     // console.log("Starting tour...");
   };
   const handleLogOut = () => {
-    // console.log("Logging out...");
+    setIsLogoutModalOpen(true);
   };
 
 
@@ -412,6 +413,10 @@ export function Header() {
       <ShareLinkModal 
         isOpen={shareLinkModalOpen} 
         onClose={() => setShareLinkModalOpen(false)} 
+      />
+      <LogoutModal 
+        isOpen={isLogoutModalOpen} 
+        onClose={() => setIsLogoutModalOpen(false)} 
       />
     </>
   );
