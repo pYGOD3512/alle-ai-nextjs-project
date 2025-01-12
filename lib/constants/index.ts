@@ -1314,4 +1314,46 @@ export const transactions: Transaction[] = [
   },
 ];
 
+// Types for our data and state
+type TimeRange = '24h' | '7d' | '30d' | '90d';
+type ChartType = 'bar' | 'pie' | 'line';
+
+interface ModelUsage {
+  model: string;
+  usage: number;
+}
+
+interface CategoryUsage {
+  label: string;
+  value: number;
+}
+
+interface TimeSeriesData {
+  date: string;
+  [key: string]: number | string; 
+}
+
+export const modelUsageData: ModelUsage[] = [
+  { model: 'GPT-4', usage: 450, },
+  { model: 'DALL-E', usage: 280 },
+  { model: 'Claude', usage: 320 },
+  { model: 'Stable Diffusion', usage: 200 },
+  { model: 'Whisper', usage: 150 },
+];
+
+export const categoryUsageData: CategoryUsage[] = [
+  { label: 'Text Generation', value: 45 },
+  { label: 'Image Generation', value: 25 },
+  { label: 'Audio Generation', value: 15 },
+  { label: 'Video Generation', value: 15 },
+];
+
+export const timeSeriesData: TimeSeriesData[] = [
+  { date: '2024-01', 'GPT-4': 65, 'DALL-E': 28, 'Claude': 45, 'Gemini': 30 },
+  { date: '2024-02', 'GPT-4': 59, 'DALL-E': 48, 'Claude': 38, 'Gemini': 49 },
+  { date: '2024-03', 'GPT-4': 80, 'DALL-E': 40, 'Claude': 43, 'Gemini': 80 },
+  { date: '2024-04', 'GPT-4': 81, 'DALL-E': 35, 'Claude': 52, 'Gemini': 62 },
+  { date: '2024-05', 'GPT-4': 56, 'DALL-E': 45, 'Claude': 47, 'Gemini': 35 },
+];
+
 
