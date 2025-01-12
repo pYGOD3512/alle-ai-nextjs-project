@@ -3,11 +3,12 @@
 import { Card } from "@/components/ui/card";
 import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AdCard } from "@/components/features/AdCard";
 import { SAMPLE_ADS } from "@/lib/constants"
+import { useVoiceStore } from "@/stores/index";
 
 interface ModelResponseProps {
   model: string;
@@ -30,6 +31,21 @@ export function ModelResponse({
 }: ModelResponseProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
+  const voiceSettings = useVoiceStore((state) => state.settings);
+  const availableVoices = useVoiceStore((state) => state.availableVoices);
+  const initVoices = useVoiceStore((state) => state.initVoices);
+
+  useEffect(() => {
+    // Initialize voices when component mounts
+    initVoices();
+    
+    // Update voices when they become available
+    speechSynthesis.onvoiceschanged = initVoices;
+    
+    return () => {
+      speechSynthesis.onvoiceschanged = null;
+    };
+  }, [initVoices]);
 
   const handleSpeak = () => {
     if (isSpeaking) {
@@ -38,7 +54,27 @@ export function ModelResponse({
     } else {
       setIsSpeaking(true);
       const utterance = new SpeechSynthesisUtterance(content);
+      
+      // Apply voice settings
+      if (voiceSettings.voice) {
+        const selectedVoice = availableVoices.find(v => v.voiceURI === voiceSettings.voice);
+        if (selectedVoice) utterance.voice = selectedVoice;
+      }
+      
+      utterance.pitch = voiceSettings.pitch;
+      utterance.rate = voiceSettings.rate;
+      utterance.volume = voiceSettings.volume;
+      
       utterance.onend = () => setIsSpeaking(false);
+      // utterance.onerror = () => {
+      //   setIsSpeaking(false);
+      //   toast({
+      //     variant: "destructive",
+      //     title: "Error",
+      //     description: "Failed to play speech. Please try again.",
+      //   });
+      // };
+      
       window.speechSynthesis.speak(utterance);
     }
   };

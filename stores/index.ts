@@ -465,3 +465,53 @@ export const useSharedLinksStore = create<SharedLinksStore>()(
     }
   )
 );
+
+interface VoiceSettings {
+  voice: string;  // Voice identifier
+  pitch: number;  // 0 to 2
+  rate: number;   // 0.1 to 10
+  volume: number; // 0 to 1
+}
+
+interface VoiceStore {
+  settings: VoiceSettings;
+  availableVoices: SpeechSynthesisVoice[];
+  setVoice: (voiceURI: string) => void;
+  setPitch: (pitch: number) => void;
+  setRate: (rate: number) => void;
+  setVolume: (volume: number) => void;
+  initVoices: () => void;
+}
+
+export const useVoiceStore = create<VoiceStore>()(
+  persist(
+    (set) => ({
+      settings: {
+        voice: '',
+        pitch: 1,
+        rate: 1,
+        volume: 1
+      },
+      availableVoices: [],
+      setVoice: (voiceURI) => set((state) => ({
+        settings: { ...state.settings, voice: voiceURI }
+      })),
+      setPitch: (pitch) => set((state) => ({
+        settings: { ...state.settings, pitch }
+      })),
+      setRate: (rate) => set((state) => ({
+        settings: { ...state.settings, rate }
+      })),
+      setVolume: (volume) => set((state) => ({
+        settings: { ...state.settings, volume }
+      })),
+      initVoices: () => {
+        const voices = window.speechSynthesis.getVoices();
+        set({ availableVoices: voices });
+      }
+    }),
+    {
+      name: 'voice-settings-storage'
+    }
+  )
+);
