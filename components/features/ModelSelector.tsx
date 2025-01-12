@@ -18,7 +18,7 @@ interface ModelSelectorProps {
 
 export function ModelSelector({ models, activeModel, onSelect }: ModelSelectorProps) {
   return (
-    <div className="grid grid-cols-auto-fit gap-2 max-w-[90%] mx-auto">
+    <div className="grid grid-cols-auto-fit gap-2 w-full mx-auto">
       {models.map((model) => (
         <Button
           key={model.id}

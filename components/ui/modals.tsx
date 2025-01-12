@@ -14,6 +14,9 @@ import {
   VIDEO_MODELS,
   socialMediaOptions,
   transactions,
+  modelUsageData,
+  categoryUsageData,
+  timeSeriesData
 } from "@/lib/constants";
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore } from "@/stores";
 import {
@@ -97,6 +100,11 @@ import {
   Plus,
   Volume2,
   Gauge,
+  PieChart as PieChartIcon,
+  LineChart as LineChartIcon,
+  Crown,
+  Coins,
+  Clock,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -119,6 +127,22 @@ import { useRouter } from "next/router";
 import { Share } from "next/dist/compiled/@next/font/dist/google";
 import { DataTable } from "./txn/data-table";
 import { columns } from "./txn/columns";
+import { StatCard } from "./stat-card";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 
 interface ModalProps {
   isOpen: boolean;
@@ -217,6 +241,9 @@ interface ReportModalProps extends ModalProps {
   contentType: 'image' | 'text' | 'audio' | 'video';
   contentPreview?: string;
 }
+
+type TimeRange = '24h' | '7d' | '30d' | '90d';
+type ChartType = 'bar' | 'pie' | 'line';
 
 const reportCategories = [
   {
@@ -662,6 +689,10 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const voiceSettings = useVoiceStore((state) => state.settings);
   const availableVoices = useVoiceStore((state) => state.availableVoices);
   const { setVoice, setPitch, setRate, setVolume } = useVoiceStore();
+  const [activeChart, setActiveChart] = useState<ChartType>('bar');
+  const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+  const [isLoading, setIsLoading] = useState(false);
+
 
   // Group voices by language/category with safety checks
   const voiceCategories = useMemo(() => {
@@ -709,21 +740,21 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     },
     personalization: {
       combination: {
-        title: "Alle-AI-Combination",
+        title: "Alle-AI Combination",
         description:
-          "Highlight similarities and differences in AI responses. Identifies consistent and conflicting viewpoints, helping you see where models agree or differ",
+        "Merge responses for a cohesive answer. Combines insights from all models to minimize inaccuracies and enhance clarity.",
         enabled: true,
       },
       summary: {
-        title: "Alle-AI-Summary",
+        title: "Alle-AI Summary",
         description:
-          "Merge responses for a cohesive answer. Combines insights from all models to minimize inaccuracies and enhance clarity.",
+        "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
         enabled: false,
       },
       comparison: {
-        title: "Alle-AI-Comparison",
+        title: "Alle-AI Comparison",
         description:
-          "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
+        "Highlight similarities and differences in AI responses. Identifies consistent and conflicting viewpoints, helping you see where models agree or differ",
         enabled: true,
       },
     },
@@ -839,7 +870,6 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         });
       }
     } else {
-      // Show the connect modal
       setShowDriveModal(true);
     }
   };
@@ -847,7 +877,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-xl lg:max-w-2xl rounded-md">
+        <DialogContent className="sm:max-w-xl lg:max-w-3xl rounded-md">
           <DialogHeader className="flex flex-row items-center justify-between relative border-b border-borderColorPrimary">
             <DialogTitle className="mb-2">Settings</DialogTitle>
             <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -974,7 +1004,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           value={voiceSettings.voice}
                           onValueChange={setVoice}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full border border-borderColorPrimary">
                             <SelectValue placeholder="Select a voice" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1257,15 +1287,363 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                 </TabsContent>
 
                 <TabsContent value="analytics">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-medium">
-                        {settingsData.analytics.myAnalytics.title}
-                      </h4>
-                      <p className="text-[0.75rem] text-muted-foreground">
-                        {settingsData.analytics.myAnalytics.description}
-                      </p>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between pb-2 border-b border-borderColorPrimary">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-medium flex items-center gap-2">
+                          <BarChart2 className="h-4 w-4 text-primary" />
+                          Model Usage Analytics
+                        </h4>
+                        <p className="text-[0.75rem] text-muted-foreground">
+                          Track your model usage and interactions
+                        </p>
+                      </div>
                     </div>
+
+                    <ScrollArea className="h-[500px] pr-4">
+                      <div className="space-y-6">
+                        {/* Chart Controls */}
+                        <div className="flex items-center justify-between">
+                          <Select
+                            defaultValue="bar"
+                            onValueChange={(value: ChartType) => setActiveChart(value)}
+                          >
+                            <SelectTrigger className="w-[180px] border border-borderColorPrimary">
+                              <SelectValue placeholder="Select chart type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="bar" className="flex items-center gap-2">
+                                <BarChart2 className="h-4 w-4" />
+                                Bar Chart
+                              </SelectItem>
+                              <SelectItem value="pie" className="flex items-center gap-2">
+                                <PieChartIcon className="h-4 w-4" />
+                                Pie Chart
+                              </SelectItem>
+                              <SelectItem value="line" className="flex items-center gap-2">
+                                <LineChartIcon className="h-4 w-4" />
+                                Line Chart
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Select
+                            defaultValue="7d"
+                            onValueChange={(value: TimeRange) => setTimeRange(value)}
+                          >
+                            <SelectTrigger className="w-[120px] border border-borderColorPrimary">
+                              <SelectValue placeholder="Time range" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="24h">Last 24 hours</SelectItem>
+                              <SelectItem value="7d">Last 7 days</SelectItem>
+                              <SelectItem value="30d">Last 30 days</SelectItem>
+                              <SelectItem value="90d">Last 90 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Charts Container */}
+                        <div className="relative h-[300px] w-full bg-muted/50 rounded-lg p-4">
+                          {activeChart === "bar" && (
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={modelUsageData} margin={{ top: 10, right: 10, bottom: 40, left: 10 }}>
+                                <CartesianGrid 
+                                  strokeDasharray="3 3" 
+                                  stroke="var(--border)"
+                                  opacity={0.3}
+                                />
+                                <XAxis 
+                                  dataKey="model" 
+                                  angle={-35} 
+                                  textAnchor="end"
+                                  height={40} 
+                                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                                  tickMargin={8}
+                                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                                />
+                                <YAxis
+                                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                                  width={40}
+                                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                                />
+                                <ChartTooltip 
+                                  content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                      return (
+                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                          <div className="grid grid-cols-2 gap-2">
+                                            <div className="flex flex-col">
+                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                Model
+                                              </span>
+                                              <span className="font-semibold text-xs">{label}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                Usage
+                                              </span>
+                                              <span className="font-semibold text-xs">
+                                                {payload[0].value}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+                                    return null
+                                  }}
+                                />
+                                <Bar 
+                                  dataKey="usage" 
+                                  fill="var(--primary)"
+                                  radius={[4, 4, 0, 0]}
+                                  maxBarSize={50}
+                                >
+                                  {/* Add different colors for each bar */}
+                                  {modelUsageData.map((entry, index) => (
+                                    <Cell 
+                                      key={`cell-${index}`} 
+                                      fill={`hsl(${index * 45}, 70%, 50%)`}
+                                      opacity={0.8}
+                                      style={{
+                                        filter: 'brightness(1.1)',
+                                        cursor: 'pointer',
+                                      }}
+                                    />
+                                  ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          )}
+
+                          {activeChart === "pie" && (
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                                <Pie
+                                  data={categoryUsageData}
+                                  dataKey="value"
+                                  nameKey="label"
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={45}
+                                  outerRadius={65}
+                                  paddingAngle={2}
+                                  label={({
+                                    cx,
+                                    cy,
+                                    midAngle,
+                                    innerRadius,
+                                    outerRadius,
+                                    percent,
+                                    index
+                                  }) => {
+                                    const RADIAN = Math.PI / 180;
+                                    const radius = outerRadius + 25;
+                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                                    return (
+                                      <text
+                                        x={x}
+                                        y={y}
+                                        fill="hsl(var(--muted-foreground))"
+                                        textAnchor={x > cx ? 'start' : 'end'}
+                                        dominantBaseline="central"
+                                        className="text-xs"
+                                      >
+                                        {`${categoryUsageData[index].label} (${(percent * 100).toFixed(0)}%)`}
+                                      </text>
+                                    );
+                                  }}
+                                >
+                                  {categoryUsageData.map((entry, index) => (
+                                    <Cell
+                                      key={`cell-${index}`}
+                                      fill={`hsl(${index * 90}, 70%, 50%)`}
+                                      opacity={0.8}
+                                      style={{
+                                        filter: 'brightness(1.1)',
+                                        cursor: 'pointer',
+                                        stroke: 'hsl(var(--background))',
+                                        strokeWidth: 2,
+                                      }}
+                                    />
+                                  ))}
+                                </Pie>
+                                <ChartTooltip 
+                                  content={({ active, payload }) => {
+                                    if (active && payload && payload.length) {
+                                      return (
+                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                          <div className="grid grid-cols-2 gap-2">
+                                            <div className="flex flex-col">
+                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                Category
+                                              </span>
+                                              <span className="font-bold text-sm">
+                                                {payload[0].name}
+                                              </span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                Usage
+                                              </span>
+                                              <span className="font-bold text-sm">
+                                                {payload[0].value}%
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+                                    return null
+                                  }}
+                                />
+                                {/* <Legend
+                                  verticalAlign="bottom"
+                                  height={36}
+                                  content={({ payload }) => (
+                                    <div className="flex flex-wrap justify-center gap-4 text-xs">
+                                      {payload?.map((entry: any, index: number) => (
+                                        <div 
+                                          key={`legend-${index}`} 
+                                          className="flex items-center gap-2"
+                                        >
+                                          <div 
+                                            className="h-3 w-3 rounded-sm" 
+                                            style={{ 
+                                              backgroundColor: `hsl(${index * 90}, 70%, 50%)`,
+                                              opacity: 0.8 
+                                            }} 
+                                          />
+                                          <span className="text-muted-foreground">
+                                            {entry.value}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                /> */}
+                              </PieChart>
+                            </ResponsiveContainer>
+                          )}
+
+                          {activeChart === "line" && (
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart 
+                                data={timeSeriesData}
+                                margin={{ top: 10, right: 10, bottom: 40, left: 10 }} 
+                              >
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                <XAxis 
+                                  dataKey="date" 
+                                  angle={-35} 
+                                  textAnchor="end"
+                                  height={40} 
+                                  tick={{ fontSize: 11 }}
+                                  tickMargin={8}
+                                />
+                                <YAxis
+                                  tick={{ fontSize: 11 }}
+                                  width={40}
+                                />
+                                <ChartTooltip
+                                  content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                      return (
+                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                          <div className="grid gap-2">
+                                            <div className="flex flex-col">
+                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                Date
+                                              </span>
+                                              <span className="font-bold text-sm">{label}</span>
+                                            </div>
+                                            {payload.map((series) => (
+                                              <div key={series.name} className="flex flex-col">
+                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                  {series.name}
+                                                </span>
+                                                <span className="font-bold text-sm">
+                                                  {series.value}
+                                                </span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+                                    return null
+                                  }}
+                                />
+                                <Legend 
+                                  verticalAlign="top"
+                                  height={36}
+                                  iconSize={8}
+                                  iconType="circle"
+                                  wrapperStyle={{ fontSize: '11px' }}
+                                />
+                                {Object.keys(timeSeriesData[0])
+                                  .filter(key => key !== 'date')
+                                  .map((key, index) => (
+                                    <Line
+                                      key={key}
+                                      type="monotone"
+                                      dataKey={key}
+                                      stroke={`hsl(${index * 60}, 70%, 50%)`}
+                                      strokeWidth={1.5} 
+                                      dot={{ r: 2 }}
+                                    />
+                                  ))}
+                              </LineChart>
+                            </ResponsiveContainer>
+                          )}
+
+                          {/* Loading State */}
+                          {isLoading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-lg">
+                              <div className="flex flex-col items-center gap-2">
+                                <Loader className="h-8 w-8 animate-spin text-primary" />
+                                <span className="text-sm text-muted-foreground">Loading analytics...</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Stats Summary */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <StatCard
+                            title="Total Interactions"
+                            value="12,453"
+                            change="+12.5%"
+                            trend="up"
+                            icon={<MessageSquare className="h-4 w-4 text-blue-400" />}
+                          />
+                          <StatCard
+                            title="Most Used Model"
+                            value="GPT-4"
+                            subtitle="32% of total usage"
+                            icon={<Crown className="h-4 w-4 text-amber-500" />}
+                          />
+                          <StatCard
+                            title="Active Time"
+                            value="126h"
+                            change="+5.2%"
+                            trend="up"
+                            icon={<Clock className="h-4 w-4 text-purple-500" />}
+                          />
+                          <StatCard
+                            title="Tokens Used"
+                            value="1.2M"
+                            change="-3.1%"
+                            trend="down"
+                            icon={<Coins className="h-4 w-4 text-brown-500" />}
+                          />
+                        </div>
+                    </div>
+                    </ScrollArea>
                   </div>
                 </TabsContent>
 
@@ -3404,7 +3782,8 @@ export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
     </Dialog>
   );
 }
-// Helper function to get icons for actions
+
+
 function getIconForAction(action: string) {
   switch (action) {
     case "Open new chat":
@@ -3610,9 +3989,6 @@ export function TransactionHistoryModal({ isOpen, onClose }: ModalProps) {
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold">Transaction History</DialogTitle>
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">esc</span>
-            </kbd>
           </div>
         </DialogHeader>
 
