@@ -119,3 +119,16 @@ export type CategoryKeys =
 export type HelpCategories = {
   [K in CategoryKeys]: HelpCategory;
 };
+
+export interface Transaction {
+  id: string;
+  type: 'subscription' | 'referral' | 'refund';
+  amount: number;
+  mode: 'platform' | 'card';
+  status: 'completed' | 'pending' | 'failed';
+  plan?: string;
+  date: Date;
+  cardLast4?: string;
+  description: string;
+  paymentMethod?: string;
+}
