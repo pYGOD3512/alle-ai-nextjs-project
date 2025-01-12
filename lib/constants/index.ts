@@ -16,6 +16,8 @@ import {
   Share,
 } from "lucide-react";
 
+import { Transaction } from "@/lib/types"
+
 
 export const navItems = [
   {
@@ -1237,6 +1239,79 @@ export const SAMPLE_ADS = [
     link: "https://data.ai",
     pill: "📈 Try Data Analytics Tools"
   }
+];
+
+export const transactions: Transaction[] = [
+  {
+    id: 'txn_1',
+    type: 'subscription',
+    amount: 20.00,
+    mode: 'card',
+    status: 'failed',
+    plan: 'Standard Monthly',
+    date: new Date('2024-03-15'),
+    cardLast4: '4242',
+    description: 'Monthly subscription payment',
+  },
+  {
+    id: 'txn_2',
+    type: 'referral',
+    amount: 5.00,
+    mode: 'platform',
+    status: 'completed',
+    date: new Date('2024-03-14'),
+    description: 'Referral bonus from user@example.com'
+  },
+  {
+    id: 'txn_3',
+    type: 'subscription',
+    amount: 300.00,
+    mode: 'platform',
+    status: 'completed',
+    plan: 'Plus Yearly',
+    date: new Date('2024-03-10'),
+    description: 'Yearly subscription using referral credits'
+  },
+  {
+    id: 'txn_4',
+    type: 'referral',
+    amount: 20.00,
+    mode: 'card',
+    status: 'completed',
+    plan: 'Standard Monthly',
+    date: new Date('2024-03-14'),
+    description: 'Monthly subscription using referral credits'
+  },
+  {
+    id: 'txn_5',
+    type: 'referral',
+    amount: 5.00,
+    mode: 'platform',
+    status: 'pending',
+    plan: "Plus Monthly",
+    date: new Date('2024-03-14'),
+    description: 'Referral bonus from user@example.com'
+  },
+  {
+    id: 'txn_6',
+    type: 'referral',
+    amount: 5.00,
+    mode: 'platform',
+    status: 'pending',
+    date: new Date('2024-03-14'),
+    description: 'Referral bonus from user@example.com'
+  },
+  {
+    id: 'txn_7',
+    type: 'subscription',
+    amount: 20.00,
+    mode: 'card',
+    status: 'failed',
+    plan: 'Standard Monthly',
+    date: new Date('2024-03-15'),
+    cardLast4: '4242',
+    description: 'Monthly subscription payment',
+  },
 ];
 
 
