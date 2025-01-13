@@ -81,7 +81,7 @@ export function SourcesWindow({ sources, isOpen, onClose, responseId, userPrompt
           <div className="flex items-center justify-between p-4 border-b bg-backgroundSecondary/95 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-sm">
-                {userPrompt.length > 35 ? userPrompt.substring(0, 35) + '...' : userPrompt}
+                {userPrompt.length > 20 ? userPrompt.substring(0, 17) + '...' : userPrompt}
               </h3>
               <div className="text-xs text-muted-foreground px-2 py-0.5 bg-secondary/50 rounded-full">
                 [{sources.length}]
