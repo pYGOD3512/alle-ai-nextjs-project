@@ -48,7 +48,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";  // Add this import
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings,
@@ -105,6 +105,14 @@ import {
   Crown,
   Coins,
   Clock,
+  ChevronsUpDown,
+  Monitor,
+  Smartphone,
+  Tablet,
+  LogOut,
+  Chrome,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -143,6 +151,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface ModalProps {
   isOpen: boolean;
@@ -199,6 +208,16 @@ interface ShortcutItem {
   shortcut: {
     keys: string[];
   }[];
+}
+
+interface LogoutModalProps extends ModalProps {
+  mode?: 'current' | 'device';
+  deviceInfo?: {
+    id: string | number;
+    name: string;
+    browser: string;
+    location: string;
+  };
 }
 
 const shortcuts: ShortcutItem[] = [
@@ -420,20 +439,43 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-export function LogoutModal({ isOpen, onClose }: ModalProps) {
+export function LogoutModal({ isOpen, onClose, mode = 'current', deviceInfo }: LogoutModalProps) {
+  const title = mode === 'current' ? 'Logout' : `Logout Device`;
+  const description = mode === 'current' 
+    ? "You will be logged out of your current session. You'll need to log in again to access your account."
+    : `This will end the session on your ${deviceInfo?.name}. Any ongoing operations on that device will be interrupted.`;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
-          <DialogTitle>Logout - are you sure?</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
         </DialogHeader>
 
         <div className="space-y-4">
+          {mode === 'device' && deviceInfo && (
+            <div className="flex items-center space-x-4 p-3 bg-muted/50 rounded-lg">
+              <div className="p-2 rounded-full bg-secondary/10">
+                <Monitor className="h-4 w-4" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">{deviceInfo.name}</p>
+                <div className="flex items-center text-xs text-muted-foreground gap-2">
+                  <Globe className="h-3 w-3" />
+                  <span>{deviceInfo.location}</span>
+                  <span>•</span>
+                  <Chrome className="h-3 w-3" />
+                  <span>{deviceInfo.browser}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <p className="text-sm text-muted-foreground">
-            You will be logged out of your current session. You&apos;ll need to log in again to access your account.
+            {description}
           </p>
 
           <div className="flex justify-end gap-2">
@@ -443,12 +485,15 @@ export function LogoutModal({ isOpen, onClose }: ModalProps) {
             <Button
               variant="destructive"
               onClick={() => {
-                // Handle logout logic here
-                console.log("Logging out...");
+                if (mode === 'current') {
+                  console.log("Logging out current session...");
+                } else if (deviceInfo) {
+                  console.log(`Logging out device: ${deviceInfo.id}`);
+                }
                 onClose();
               }}
             >
-              Logout
+              {mode === 'current' ? 'Logout' : 'Logout Device'}
             </Button>
           </div>
         </div>
@@ -686,18 +731,19 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const { isAuthenticated } = useDriveAuthStore();
   const [showDriveModal, setShowDriveModal] = useState(false);
   const [isTransactionHistoryOpen, setIsTransactionHistoryOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const voiceSettings = useVoiceStore((state) => state.settings);
   const availableVoices = useVoiceStore((state) => state.availableVoices);
   const { setVoice, setPitch, setRate, setVolume } = useVoiceStore();
   const [activeChart, setActiveChart] = useState<ChartType>('bar');
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
+  const [isDevicesOpen, setIsDevicesOpen] = useState(true);
 
   // Group voices by language/category with safety checks
   const voiceCategories = useMemo(() => {
     return availableVoices.reduce((acc, voice) => {
-      // Skip if voice or voice.lang is undefined
       if (!voice?.lang) return acc;
       
       const category = voice.lang.split('-')[0];
@@ -813,6 +859,39 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         description:
           "Log out from all active sessions on every device, including your current one. Other devices may take up to 30 minutes to be logged out.",
         action: "Log out",
+      },
+      devices: {
+        title: "Connected Devices",
+        description: "Manage individual device access to your account",
+        activeDevices: [
+          {
+            id: 1,
+            name: "MacBook Pro",
+            browser: "Chrome",
+            location: "San Francisco, US",
+            lastActive: "Active now",
+            device: "desktop",
+            current: true,
+          },
+          {
+            id: 2,
+            name: "iPhone 13",
+            browser: "Safari",
+            location: "New York, US",
+            lastActive: "2 hours ago",
+            device: "mobile",
+            current: false,
+          },
+          {
+            id: 3,
+            name: "iPad Air",
+            browser: "Safari",
+            location: "London, UK",
+            lastActive: "1 day ago",
+            device: "tablet",
+            current: false,
+          }
+        ],
       },
     },
   };
@@ -1308,7 +1387,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                             defaultValue="bar"
                             onValueChange={(value: ChartType) => setActiveChart(value)}
                           >
-                            <SelectTrigger className="w-[180px] border border-borderColorPrimary">
+                            <SelectTrigger className="w-[180px]">
                               <SelectValue placeholder="Select chart type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1331,7 +1410,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                             defaultValue="7d"
                             onValueChange={(value: TimeRange) => setTimeRange(value)}
                           >
-                            <SelectTrigger className="w-[120px] border border-borderColorPrimary">
+                            <SelectTrigger className="w-[120px]">
                               <SelectValue placeholder="Time range" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1347,7 +1426,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                         <div className="relative h-[300px] w-full bg-muted/50 rounded-lg p-4">
                           {activeChart === "bar" && (
                             <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={modelUsageData} margin={{ top: 10, right: 10, bottom: 40, left: 10 }}>
+                              <BarChart data={modelUsageData} margin={{ top: 10, right: 10, bottom: 40, left: 40 }}>
                                 <CartesianGrid 
                                   strokeDasharray="3 3" 
                                   stroke="var(--border)"
@@ -1360,7 +1439,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                   height={40} 
                                   tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                                   tickMargin={8}
-                                  axisLine={{ stroke: 'hsl(var(--border))' }}
+                                  axisLine={{ stroke: 'var(--border)' }}
                                 />
                                 <YAxis
                                   tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
@@ -1372,7 +1451,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                   content={({ active, payload, label }) => {
                                     if (active && payload && payload.length) {
                                       return (
-                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                        <div className="rounded-lg border bg-backgroundSecondary p-2 shadow-sm">
                                           <div className="grid grid-cols-2 gap-2">
                                             <div className="flex flex-col">
                                               <span className="text-[0.70rem] uppercase text-muted-foreground">
@@ -1385,7 +1464,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                                 Usage
                                               </span>
                                               <span className="font-semibold text-xs">
-                                                {payload[0].value}
+                                                                {payload[0].value}
                                               </span>
                                             </div>
                                           </div>
@@ -1476,7 +1555,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                   content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                       return (
-                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                        <div className="rounded-lg border bg-backgroundSecondary p-2 shadow-sm">
                                           <div className="grid grid-cols-2 gap-2">
                                             <div className="flex flex-col">
                                               <span className="text-[0.70rem] uppercase text-muted-foreground">
@@ -1501,104 +1580,79 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                     return null
                                   }}
                                 />
-                                {/* <Legend
-                                  verticalAlign="bottom"
-                                  height={36}
-                                  content={({ payload }) => (
-                                    <div className="flex flex-wrap justify-center gap-4 text-xs">
-                                      {payload?.map((entry: any, index: number) => (
-                                        <div 
-                                          key={`legend-${index}`} 
-                                          className="flex items-center gap-2"
-                                        >
-                                          <div 
-                                            className="h-3 w-3 rounded-sm" 
-                                            style={{ 
-                                              backgroundColor: `hsl(${index * 90}, 70%, 50%)`,
-                                              opacity: 0.8 
-                                            }} 
-                                          />
-                                          <span className="text-muted-foreground">
-                                            {entry.value}
-                                          </span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                /> */}
                               </PieChart>
                             </ResponsiveContainer>
                           )}
 
                           {activeChart === "line" && (
                             <ResponsiveContainer width="100%" height="100%">
-                              <LineChart 
-                                data={timeSeriesData}
-                                margin={{ top: 10, right: 10, bottom: 40, left: 10 }} 
-                              >
-                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                                <XAxis 
-                                  dataKey="date" 
-                                  angle={-35} 
-                                  textAnchor="end"
-                                  height={40} 
-                                  tick={{ fontSize: 11 }}
-                                  tickMargin={8}
-                                />
-                                <YAxis
-                                  tick={{ fontSize: 11 }}
-                                  width={40}
-                                />
-                                <ChartTooltip
-                                  content={({ active, payload, label }) => {
-                                    if (active && payload && payload.length) {
-                                      return (
-                                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                          <div className="grid gap-2">
-                                            <div className="flex flex-col">
-                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                Date
-                                              </span>
-                                              <span className="font-bold text-sm">{label}</span>
-                                            </div>
-                                            {payload.map((series) => (
-                                              <div key={series.name} className="flex flex-col">
-                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                  {series.name}
-                                                </span>
-                                                <span className="font-bold text-sm">
-                                                  {series.value}
-                                                </span>
-                                              </div>
-                                            ))}
+                            <LineChart 
+                              data={timeSeriesData}
+                              margin={{ top: 10, right: 10, bottom: 40, left: 10 }} 
+                            >
+                              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                              <XAxis 
+                                dataKey="date" 
+                                angle={-35} 
+                                textAnchor="end"
+                                height={40} 
+                                tick={{ fontSize: 11 }}
+                                tickMargin={8}
+                              />
+                              <YAxis
+                                tick={{ fontSize: 11 }}
+                                width={40}
+                              />
+                              <ChartTooltip
+                                content={({ active, payload, label }) => {
+                                  if (active && payload && payload.length) {
+                                    return (
+                                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                        <div className="grid gap-2">
+                                          <div className="flex flex-col">
+                                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                              Date
+                                            </span>
+                                            <span className="font-bold text-sm">{label}</span>
                                           </div>
+                                          {payload.map((series) => (
+                                            <div key={series.name} className="flex flex-col">
+                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                {series.name}
+                                              </span>
+                                              <span className="font-bold text-sm">
+                                                {series.value}
+                                              </span>
+                                            </div>
+                                          ))}
                                         </div>
-                                      )
-                                    }
-                                    return null
-                                  }}
-                                />
-                                <Legend 
-                                  verticalAlign="top"
-                                  height={36}
-                                  iconSize={8}
-                                  iconType="circle"
-                                  wrapperStyle={{ fontSize: '11px' }}
-                                />
-                                {Object.keys(timeSeriesData[0])
-                                  .filter(key => key !== 'date')
-                                  .map((key, index) => (
-                                    <Line
-                                      key={key}
-                                      type="monotone"
-                                      dataKey={key}
-                                      stroke={`hsl(${index * 60}, 70%, 50%)`}
-                                      strokeWidth={1.5} 
-                                      dot={{ r: 2 }}
-                                    />
-                                  ))}
-                              </LineChart>
-                            </ResponsiveContainer>
+                                      </div>
+                                    )
+                                  }
+                                  return null
+                                }}
+                              />
+                              <Legend 
+                                verticalAlign="top"
+                                height={36}
+                                iconSize={8}
+                                iconType="circle"
+                                wrapperStyle={{ fontSize: '11px' }}
+                              />
+                              {Object.keys(timeSeriesData[0])
+                                .filter(key => key !== 'date')
+                                .map((key, index) => (
+                                  <Line
+                                    key={key}
+                                    type="monotone"
+                                    dataKey={key}
+                                    stroke={`hsl(${index * 60}, 70%, 50%)`}
+                                    strokeWidth={1.5} 
+                                    dot={{ r: 2 }}
+                                  />
+                                ))}
+                            </LineChart>
+                          </ResponsiveContainer>
                           )}
 
                           {/* Loading State */}
@@ -1619,52 +1673,141 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                             value="12,453"
                             change="+12.5%"
                             trend="up"
-                            icon={<MessageSquare className="h-4 w-4 text-blue-400" />}
+                            icon={<MessageSquare className="h-4 w-4" />}
                           />
                           <StatCard
                             title="Most Used Model"
                             value="GPT-4"
                             subtitle="32% of total usage"
-                            icon={<Crown className="h-4 w-4 text-amber-500" />}
+                            icon={<Crown className="h-4 w-4" />}
                           />
                           <StatCard
                             title="Active Time"
                             value="126h"
                             change="+5.2%"
                             trend="up"
-                            icon={<Clock className="h-4 w-4 text-purple-500" />}
+                            icon={<Clock className="h-4 w-4" />}
                           />
                           <StatCard
                             title="Tokens Used"
                             value="1.2M"
                             change="-3.1%"
                             trend="down"
-                            icon={<Coins className="h-4 w-4 text-brown-500" />}
+                            icon={<Coins className="h-4 w-4" />}
                           />
                         </div>
-                    </div>
+                      </div>
                     </ScrollArea>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="security" className="space-y-6">
-                  <div className="">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-sm font-small">
-                        {settingsData.security.logoutAll.title}
-                      </h4>
-                      <Button
-                        variant="destructive"
-                        className="h-8 rounded-md p-2 text-xs border-borderColorPrimary"
-                        size="sm"
-                        onClick={() => setLogoutAllModalOpen(true)}
-                      >
-                        {settingsData.security.logoutAll.action}
-                      </Button>
+                  <div className="space-y-6">
+                    {/* Existing logout all devices section */}
+                    <div className="">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-small">
+                          {settingsData.security.logoutAll.title}
+                        </h4>
+                        <Button
+                          variant="destructive"
+                          className="h-8 rounded-md p-2 text-xs border-borderColorPrimary"
+                          size="sm"
+                          onClick={() => setLogoutAllModalOpen(true)}
+                        >
+                          {settingsData.security.logoutAll.action}
+                        </Button>
+                      </div>
+                      <p className="text-[0.75rem] text-muted-foreground">
+                        {settingsData.security.logoutAll.description}
+                      </p>
                     </div>
-                    <p className="text-[0.75rem] text-muted-foreground">
-                      {settingsData.security.logoutAll.description}
-                    </p>
+
+                    {/* Advanced Section */}
+                    <Collapsible 
+                      open={isDevicesOpen}
+                      onOpenChange={setIsDevicesOpen}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-medium">Manage Devices</h4>
+                          <Badge variant="secondary" className="text-xs">
+                            {settingsData.security.devices.activeDevices.length}
+                          </Badge>
+                        </div>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="w-9 p-0 hover:bg-secondary/20">
+                            {isDevicesOpen ? (
+                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span className="sr-only">
+                              {isDevicesOpen ? 'Close devices' : 'Show devices'}
+                            </span>
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+
+                      <CollapsibleContent className="space-y-4">
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="rounded-md border border-borderColorPrimary"
+                        >
+                          {settingsData.security.devices.activeDevices.map((device, index) => (
+                            <div
+                              key={device.id}
+                              className={cn(
+                                "flex items-center justify-between p-4",
+                                index !== settingsData.security.devices.activeDevices.length - 1 && 
+                                "border-b border-borderColorPrimary"
+                              )}
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div className="p-2 rounded-full bg-secondary/10">
+                                  {device.device === 'desktop' && <Monitor className="h-4 w-4" />}
+                                  {device.device === 'mobile' && <Smartphone className="h-4 w-4" />}
+                                  {device.device === 'tablet' && <Tablet className="h-4 w-4" />}
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium flex items-center gap-2">
+                                    {device.name}
+                                    {device.current && (
+                                      <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full">
+                                        Current
+                                      </span>
+                                    )}
+                                  </p>
+                                  <div className="flex items-center text-xs text-muted-foreground gap-2">
+                                    <Globe className="h-3 w-3" />
+                                    <span>{device.location}</span>
+                                    <span>•</span>
+                                    <Chrome className="h-3 w-3" />
+                                    <span>{device.browser}</span>
+                                    <span>•</span>
+                                    <Clock className="h-3 w-3" />
+                                    <span>{device.lastActive}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              {!device.current && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => setLogoutDeviceId(device.id)}
+                                >
+                                  <LogOut className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </motion.div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </TabsContent>
               </div>
@@ -1672,6 +1815,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
           </Tabs>
         </DialogContent>
       </Dialog>
+
       <DataExportModal
         isOpen={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
@@ -1698,6 +1842,15 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         isOpen={isTransactionHistoryOpen} 
         onClose={() => setIsTransactionHistoryOpen(false)} 
       />
+      {/* Single device logout modal */}
+      {logoutDeviceId && (
+        <LogoutModal 
+          isOpen={true}
+          onClose={() => setLogoutDeviceId(null)}
+          mode="device"
+          deviceInfo={settingsData.security.devices.activeDevices.find(d => d.id === logoutDeviceId)}
+        />
+      )}
     </>
   );
 }

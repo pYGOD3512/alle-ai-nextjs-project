@@ -132,3 +132,10 @@ export interface Transaction {
   description: string;
   paymentMethod?: string;
 }
+
+export interface Source {
+  url: string;
+  title: string;
+  type: 'wikipedia' | 'encyclopedia' | 'nba' | 'espn' | 'biography' | 'other';
+  description: string;
+}
