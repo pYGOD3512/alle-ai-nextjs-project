@@ -16,7 +16,7 @@ import {
   Share,
 } from "lucide-react";
 
-import { Transaction } from "@/lib/types"
+import { Transaction, Source } from "@/lib/types"
 
 
 export const navItems = [
@@ -1368,4 +1368,44 @@ export const webSources = [
   { type: 'wikipedia', title: 'Example Source 9', description: 'Example description 9...', url: 'https://example.com/9' },
 ];
 
+export const EXAMPLE_SOURCES: Source[] = [
+  {
+    type: 'wikipedia',
+    title: 'LeBron James - Wikipedia',
+    description: 'LeBron Raymone James Sr is an American professional basketball player for the Los Angeles...',
+    url: 'https://wikipedia.org/wiki/LeBron_James'
+  },
+  {
+    type: 'encyclopedia',
+    title: 'LeBron James | Biography, Championships, Stats, & Facts - Britannica',
+    description: 'LeBron James is an iconic basketball player known for his athleticism and versatility. He has achieved...',
+    url: 'https://britannica.com/biography/lebron-james'
+  },
+  {
+    type: 'nba',
+    title: 'LeBron James | Forward | Los Angeles Lakers - NBA.Com',
+    description: 'LeBron is the NBA\'s all-time leading scorer. He is a four-time NBA Champion (2012, 2013, 2016, 2020)...',
+    url: 'https://nba.com/player/lebron-james'
+  },
+  {
+    type: 'espn',
+    title: 'LeBron James - Los Angeles Lakers Small Forward - ESPN',
+    description: 'View the profile of Los Angeles Lakers Small Forward LeBron James on ESPN. Get the latest news, live stat...',
+    url: 'https://espn.com/nba/player/_/id/1966/lebron-james'
+  }
+];
 
+export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
+  {
+    type: 'wikipedia',
+    title: 'Example Source 1',
+    description: 'Example description 1...',
+    url: 'https://example.com/1'
+  },
+  {
+    type: 'encyclopedia',
+    title: 'Example Source 2',
+    description: 'Example description 2...',
+    url: 'https://example.com/2'
+  }
+];

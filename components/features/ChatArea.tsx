@@ -12,13 +12,15 @@ import {
   Message,
   initialMessages,
   MODEL_RESPONSES,
+  EXAMPLE_SOURCES,
+  EXAMPLE_SOURCES_SIMPLE,
 } from "@/lib/constants";
 import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore } from "@/stores";
+import { Source } from "@/lib/types";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
 import { useToast } from "@/hooks/use-toast";
-import { Source } from '@/lib/types';
 import { SourcesWindow } from "../SourcesWindow";
 
 
@@ -53,14 +55,13 @@ export function ChatArea() {
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
-    // Initialize with the content from store if it exists
     if (content.chat.input) {
       const sessionId = `session-${Date.now()}`;
       const messageId = `msg-${Date.now()}`;
       
       return [{
         id: sessionId,
-        activeModel: selectedModels.chat[0],
+        activeModel: selectedModels.chat[2],
         status: 'active',
         messages: [{
           id: messageId,
@@ -73,32 +74,7 @@ export function ChatArea() {
             content: '',
             status: 'loading',
             parentMessageId: messageId,
-            sources: isWebSearch ? [
-              {
-                type: 'wikipedia',
-                title: 'LeBron James - Wikipedia',
-                description: 'LeBron Raymone James Sr is an American professional basketball player for the Los Angeles...',
-                url: 'https://wikipedia.org/wiki/LeBron_James'
-              },
-              {
-                type: 'encyclopedia',
-                title: 'LeBron James | Biography, Championships, Stats, & Facts - Britannica',
-                description: 'LeBron James is an iconic basketball player known for his athleticism and versatility. He has achieved...',
-                url: 'https://britannica.com/biography/lebron-james'
-              },
-              {
-                type: 'nba',
-                title: 'LeBron James | Forward | Los Angeles Lakers - NBA.Com',
-                description: 'LeBron is the NBA\'s all-time leading scorer. He is a four-time NBA Champion (2012, 2013, 2016, 2020)...',
-                url: 'https://nba.com/player/lebron-james'
-              },
-              {
-                type: 'espn',
-                title: 'LeBron James - Los Angeles Lakers Small Forward - ESPN',
-                description: 'View the profile of Los Angeles Lakers Small Forward LeBron James on ESPN. Get the latest news, live stat...',
-                url: 'https://espn.com/nba/player/_/id/1966/lebron-james'
-              }
-            ] : undefined
+            sources: isWebSearch ? EXAMPLE_SOURCES : undefined
           }))
         }]
       }];
@@ -106,7 +82,6 @@ export function ChatArea() {
     return [];
   });
 
-  // Trigger response generation on initial mount if we have content
   useEffect(() => {
     if (content.chat.input && chatSessions.length > 0) {
       const session = chatSessions[0];
@@ -152,7 +127,7 @@ export function ChatArea() {
     
     const newSession: ChatSession = {
       id: sessionId,
-      activeModel: selectedModels.chat[0],
+      activeModel: selectedModels.chat[2],
       status: 'active',
       messages: [{
         id: messageId,
@@ -165,20 +140,7 @@ export function ChatArea() {
           content: '',
           status: 'loading',
           parentMessageId: messageId,
-          sources: isWebSearch ? [
-            {
-              type: 'wikipedia',
-              title: 'Example Source 1',
-              description: 'Example description 1...',
-              url: 'https://example.com/1'
-            },
-            {
-              type: 'encyclopedia',
-              title: 'Example Source 2',
-              description: 'Example description 2...',
-              url: 'https://example.com/2'
-            }
-          ] : undefined
+          sources: isWebSearch ?EXAMPLE_SOURCES_SIMPLE : undefined
         }))
       }]
     };
