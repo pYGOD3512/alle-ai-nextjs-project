@@ -286,7 +286,7 @@ export function ChatInput({
               />
               
               {isWeb && (
-                <TooltipProvider>
+                <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button

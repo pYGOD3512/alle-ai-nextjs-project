@@ -306,7 +306,7 @@ export function Header() {
                   </TooltipTrigger>
                   <TooltipContent
                     side="bottom"
-                    className="max-w-[300px] break-words bg-backgroundSecondary"
+                    className="max-w-[300px] break-words"
                   >
                     Selected Models
                   </TooltipContent>
@@ -334,14 +334,18 @@ export function Header() {
 
           <div className={`flex items-center gap-2 ${isSubscribed ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
             {/* <AuthSwitch /> */}
-            <Button
-            variant={'outline'}
-            className="h-8 rounded-full gap-1 p-2 text-muted-foreground"
-            onClick={() => setShareLinkModalOpen(true)}
-            >
-              <Share className="w-4 h-4"/>
-              Share
-            </Button>
+            {pathname.includes("/chat") && (
+              <Button
+              variant={'outline'}
+              className="h-8 rounded-full gap-1 p-2 text-muted-foreground"
+              onClick={() => setShareLinkModalOpen(true)}
+              >
+                <Share className="w-4 h-4"/>
+                Share
+              </Button>
+            )}
+            
+
             <ThemeToggle />
             {navItems.filter(item => 
               isSubscribed || 

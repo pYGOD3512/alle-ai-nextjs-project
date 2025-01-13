@@ -34,7 +34,7 @@ const SourcesPill = ({ onClick }: SourcesPillProps) => {
   return (
     <div 
       onClick={onClick}
-      className="relative inline-flex items-center px-2.5 py-2 
+      className="relative inline-flex items-center px-1
                 text-xs font-medium group
                 rounded-full cursor-pointer
                 border border-borderColorPrimary
@@ -185,12 +185,6 @@ export function ModelResponse({
           <span className="font-medium text-sm mb-3">{model}</span>
           <p className="text-sm text-muted-foreground">{content}</p>
 
-          {/* Sources pill with new animations */}
-          {sources && sources.length > 0 && (
-            <div className="mt-4">
-              <SourcesPill onClick={() => setSources(responseId, sources)} />
-            </div>
-          )}
 
           <div className="flex items-center gap-1 mt-4">
             <Button
@@ -250,6 +244,12 @@ export function ModelResponse({
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
+
+            {sources && sources.length > 0 && (
+            <div className="">
+              <SourcesPill onClick={() => setSources(responseId, sources)} />
+            </div>
+          )}
           </div>
           
           <AdCard ads={SAMPLE_ADS} />
