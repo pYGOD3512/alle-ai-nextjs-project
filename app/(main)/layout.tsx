@@ -9,6 +9,10 @@ import PlansArea from '@/components/features/plans/PlansArea';
 import { useAuth } from '@/components/providers/authTest';
 import { MaintenancePage } from '@/components/features/maintenance/MaintenancePage';
 import * as Frigade from '@frigade/react';
+import { FooterText } from '@/components/FooterText';
+import { useSidebarStore } from "@/stores";
+import { usePathname } from 'next/navigation';
+
 
 const isMaintenance = false;
 
@@ -18,6 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const { isSubscribed } = useAuth();
+  const { isOpen } = useSidebarStore();
+  const pathname = usePathname();
 
   const onRefresh = () => {
     window.location.reload();
@@ -54,6 +60,11 @@ export default function RootLayout({
                 {children}
               </div>
               <HelpButton />
+              {pathname === "/" && (
+                <FooterText 
+                className={`fixed bottom-0 ${isOpen ? "right-[39%]" : "right-[45%]"} h-6 transition-all duration-300`}
+                />
+              )}
             </main>
           </div>
           </Frigade.Provider>

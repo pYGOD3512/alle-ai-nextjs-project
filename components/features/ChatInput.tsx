@@ -16,6 +16,7 @@ import { FilePreview } from "../ui/file-preview";
 import { processFile } from '@/lib/fileProcessing';
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { FooterText } from "../FooterText";
 
 declare global {
   interface Window {
@@ -43,7 +44,6 @@ export function ChatInput({
   isWeb,
   onWebSearchToggle
 }: ChatInputProps) {
-  const [textIndex, setTextIndex] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
   const [isWebSearch, setIsWebSearch] = useState(false);
@@ -225,19 +225,7 @@ export function ChatInput({
     };
   }, []);
 
-  const texts = [
-    "Your all-in-one AI Platform",
-    "Alle-AI: Combine and compare AI models",
-    "Alle-AI: Explore innovative AI solutions",
-  ];
   const pathname = usePathname();
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTextIndex((current) => (current + 1) % texts.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const isInputEmpty = value.trim() === "";
 
@@ -357,21 +345,8 @@ export function ChatInput({
         </div>
       </div>
 
-      {(pathname === "/" || pathname.startsWith("/chat")) && (
-        <div className="h-6 relative overflow-hidden mt-2">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={textIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.5 }}
-              className="text-center text-[0.6rem] sm:text-xs absolute w-full text-muted-foreground"
-            >
-              {texts[textIndex]}
-            </motion.p>
-          </AnimatePresence>
-        </div>
+      {(pathname.startsWith("/chat") || pathname.startsWith("/image")) && (
+          <FooterText />
       )}
     </div>
   );
