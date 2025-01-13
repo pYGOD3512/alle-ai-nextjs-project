@@ -13,7 +13,7 @@ import {
   initialMessages,
   MODEL_RESPONSES,
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useContentStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore } from "@/stores";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
@@ -51,7 +51,7 @@ export function ChatArea() {
   const { content } = useContentStore();
   const { selectedModels } = useSelectedModelsStore();
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
-  const [isWebSearch, setIsWebSearch] = useState(false);
+  const { isWebSearch } = useWebSearchStore();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
     // Initialize with the content from store if it exists
     if (content.chat.input) {
@@ -230,7 +230,7 @@ export function ChatArea() {
   };
 
   const handleWebSearchToggle = (enabled: boolean) => {
-    setIsWebSearch(enabled);
+    useWebSearchStore.getState().setIsWebSearch(enabled);
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);

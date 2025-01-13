@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { ChatInput } from "@/components/features/ChatInput";
-import { useSidebarStore, useContentStore } from "@/stores";
+import { useSidebarStore, useContentStore, useWebSearchStore } from "@/stores";
 import { useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -29,6 +29,8 @@ export default function Home() {
   const { setContent } = useContentStore();
   const router = useRouter();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+  const { setIsWebSearch } = useWebSearchStore();
+
   
 
   useEffect(() => {
@@ -67,6 +69,11 @@ export default function Home() {
     setInput(opt.label as String);
     setTimeout(() => inputRef.current?.focus(), 0);
   };
+
+    const handleWebSearchToggle = (enabled: boolean) => {
+      setIsWebSearch(enabled);
+  };
+
   return (
     <div
     className={`transition-all duration-300 ${
@@ -86,6 +93,7 @@ export default function Home() {
         onSend={handleSend}
         inputRef={inputRef}
         isWeb={true}
+        onWebSearchToggle={handleWebSearchToggle}
       />
     </div>
   );

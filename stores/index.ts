@@ -515,3 +515,13 @@ export const useVoiceStore = create<VoiceStore>()(
     }
   )
 );
+
+interface WebSearchState {
+  isWebSearch: boolean;
+  setIsWebSearch: (enabled: boolean) => void;
+}
+
+export const useWebSearchStore = create<WebSearchState>((set) => ({
+  isWebSearch: false,
+  setIsWebSearch: (enabled) => set({ isWebSearch: enabled }),
+}));
