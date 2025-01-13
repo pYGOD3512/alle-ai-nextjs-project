@@ -1356,4 +1356,16 @@ export const timeSeriesData: TimeSeriesData[] = [
   { date: '2024-05', 'GPT-4': 56, 'DALL-E': 45, 'Claude': 47, 'Gemini': 35 },
 ];
 
+export const webSources = [
+  { type: 'wikipedia', title: 'Example Source 1', description: 'Example description 1...', url: 'https://example.com/1' },
+  { type: 'encyclopedia', title: 'Example Source 2', description: 'Example description 2...', url: 'https://example.com/2' },
+  { type: 'wikipedia', title: 'Example Source 3', description: 'Example description 3...', url: 'https://example.com/3' },
+  { type: 'encyclopedia', title: 'Example Source 4', description: 'Example description 4...', url: 'https://example.com/4' },
+  { type: 'wikipedia', title: 'Example Source 5', description: 'Example description 5...', url: 'https://example.com/5' },
+  { type: 'encyclopedia', title: 'Example Source 6', description: 'Example description 6...', url: 'https://example.com/6' },
+  { type: 'wikipedia', title: 'Example Source 7', description: 'Example description 7...', url: 'https://example.com/7' },
+  { type: 'encyclopedia', title: 'Example Source 8', description: 'Example description 8...', url: 'https://example.com/8' },
+  { type: 'wikipedia', title: 'Example Source 9', description: 'Example description 9...', url: 'https://example.com/9' },
+];
+
 
