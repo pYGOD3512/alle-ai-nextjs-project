@@ -31,6 +31,7 @@ interface ChatInputProps {
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   isLoading: boolean;
   isWeb?: boolean;
+  onWebSearchToggle?: (enabled: boolean) => void;
 }
 
 export function ChatInput({
@@ -40,6 +41,7 @@ export function ChatInput({
   inputRef,
   isLoading,
   isWeb,
+  onWebSearchToggle
 }: ChatInputProps) {
   const [textIndex, setTextIndex] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -240,12 +242,14 @@ export function ChatInput({
   const isInputEmpty = value.trim() === "";
 
   const handleWebSearchToggle = () => {
-    setIsWebSearch(!isWebSearch);
+    const newValue = !isWebSearch;
+    setIsWebSearch(newValue);
+    onWebSearchToggle?.(newValue);
     toast({
-      title: isWebSearch ? "Web Search Disabled" : "Web Search Enabled",
-      description: isWebSearch 
-        ? "Messages will be processed without web search" 
-        : "Your messages will now include web search results",
+      title: newValue ? "Web Search Enabled" : "Web Search Disabled",
+      description: newValue 
+        ? "Your messages will now include web search results"
+        : "Messages will be processed without web search",
     });
   };
 

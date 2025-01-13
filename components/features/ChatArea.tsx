@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSelector } from "./ModelSelector";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { ModelResponse } from "./ModelResponse";
+import { ModelResponse, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import {
   CHAT_MODELS as MODELS,
@@ -18,6 +18,9 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
 import { useToast } from "@/hooks/use-toast";
+import { Source } from '@/lib/types';
+import { SourcesWindow } from "../SourcesWindow";
+
 
 interface ChatSession {
   id: string;
@@ -40,12 +43,15 @@ interface ModelResponse {
   content: string;
   status: 'loading' | 'complete' | 'error';
   parentMessageId: string;
+  sources?: Source[];
 }
 
 export function ChatArea() {
   const { toast } = useToast();
   const { content } = useContentStore();
   const { selectedModels } = useSelectedModelsStore();
+  const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
+  const [isWebSearch, setIsWebSearch] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
     // Initialize with the content from store if it exists
     if (content.chat.input) {
@@ -66,7 +72,33 @@ export function ChatArea() {
             modelId,
             content: '',
             status: 'loading',
-            parentMessageId: messageId
+            parentMessageId: messageId,
+            sources: isWebSearch ? [
+              {
+                type: 'wikipedia',
+                title: 'LeBron James - Wikipedia',
+                description: 'LeBron Raymone James Sr is an American professional basketball player for the Los Angeles...',
+                url: 'https://wikipedia.org/wiki/LeBron_James'
+              },
+              {
+                type: 'encyclopedia',
+                title: 'LeBron James | Biography, Championships, Stats, & Facts - Britannica',
+                description: 'LeBron James is an iconic basketball player known for his athleticism and versatility. He has achieved...',
+                url: 'https://britannica.com/biography/lebron-james'
+              },
+              {
+                type: 'nba',
+                title: 'LeBron James | Forward | Los Angeles Lakers - NBA.Com',
+                description: 'LeBron is the NBA\'s all-time leading scorer. He is a four-time NBA Champion (2012, 2013, 2016, 2020)...',
+                url: 'https://nba.com/player/lebron-james'
+              },
+              {
+                type: 'espn',
+                title: 'LeBron James - Los Angeles Lakers Small Forward - ESPN',
+                description: 'View the profile of Los Angeles Lakers Small Forward LeBron James on ESPN. Get the latest news, live stat...',
+                url: 'https://espn.com/nba/player/_/id/1966/lebron-james'
+              }
+            ] : undefined
           }))
         }]
       }];
@@ -132,7 +164,21 @@ export function ChatArea() {
           modelId,
           content: '',
           status: 'loading',
-          parentMessageId: messageId
+          parentMessageId: messageId,
+          sources: isWebSearch ? [
+            {
+              type: 'wikipedia',
+              title: 'Example Source 1',
+              description: 'Example description 1...',
+              url: 'https://example.com/1'
+            },
+            {
+              type: 'encyclopedia',
+              title: 'Example Source 2',
+              description: 'Example description 2...',
+              url: 'https://example.com/2'
+            }
+          ] : undefined
         }))
       }]
     };
@@ -181,6 +227,10 @@ export function ChatArea() {
     if (!input.trim()) return;
     handleSend(input);
     setInput("");
+  };
+
+  const handleWebSearchToggle = (enabled: boolean) => {
+    setIsWebSearch(enabled);
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -268,6 +318,9 @@ export function ChatArea() {
                       r.modelId === session.activeModel && r.status === 'complete'
                     ) && (
                       <ModelResponse
+                        key={session.messages[0].responses.find(r => 
+                          r.modelId === session.activeModel
+                        )?.id}
                         model={MODELS.find(m => m.id === session.activeModel)?.name || ""}
                         content={
                           session.messages[0].responses.find(r => 
@@ -283,12 +336,15 @@ export function ChatArea() {
                         )?.id || ""]}
                         onFeedbackChange={handleFeedbackChange}
                         onRegenerate={(responseId) => {
-                          // Add regeneration logic here
                           toast({
                             title: "Regenerating response",
                             description: "Please wait while we generate a new response.",
                           });
                         }}
+                        webSearchEnabled={isWebSearch}
+                        sources={session.messages[0].responses.find(r => 
+                          r.modelId === session.activeModel
+                        )?.sources}
                       />
                     )}
                   </div>
@@ -310,6 +366,16 @@ export function ChatArea() {
         inputRef={useRef<HTMLTextAreaElement>(null)}
         isLoading={false}
         isWeb={true}
+        onWebSearchToggle={handleWebSearchToggle}
+      />
+      <SourcesWindow
+        sources={sources}
+        isOpen={isOpen}
+        onClose={close}
+        responseId={activeResponseId || ''}
+        userPrompt={chatSessions.find(session => 
+          session.messages[0].responses.some(r => r.id === activeResponseId)
+        )?.messages[0].content || ''}
       />
     </RenderPageContent>
   );
