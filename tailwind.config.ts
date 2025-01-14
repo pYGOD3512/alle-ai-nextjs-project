@@ -105,10 +105,52 @@ const config: Config = {
       gridTemplateColumns: {
         'auto-fit': 'repeat(auto-fit, minmax(0, 1fr))',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'inherit',
+            a: {
+              color: 'inherit',
+              textDecoration: 'none',
+              '&:hover': {
+                color: 'inherit',
+              },
+            },
+            code: {
+              color: 'inherit',
+              background: 'transparent',
+              padding: 0,
+            },
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+            'blockquote p:first-of-type::before': {
+              content: '""',
+            },
+            'blockquote p:last-of-type::after': {
+              content: '""',
+            },
+            img: {
+              marginTop: 0,
+              marginBottom: 0,
+            },
+            hr: {
+              borderColor: 'var(--border)',
+              marginTop: '1em',
+              marginBottom: '1em',
+            },
+          },
+        },
+      },
     },
   },
   plugins: [
     require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
     function ({ addUtilities }: { addUtilities: (utilities: object, variants: string[]) => void }) {
       const newUtilities = {
         ".scrollbar-thin": {
