@@ -78,7 +78,6 @@ import {
   ArrowLeft,
   LogIn,
   RefreshCw,
-  RefreshCcw,
   Link,
   Clock9,
   MessageSquare,
@@ -89,11 +88,7 @@ import {
   PanelLeftClose,
   Command as KeyboardCommand,
   AlertTriangle,
-  Receipt,
-  Users,
-  CircleDot,
   Wallet,
-  CreditCard,
   ArrowUpDown,
   Globe,
   Minus,
@@ -105,7 +100,6 @@ import {
   Crown,
   Coins,
   Clock,
-  ChevronsUpDown,
   Monitor,
   Smartphone,
   Tablet,
@@ -113,6 +107,11 @@ import {
   Chrome,
   ChevronUp,
   ChevronDown,
+  Bell,
+  Zap,
+  AlertCircle,
+  ArrowRight,
+  Tag,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -130,6 +129,7 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
+import { NotificationItem } from "@/lib/types";
 import { driveService } from '@/lib/services/driveServices';
 import { useRouter } from "next/router";
 import { Share } from "next/dist/compiled/@next/font/dist/google";
@@ -4162,6 +4162,110 @@ export function TransactionHistoryModal({ isOpen, onClose }: ModalProps) {
                 .reduce((acc, curr) => acc + curr.amount, 0)
                 .toFixed(2)}
             </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface NotificationModalProps {
+  notification: NotificationItem | null;
+  open: boolean;
+  onClose: () => void;
+}
+
+const typeIcons = {
+  feature: Zap,
+  security: Shield,
+  update: Bell,
+  alert: AlertCircle,
+  info: Info,
+};
+
+const priorityColors = {
+  low: 'bg-slate-500',
+  medium: 'bg-yellow-500',
+  high: 'bg-red-500',
+};
+
+export function NotificationModal({
+  notification,
+  open,
+  onClose,
+}: NotificationModalProps) {
+  if (!notification) return null;
+
+  const IconComponent = typeIcons[notification.type] || Bell;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] p-0">
+        <div className={`p-6 border-b bg-${notification.type === 'security' ? 'red' : 'primary'}/5`}>
+          <DialogHeader>
+            <div className="flex items-start gap-4">
+              <div className={`p-2 rounded-xl bg-${notification.type === 'security' ? 'red' : 'primary'}/10`}>
+                <IconComponent className={`h-6 w-6 text-${notification.type === 'security' ? 'red' : 'primary'}`} />
+              </div>
+              <div className="flex-1">
+                <DialogTitle className="text-xl mb-2">{notification.title}</DialogTitle>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {notification.priority && (
+                    <Badge variant="outline" className="capitalize">
+                      {notification.priority} Priority
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="capitalize">
+                    {notification.type}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div className="space-y-4">
+            <p className="text-muted-foreground leading-relaxed">
+              {notification.message}
+            </p>
+
+            {notification.metadata && (
+              <div className="space-y-3 pt-4 border-t">
+                {notification.metadata.category && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Folder className="h-4 w-4" />
+                    <span>Category: {notification.metadata.category}</span>
+                  </div>
+                )}
+                {notification.metadata.tags && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Tag className="h-4 w-4" />
+                    <div className="flex flex-wrap gap-1">
+                      {notification.metadata.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="h-4 w-4 mr-2" />
+              {format(notification.timestamp, 'PPpp')}
+            </div>
+            
+            {notification.actionUrl && (
+              <Button onClick={() => window.location.href = notification.actionUrl!}>
+                {notification.actionLabel || 'View Details'}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

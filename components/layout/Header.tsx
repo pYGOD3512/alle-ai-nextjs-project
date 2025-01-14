@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { navItems, userMenuItems, notifications as notificationData} from '@/lib/constants';
+import { NotificationItem } from "@/lib/types";
 import { useSidebarStore, useSelectedModelsStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
@@ -31,6 +32,8 @@ import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/components/providers/authTest';
 import { AuthSwitch } from "../ui/authSwitch";
+import { NotificationsPanel } from "@/components/NotificationWindow";
+import { NotificationModal } from "@/components/ui/modals";
 
 
 export function Header() {
@@ -42,7 +45,7 @@ export function Header() {
   const pathname = usePathname();
 
   const [mounted, setMounted] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(notificationData);
+  const [notifications, setNotifications] = React.useState<NotificationItem[]>(notificationData);
   const [textSizeModalOpen, setTextSizeModalOpen] = React.useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = React.useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
@@ -51,6 +54,9 @@ export function Header() {
   const [albumModalOpen, setAlbumModalOpen] = React.useState(false);
   const [shareLinkModalOpen, setShareLinkModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
 
   const currentPage = useSidebarStore((state) => state.currentPage);
   const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
@@ -68,6 +74,12 @@ export function Header() {
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleNotificationClick = (notification: NotificationItem) => {
+    setSelectedNotification(notification);
+    setNotificationModalOpen(true);
+    markAsRead(notification.id);
+  };
 
   const renderNavItem = (item: any, index: number) => {
 
@@ -140,46 +152,66 @@ export function Header() {
             <>
               <div className="flex justify-between items-center px-3 border-b border-borderColorPrimary">
                 <h4 className="font-small text-sm">Notifications</h4>
-              <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs text-muted-foreground hover:text-primary"
-              onClick={() => setNotifications([])}
-            >
-              Clear all
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-muted-foreground hover:text-primary"
+                  onClick={() => setNotifications([])}
+                >
+                  Clear all
+                </Button>
+              </div>
+              {notifications.map((notification) => (
+                <DropdownMenuItem 
+                  key={notification.id}
+                  className={`flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 ${
+                    !notification.read ? 'bg-primary/5' : ''
+                  }`}
+                  onClick={() => {
+                    markAsRead(notification.id);
+                    handleNotificationClick(notification);
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium text-xs">{notification.title}</div>
+                    {!notification.read && (
+                      <span className="w-2 h-2 bg-primary rounded-full" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{notification.message.length > 50 ? notification.message.slice(0, 50) + '...' : notification.message}</div>
+                  <div className="text-[0.6rem] text-muted-foreground">
+                  {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
+                    Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
+                    'minute'
+                  )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
+                onClick={() => setNotificationsPanelOpen(true)}
+              >
+                See all notifications
               </Button>
-          </div>
             </>
           )}
-          {notifications.length === 0 ? (
+          {notifications.length === 0 && (
+          <>
             <div className=" p-4 text-center text-muted-foreground">
               <Bell className="h-6 w-6 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No new notifications</p>
             </div>
-          ) : (
-            notifications.map((notification) => (
-              <DropdownMenuItem 
-                key={notification.id}
-                className={`flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 ${
-                  !notification.read ? 'bg-primary/5' : ''
-                }`}
-                onClick={() => markAsRead(notification.id)}
+            <Button
+                variant="secondary"
+                size="sm"
+                className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
+                onClick={() => setNotificationsPanelOpen(true)}
               >
-                <div className="flex items-center gap-2">
-                  <div className="font-small text-xs">{notification.title}</div>
-                  {!notification.read && (
-                    <span className="w-2 h-2 bg-primary rounded-full" />
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground">{notification.message}</div>
-                <div className="text-[0.6rem] text-muted-foreground">
-                {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
-                  Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
-                  'minute'
-                )}
-                </div>
-              </DropdownMenuItem>
-            ))
+                See all notifications
+              </Button>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -421,6 +453,21 @@ export function Header() {
       <LogoutModal 
         isOpen={isLogoutModalOpen} 
         onClose={() => setIsLogoutModalOpen(false)} 
+      />
+      <NotificationsPanel
+        open={notificationsPanelOpen}
+        onClose={() => setNotificationsPanelOpen(false)}
+        notifications={notifications}
+        onNotificationClick={handleNotificationClick}
+      />
+      
+      <NotificationModal
+        notification={selectedNotification}
+        open={notificationModalOpen}
+        onClose={() => {
+          setNotificationModalOpen(false);
+          setSelectedNotification(null);
+        }}
       />
     </>
   );
