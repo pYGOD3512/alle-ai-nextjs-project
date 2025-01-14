@@ -16,8 +16,74 @@ import {
   Share,
 } from "lucide-react";
 
-import { Transaction, Source } from "@/lib/types"
+import { Transaction, Source, NotificationItem } from "@/lib/types";
 
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: "user" | "ai";
+  timestamp: Date;
+  responses?: {
+    model: string;
+    content: string;
+    icon: string;
+  }[];
+}
+
+export interface ReleaseNote {
+  id: string
+  version: string
+  date: string
+  translations: {
+    [key: string]: {
+      title: string
+      description: string
+      details: {
+        summary: string
+        changes: string[]
+        impact?: string
+        technicalNotes?: string[]
+      }
+    }
+  }
+  type: "security" | "solve" | "error" | "testing"| "feature" | "fix" | "bug" | "improvement"
+  image?: string
+}
+
+export const notifications: NotificationItem[] = [
+  {
+    id: "1",
+    title: "New Model Available",
+    message: "Claude 3 Opus is now available for all users. Experience state-of-the-art AI with improved reasoning, coding, and mathematical capabilities.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    read: false,
+    type: 'feature',
+    priority: 'high',
+    actionUrl: '/',
+    actionLabel: 'Try it now',
+    metadata: {
+      category: 'AI Models',
+      tags: ['claude', 'new-feature', 'ai'],
+      relatedFeature: 'text-generation'
+    }
+  },
+  {
+    id: "2",
+    title: "Security Update Required",
+    message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 24),
+    read: true,
+    type: 'security',
+    priority: 'high',
+    actionUrl: '/',
+    actionLabel: 'Enable 2FA',
+    metadata: {
+      category: 'Security',
+      tags: ['security', '2fa', 'account'],
+    }
+  },
+];
 
 export const navItems = [
   {
@@ -52,31 +118,6 @@ export const navItems = [
         // onClick: () => console.log("All Notifications")
       },
     ],
-  },
-];
-
-type Notification = {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-};
-
-export const notifications: Notification[] = [
-  {
-    id: "1",
-    title: "New Model Available",
-    message: "Claude 3 Opus is now available for all users",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Welcome!",
-    message: "Thanks for joining our AI platform. Take a tour to get started.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 24), // 1 day ago
-    read: true,
   },
 ];
 
@@ -255,19 +296,6 @@ export const userMenuItems = [
     },
   },
 ];
-
-
-export interface Message {
-  id: string;
-  content: string;
-  sender: "user" | "ai";
-  timestamp: Date;
-  responses?: {
-    model: string;
-    content: string;
-    icon: string;
-  }[];
-}
 
 export const CHAT_MODELS = [
   {
@@ -575,26 +603,6 @@ export const socialMediaOptions = [
     handler: (url: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}`
   }
 ];
-
-export interface ReleaseNote {
-  id: string
-  version: string
-  date: string
-  translations: {
-    [key: string]: {
-      title: string
-      description: string
-      details: {
-        summary: string
-        changes: string[]
-        impact?: string
-        technicalNotes?: string[]
-      }
-    }
-  }
-  type: "security" | "solve" | "error" | "testing"| "feature" | "fix" | "bug" | "improvement"
-  image?: string
-}
 
 export const languages = [
   { code: 'en', name: 'English' },
@@ -1356,42 +1364,34 @@ export const timeSeriesData: TimeSeriesData[] = [
   { date: '2024-05', 'GPT-4': 56, 'DALL-E': 45, 'Claude': 47, 'Gemini': 35 },
 ];
 
-export const webSources = [
-  { type: 'wikipedia', title: 'Example Source 1', description: 'Example description 1...', url: 'https://example.com/1' },
-  { type: 'encyclopedia', title: 'Example Source 2', description: 'Example description 2...', url: 'https://example.com/2' },
-  { type: 'wikipedia', title: 'Example Source 3', description: 'Example description 3...', url: 'https://example.com/3' },
-  { type: 'encyclopedia', title: 'Example Source 4', description: 'Example description 4...', url: 'https://example.com/4' },
-  { type: 'wikipedia', title: 'Example Source 5', description: 'Example description 5...', url: 'https://example.com/5' },
-  { type: 'encyclopedia', title: 'Example Source 6', description: 'Example description 6...', url: 'https://example.com/6' },
-  { type: 'wikipedia', title: 'Example Source 7', description: 'Example description 7...', url: 'https://example.com/7' },
-  { type: 'encyclopedia', title: 'Example Source 8', description: 'Example description 8...', url: 'https://example.com/8' },
-  { type: 'wikipedia', title: 'Example Source 9', description: 'Example description 9...', url: 'https://example.com/9' },
-];
-
-export const EXAMPLE_SOURCES: Source[] = [
+export const EXAMPLE_SOURCES: Source [] = [
   {
     type: 'wikipedia',
     title: 'LeBron James - Wikipedia',
     description: 'LeBron Raymone James Sr is an American professional basketball player for the Los Angeles...',
-    url: 'https://wikipedia.org/wiki/LeBron_James'
+    url: 'https://wikipedia.org/wiki/LeBron_James',
+    img: '/iocns/espn.png',
   },
   {
     type: 'encyclopedia',
     title: 'LeBron James | Biography, Championships, Stats, & Facts - Britannica',
-    description: 'LeBron James is an iconic basketball player known for his athleticism and versatility. He has achieved...',
-    url: 'https://britannica.com/biography/lebron-james'
+    description: 'LeBron James is an Sourceiconic basketball player known for his athleticism and versatility. He has achieved...',
+    url: 'https://britannica.com/biography/lebron-james',
+    img: 'iocns/espn.png',
   },
   {
     type: 'nba',
     title: 'LeBron James | Forward | Los Angeles Lakers - NBA.Com',
     description: 'LeBron is the NBA\'s all-time leading scorer. He is a four-time NBA Champion (2012, 2013, 2016, 2020)...',
-    url: 'https://nba.com/player/lebron-james'
+    url: 'https://nba.com/player/lebron-james',
+    img: 'iocns/espn.png',
   },
   {
     type: 'espn',
     title: 'LeBron James - Los Angeles Lakers Small Forward - ESPN',
     description: 'View the profile of Los Angeles Lakers Small Forward LeBron James on ESPN. Get the latest news, live stat...',
-    url: 'https://espn.com/nba/player/_/id/1966/lebron-james'
+    url: 'https://espn.com/nba/player/_/id/1966/lebron-james',
+    img: 'iocns/espn.png',
   }
 ];
 
@@ -1400,12 +1400,14 @@ export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
     type: 'wikipedia',
     title: 'Example Source 1',
     description: 'Example description 1...',
-    url: 'https://example.com/1'
+    url: 'https://example.com/1',
+    img: 'iocns/espn.png',
   },
   {
     type: 'encyclopedia',
     title: 'Example Source 2',
     description: 'Example description 2...',
-    url: 'https://example.com/2'
+    url: 'https://example.com/2',
+    img: 'iocns/espn.png',
   }
 ];
