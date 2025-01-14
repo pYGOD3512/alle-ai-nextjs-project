@@ -17,6 +17,9 @@ const config: Config = {
       '2xl': '1536px',
     },
     extend: {
+      spacing:{
+        "25":"120px",
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

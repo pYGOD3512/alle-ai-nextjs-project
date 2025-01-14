@@ -126,25 +126,25 @@ export const helpCategories: HelpCategories = {
         }
       ]
     },
-    "3675931-api": {
-      id: "3675931",
-      iconName: "Code",
-      title: "API",
-      description: "Common questions related to our APIs and models",
-      sections: [
-        {
-            title: 'API',
-            articles: [
-                {
-                id: "apis",
-                title: "API",
-                description: "Read our apis",
-                readingTime: "10 min read"
-                }
-            ]
-        }
-      ]
-    },
+    // "3675931-api": {
+    //   id: "3675931",
+    //   iconName: "Code",
+    //   title: "API",
+    //   description: "Common questions related to our APIs and models",
+    //   sections: [
+    //     {
+    //         title: 'API',
+    //         articles: [
+    //             {
+    //             id: "apis",
+    //             title: "API",
+    //             description: "Read our apis",
+    //             readingTime: "10 min read"
+    //             }
+    //         ]
+    //     }
+    //   ]
+    // },
     "3742473-alle-ai": {
       id: "3742473",
       iconName: "MessageCircleMore",
