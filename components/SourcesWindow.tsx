@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface Source {
   url: string;
   title: string;
-  type: 'wikipedia' | 'encyclopedia' | 'nba' | 'espn' | 'biography' | 'other';
+  type: string;
   description: string;
 }
 

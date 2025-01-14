@@ -136,7 +136,7 @@ export interface Transaction {
 export interface Source {
   url: string;
   title: string;
-  type: 'wikipedia' | 'encyclopedia' | 'nba' | 'espn' | 'biography' | 'other';
+  type: string;
   description: string;
   img?: string;
 }
