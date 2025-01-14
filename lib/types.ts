@@ -138,4 +138,23 @@ export interface Source {
   title: string;
   type: 'wikipedia' | 'encyclopedia' | 'nba' | 'espn' | 'biography' | 'other';
   description: string;
+  img?: string;
 }
+
+export type NotificationItem = {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+  type: 'feature' | 'security' | 'update' | 'alert' | 'info';
+  priority?: 'low' | 'medium' | 'high';
+  actionUrl?: string;
+  actionLabel?: string;
+  icon?: string;
+  metadata?: {
+    category?: string;
+    tags?: string[];
+    relatedFeature?: string;
+  };
+};
