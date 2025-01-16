@@ -1,22 +1,28 @@
+// @ts-nocheck
 "use client";
-import { ChevronRight, Clock, ThumbsUp, ThumbsDown, ArrowLeft,  } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  ThumbsUp,
+  ThumbsDown,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { HelpCategory, Article } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { IconComponent } from "@/components/IconComponent";
-
-import { languages } from "@/lib/constants"
+import DynamicFaq from "@/components/faq/DynamicFaq";
+import { languages } from "@/lib/constants";
 import { toast, useToast } from "@/hooks/use-toast";
 
+type FeedbackType = "helpful" | "not-helpful" | null;
 
-type FeedbackType = 'helpful' | 'not-helpful' | null;
-
-export function ArticleContent({ 
-  category, 
+export function ArticleContent({
+  category,
   article,
-  categorySlug 
-}: { 
+  categorySlug,
+}: {
   category: HelpCategory;
   article: Article;
   categorySlug: string;
@@ -24,39 +30,38 @@ export function ArticleContent({
   const [feedbackGiven, setFeedbackGiven] = useState<FeedbackType>(null);
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
   const { toast } = useToast();
-
+  
 
   useEffect(() => {
-    if(selectedLanguage.code !== "en"){
+    // alert(article.id)
+    if (selectedLanguage.code !== "en") {
       toast({
         title: "Coming soon!",
-        description: "This language translation will be available soon"
+        description: "This language translation will be available soon",
       });
     }
   }, [selectedLanguage.code, toast]);
-  
+
   const handleFeedback = (type: FeedbackType) => {
     setFeedbackGiven(type);
   };
 
   // Get all articles from all sections for related articles
-  const allArticles = category.sections.flatMap(section => section.articles);
-  
+  const allArticles = category.sections.flatMap((section) => section.articles);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="max-w-4xl mx-auto px-4 py-12">
           {/* Back to Category */}
-          <Link 
+          <Link
             href={`/collection/${categorySlug}`}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 group"
           >
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to {category.title}
           </Link>
-
-          
 
           {/* Article Header */}
           <div className="flex items-start gap-6">
@@ -83,86 +88,31 @@ export function ArticleContent({
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-12">
         <article className="prose prose-neutral dark:prose-invert max-w-none">
-          {/* Content sections with enhanced styling */}
+          {/* dynamically get article content  */}
           <div className="space-y-8">
-            <section>
-              <h2 className="text-2xl font-semibold mb-4">Getting Started</h2>
-              <p className="text-base leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
-            </section>
-
-            {/* Code example with enhanced styling */}
-            <section className="rounded-xl overflow-hidden">
-              <div className="bg-zinc-800 p-3 text-white text-sm">
-                <span className="text-zinc-400">Javascript</span>
-              </div>
-              <div className="bg-zinc-900 p-4">
-                <pre className="text-sm text-white">
-                  <code>
-                    {`// Example code
-const example = "Hello World";
-console.log(example);`}
-                  </code>
-                </pre>
-              </div>
-            </section>
-
-            {/* Steps with enhanced styling */}
-            <section className="space-y-4">
-              <h3 className="text-xl font-semibold">Steps to follow:</h3>
-              <ol className="space-y-4">
-                {[1, 2, 3].map((step) => (
-                  <li key={step} className="flex gap-4">
-                    <div className="flex-none">
-                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-medium">
-                        {step}
-                      </span>
-                    </div>
-                    <div className="flex-1 pt-1">
-                      <p>Step {step} instruction goes here with detailed explanation.</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
-            {/* Notes with enhanced styling */}
-            <div className="rounded-xl border border-yellow-500/20 overflow-hidden">
-              <div className="bg-yellow-500/10 p-4 flex items-start gap-3">
-                <div className="p-2 rounded-full bg-yellow-500/20">
-                  <IconComponent name="AlertTriangle" className="h-4 w-4 text-yellow-600" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-yellow-600 dark:text-yellow-500 mb-2">
-                    Important Note
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Important information or warnings can go here with additional context and details.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <DynamicFaq faqName={`${article.id}`} />
           </div>
-
           {/* Feedback Section */}
-          <div className="mt-16 pt-8 border-t">
-            <h3 className="text-lg font-semibold mb-4">Was this article helpful?</h3>
+          <div className="mt-10 pt-4 border-t">
+            <h3 className="text-lg font-semibold mb-4">
+              Was this article helpful?
+            </h3>
             <div className="flex items-center gap-4">
               <Button
-                variant={feedbackGiven === 'helpful' ? 'default' : 'outline'}
+                variant={feedbackGiven === "helpful" ? "default" : "outline"}
                 className="flex items-center gap-2 select-none"
-                onClick={() => handleFeedback('helpful')}
+                onClick={() => handleFeedback("helpful")}
                 disabled={feedbackGiven !== null}
               >
                 <ThumbsUp className="h-4 w-4" />
                 Yes, it helped
               </Button>
               <Button
-                variant={feedbackGiven === 'not-helpful' ? 'default' : 'outline'}
+                variant={
+                  feedbackGiven === "not-helpful" ? "default" : "outline"
+                }
                 className="flex items-center gap-2 select-none"
-                onClick={() => handleFeedback('not-helpful')}
+                onClick={() => handleFeedback("not-helpful")}
                 disabled={feedbackGiven !== null}
               >
                 <ThumbsDown className="h-4 w-4" />
@@ -171,7 +121,8 @@ console.log(example);`}
             </div>
             {feedbackGiven && (
               <div className="mt-4 p-4 rounded-lg bg-primary/5 text-sm text-muted-foreground">
-                Thank you for your feedback! We'll use this to improve our documentation.
+                Thank you for your feedback! We'll use this to improve our
+                documentation.
               </div>
             )}
           </div>

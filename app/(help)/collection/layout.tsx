@@ -9,8 +9,6 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { ScrollText, Search, Globe, Home, Router } from "lucide-react";
-import { HelpCategories } from "@/lib/types";
-import { IconComponent } from "@/components/IconComponent";
 import {
   DropdownMenu,
   DropdownMenuContent,
