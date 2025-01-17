@@ -16,6 +16,9 @@ const faqComponents = {
   "contact-support": dynamic(
     () => import("@/components/faq/account/contact-support")
   ),
+  "subscription-billing": dynamic(
+    () => import("@/components/faq/account/subscription-billing")
+  ),
 };
 
 interface DynamicFaqProps {
@@ -26,7 +29,7 @@ const DynamicFaq: FC<DynamicFaqProps> = ({ faqName }) => {
   const SelectedFAQ = faqComponents[faqName];
 
   if (!SelectedFAQ) {
-    return <p>FAQ not found!</p>; // Fallback 
+    return <p>FAQ not found!</p>; // Fallback
   }
 
   return (
