@@ -1,4 +1,3 @@
-import { Description } from "@radix-ui/react-toast";
 import dynamic from "next/dynamic";
 import { FC } from "react";
 
@@ -11,7 +10,12 @@ const faqComponents = {
     () => import("@/components/faq/account/change-email")
   ),
   "auth-method": dynamic(() => import("@/components/faq/account/auth-method")),
-  "change-password": dynamic(() => import("@/components/faq/account/change-password")),
+  "change-password": dynamic(
+    () => import("@/components/faq/account/change-password")
+  ),
+  "contact-support": dynamic(
+    () => import("@/components/faq/account/contact-support")
+  ),
 };
 
 interface DynamicFaqProps {
@@ -22,7 +26,7 @@ const DynamicFaq: FC<DynamicFaqProps> = ({ faqName }) => {
   const SelectedFAQ = faqComponents[faqName];
 
   if (!SelectedFAQ) {
-    return <p>FAQ not found!</p>; // Fallback UI will implement later
+    return <p>FAQ not found!</p>; // Fallback 
   }
 
   return (

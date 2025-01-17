@@ -30,7 +30,6 @@ export default function PhoneVerification() {
         </ol>
       </div>
       {/* Oaauth */}
-
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">For OAuth Users:</h2>
         <ul className="ml-4 space-y-2 text-muted-foreground">

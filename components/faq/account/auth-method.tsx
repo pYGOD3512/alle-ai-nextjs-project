@@ -22,7 +22,7 @@ export default function AuthMethod() {
         </p>
         <ul className="list-disc pl-6 space-y-1">
           <li>Email and password</li>
-          <li>Authenticator apps (Google Authenticator, etc.)</li>
+          <li>Oauth Authentication  (Google )</li>
         </ul>
       </section>
     </div>
