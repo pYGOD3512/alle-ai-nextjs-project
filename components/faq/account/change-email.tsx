@@ -21,10 +21,10 @@ export default function PhoneVerification() {
         <ol className="ml-4 space-y-2 ">
           <li>1. Log in to your account</li>
           <li>2. Navigate to Account Settings</li>
-          <li>3. Select "Change Email Address"</li>
+          <li>{`3. Select "Change Email Address"`}</li>
           <li>4. Enter your new email address</li>
           <li>5. Verify your password</li>
-          <li>6. Click "Save" or "Update"</li>
+          <li>{`6. Click "Save" or "Update"`}</li>
           <li>7. Check your new email for confirmation</li>
           <li>8. Click the verification link</li>
         </ol>

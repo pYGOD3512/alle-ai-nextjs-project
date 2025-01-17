@@ -51,9 +51,9 @@ export default function PaymentFAQPage() {
           <div>
             <h3 className="font-medium mb-2">How does billing work?</h3>
             <p className="text-muted-foreground">
-              Subscriptions are billed monthly or annually, depending on your
+              {`Subscriptions are billed monthly or annually, depending on your
               chosen plan. You'll be charged automatically at the start of each
-              billing period.
+              billing period.`}
             </p>
           </div>
 
@@ -84,7 +84,7 @@ export default function PaymentFAQPage() {
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">What's your refund policy?</h3>
+            <h3 className="font-medium mb-2"> {`What's your refund policy?`} </h3>
             <p className="text-muted-foreground">
               We offer a 30-day money-back guarantee for annual subscriptions.
               Monthly subscriptions can be cancelled but are not refundable for

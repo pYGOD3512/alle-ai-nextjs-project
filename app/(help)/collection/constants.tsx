@@ -68,7 +68,7 @@ export const helpCategories: HelpCategories = {
             id: "change-email",
             title: "How to change your email address",
             description:
-              "We do not support changing an email address. This article includes other available options.",
+              "We do  support changing an email address. This article includes other available options.",
             readingTime: "3 min read",
           },
         ],
