@@ -73,6 +73,21 @@ export const notifications: NotificationItem[] = [
     title: "Security Update Required",
     message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
     timestamp: new Date(Date.now() - 1000 * 60 * 24),
+    read: false,
+    type: 'security',
+    priority: 'high',
+    actionUrl: '/',
+    actionLabel: 'Enable 2FA',
+    metadata: {
+      category: 'Security',
+      tags: ['security', '2fa', 'account'],
+    }
+  },
+  {
+    id: "3",
+    title: "Security Update Required",
+    message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 24),
     read: true,
     type: 'security',
     priority: 'high',
@@ -307,7 +322,7 @@ export const CHAT_MODELS = [
     preview: "Making $1 million in just 5 days is an...",
   },
   {
-    id: "gpt4",
+    id: "gpt4-o",
     name: "GPT-4o",
     icon: "/models/gpt-4o.png",
     provider: "OpenAI",
@@ -530,96 +545,33 @@ export const VIDEO_MODELS = [
 ];
 
 export const MODEL_RESPONSES: { [key: string]: string } = {
-  "chatgpt-3-5-turbo": `# 
+  "chatgpt-3-5-turbo": `Achieving a million dollars in just five days is an extremely ambitious goal and, for most people, unrealistic without prior preparation, substantial resources, or extraordinary circumstances. However, if you're aiming to build significant wealth over time, here are some strategies that can guide you toward financial success:
 
-## Day 1: Research and Planning
-1. **Identify High-Yield Opportunities:**
-   - Stock market
-   - Cryptocurrencies
-   - Real estate flipping
-   - High-stakes poker or gambling (not recommended due to high risk)
-   - Crowdfunding for a revolutionary product
-
-2. **Market Analysis:**
-   - Conduct thorough research on your chosen opportunity.
-   - Analyze market trends, risks, and potential returns.
-
-3. **Set Up Accounts:**
-   - Create necessary accounts (brokerage, cryptocurrency exchange, etc.)
-   - Ensure you have the required capital to invest.
-
-## Day 2: Capital Mobilization
-1. **Secure Initial Investment:**
-   - Use savings, sell assets, or take loans (be cautious with debt).
-   - Seek investors or partners if needed.
-
-2. **Risk Management:**
-   - Determine how much you can afford to lose.
-   - Set stop-loss limits and diversify investments to mitigate risks.
-
-## Day 3: Execution
-1. **Make Investments:**
-   - Buy stocks, cryptocurrencies, or other high-yield assets.
-   - Invest in multiple opportunities to spread risk.
-
-2. **Monitor Closely:**
-   - Keep an eye on market movements.
-   - Be ready to make quick decisions based on market changes.
-
-## Day 4: Optimization
-1. **Reassess Investments:**
-   - Evaluate the performance of your investments.
-   - Reallocate funds if necessary to maximize returns.
-
-2. **Leverage News and Trends:**
-   - Stay updated with financial news.
-   - Take advantage of market-moving events.
-
-## Day 5: Final Push and Exit Strategy
-1. **Maximize Returns:**
-   - Consider short-term trading strategies like day trading.
-   - Use leverage carefully to amplify gains (high risk).
-
-2. **Exit Strategy:**
-   - Decide when to sell off investments to lock in profits.
-   - Ensure you exit at the right time to maximize returns.
-
-3. **Secure Profits:**
-   - Transfer profits to a secure account.
-   - Pay off any debts or loans taken for initial investment.
-
-## Conclusion
-Making a million dollars in 5 days is highly ambitious and fraught with risk. It requires expert knowledge, significant capital, and a bit of luck. Always consider the potential for loss and consult with financial advisors before making high-stakes investments.
-
-**Disclaimer:** This guide is for informational purposes only. It is not financial advice.`,
-  
-  "gpt4": `Achieving a million dollars in just five days is an extremely ambitious goal and, for most people, unrealistic without prior preparation, substantial resources, or extraordinary circumstances. However, if you're aiming to build significant wealth over time, here are some strategies that can guide you toward financial success:
-
-1. **Start with Passion**
+**1. Start with Passion**
 
    - Engage in work or a business that you are passionate about. Passion drives commitment and innovation, which are crucial for success. [lewishowes.com](https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com)
 
-2. **Invest in Yourself**
+**2. Invest in Yourself**
 
    - Seek mentors and invest in education to enhance your skills and knowledge. Continuous learning can open new opportunities and pathways to wealth. [lewishowes.com](https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com)
 
-3. **Build Multiple Income Streams**
+**3. Build Multiple Income Streams**
 
    - Diversify your income sources to include passive income, such as investments in real estate or dividend-paying stocks. Multiple income streams provide financial stability and accelerate wealth accumulation. [nasdaq.com](https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com)
 
-4. **Practice Financial Discipline**
+**4. Practice Financial Discipline**
 
    - Keep a tight check on spending, live within your means, and save diligently. Financial discipline is essential for accumulating wealth. [investopedia.com](https://www.investopedia.com/articles/younginvestors/08/millionaire-mindset.asp?utm_source=chatgpt.com)
 
-5. **Leverage the Power of Compounding**
+**5. Leverage the Power of Compounding**
 
    - Invest early and consistently to take advantage of compound interest, which can significantly grow your wealth over time. [nasdaq.com](https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com)
 
-6. **Set Clear Financial Goals**
+**6. Set Clear Financial Goals**
 
 - Define your financial objectives and create a plan to achieve them. Setting clear goals provides direction and motivation. [synchrony.com](https://www.synchrony.com/blog/banking/how-to-make-million-dollars?utm_source=chatgpt.com)
 
-7. **Embrace Hard Work and Persistence**
+**7. Embrace Hard Work and Persistence**
 
    - Success requires dedication and perseverance. Be prepared to work hard and stay committed to your goals, even when faced with challenges.
 
@@ -628,56 +580,248 @@ For a more in-depth understanding, you might find this video helpful:
 [How To Make A Million Dollars Step By Step](https://www.youtube.com/watch?v=-q8E1tcK9rU&utm_source=chatgpt.com)
 `,
   
-  "gemini-1-5-pro": `Unfortunately, there are no legitimate ways to make a million dollars in just five days. However, there are many ways to build wealth over time through hard work, smart investments, and sound financial planning.
+  "gpt4-o": `# Michael Jordan's Career Highlights
 
-Here are a few suggestions:
+| **Category**             | **Achievements**                                                                 |
+|--------------------------|---------------------------------------------------------------------------------|
+| **NBA Championships**    | 6-time Champion (1991, 1992, 1993, 1996, 1997, 1998)                            |
+| **MVP Awards**           | 5-time NBA Most Valuable Player (1988, 1991, 1992, 1996, 1998)                 |
+| **Scoring Titles**       | 10-time NBA Scoring Champion                                                    |
+| **Olympic Gold Medals**  | 2-time Olympic Gold Medalist (1984, 1992)                                       |
+| **All-Star Selections**  | 14-time NBA All-Star                                                           |
+| **Defensive Accolades**  | 9-time NBA All-Defensive First Team                                             |
+| **Career Points**        | 32,292 points (average: 30.1 PPG)                                               |
+| **Hall of Fame**         | Inducted into the Naismith Memorial Basketball Hall of Fame in 2009             |
 
-* **Start a business:** This is a great way to create wealth, but it takes time, effort, and often requires significant investment.
-* **Invest in the stock market:** This can be a risky proposition, but it can also be a very rewarding one if you know what you're doing.
-* **Save your money:** This may seem like a no-brainer, but it's often the most difficult thing to do. However, it's essential for building wealth over time.
-* **Get a good education:** A good education can lead to a higher-paying job, which can help you build wealth more quickly.
+| Feature | Support |
+|---------|---------|
+| Tables  | ✓       |
+| ~~Strikethrough~~ | ✓ |
+- [x] Task lists
+- [ ] Unchecked item
 
-Remember, there is no magic bullet when it comes to making money. The best way to build wealth is to focus on your long-term goals and make smart decisions along the way.
+Visit https://github.com (auto-linked)
+
+Here's a footnote[^1]
+
+[^1]: This is the footnote content
+
+`,
+  
+  "gemini-1-5-pro": `# Michael Jordan
+
+  Here are four iconic images of Michael Jordan:
+
+  ![Michael Jordan Dunking](https://tse3.mm.bing.net/th?id=OIP.NpDxUlHChYVtYaow5NGHygHaLz&pid=Api)
+  *Michael Jordan performing one of his iconic dunks.*
+
+  ![Michael Jordan's Scoring](https://tse2.mm.bing.net/th?id=OIP.Ony79F6lWknI7zTt6tLUdAHaLH&pid=Api)
+  *Jordan showcasing his scoring prowess during a game.*
+
+  ![Michael Jordan in the Air](https://tse3.mm.bing.net/th?id=OIP.o8OT-3GUN17Z3CIN1ONdogHaLH&pid=Api)
+  *Jordan defying gravity with his signature Air Jordan moves.*
+
+  ![Michael Jordan's Finals Celebration](https://tse1.mm.bing.net/th?id=OIP.hVAYEnuqiZtI0nKgKWDzAwHaLB&pid=Api)
+  *Celebrating a championship victory in style.*
+
+  ![Michael Jordan's Finals Celebration](https://tse1.mm.bing.net/th?id=OIP.hVAYEnuqiZtI0nKgKWDzAwHaLB&pid=Api)
+  *Celebrating a championship victory in style.*
   `,
   
-  "llama-3-70b-instruct": `Making a Million Dollars in 5 Days
-----------------------------------
+  "llama-3-70b-instruct": `Here's an example of how to create a simple React component:
 
-Online Businesses
------------------
+\`\`\`jsx
+import React from 'react';
 
-*   Creating and selling an online course can generate significant revenue. Platforms like Udemy, Teachable, or Skillshare can host courses. [Forbes](https://www.forbes.com/)
-    
-*   Building a high-traffic blog or YouTube channel with affiliate marketing or sponsorships can also be lucrative. [Entrepreneur](https://www.entrepreneur.com/)
-    
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+}
 
-Trading and Investing
----------------------
+export function CustomButton({ label, onClick, variant = 'primary' }: ButtonProps) {
+  return (
+    <button 
+      className={\`px-4 py-2 rounded-lg \${
+        variant === 'primary' 
+          ? 'bg-blue-500 text-white' 
+          : 'bg-gray-200 text-gray-800'
+      }\`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+  export function CustomButton({ label, onClick, variant = 'primary' }: ButtonProps) {
+  return (
+    <button 
+      className={\`px-4 py-2 rounded-lg \${
+        variant === 'primary' 
+          ? 'bg-blue-500 text-white' 
+          : 'bg-gray-200 text-gray-800'
+      }\`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+\`\`\`
 
-*   Trading stocks, options, or cryptocurrencies can potentially yield high returns, but it's essential to understand the risks involved. [Investopedia](https://www.investopedia.com/)
-    
-*   Investing in real estate investment trusts (REITs) or crowdfunding platforms can provide opportunities for high returns. [The Balance](https://www.thebalance.com/)
-    
+You can use this component like this:
 
-Other Opportunities
--------------------
+\`\`\`python
+import tkinter as tk
+from tkinter import messagebox
 
-*   Creating and selling a mobile app or game can generate significant revenue through in-app purchases or advertising. [Business Insider](https://www.businessinsider.com/)
-    
-*   Participating in high-stakes competitions or tournaments, such as poker or esports, can also yield high returns. [ESPN](https://www.espn.com/)
-    
+def primary_button_clicked():
+    messagebox.showinfo("Primary Button", "Button clicked!")
 
-Please note that these sources provide general information and should not be considered personalized advice. Making a million dollars in 5 days is extremely challenging and often requires a combination of hard work, smart decisions, and luck.`,
+def secondary_button_clicked():
+    print("Secondary clicked")
+
+def create_button(parent, text, command, variant="primary"):
+    color = "blue" if variant == "primary" else "gray"
+    fg = "white" if variant == "primary" else "black"
+    button = tk.Button(
+        parent, 
+        text=text, 
+        command=command, 
+        bg=color, 
+        fg=fg, 
+        padx=10, 
+        pady=5
+    )
+    return button
+
+# Create the main window
+root = tk.Tk()
+root.title("Custom Buttons")
+
+# Create buttons
+primary_button = create_button(root, "Click me!", primary_button_clicked, "primary")
+secondary_button = create_button(root, "Secondary", secondary_button_clicked, "secondary")
+
+# Add buttons to the window
+primary_button.pack(pady=10)
+secondary_button.pack(pady=10)
+
+# Run the application
+root.mainloop()
+
+\`\`\`
+
+This will create a reusable button component with primary and secondary variants.`,
   
-  "claude-3-5-sonnet": "Let me provide a balanced perspective on making $1 million in 5 days. While technically possible, it would require: 1) Substantial initial capital 2) Extremely favorable market conditions 3) High-risk tolerance. Consider focusing on more sustainable long-term wealth building strategies.",
+  "claude-3-5-sonnet": `# Michael Jordan Detailed Career Highlights
+
+| **Season** | **Team**          | **Achievements**                                                                                                                                                     | **Statistics**                          | **Notes**                                                                                         |
+|------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|---------------------------------------------------------------------------------------------------|
+| 1984-85    | Chicago Bulls     | - NBA Rookie of the Year <br> - NBA All-Rookie First Team                                                                                                          | PPG: 28.2 <br> APG: 5.9 <br> RPG: 6.5  | Debut season; led Bulls to playoffs for the first time in 4 years.                              |
+| 1990-91    | Chicago Bulls     | - NBA Champion <br> - Finals MVP <br> - NBA MVP                                                                                                                   | PPG: 31.5 <br> APG: 5.5 <br> RPG: 6.0  | Began first three-peat; defeated Magic Johnson's Lakers in the Finals.                          |
+| 1991-92    | Chicago Bulls     | - NBA Champion <br> - Finals MVP <br> - NBA MVP                                                                                                                   | PPG: 30.1 <br> APG: 6.1 <br> RPG: 6.4  | Known for "The Shrug" game in the Finals vs. Portland Trail Blazers.                            |
+| 1992-93    | Chicago Bulls     | - NBA Champion <br> - Finals MVP                                                                                                                                    | PPG: 32.6 <br> APG: 5.5 <br> RPG: 6.7  | Hit the iconic game-winning shot in the Finals against the Phoenix Suns.                        |
+| 1993-94    | N/A               | - Retired from NBA <br> - Played minor league baseball with Birmingham Barons                                                                                     | N/A                                     | Pursued baseball after the tragic loss of his father.                                           |
+| 1995-96    | Chicago Bulls     | - NBA Champion <br> - Finals MVP <br> - NBA MVP <br> - NBA All-Star Game MVP                                                                                       | PPG: 30.4 <br> APG: 4.3 <br> RPG: 6.6  | Led Bulls to a historic 72-10 record; widely considered one of the greatest seasons ever.        |
+| 1996-97    | Chicago Bulls     | - NBA Champion <br> - Finals MVP                                                                                                                                    | PPG: 29.6 <br> APG: 4.3 <br> RPG: 5.9  | Hit "The Flu Game" performance in the Finals against the Utah Jazz.                             |
+| 1997-98    | Chicago Bulls     | - NBA Champion <br> - Finals MVP                                                                                                                                    | PPG: 28.7 <br> APG: 3.5 <br> RPG: 5.8  | Ended his Bulls career with "The Last Shot" against the Utah Jazz to clinch his sixth title.    |
+| 2001-02    | Washington Wizards| - Came out of retirement <br> - NBA All-Star                                                                                                                       | PPG: 22.9 <br> APG: 5.2 <br> RPG: 5.7  | Returned to the NBA at age 38; played two seasons with the Wizards.                             |
+| 2002-03    | Washington Wizards| - Played his final NBA season <br> - Became the oldest player to score over 40 points in a game                                                                    | PPG: 20.0 <br> APG: 3.8 <br> RPG: 6.1  | Retired from basketball permanently.                                                            |
+
+### Legend
+- **PPG**: Points Per Game  
+- **APG**: Assists Per Game  
+- **RPG**: Rebounds Per Game  
+- **NBA MVP**: Most Valuable Player Award  
+- **Finals MVP**: Most Valuable Player of the NBA Finals  
+- **NBA Champion**: Won the NBA Championship that season  
+- **The Flu Game**: A famous Finals game where Jordan played through severe illness.  
+- **The Last Shot**: Jordan's final game-winning shot with the Bulls.  
+
+`,
 
   "sonar-large-32k-online": "Making $1 million in 5 days is extremely challenging. Here's a realistic perspective: Start with identifying high-value opportunities, leverage existing networks, and focus on scalable solutions. However, remember that sustainable wealth building typically takes more time.",
 
   "gpt-4o-mini": "While making $1 million in 5 days is an ambitious goal, let's break this down strategically: 1) Identify existing assets that can be leveraged 2) Look for high-return investment opportunities 3) Consider business acquisitions or mergers. However, I must emphasize that such rapid wealth creation carries significant risks.",
 
-  "claude-3-opus": "Let me provide a balanced perspective on making $1 million in 5 days. While technically possible, it would require: 1) Substantial initial capital 2) Extremely favorable market conditions 3) High-risk tolerance. Consider focusing on more sustainable long-term wealth building strategies.",
+  "claude-3-opus": `![Michael Jordan](https://tse2.mm.bing.net/th?id=OIP.wJd8FjXXA7pTSO_uJZ8KDQHaHa&pid=Api)
 
-  "yi-large": "The goal of making $1 million in 5 days requires careful consideration. Here's my analysis: First, evaluate your current resources. Second, identify potential high-return opportunities. Third, understand the associated risks. Remember, sustainable wealth building typically requires more time.",
+**Michael Jordan**  
+*Born:* February 17, 1963, Brooklyn, New York, USA  
+*Nationality:* American  
+*Profession:* Former Professional Basketball Player, Businessman  
+
+**Career Highlights:**
+
+- **NBA Championships:**  
+  - 6-time NBA Champion with the Chicago Bulls  
+    - *First Three-Peat:* 1991, 1992, 1993  
+    - *Second Three-Peat:* 1996, 1997, 1998  
+  - *Source:* [Britannica](https://www.britannica.com/biography/Michael-Jordan)
+
+- **MVP Awards:**  
+  - 5-time NBA Most Valuable Player (MVP)  
+    - 1988, 1991, 1992, 1996, 1998  
+  - *Source:* [NBA.com](https://www.nba.com/news/history-nba-legend-michael-jordan)
+
+- **Scoring Titles:**  
+  - 10-time NBA Scoring Champion  
+  - *Source:* [NBA.com](https://www.nba.com/news/history-nba-legend-michael-jordan)
+
+- **Defensive Accolades:**  
+  - 9-time NBA All-Defensive First Team  
+  - *Source:* [NBA.com](https://www.nba.com/news/history-nba-legend-michael-jordan)
+
+- **Olympic Gold Medals:**  
+  - 2-time Olympic Gold Medalist with Team USA  
+    - 1984 Los Angeles Olympics  
+    - 1992 Barcelona Olympics (as part of the "Dream Team")  
+  - *Source:* [Olympics.com](https://olympics.com/en/athletes/michael-jordan)
+
+**Post-Playing Career:**
+
+- **Business Ventures:**  
+  - Principal owner and chairman of the Charlotte Hornets, an NBA franchise.  
+  - *Source:* [IMDb](https://www.imdb.com/name/nm0003044/bio/)
+
+- **Brand Endorsements:**  
+  - Partnership with Nike led to the creation of the Air Jordan brand, a highly successful line of basketball shoes and apparel.  
+  - *Source:* [Biography.com](https://www.biography.com/athlete/michael-jordan)
+
+**Cultural Impact:**
+
+- **Documentary:**  
+  - Subject of the 2020 documentary series "The Last Dance," which provided an in-depth look at his final season with the Chicago Bulls.  
+  - *Source:* [Wikipedia](https://en.wikipedia.org/wiki/Michael_Jordan)
+
+**Recent Insights:**
+
+- **Coaching Ambitions:**  
+  - Despite his profound understanding of the game, Jordan has expressed no desire to pursue a coaching career. He believes his competitive nature and high expectations might not align well with coaching roles.  
+  - *Source:* [TalkSport](https://talksport.com/basketball/2706415/michael-jordan-nba-coaching-chicago-bulls-washington-wizards/)
+
+**Further Reading:**
+
+- *Michael Jordan: The Life* by Roland Lazenby  
+  - An in-depth biography covering Jordan's life and career.  
+  - *Source:* [Amazon](https://www.amazon.com/Michael-Jordan-Life-Roland-Lazenby/dp/031619476X)
+
+**References:**
+
+- [Britannica: Michael Jordan](https://www.britannica.com/biography/Michael-Jordan)  
+- [NBA.com: Legends Profile](https://www.nba.com/news/history-nba-legend-michael-jordan)  
+- [Olympics.com: Michael Jordan](https://olympics.com/en/athletes/michael-jordan)  
+- [IMDb: Michael Jordan Biography](https://www.imdb.com/name/nm0003044/bio/)  
+- [Biography.com: Michael Jordan](https://www.biography.com/athlete/michael-jordan)  
+- [Wikipedia: Michael Jordan](https://en.wikipedia.org/wiki/Michael_Jordan)  
+- [TalkSport: Michael Jordan on Coaching](https://talksport.com/basketball/2706415/michael-jordan-nba-coaching-chicago-bulls-washington-wizards/)  
+- [Amazon: Michael Jordan: The Life](https://www.amazon.com/Michael-Jordan-Life-Roland-Lazenby/dp/031619476X)
+
+`,
+
+  "yi-large": `
+  `,
 
   "gemini-1-0-pro": "From a practical standpoint, generating $1 million in 5 days would require: 1. Exceptional market timing 2. Significant initial capital 3. High-risk opportunities. Consider more sustainable approaches to wealth building that align with your resources and risk tolerance.",
 };
@@ -1501,35 +1645,35 @@ export const EXAMPLE_SOURCES: Source [] = [
     title: "How to Make $1 Million Online - Lewis Howes",
     description: "Lewis Howes discusses strategies for building wealth online, emphasizing the importance of passion and self-investment.",
     url: "https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com",
-    img: "/icons/lewis_howes.png"
+    img: "/images/stable-diffusion.jpg"
   },
   {
     type: "article",
     title: "Lazy Millionaire: 8 Ways to Make a Million Dollars on 4 Hours a Day - Nasdaq",
     description: "This article explores various methods to achieve millionaire status with minimal daily work hours, highlighting the power of compounding and multiple income streams.",
     url: "https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com",
-    img: "/icons/nasdaq.png"
+    img: "/images/titan-image-generator.jpg"
   },
   {
     type: "article",
     title: "The Millionaire Mindset: How to Think, Act, and Grow Rich - Investopedia",
     description: "Investopedia delves into the mindset required for financial success, including the importance of financial discipline and goal setting.",
     url: "https://www.investopedia.com/articles/younginvestors/08/millionaire-mindset.asp?utm_source=chatgpt.com",
-    img: "/icons/investopedia.png"
+    img: "/images/midjourney.jpg"
   },
   {
     type: "article",
     title: "How to Make a Million Dollars - Synchrony",
     description: "Synchrony provides insights into setting clear financial goals and the steps necessary to achieve millionaire status.",
     url: "https://www.synchrony.com/blog/banking/how-to-make-million-dollars?utm_source=chatgpt.com",
-    img: "/icons/synchrony.png"
+    img: "/images/dall-e-3.jpg"
   },
   {
     type: "video",
     title: "How To Make A Million Dollars Step By Step",
     description: "A comprehensive guide on the steps to becoming a millionaire, presented in an easy-to-follow video format.",
     url: "https://www.youtube.com/watch?v=-q8E1tcK9rU&utm_source=chatgpt.com",
-    img: "/icons/youtube.png"
+    img: "/images/titan-image-generator.jpg"
   }
 ];
 
@@ -1539,13 +1683,13 @@ export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
     title: 'Example Source 1',
     description: 'Example description 1...',
     url: 'https://example.com/1',
-    img: 'iocns/espn.png',
+    img: '/images/midjourney.jpg',
   },
   {
     type: 'encyclopedia',
     title: 'Example Source 2',
     description: 'Example description 2...',
     url: 'https://example.com/2',
-    img: 'iocns/espn.png',
+    img: '/images/stable-diffusion.jpg',
   }
 ];
