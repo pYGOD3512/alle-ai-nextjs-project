@@ -7,8 +7,8 @@ const faqComponents = {
   "reset-password": dynamic(
     () => import("@/components/faq/account/reset-password")
   ),
-  "phone-verification": dynamic(
-    () => import("@/components/faq/account/phone-verification")
+  "change-email": dynamic(
+    () => import("@/components/faq/account/change-email")
   ),
   "auth-method": dynamic(() => import("@/components/faq/account/auth-method")),
   "change-password": dynamic(() => import("@/components/faq/account/change-password")),
