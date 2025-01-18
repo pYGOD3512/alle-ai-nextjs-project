@@ -1,9 +1,9 @@
 'use client';
 
 import { Card } from "@/components/ui/card";
-import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe } from 'lucide-react';
+import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe, ZoomIn, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AdCard } from "@/components/features/AdCard";
@@ -20,8 +20,19 @@ import rehypeSanitize from 'rehype-sanitize'
 import { CustomLink } from '@/components/markdown/CustomLink'
 import { YouTubeEmbed } from '@/components/markdown/YouTubeEmbed';
 import { Components } from 'react-markdown';
-import { HTMLProps } from 'react';
-import type { DetailedHTMLProps, HTMLAttributes, ImgHTMLAttributes, AnchorHTMLAttributes } from 'react';
+import { SourcesPill } from '@/components/features/SourcesPill';
+import type { HTMLAttributes, ImgHTMLAttributes, AnchorHTMLAttributes } from 'react';
+import React from "react";
+import { MarkdownImage } from '@/components/markdown/MarkdownImage';
+import { cn } from "@/lib/utils";
+import { 
+  MarkdownTable, 
+  MarkdownThead, 
+  MarkdownTr, 
+  MarkdownTh, 
+  MarkdownTd 
+} from '@/components/markdown/MarkdownTable';
+import { MarkdownCode } from '@/components/markdown/MarkdownCode';
 
 interface ModelResponseProps {
   model: string;
@@ -34,69 +45,6 @@ interface ModelResponseProps {
   webSearchEnabled?: boolean;
   sources?: Source[];
 }
-
-interface SourcesPillProps {
-  onClick: () => void;
-  sources: Source[];
-}
-
-const SourcesPill = ({ onClick, sources }: SourcesPillProps) => {
-  // Limit to showing max 4 source images
-  const displaySources = sources.slice(0, 3);
-  const remainingCount = Math.max(0, sources.length - 4);
-
-  return (
-    <div 
-      onClick={onClick}
-      className="relative inline-flex items-center gap-2 px-2 py-1
-                text-xs font-medium group
-                rounded-full cursor-pointer
-                border border-borderColorPrimary
-                overflow-hidden hover:bg-secondary/10
-                transition-colors duration-200"
-    >
-      {/* Source Images Stack */}
-      <span className="relative z-10 transition-colors duration-300 group-hover:text-secondary-foreground">
-        Sources
-      </span>
-      
-      <div className="flex -space-x-2 relative">
-        {displaySources.map((source, index) => (
-          <div
-            key={index}
-            className="relative w-4 h-4 rounded-full border border-background
-                      ring-2 ring-background
-                      transition-transform duration-200
-                      hover:translate-y-[-2px]"
-            style={{
-              zIndex: displaySources.length - index
-            }}
-          >
-            <Image
-              src={source.img || '/icons/wikipedia.png'}
-              alt={source.type}
-              width={16}
-              height={16}
-              className="rounded-full object-cover"
-            />
-          </div>
-        ))}
-        {remainingCount > 0 && (
-          <div 
-            className="relative w-4 h-4 rounded-full bg-secondary/30
-                       flex items-center justify-center
-                       text-[10px] font-medium
-                       border border-background
-                       ring-2 ring-background"
-          >
-            +{remainingCount}
-          </div>
-        )}
-      </div>
-      
-    </div>
-  );
-};
 
 interface SourcesWindowState {
   isOpen: boolean;
@@ -133,18 +81,36 @@ type LinkProps = {
   href?: string;
 } & AnchorHTMLAttributes<HTMLAnchorElement>;
 
-type ImageProps = {
-  node?: any;
-  alt?: string;
-  src?: string;
-} & ImgHTMLAttributes<HTMLImageElement>;
-
 type CodeProps = {
   node?: any;
   inline?: boolean;
   className?: string;
   children?: React.ReactNode;
 } & HTMLAttributes<HTMLElement>;
+
+interface ImageGroup {
+  id: string;
+  images: Array<{ src: string; alt: string; }>;
+}
+
+let currentGroup: ImageGroup | null = null;
+const imageGroups = new Map<string, ImageGroup>();
+
+// Add this helper function to extract images from markdown
+function extractImagesFromMarkdown(content: string): { src: string; alt: string; }[] {
+  const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+  const images: { src: string; alt: string; }[] = [];
+  let match;
+
+  while ((match = imageRegex.exec(content)) !== null) {
+    images.push({
+      alt: match[1] || '',
+      src: match[2] || ''
+    });
+  }
+
+  return images;
+}
 
 export function ModelResponse({ 
   model_img, 
@@ -163,6 +129,7 @@ export function ModelResponse({
   const availableVoices = useVoiceStore((state) => state.availableVoices);
   const initVoices = useVoiceStore((state) => state.initVoices);
   const { setSources, close } = useSourcesWindowStore();
+  const [showAllImages, setShowAllImages] = useState(false);
 
   useEffect(() => {
     // Initialize voices when component mounts
@@ -195,14 +162,6 @@ export function ModelResponse({
       utterance.volume = voiceSettings.volume;
       
       utterance.onend = () => setIsSpeaking(false);
-      // utterance.onerror = () => {
-      //   setIsSpeaking(false);
-      //   toast({
-      //     variant: "destructive",
-      //     title: "Error",
-      //     description: "Failed to play speech. Please try again.",
-      //   });
-      // };
       
       window.speechSynthesis.speak(utterance);
     }
@@ -236,16 +195,16 @@ export function ModelResponse({
     });
   };
 
-  const components: Components = {
+  // Memoize the components object
+  const components: Components = useMemo(() => ({
     a: ({ children, href, ...props }: LinkProps) => {
       if (!href) return <>{children}</>;
       
-      // Handle YouTube links
       if (href.match(/youtube\.com|youtu\.be/)) {
         return (
           <>
             <br />
-            <YouTubeEmbed url={href} />
+            <YouTubeEmbed key={href} url={href} />
             <br />
           </>
         );
@@ -254,39 +213,36 @@ export function ModelResponse({
       return <CustomLink href={href} {...props}>{children}</CustomLink>;
     },
     
-    img: ({ alt, src, ...props }: ImageProps) => (
-      <div className="my-4">
-        <img
-          alt={alt || ''}
-          src={src}
-          {...props}
-          className="rounded-lg w-full object-cover max-h-[400px]"
-          loading="lazy"
-        />
-      </div>
-    ),
-    
-    code: ({ inline, className, children, ...props }: CodeProps) => {
-      if (inline) {
+    p: ({ children, ...props }: MarkdownComponentProps) => {
+      const childArray = React.Children.toArray(children);
+      const imageCount = childArray.filter(child => 
+        React.isValidElement(child) && child.type === 'img'
+      ).length;
+
+      if (imageCount > 0) {
         return (
-          <code 
-            className="px-1.5 py-0.5 rounded-md bg-secondary/30 text-xs font-mono"
-            {...props}
-          >
+          <div className={cn(
+            "my-2 gap-2",
+            imageCount > 1 ? "grid grid-cols-3 sm:grid-cols-4 max-w-xl" : "block max-w-[150px]"
+          )}>
             {children}
-          </code>
+          </div>
         );
       }
-      
+
+      return <p {...props}>{children}</p>;
+    },
+    
+    img: ({ src, alt, ...props }: ImgHTMLAttributes<HTMLImageElement> & { node?: any }) => {
+      if (!src) return null;
+      return <MarkdownImage src={src} alt={alt} />;
+    },
+    
+    code: ({ inline, className, children, ...props }: CodeProps) => {
       return (
-        <div className="relative my-4 rounded-lg overflow-hidden">
-          <pre 
-            className="p-4 bg-secondary/10 overflow-x-auto"
-            {...props}
-          >
-            {children}
-          </pre>
-        </div>
+        <MarkdownCode inline={inline} className={className} {...props}>
+          {children}
+        </MarkdownCode>
       );
     },
     
@@ -298,7 +254,48 @@ export function ModelResponse({
         {children}
       </blockquote>
     ),
+    
+    table: ({ children, ...props }: MarkdownComponentProps) => (
+      <MarkdownTable {...props}>{children}</MarkdownTable>
+    ),
+    
+    thead: ({ children, ...props }: MarkdownComponentProps) => (
+      <MarkdownThead {...props}>{children}</MarkdownThead>
+    ),
+    
+    tr: ({ children, ...props }: MarkdownComponentProps) => (
+      <MarkdownTr {...props}>{children}</MarkdownTr>
+    ),
+    
+    th: ({ children, ...props }: MarkdownComponentProps) => (
+      <MarkdownTh {...props}>{children}</MarkdownTh>
+    ),
+    
+    td: ({ children, ...props }: MarkdownComponentProps) => (
+      <MarkdownTd {...props}>{children}</MarkdownTd>
+    ),
+  }), []);
+
+  // Get display limit based on screen size
+  const getDisplayLimit = () => {
+    if (typeof window === 'undefined') return 2; // Default for SSR
+    if (window.innerWidth >= 1024) return 4; // lg
+    if (window.innerWidth >= 768) return 3; // md
+    return 2; // Default (sm and below)
   };
+
+  // Extract images from content
+  const images = useMemo(() => extractImagesFromMarkdown(content), [content]);
+  
+  // Calculate visible images and remaining count
+  const displayLimit = getDisplayLimit();
+  const visibleImages = showAllImages ? images : images.slice(0, displayLimit);
+  const remainingCount = images.length - displayLimit;
+
+  // Remove images from content to prevent double rendering
+  const textContent = useMemo(() => {
+    return content.replace(/!\[(.*?)\]\((.*?)\)/g, '');
+  }, [content]);
 
   return (
     <Card className="bg-transparent border-none shadow-none p-4">
@@ -308,8 +305,44 @@ export function ModelResponse({
         </div>
         <div className="flex flex-col flex-1">
           <span className="font-medium text-sm mb-3">{model}</span>
+          
+          {/* Render images grid if there are images */}
+          {images.length > 0 && (
+            <div className={cn(
+              "my-4 gap-2",
+              showAllImages 
+                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4" 
+                : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            )}>
+              {visibleImages.map((img, index) => {
+                const isLastImage = !showAllImages && index === displayLimit - 1;
+                const showOverlay = isLastImage && remainingCount > 0;
+
+                return (
+                  <div 
+                    key={`${img.src}-${index}`}
+                    className="relative"
+                    onClick={() => showOverlay && setShowAllImages(true)}
+                  >
+                    <MarkdownImage 
+                      src={img.src}
+                      alt={img.alt}
+                      className={cn(
+                        showOverlay && "cursor-pointer"
+                      )}
+                      showOverlay={showOverlay}
+                      overlayContent={`+${remainingCount}`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Render markdown content */}
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <ReactMarkdown
+              key={`${responseId}-${content}`}
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw, rehypeSanitize]}
               components={components}
@@ -320,9 +353,11 @@ export function ModelResponse({
                         [&_li]:pl-1
                         [&_ol>li]:marker:text-primary/70 [&_ol>li]:marker:font-medium
                         [&_ul>li]:marker:text-primary/70
-                        [&_p]:my-2"
+                        [&_p]:my-2
+                        [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:m-0
+                        [&_code]:bg-transparent"
             >
-              {content}
+              {textContent}
             </ReactMarkdown>
           </div>
 
