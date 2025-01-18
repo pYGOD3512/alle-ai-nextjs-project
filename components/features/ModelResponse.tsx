@@ -34,6 +34,9 @@ import {
 } from '@/components/markdown/MarkdownTable';
 import { MarkdownCode } from '@/components/markdown/MarkdownCode';
 
+import { SummaryContent } from "./SummaryContent";
+import { SUMMARY_DATA } from "@/lib/constants";
+
 interface ModelResponseProps {
   model: string;
   content: string;
@@ -340,26 +343,35 @@ export function ModelResponse({
           )}
 
           {/* Render markdown content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown
-              key={`${responseId}-${content}`}
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw, rehypeSanitize]}
-              components={components}
-              className="text-base text-accent-foreground 
-                        [&>*:first-child]:mt-0 [&>*:last-child]:mb-0
-                        [&_a]:no-underline [&_p>a]:before:content-[''] [&_p>a]:after:content-['']
-                        [&_ol]:space-y-2 [&_ul]:space-y-2
-                        [&_li]:pl-1
-                        [&_ol>li]:marker:text-primary/70 [&_ol>li]:marker:font-medium
-                        [&_ul>li]:marker:text-primary/70
-                        [&_p]:my-2
-                        [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:m-0
-                        [&_code]:bg-transparent"
-            >
-              {textContent}
-            </ReactMarkdown>
-          </div>
+          {model === "AI Summary" ? (
+            <SummaryContent
+              summary={SUMMARY_DATA.summary}
+              consistencies={SUMMARY_DATA.consistencies}
+              inconsistencies={SUMMARY_DATA.inconsistencies}
+              finalAnswer={SUMMARY_DATA.finalAnswer}
+            />
+          ) : (
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown
+                key={`${responseId}-${content}`}
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                components={components}
+                className="text-base text-accent-foreground 
+                          [&>*:first-child]:mt-0 [&>*:last-child]:mb-0
+                          [&_a]:no-underline [&_p>a]:before:content-[''] [&_p>a]:after:content-['']
+                          [&_ol]:space-y-2 [&_ul]:space-y-2
+                          [&_li]:pl-1
+                          [&_ol>li]:marker:text-primary/70 [&_ol>li]:marker:font-medium
+                          [&_ul>li]:marker:text-primary/70
+                          [&_p]:my-2
+                          [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:m-0
+                          [&_code]:bg-transparent"
+              >
+                {textContent}
+              </ReactMarkdown>
+            </div>
+          )}
 
           <div className="flex items-center gap-1 mt-1">
             <Button
