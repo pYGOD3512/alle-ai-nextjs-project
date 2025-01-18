@@ -713,7 +713,6 @@ root.mainloop()
 \`\`\`
 
 This will create a reusable button component with primary and secondary variants.`,
-
   
   "claude-3-5-sonnet": `# Michael Jordan Detailed Career Highlights
 
@@ -790,7 +789,8 @@ This will create a reusable button component with primary and secondary variants
   - Partnership with Nike led to the creation of the Air Jordan brand, a highly successful line of basketball shoes and apparel.  
   - *Source:* [Biography.com](https://www.biography.com/athlete/michael-jordan)
 
-**Cultural Impact:**
+
+- **Cultural Impact:**
 
 - **Documentary:**  
   - Subject of the 2020 documentary series "The Last Dance," which provided an in-depth look at his final season with the Chicago Bulls.  
@@ -1694,3 +1694,70 @@ export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
     img: '/images/stable-diffusion.jpg',
   }
 ];
+
+export const SUMMARY_RESPONSES: Record<string, string> = {
+  "default": `# Summary of Model Responses
+
+Here's a comparative analysis of the different model responses:
+
+## Key Points of Agreement
+- All models acknowledge the complexity of the topic
+- Common themes include technical feasibility and practical considerations
+- Similar recommendations for implementation approach
+
+## Notable Differences
+- Claude 3 Opus provides more detailed technical analysis
+- GPT-4 focuses more on practical implications
+- Sonar Small offers unique perspectives on edge cases
+
+## Recommendation
+Based on the collective responses, the most balanced approach would be to...`,
+};
+
+// Add this after the SUMMARY_RESPONSES constant
+export const SUMMARY_DATA = {
+  summary: `The models have provided various perspectives on building a wall. Here's a comprehensive overview of their responses, highlighting key agreements and differences in their approaches.`,
+  
+  consistencies: [
+    {
+      point: "All models agree that proper foundation is crucial for wall stability",
+      models: ["ChatGPT 3.5", "Claude 3 Opus", "Claude 3 Sonnet"]
+    },
+    {
+      point: "Material selection should prioritize durability and local climate conditions",
+      models: ["ChatGPT 3.5", "Claude 3 Opus", "Sonar Small"]
+    },
+    {
+      point: "Regular maintenance is essential for long-term wall integrity",
+      models: ["Claude 3 Opus", "Claude 3 Sonnet", "Sonar Small"]
+    }
+  ],
+  
+  inconsistencies: [
+    {
+      point: "Recommended wall height varies between models",
+      variations: [
+        { model: "ChatGPT 3.5", response: "Suggests 6-8 feet for residential purposes" },
+        { model: "Claude 3 Opus", response: "Recommends 10-12 feet for maximum security" },
+        { model: "Sonar Small", response: "Proposes variable height based on specific needs" }
+      ]
+    },
+    {
+      point: "Construction timeline estimates differ",
+      variations: [
+        { model: "ChatGPT 3.5", response: "2-3 weeks for completion" },
+        { model: "Claude 3 Opus", response: "4-6 weeks including preparation" },
+        { model: "Claude 3 Sonnet", response: "3-4 weeks with proper planning" }
+      ]
+    }
+  ],
+  
+  finalAnswer: `Based on the collective analysis, the optimal approach would be to:
+  1. Start with a professional soil assessment
+  2. Use reinforced concrete foundation
+  3. Build with weather-resistant materials
+  4. Implement a phased construction approach
+  5. Include regular maintenance checkpoints
+  
+  This balanced approach incorporates the most reliable recommendations while addressing potential concerns raised by different models.`
+};

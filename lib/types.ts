@@ -42,10 +42,9 @@ export interface UploadedFile {
   type: string;
   size: number;
   url: string;
-  status: 'loading' | 'ready' | 'error';
+  status: "loading" | "ready" | "error";
   progress?: number;
 }
-
 
 export interface ChatThread {
   id: string;
@@ -66,7 +65,7 @@ export interface ModelResponse {
   id: string;
   modelId: string;
   content: string;
-  status: 'loading' | 'complete' | 'error';
+  status: "loading" | "complete" | "error";
   parentMessageId: string;
   timestamp: Date;
 }
@@ -89,25 +88,27 @@ export interface HelpCategory {
   title: string;
   description: string;
   sections: Section[];
+  uniqueRoute?: boolean;
+  href?:string
 }
 
-export type IconName = 
-| "Settings"
-| "BriefcaseBusiness"
-| "Code"
-| "MessageCircleMore"
-| "FolderCog"
-| "Users"
-| "Building2"
-| "AlertTriangle"
-| "Clock"
-| "ChevronRight"
-| "Search"
-| "ArrowLeft"
-| "ThumbsUp"
-| "ThumbsDown"
+export type IconName =
+  | "Settings"
+  | "BriefcaseBusiness"
+  | "Code"
+  | "MessageCircleMore"
+  | "FolderCog"
+  | "Users"
+  | "Building2"
+  | "AlertTriangle"
+  | "Clock"
+  | "ChevronRight"
+  | "Search"
+  | "ArrowLeft"
+  | "ThumbsUp"
+  | "ThumbsDown";
 
-export type CategoryKeys = 
+export type CategoryKeys =
   | "3943089-account-login-and-billing"
   | "6864268-privacy-and-policies"
   | "3675931-api"
@@ -122,10 +123,10 @@ export type HelpCategories = {
 
 export interface Transaction {
   id: string;
-  type: 'subscription' | 'referral' | 'refund';
+  type: "subscription" | "referral" | "refund";
   amount: number;
-  mode: 'platform' | 'card';
-  status: 'completed' | 'pending' | 'failed';
+  mode: "platform" | "card";
+  status: "completed" | "pending" | "failed";
   plan?: string;
   date: Date;
   cardLast4?: string;

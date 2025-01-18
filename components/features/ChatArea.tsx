@@ -14,6 +14,7 @@ import {
   MODEL_RESPONSES,
   EXAMPLE_SOURCES,
   EXAMPLE_SOURCES_SIMPLE,
+  SUMMARY_RESPONSES,
 } from "@/lib/constants";
 import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore } from "@/stores";
 import { Source } from "@/lib/types";
@@ -22,6 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
 import { useToast } from "@/hooks/use-toast";
 import { SourcesWindow } from "../SourcesWindow";
+import { Summary } from "./Summary";
+import { Card } from "@/components/ui/card";
 
 
 interface ChatSession {
@@ -116,6 +119,12 @@ export function ChatArea() {
   const [activeSessionId, setActiveSessionId] = useState<string>();
   const [input, setInput] = useState("");
   const [responseFeedback, setResponseFeedback] = useState<Record<string, 'like' | 'dislike' | null>>({});
+  const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
+  const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
+  const [activeContents, setActiveContents] = useState<Record<string, {
+    type: 'model' | 'summary';
+    id: string;
+  }>>({});
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -125,6 +134,11 @@ export function ChatArea() {
     const sessionId = `session-${Date.now()}`;
     const messageId = `msg-${Date.now()}`;
     
+    setActiveContents(prev => ({
+      ...prev,
+      [sessionId]: { type: 'model', id: selectedModels.chat[2] }
+    }));
+
     const newSession: ChatSession = {
       id: sessionId,
       activeModel: selectedModels.chat[2],
@@ -140,7 +154,7 @@ export function ChatArea() {
           content: '',
           status: 'loading',
           parentMessageId: messageId,
-          sources: isWebSearch ?EXAMPLE_SOURCES_SIMPLE : undefined
+          sources: isWebSearch ? EXAMPLE_SOURCES_SIMPLE : undefined
         }))
       }]
     };
@@ -204,6 +218,66 @@ export function ChatArea() {
     }));
   };
 
+  useEffect(() => {
+    chatSessions.forEach(session => {
+      const allResponsesComplete = session.messages[0]?.responses?.every(
+        response => response.status === 'complete'
+      );
+
+      if (allResponsesComplete && !showSummary[session.id] && !generatingSummary[session.id]) {
+        setGeneratingSummary(prev => ({ ...prev, [session.id]: true }));
+        
+        // Simulate summary generation
+        setTimeout(() => {
+          setGeneratingSummary(prev => ({ ...prev, [session.id]: false }));
+          setShowSummary(prev => ({ ...prev, [session.id]: true }));
+        }, 4000); 
+      }
+    });
+  }, [chatSessions, showSummary, generatingSummary]);
+
+  const handleModelSelect = (modelId: string, sessionId: string) => {
+    setActiveContents(prev => ({
+      ...prev,
+      [sessionId]: { type: 'model', id: modelId }
+    }));
+    setChatSessions(prev => prev.map(s => ({
+      ...s,
+      activeModel: s.id === sessionId ? modelId : s.activeModel
+    })));
+  };
+
+  const handleSummarySelect = (sessionId: string) => {
+    setActiveContents(prev => ({
+      ...prev,
+      [sessionId]: { type: 'summary', id: 'default' }
+    }));
+    setChatSessions(prev => prev.map(s => ({
+      ...s,
+      activeModel: s.id === sessionId ? '' : s.activeModel
+    })));
+  };
+
+  useEffect(() => {
+    chatSessions.forEach(session => {
+      // Check if responses exist and at least one is complete
+      const hasCompleteResponse = session.messages[0]?.responses?.some(
+        response => response.status === 'complete'
+      );
+
+      // If there's a complete response but no active content set for this session
+      if (hasCompleteResponse && !activeContents[session.id]) {
+        setActiveContents(prev => ({
+          ...prev,
+          [session.id]: { 
+            type: 'model', 
+            id: session.activeModel 
+          }
+        }));
+      }
+    });
+  }, [chatSessions, activeContents]);
+
   return (
     <RenderPageContent>
       <ScrollArea 
@@ -219,6 +293,13 @@ export function ChatArea() {
                 timestamp={session.messages[0].timestamp}
               />
               <div className="mt-4">
+                {(showSummary[session.id] || generatingSummary[session.id]) && (
+                  <Summary 
+                    isGenerating={generatingSummary[session.id]}
+                    isActive={activeContents[session.id]?.type === 'summary'}
+                    onClick={() => handleSummarySelect(session.id)}
+                  />
+                )}
                 <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
                   {selectedModels.chat.map((modelId, index) => {
                     const model = MODELS.find(m => m.id === modelId);
@@ -259,16 +340,8 @@ export function ChatArea() {
                       <ModelSelector
                         key={modelId}
                         models={[model]}
-                        activeModel={session.activeModel}
-                        onSelect={(modelId) => {
-                          setChatSessions(prev => prev.map(s => {
-                            if (s.id !== session.id) return s;
-                            return {
-                              ...s,
-                              activeModel: modelId
-                            };
-                          }));
-                        }}
+                        activeModel={activeContents[session.id]?.type === 'model' ? session.activeModel : ''}
+                        onSelect={(modelId) => handleModelSelect(modelId, session.id)}
                       />
                     );
                   })}
@@ -276,35 +349,60 @@ export function ChatArea() {
 
                 {session.messages[0].responses && session.messages[0].responses.length > 0 && (
                   <div className="mt-4">
-                    {session.messages[0].responses.find(r => 
-                      r.modelId === session.activeModel && r.status === 'complete'
-                    ) && (
+                    {activeContents[session.id]?.type === 'model' && (
+                      <>
+                        {session.messages[0].responses.find(r => 
+                          r.modelId === session.activeModel
+                        )?.status === 'loading' ? (
+                          // Loading skeleton
+                          <Card className="bg-transparent border-none shadow-none p-4">
+                            <div className="flex items-start gap-4">
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                              </div>
+                              <div className="flex-1 space-y-3">
+                                <Skeleton className="h-4 w-[250px]" />
+                                <Skeleton className="h-4 w-[400px]" />
+                                <Skeleton className="h-4 w-[300px]" />
+                              </div>
+                            </div>
+                          </Card>
+                        ) : (
+                          <ModelResponse
+                            key={`${session.id}-${session.activeModel}`}
+                            model={MODELS.find(m => m.id === session.activeModel)?.name || ""}
+                            content={session.messages[0].responses.find(r => 
+                              r.modelId === session.activeModel
+                            )?.content || ""}
+                            model_img={MODELS.find(m => m.id === session.activeModel)?.icon || ""}
+                            responseId={session.messages[0].responses.find(r => 
+                              r.modelId === session.activeModel
+                            )?.id || ""}
+                            feedback={responseFeedback[session.messages[0].responses.find(r => 
+                              r.modelId === session.activeModel
+                            )?.id || ""]}
+                            onFeedbackChange={handleFeedbackChange}
+                            onRegenerate={(responseId) => {
+                              toast({
+                                title: "Regenerating response",
+                                description: "Please wait while we generate a new response.",
+                              });
+                            }}
+                            webSearchEnabled={isWebSearch}
+                            sources={session.messages[0].responses.find(r => 
+                              r.modelId === session.activeModel && r.status === 'complete'
+                            )?.sources}
+                          />
+                        )}
+                      </>
+                    )}
+                    {activeContents[session.id]?.type === 'summary' && (
                       <ModelResponse
-                        key={`${session.id}-${session.activeModel}`}
-                        model={MODELS.find(m => m.id === session.activeModel)?.name || ""}
-                        content={
-                          session.messages[0].responses.find(r => 
-                            r.modelId === session.activeModel
-                          )?.content || ""
-                        }
-                        model_img={MODELS.find(m => m.id === session.activeModel)?.icon || ""}
-                        responseId={session.messages[0].responses.find(r => 
-                          r.modelId === session.activeModel
-                        )?.id || ""}
-                        feedback={responseFeedback[session.messages[0].responses.find(r => 
-                          r.modelId === session.activeModel
-                        )?.id || ""]}
+                        model="AI Summary"
+                        content={SUMMARY_RESPONSES['default']}
+                        model_img="/svgs/logo-desktop-mini.png"
+                        responseId={`summary-${session.id}`}
+                        feedback={responseFeedback[`summary-${session.id}`]}
                         onFeedbackChange={handleFeedbackChange}
-                        onRegenerate={(responseId) => {
-                          toast({
-                            title: "Regenerating response",
-                            description: "Please wait while we generate a new response.",
-                          });
-                        }}
-                        webSearchEnabled={isWebSearch}
-                        sources={session.messages[0].responses.find(r => 
-                          r.modelId === session.activeModel
-                        )?.sources}
                       />
                     )}
                   </div>
