@@ -713,6 +713,7 @@ root.mainloop()
 \`\`\`
 
 This will create a reusable button component with primary and secondary variants.`,
+
   
   "claude-3-5-sonnet": `# Michael Jordan Detailed Career Highlights
 
