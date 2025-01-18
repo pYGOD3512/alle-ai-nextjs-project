@@ -135,7 +135,7 @@ export function ArticleContent({
               <div className="bg-zinc-800 p-3 text-white text-sm">
                 <span className="text-zinc-400">Javascript</span>
               </div>
-              <div className="bg-zinc-900 p-4">
+              <div className="bg-black p-2">
                 <pre className="text-sm text-white">
                   <code>
                     {`// Example code

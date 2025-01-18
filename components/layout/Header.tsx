@@ -45,7 +45,8 @@ export function Header() {
   const pathname = usePathname();
 
   const [mounted, setMounted] = React.useState(false);
-  const [notifications, setNotifications] = React.useState<NotificationItem[]>(notificationData);
+  const [recentNotifications, setRecentNotifications] = React.useState<NotificationItem[]>(notificationData);
+  const [allNotifications, setAllNotifications] = React.useState<NotificationItem[]>(notificationData);
   const [textSizeModalOpen, setTextSizeModalOpen] = React.useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = React.useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
@@ -142,31 +143,33 @@ export function Header() {
             className="relative w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
           >
             <item.type className="h-5 w-5" />
-            {notifications.some(n => !n.read) && (
+            {recentNotifications.some(n => !n.read) && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className={`${notifications.length === 0 ? 'w-fit' : 'w-64 md:w-80'} mr-20 rounded-xl p-1 md:p-2 bg-backgroundSecondary`}>
-          {notifications.length > 0 && (
+        <DropdownMenuContent className={`${unreadNotifications.length === 0 ? 'w-fit' : 'w-64 md:w-80'} mr-20 rounded-xl p-1 md:p-2 bg-backgroundSecondary`}>
+          {unreadNotifications.length > 0 ? (
             <>
               <div className="flex justify-between items-center px-3 border-b border-borderColorPrimary">
-                <h4 className="font-small text-sm">Notifications</h4>
+                <h4 className="font-small text-sm">Unread Notifications</h4>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   className="text-xs text-muted-foreground hover:text-primary"
-                  onClick={() => setNotifications([])}
+                  onClick={() => {
+                    // Mark all as read instead of clearing
+                    setRecentNotifications(recentNotifications.map(n => ({ ...n, read: true })));
+                    setAllNotifications(allNotifications.map(n => ({ ...n, read: true })));
+                  }}
                 >
-                  Clear all
+                  Mark all read
                 </Button>
               </div>
-              {notifications.map((notification) => (
+              {unreadNotifications.map((notification) => (
                 <DropdownMenuItem 
                   key={notification.id}
-                  className={`flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 ${
-                    !notification.read ? 'bg-primary/5' : ''
-                  }`}
+                  className="flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 bg-primary/5"
                   onClick={() => {
                     markAsRead(notification.id);
                     handleNotificationClick(notification);
@@ -174,16 +177,16 @@ export function Header() {
                 >
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-xs">{notification.title}</div>
-                    {!notification.read && (
-                      <span className="w-2 h-2 bg-primary rounded-full" />
-                    )}
+                    <span className="w-2 h-2 bg-primary rounded-full" />
                   </div>
-                  <div className="text-xs text-muted-foreground">{notification.message.length > 50 ? notification.message.slice(0, 50) + '...' : notification.message}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {notification.message.length > 50 ? notification.message.slice(0, 50) + '...' : notification.message}
+                  </div>
                   <div className="text-[0.6rem] text-muted-foreground">
-                  {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
-                    Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
-                    'minute'
-                  )}
+                    {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
+                      Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
+                      'minute'
+                    )}
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -196,22 +199,18 @@ export function Header() {
                 See all notifications
               </Button>
             </>
-          )}
-          {notifications.length === 0 && (
-          <>
-            <div className=" p-4 text-center text-muted-foreground">
-              <Bell className="h-6 w-6 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No new notifications</p>
-            </div>
-            <Button
-                variant="secondary"
+          ) : (
+            <div className="p-4 text-center">
+              <p className="text-sm text-muted-foreground">No unread notifications</p>
+              <Button
+                variant="ghost"
                 size="sm"
                 className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
                 onClick={() => setNotificationsPanelOpen(true)}
               >
                 See all notifications
               </Button>
-            </>
+            </div>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -252,7 +251,13 @@ export function Header() {
 
   // Mark as read
   const markAsRead = (notificationId: string) => {
-    setNotifications(notifications.map(notification => 
+    setRecentNotifications(recentNotifications.map(notification => 
+      notification.id === notificationId 
+        ? { ...notification, read: true }
+        : notification
+    ));
+    
+    setAllNotifications(allNotifications.map(notification => 
       notification.id === notificationId 
         ? { ...notification, read: true }
         : notification
@@ -267,6 +272,11 @@ export function Header() {
     setIsLogoutModalOpen(true);
   };
 
+  // Get only unread notifications for the header dropdown
+  const unreadNotifications = React.useMemo(() => 
+    recentNotifications.filter(notification => !notification.read),
+    [recentNotifications]
+  );
 
   return (
     <>
@@ -457,7 +467,7 @@ export function Header() {
       <NotificationsPanel
         open={notificationsPanelOpen}
         onClose={() => setNotificationsPanelOpen(false)}
-        notifications={notifications}
+        notifications={allNotifications}
         onNotificationClick={handleNotificationClick}
       />
       

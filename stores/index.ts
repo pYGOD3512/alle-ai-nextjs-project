@@ -525,3 +525,20 @@ export const useWebSearchStore = create<WebSearchState>((set) => ({
   isWebSearch: false,
   setIsWebSearch: (enabled) => set({ isWebSearch: enabled }),
 }));
+
+interface CodeThemeStore {
+  theme: keyof typeof AVAILABLE_THEMES;
+  setTheme: (theme: keyof typeof AVAILABLE_THEMES) => void;
+}
+
+export const useCodeThemeStore = create<CodeThemeStore>()(
+  persist(
+    (set) => ({
+      theme: 'System Default',
+      setTheme: (theme) => set({ theme }),
+    }),
+    {
+      name: 'code-theme-storage',
+    }
+  )
+);
