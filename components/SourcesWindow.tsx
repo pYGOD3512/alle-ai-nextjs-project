@@ -3,13 +3,8 @@ import { X, ExternalLink, Globe, BookOpen, Trophy, Tv, FileText } from 'lucide-r
 import { motion, useDragControls, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-interface Source {
-  url: string;
-  title: string;
-  type: 'wikipedia' | 'encyclopedia' | 'nba' | 'espn' | 'biography' | 'other';
-  description: string;
-}
+import { Source } from '@/lib/types'
+import Image from 'next/image';
 
 interface SourcesWindowProps {
   sources: Source[];
@@ -34,24 +29,6 @@ const getSourceIcon = (type: Source['type']) => {
       return <FileText className="h-4 w-4" />;
     default:
       return <ExternalLink className="h-4 w-4" />;
-  }
-};
-
-// Helper function to get source label
-const getSourceLabel = (type: Source['type']) => {
-  switch (type) {
-    case 'wikipedia':
-      return 'Wikipedia';
-    case 'encyclopedia':
-      return 'Encyclopedia Britannica';
-    case 'nba':
-      return 'NBA';
-    case 'espn':
-      return 'ESPN';
-    case 'biography':
-      return 'Biography';
-    default:
-      return '';
   }
 };
 
@@ -106,7 +83,7 @@ export function SourcesWindow({ sources, isOpen, onClose, responseId, userPrompt
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-2 p-3"
+                className="space-y-1 p-2"
               >
                 {sources.map((source, index) => (
                   <motion.div
@@ -121,29 +98,34 @@ export function SourcesWindow({ sources, isOpen, onClose, responseId, userPrompt
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block p-2 rounded-xl 
-                                bg-sideBarBackground hover:bg-secondary/10
-                                border border-transparent hover:border-secondary/20
+                                bg-background hover:bg-secondary/10
+                                border border-borderColorPrimary hover:border-secondary/20
                                 transition-all duration-200 ease-in-out
                                 hover:shadow-lg hover:shadow-secondary/5
                                 hover:-translate-y-0.5"
                     >
                       {/* Source Type Header */}
-                      <div className="flex items-center gap-1 mb-1.5">
+                      <div className="flex items-center gap-0.5 mb-1">
                         <div className="w-8 h-8 rounded-lg bg-secondary/10 
                                       flex items-center justify-center
                                       group-hover:bg-secondary/20 
                                       transition-colors duration-200">
-                          {getSourceIcon(source.type)}
+                          {source.img ? <Image 
+                          src={source.img} 
+                          alt={source.title} 
+                          width={32}
+                          height={32}
+                          className="w-4 h-4 object-cover rounded-full" /> : null}
                         </div>
                         <span className="text-xs font-medium text-muted-foreground/80
                                        group-hover:text-primary/80 transition-colors">
-                          {getSourceLabel(source.type)}
+                          {source.type}
                         </span>
                       </div>
                       
                       {/* Title and Description */}
                       <div className="space-y-2">
-                        <h4 className="text-sm font-semibold leading-snug 
+                        <h4 className="text-xs font-semibold leading-snug 
                                      text-foreground/90 group-hover:text-primary 
                                      transition-colors duration-200">
                           {source.title}
@@ -151,7 +133,7 @@ export function SourcesWindow({ sources, isOpen, onClose, responseId, userPrompt
                         <p className="text-xs text-muted-foreground/70 
                                    group-hover:text-muted-foreground/90
                                    line-clamp-2 leading-relaxed">
-                          {source.description}
+                          {source.description.length > 100 ? source.description.substring(0, 97) + '...' : source.description}
                         </p>
                       </div>
                     </a>

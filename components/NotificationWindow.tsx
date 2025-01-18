@@ -34,15 +34,15 @@ export function NotificationsPanel({
           {/* Content */}
           {notifications.length > 0 ? (
             <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
                     onClick={() => onNotificationClick(notification)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors
+                    className={`p-2 rounded-lg border cursor-pointer transition-colors
                       ${!notification.read 
-                        ? 'bg-primary/5 border-primary/20' 
-                        : 'hover:bg-muted/50 border-border'
+                        ? 'bg-primary/10 border-primary/20' 
+                        : 'hover:bg-muted/50 border-borderColorPrimary'
                       }`}
                   >
                     <div className="flex items-start justify-between gap-2">

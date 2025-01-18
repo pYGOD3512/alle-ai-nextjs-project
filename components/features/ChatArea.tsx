@@ -210,7 +210,7 @@ export function ChatArea() {
         ref={scrollAreaRef} 
         className="flex-1"
       >
-        <div className="max-w-xl sm:max-w-2xl md:max-w-5xl mt-4 mx-auto px-4">
+        <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
           {chatSessions.map((session) => (
             <div key={session.id} className="mb-8">
               <ChatMessage
@@ -280,9 +280,7 @@ export function ChatArea() {
                       r.modelId === session.activeModel && r.status === 'complete'
                     ) && (
                       <ModelResponse
-                        key={session.messages[0].responses.find(r => 
-                          r.modelId === session.activeModel
-                        )?.id}
+                        key={`${session.id}-${session.activeModel}`}
                         model={MODELS.find(m => m.id === session.activeModel)?.name || ""}
                         content={
                           session.messages[0].responses.find(r => 
