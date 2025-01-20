@@ -115,8 +115,8 @@ export function SummaryContent({ summary, consistencies, inconsistencies, finalA
             className="prose prose-sm dark:prose-invert"
           >
             <Card className="p-4 bg-primary/5 border-primary/20">
-              <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-primary mt-1" />
+              <div className="flex items-start gap-2">
+                <Lightbulb className="w-4 h-4 mt-1" />
                 <div className="space-y-4">
                   {finalAnswer}
                 </div>
