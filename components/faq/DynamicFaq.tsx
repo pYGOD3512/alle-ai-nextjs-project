@@ -29,7 +29,7 @@ const DynamicFaq: FC<DynamicFaqProps> = ({ faqName }) => {
   const SelectedFAQ = faqComponents[faqName];
 
   if (!SelectedFAQ) {
-    return <p>FAQ not found!</p>; // Fallback
+    return <p>FAQ not found!</p>; 
   }
 
   return (
