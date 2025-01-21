@@ -16,8 +16,74 @@ import {
   Share,
 } from "lucide-react";
 
-import { Transaction, Source } from "@/lib/types"
+import { Transaction, Source, NotificationItem } from "@/lib/types";
 
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: "user" | "ai";
+  timestamp: Date;
+  responses?: {
+    model: string;
+    content: string;
+    icon: string;
+  }[];
+}
+
+export interface ReleaseNote {
+  id: string
+  version: string
+  date: string
+  translations: {
+    [key: string]: {
+      title: string
+      description: string
+      details: {
+        summary: string
+        changes: string[]
+        impact?: string
+        technicalNotes?: string[]
+      }
+    }
+  }
+  type: "security" | "solve" | "error" | "testing"| "feature" | "fix" | "bug" | "improvement"
+  image?: string
+}
+
+export const notifications: NotificationItem[] = [
+  {
+    id: "1",
+    title: "New Model Available",
+    message: "Claude 3 Opus is now available for all users. Experience state-of-the-art AI with improved reasoning, coding, and mathematical capabilities.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    read: false,
+    type: 'feature',
+    priority: 'high',
+    actionUrl: '/',
+    actionLabel: 'Try it now',
+    metadata: {
+      category: 'AI Models',
+      tags: ['claude', 'new-feature', 'ai'],
+      relatedFeature: 'text-generation'
+    }
+  },
+  {
+    id: "2",
+    title: "Security Update Required",
+    message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 24),
+    read: true,
+    type: 'security',
+    priority: 'high',
+    actionUrl: '/',
+    actionLabel: 'Enable 2FA',
+    metadata: {
+      category: 'Security',
+      tags: ['security', '2fa', 'account'],
+    }
+  },
+];
 
 export const navItems = [
   {
@@ -52,31 +118,6 @@ export const navItems = [
         // onClick: () => console.log("All Notifications")
       },
     ],
-  },
-];
-
-type Notification = {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-};
-
-export const notifications: Notification[] = [
-  {
-    id: "1",
-    title: "New Model Available",
-    message: "Claude 3 Opus is now available for all users",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Welcome!",
-    message: "Thanks for joining our AI platform. Take a tour to get started.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 24), // 1 day ago
-    read: true,
   },
 ];
 
@@ -255,19 +296,6 @@ export const userMenuItems = [
     },
   },
 ];
-
-
-export interface Message {
-  id: string;
-  content: string;
-  sender: "user" | "ai";
-  timestamp: Date;
-  responses?: {
-    model: string;
-    content: string;
-    icon: string;
-  }[];
-}
 
 export const CHAT_MODELS = [
   {
@@ -502,13 +530,144 @@ export const VIDEO_MODELS = [
 ];
 
 export const MODEL_RESPONSES: { [key: string]: string } = {
-  "chatgpt-3-5-turbo": "Making $1 million in 5 days is extremely challenging. Here's a realistic perspective: Start with identifying high-value opportunities, leverage existing networks, and focus on scalable solutions. However, remember that sustainable wealth building typically takes more time.",
+  "chatgpt-3-5-turbo": `# 
+
+## Day 1: Research and Planning
+1. **Identify High-Yield Opportunities:**
+   - Stock market
+   - Cryptocurrencies
+   - Real estate flipping
+   - High-stakes poker or gambling (not recommended due to high risk)
+   - Crowdfunding for a revolutionary product
+
+2. **Market Analysis:**
+   - Conduct thorough research on your chosen opportunity.
+   - Analyze market trends, risks, and potential returns.
+
+3. **Set Up Accounts:**
+   - Create necessary accounts (brokerage, cryptocurrency exchange, etc.)
+   - Ensure you have the required capital to invest.
+
+## Day 2: Capital Mobilization
+1. **Secure Initial Investment:**
+   - Use savings, sell assets, or take loans (be cautious with debt).
+   - Seek investors or partners if needed.
+
+2. **Risk Management:**
+   - Determine how much you can afford to lose.
+   - Set stop-loss limits and diversify investments to mitigate risks.
+
+## Day 3: Execution
+1. **Make Investments:**
+   - Buy stocks, cryptocurrencies, or other high-yield assets.
+   - Invest in multiple opportunities to spread risk.
+
+2. **Monitor Closely:**
+   - Keep an eye on market movements.
+   - Be ready to make quick decisions based on market changes.
+
+## Day 4: Optimization
+1. **Reassess Investments:**
+   - Evaluate the performance of your investments.
+   - Reallocate funds if necessary to maximize returns.
+
+2. **Leverage News and Trends:**
+   - Stay updated with financial news.
+   - Take advantage of market-moving events.
+
+## Day 5: Final Push and Exit Strategy
+1. **Maximize Returns:**
+   - Consider short-term trading strategies like day trading.
+   - Use leverage carefully to amplify gains (high risk).
+
+2. **Exit Strategy:**
+   - Decide when to sell off investments to lock in profits.
+   - Ensure you exit at the right time to maximize returns.
+
+3. **Secure Profits:**
+   - Transfer profits to a secure account.
+   - Pay off any debts or loans taken for initial investment.
+
+## Conclusion
+Making a million dollars in 5 days is highly ambitious and fraught with risk. It requires expert knowledge, significant capital, and a bit of luck. Always consider the potential for loss and consult with financial advisors before making high-stakes investments.
+
+**Disclaimer:** This guide is for informational purposes only. It is not financial advice.`,
   
-  "gpt4": "While making $1 million in 5 days is an ambitious goal, let's break this down strategically: 1) Identify existing assets that can be leveraged 2) Look for high-return investment opportunities 3) Consider business acquisitions or mergers. However, I must emphasize that such rapid wealth creation carries significant risks.",
+  "gpt4": `Achieving a million dollars in just five days is an extremely ambitious goal and, for most people, unrealistic without prior preparation, substantial resources, or extraordinary circumstances. However, if you're aiming to build significant wealth over time, here are some strategies that can guide you toward financial success:
+
+1. **Start with Passion**
+
+   - Engage in work or a business that you are passionate about. Passion drives commitment and innovation, which are crucial for success. [lewishowes.com](https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com)
+
+2. **Invest in Yourself**
+
+   - Seek mentors and invest in education to enhance your skills and knowledge. Continuous learning can open new opportunities and pathways to wealth. [lewishowes.com](https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com)
+
+3. **Build Multiple Income Streams**
+
+   - Diversify your income sources to include passive income, such as investments in real estate or dividend-paying stocks. Multiple income streams provide financial stability and accelerate wealth accumulation. [nasdaq.com](https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com)
+
+4. **Practice Financial Discipline**
+
+   - Keep a tight check on spending, live within your means, and save diligently. Financial discipline is essential for accumulating wealth. [investopedia.com](https://www.investopedia.com/articles/younginvestors/08/millionaire-mindset.asp?utm_source=chatgpt.com)
+
+5. **Leverage the Power of Compounding**
+
+   - Invest early and consistently to take advantage of compound interest, which can significantly grow your wealth over time. [nasdaq.com](https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com)
+
+6. **Set Clear Financial Goals**
+
+- Define your financial objectives and create a plan to achieve them. Setting clear goals provides direction and motivation. [synchrony.com](https://www.synchrony.com/blog/banking/how-to-make-million-dollars?utm_source=chatgpt.com)
+
+7. **Embrace Hard Work and Persistence**
+
+   - Success requires dedication and perseverance. Be prepared to work hard and stay committed to your goals, even when faced with challenges.
+
+For a more in-depth understanding, you might find this video helpful:
+
+[How To Make A Million Dollars Step By Step](https://www.youtube.com/watch?v=-q8E1tcK9rU&utm_source=chatgpt.com)
+`,
   
-  "gemini-1-5-pro": "From a practical standpoint, generating $1 million in 5 days would require: 1. Exceptional market timing 2. Significant initial capital 3. High-risk opportunities. Consider more sustainable approaches to wealth building that align with your resources and risk tolerance.",
+  "gemini-1-5-pro": `Unfortunately, there are no legitimate ways to make a million dollars in just five days. However, there are many ways to build wealth over time through hard work, smart investments, and sound financial planning.
+
+Here are a few suggestions:
+
+* **Start a business:** This is a great way to create wealth, but it takes time, effort, and often requires significant investment.
+* **Invest in the stock market:** This can be a risky proposition, but it can also be a very rewarding one if you know what you're doing.
+* **Save your money:** This may seem like a no-brainer, but it's often the most difficult thing to do. However, it's essential for building wealth over time.
+* **Get a good education:** A good education can lead to a higher-paying job, which can help you build wealth more quickly.
+
+Remember, there is no magic bullet when it comes to making money. The best way to build wealth is to focus on your long-term goals and make smart decisions along the way.
+  `,
   
-  "llama-3-70b-instruct": "The goal of making $1 million in 5 days requires careful consideration. Here's my analysis: First, evaluate your current resources. Second, identify potential high-return opportunities. Third, understand the associated risks. Remember, sustainable wealth building typically requires more time.",
+  "llama-3-70b-instruct": `Making a Million Dollars in 5 Days
+----------------------------------
+
+Online Businesses
+-----------------
+
+*   Creating and selling an online course can generate significant revenue. Platforms like Udemy, Teachable, or Skillshare can host courses. [Forbes](https://www.forbes.com/)
+    
+*   Building a high-traffic blog or YouTube channel with affiliate marketing or sponsorships can also be lucrative. [Entrepreneur](https://www.entrepreneur.com/)
+    
+
+Trading and Investing
+---------------------
+
+*   Trading stocks, options, or cryptocurrencies can potentially yield high returns, but it's essential to understand the risks involved. [Investopedia](https://www.investopedia.com/)
+    
+*   Investing in real estate investment trusts (REITs) or crowdfunding platforms can provide opportunities for high returns. [The Balance](https://www.thebalance.com/)
+    
+
+Other Opportunities
+-------------------
+
+*   Creating and selling a mobile app or game can generate significant revenue through in-app purchases or advertising. [Business Insider](https://www.businessinsider.com/)
+    
+*   Participating in high-stakes competitions or tournaments, such as poker or esports, can also yield high returns. [ESPN](https://www.espn.com/)
+    
+
+Please note that these sources provide general information and should not be considered personalized advice. Making a million dollars in 5 days is extremely challenging and often requires a combination of hard work, smart decisions, and luck.`,
   
   "claude-3-5-sonnet": "Let me provide a balanced perspective on making $1 million in 5 days. While technically possible, it would require: 1) Substantial initial capital 2) Extremely favorable market conditions 3) High-risk tolerance. Consider focusing on more sustainable long-term wealth building strategies.",
 
@@ -575,26 +734,6 @@ export const socialMediaOptions = [
     handler: (url: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}`
   }
 ];
-
-export interface ReleaseNote {
-  id: string
-  version: string
-  date: string
-  translations: {
-    [key: string]: {
-      title: string
-      description: string
-      details: {
-        summary: string
-        changes: string[]
-        impact?: string
-        technicalNotes?: string[]
-      }
-    }
-  }
-  type: "security" | "solve" | "error" | "testing"| "feature" | "fix" | "bug" | "improvement"
-  image?: string
-}
 
 export const languages = [
   { code: 'en', name: 'English' },
@@ -1356,42 +1495,41 @@ export const timeSeriesData: TimeSeriesData[] = [
   { date: '2024-05', 'GPT-4': 56, 'DALL-E': 45, 'Claude': 47, 'Gemini': 35 },
 ];
 
-export const webSources = [
-  { type: 'wikipedia', title: 'Example Source 1', description: 'Example description 1...', url: 'https://example.com/1' },
-  { type: 'encyclopedia', title: 'Example Source 2', description: 'Example description 2...', url: 'https://example.com/2' },
-  { type: 'wikipedia', title: 'Example Source 3', description: 'Example description 3...', url: 'https://example.com/3' },
-  { type: 'encyclopedia', title: 'Example Source 4', description: 'Example description 4...', url: 'https://example.com/4' },
-  { type: 'wikipedia', title: 'Example Source 5', description: 'Example description 5...', url: 'https://example.com/5' },
-  { type: 'encyclopedia', title: 'Example Source 6', description: 'Example description 6...', url: 'https://example.com/6' },
-  { type: 'wikipedia', title: 'Example Source 7', description: 'Example description 7...', url: 'https://example.com/7' },
-  { type: 'encyclopedia', title: 'Example Source 8', description: 'Example description 8...', url: 'https://example.com/8' },
-  { type: 'wikipedia', title: 'Example Source 9', description: 'Example description 9...', url: 'https://example.com/9' },
-];
-
-export const EXAMPLE_SOURCES: Source[] = [
+export const EXAMPLE_SOURCES: Source [] = [
   {
-    type: 'wikipedia',
-    title: 'LeBron James - Wikipedia',
-    description: 'LeBron Raymone James Sr is an American professional basketball player for the Los Angeles...',
-    url: 'https://wikipedia.org/wiki/LeBron_James'
+    type: "podcast",
+    title: "How to Make $1 Million Online - Lewis Howes",
+    description: "Lewis Howes discusses strategies for building wealth online, emphasizing the importance of passion and self-investment.",
+    url: "https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com",
+    img: "/icons/lewis_howes.png"
   },
   {
-    type: 'encyclopedia',
-    title: 'LeBron James | Biography, Championships, Stats, & Facts - Britannica',
-    description: 'LeBron James is an iconic basketball player known for his athleticism and versatility. He has achieved...',
-    url: 'https://britannica.com/biography/lebron-james'
+    type: "article",
+    title: "Lazy Millionaire: 8 Ways to Make a Million Dollars on 4 Hours a Day - Nasdaq",
+    description: "This article explores various methods to achieve millionaire status with minimal daily work hours, highlighting the power of compounding and multiple income streams.",
+    url: "https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com",
+    img: "/icons/nasdaq.png"
   },
   {
-    type: 'nba',
-    title: 'LeBron James | Forward | Los Angeles Lakers - NBA.Com',
-    description: 'LeBron is the NBA\'s all-time leading scorer. He is a four-time NBA Champion (2012, 2013, 2016, 2020)...',
-    url: 'https://nba.com/player/lebron-james'
+    type: "article",
+    title: "The Millionaire Mindset: How to Think, Act, and Grow Rich - Investopedia",
+    description: "Investopedia delves into the mindset required for financial success, including the importance of financial discipline and goal setting.",
+    url: "https://www.investopedia.com/articles/younginvestors/08/millionaire-mindset.asp?utm_source=chatgpt.com",
+    img: "/icons/investopedia.png"
   },
   {
-    type: 'espn',
-    title: 'LeBron James - Los Angeles Lakers Small Forward - ESPN',
-    description: 'View the profile of Los Angeles Lakers Small Forward LeBron James on ESPN. Get the latest news, live stat...',
-    url: 'https://espn.com/nba/player/_/id/1966/lebron-james'
+    type: "article",
+    title: "How to Make a Million Dollars - Synchrony",
+    description: "Synchrony provides insights into setting clear financial goals and the steps necessary to achieve millionaire status.",
+    url: "https://www.synchrony.com/blog/banking/how-to-make-million-dollars?utm_source=chatgpt.com",
+    img: "/icons/synchrony.png"
+  },
+  {
+    type: "video",
+    title: "How To Make A Million Dollars Step By Step",
+    description: "A comprehensive guide on the steps to becoming a millionaire, presented in an easy-to-follow video format.",
+    url: "https://www.youtube.com/watch?v=-q8E1tcK9rU&utm_source=chatgpt.com",
+    img: "/icons/youtube.png"
   }
 ];
 
@@ -1400,12 +1538,14 @@ export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
     type: 'wikipedia',
     title: 'Example Source 1',
     description: 'Example description 1...',
-    url: 'https://example.com/1'
+    url: 'https://example.com/1',
+    img: 'iocns/espn.png',
   },
   {
     type: 'encyclopedia',
     title: 'Example Source 2',
     description: 'Example description 2...',
-    url: 'https://example.com/2'
+    url: 'https://example.com/2',
+    img: 'iocns/espn.png',
   }
 ];
