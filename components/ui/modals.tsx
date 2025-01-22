@@ -566,7 +566,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
 
-  const [userPlan, setUserPlan] = useState<UserPlan>('free');
+  const [userPlan, setUserPlan] = useState<UserPlan>('plus');
 
   // Plan limits
   const MODEL_LIMITS = {
