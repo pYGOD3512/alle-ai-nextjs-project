@@ -65,7 +65,7 @@ export function ChatArea() {
       
       return [{
         id: sessionId,
-        activeModel: selectedModels.chat[2],
+        activeModel: selectedModels.chat[0],
         status: 'active',
         messages: [{
           id: messageId,
@@ -142,7 +142,7 @@ export function ChatArea() {
 
     const newSession: ChatSession = {
       id: sessionId,
-      activeModel: selectedModels.chat[2],
+      activeModel: selectedModels.chat[0],
       status: 'active',
       messages: [{
         id: messageId,
