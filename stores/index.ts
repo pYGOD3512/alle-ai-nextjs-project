@@ -545,3 +545,36 @@ export const useCodeThemeStore = create<CodeThemeStore>()(
     }
   )
 );
+
+interface SettingsState {
+  personalization: {
+    combination: boolean;
+    summary: boolean;
+    comparison: boolean;
+    personalizedAds: boolean;
+  };
+  setPersonalizationSetting: (key: keyof SettingsState['personalization'], value: boolean) => void;
+}
+
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({
+      personalization: {
+        combination: true,
+        summary: false,
+        comparison: true,
+        personalizedAds: true, // Default to true
+      },
+      setPersonalizationSetting: (key, value) =>
+        set((state) => ({
+          personalization: {
+            ...state.personalization,
+            [key]: value,
+          },
+        })),
+    }),
+    {
+      name: 'settings-storage',
+    }
+  )
+);

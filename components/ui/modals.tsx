@@ -18,7 +18,7 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -117,6 +117,8 @@ import {
   XCircle,
   Sparkles,
   Lock,
+  Target,
+  ChevronRight,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -582,7 +584,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     if (model?.type === 'plus' && userPlan === 'free') {
       setPromptConfig({
         title: "Premium Model",
-        message: "This model is only available for Plus plan users.",
+        message: "Upgrade to Standard or Plus to use this model",
         type: "upgrade",
         metadata: {
           plan: "Plus",
@@ -619,7 +621,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
       
       setPromptConfig({
         title: "Model Limit Reached",
-        message: `Your ${userPlan} plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
+        message: `${userPlan} plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
         type: "warning",
         metadata: {
           plan: planUpgrade,
@@ -772,38 +774,69 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md" id="tooltip-select-menu">
           <DialogHeader className="space-y-4 relative">
-          <PlanSwitcher />
+            <PlanSwitcher />
             <DialogTitle className="">Model Selection</DialogTitle>
 
             {/* Selected Models */}
             <div className="space-y-2">
-              {tempSelectedModels.length < 1 ? (
-                ""
+              {tempSelectedModels.length > 0 ? (
+                <>
+                  <label className="text-sm font-medium">Selected Models</label>
+                  <div className="flex flex-wrap gap-2">
+                    {tempSelectedModels.map((modelId) => {
+                      const model = models.find((m) => m.id === modelId);
+                      return (
+                        <Badge
+                          variant="outline"
+                          key={modelId}
+                          className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
+                        >
+                          {model?.name}
+                          {model?.type === 'plus' && (
+                            <Crown className="h-3 w-3 text-yellow-500" />
+                          )}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-red-700"
+                            onClick={() => toggleModelSelection(modelId)}
+                          />
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </>
               ) : (
-                <label className="text-sm font-medium">Selected Models</label>
+                <div className="text-center p-8 space-y-4">
+                  <div className="text-muted-foreground text-sm">
+                    No models selected yet
+                  </div>
+                </div>
               )}
-              <div className="flex flex-wrap gap-2">
-                {tempSelectedModels.map((modelId) => {
-                  const model = models.find((m) => m.id === modelId);
-                  return (
-                    <Badge
-                      variant="outline"
-                      key={modelId}
-                      className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
-                    >
-                      {model?.name}
-                      {model?.type === 'plus' && (
-                        <Crown className="h-3 w-3 text-yellow-500" />
-                      )}
-                      <X
-                        className="h-3 w-3 cursor-pointer hover:text-red-700"
-                        onClick={() => toggleModelSelection(modelId)}
-                      />
-                    </Badge>
-                  );
-                })}
-              </div>
             </div>
+
+            {/* Get Started Section */}
+            {tempSelectedModels.length > MODEL_LIMITS[userPlan] && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 rounded-lg border border-primary/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm"
+              >
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="text-sm text-muted-foreground">
+                    Unlock more AI models with Alle-AI
+                  </div>
+                  <a 
+                    href="/get-started" 
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium transition-all hover:from-purple-600 hover:to-pink-600 hover:shadow-lg hover:-translate-y-0.5"
+                  >
+                    Get Started with Alle-AI
+                    <ChevronRight className="h-4 w-4" />
+                  </a>
+                  <span className="text-xs text-muted-foreground opacity-75">
+                    Experience the full power of AI collaboration
+                  </span>
+                </div>
+              </motion.div>
+            )}
 
             {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between">
@@ -929,6 +962,9 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
   const [isDevicesOpen, setIsDevicesOpen] = useState(true);
 
+  const { personalization, setPersonalizationSetting } = useSettingsStore();
+
+
   // Group voices by language/category with safety checks
   const voiceCategories = useMemo(() => {
     return availableVoices.reduce((acc, voice) => {
@@ -977,19 +1013,24 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         title: "Alle-AI Combination",
         description:
         "Merge responses for a cohesive answer. Combines insights from all models to minimize inaccuracies and enhance clarity.",
-        enabled: true,
+        enabled: personalization.combination,
       },
       summary: {
         title: "Alle-AI Summary",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
-        enabled: false,
+        enabled: personalization.summary,
       },
       comparison: {
         title: "Alle-AI Comparison",
         description:
         "Highlight similarities and differences in AI responses. Identifies consistent and conflicting viewpoints, helping you see where models agree or differ",
-        enabled: true,
+        enabled: personalization.comparison,
+      },
+      personalizedAds: {
+        title: "Personalized Ads",
+        description: "See relevant ads based on your conversations and searches. Turning this off will disable ads.",
+        enabled: personalization.personalizedAds,
       },
     },
     data_controls: {
@@ -1141,6 +1182,10 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     }
   };
 
+  const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
+    setPersonalizationSetting(key, checked);
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -1233,17 +1278,28 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                         className="flex items-center justify-between space-x-4 pb-2 border-b border-borderColorPrimary last:border-none"
                       >
                         <div className="space-y-1">
-                          <h4 className="text-sm font-medium">
-                            {setting.title}
-                          </h4>
+                          <div className="flex items-center gap-2">
+                            {/* {setting.icon && setting.icon} */}
+                            <h4 className="text-sm font-medium flex items-center gap-2">
+                              {setting.title}
+                            </h4>
+                          </div>
                           <p className="text-[0.75rem] text-muted-foreground">
                             {setting.description}
                           </p>
                         </div>
-                        <Switch
-                          className="data-[state=unchecked]:bg-borderColorPrimary"
-                          defaultChecked={setting.enabled}
-                        />
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            className="data-[state=unchecked]:bg-borderColorPrimary"
+                            checked={setting.enabled}
+                            onCheckedChange={(checked) => 
+                              handleSwitchChange(
+                                key as "summary" | "combination" | "comparison" | "personalizedAds",
+                                checked
+                              )
+                            }
+                          />
+                        </div>
                       </div>
                     )
                   )}
@@ -1632,8 +1688,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                 <YAxis
                                   tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                                   width={40}
-                                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                                  tickLine={{ stroke: 'hsl(var(--border))' }}
+                                  axisLine                                  tickLine={{ stroke: 'hsl(var(--border))' }}
                                 />
                                 <ChartTooltip 
                                   content={({ active, payload, label }) => {
@@ -2151,7 +2206,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
             )}
 
             <div className="flex justify-between gap-2 pt-4 border-t">
-              <Button className='p-2 sm:p-3 text-xs sm:text-sm' variant="outline" onClick={() => {
+              <Button className='p-2 sm:p-3 text-xs sm:text-sm border-none text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' variant="outline" onClick={() => {
                 setPlansModalOpen(true);
                 onClose();
                 }}>
@@ -4479,8 +4534,8 @@ export function PromptModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md sm:max-w-lg">
-        <DialogHeader className="space-y-4">
+      <DialogContent className="max-w-md">
+        <DialogHeader>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -4502,13 +4557,20 @@ export function PromptModal({
           {/* Metadata Section */}
           {metadata && (
             <div className="space-y-4 rounded-lg bg-muted/50 p-4">
+              {/* Friendly, informative text with inline link */}
               {metadata.plan && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Required Plan</span>
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <Lock className="h-3 w-3" />
-                    {metadata.plan}
-                  </Badge>
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    <a 
+                      href="/hub/getting-started" 
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      Read more
+                      <ChevronRight className="h-3 w-3 inline-block" />
+                    </a>
+                    {' '}
+                    about this.
+                  </p>
                 </div>
               )}
 
@@ -4528,7 +4590,11 @@ export function PromptModal({
                   <span className="text-sm">Selected Model(s)</span>
                   <div className="flex flex-wrap gap-2">
                     {metadata.models.map((model) => (
-                      <Badge key={model} variant="outline" className="text-xs border-borderColorPrimary">
+                      <Badge 
+                        key={model} 
+                        variant="outline" 
+                        className="text-xs border-borderColorPrimary"
+                      >
                         {model}
                       </Badge>
                     ))}
@@ -4582,7 +4648,6 @@ export function PromptModal({
             exit={{ opacity: 0 }}
             className="absolute inset-0 pointer-events-none"
           >
-            {/* Add sparkle elements here */}
             <Sparkles className="absolute h-6 w-6 text-yellow-400 animate-bounce" />
           </motion.div>
         )}
