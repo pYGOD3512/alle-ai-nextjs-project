@@ -8,8 +8,8 @@ export default function AuthMethod() {
           Can I change how I log in?
         </h2>
         <p className="text-md">
-          No, you cannot change your authentication method for now. Here's everything you
-          need to know about managing your authentication options:
+          {`   No, you cannot change your authentication method for now. Here's everything you
+          need to know about managing your authentication options:`}
         </p>
       </section>
       {/* Available Methods Section */}
@@ -22,7 +22,7 @@ export default function AuthMethod() {
         </p>
         <ul className="list-disc pl-6 space-y-1">
           <li>Email and password</li>
-          <li>Oauth Authentication  (Google )</li>
+          <li>Oauth Authentication (Google )</li>
         </ul>
       </section>
     </div>
