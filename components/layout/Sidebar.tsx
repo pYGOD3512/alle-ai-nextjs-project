@@ -440,9 +440,10 @@ export function Sidebar() {
               <Button
                 size="sm"
                 variant="outline"
-                className="w-full text-xs border-none text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                className="gap-1 w-full text-xs border-none text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                 onClick={() => setPlansModalOpen(true)}
               >
+                <Gem className="h-4 w-4" />
                 UPGRADE
               </Button>
             </div>

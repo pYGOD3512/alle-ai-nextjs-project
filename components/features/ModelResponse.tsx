@@ -36,17 +36,22 @@ import { MarkdownCode } from '@/components/markdown/MarkdownCode';
 
 import { SummaryContent } from "./SummaryContent";
 import { SUMMARY_DATA } from "@/lib/constants";
+import { useSettingsStore } from "@/stores";
 
 interface ModelResponseProps {
   model: string;
   content: any;
   model_img: string;
   responseId: string;
+  sessionId: string; // Add this prop
   onFeedbackChange?: (responseId: string, feedback: 'like' | 'dislike' | null) => void;
   onRegenerate?: (responseId: string) => void;
   feedback?: 'like' | 'dislike' | null;
   webSearchEnabled?: boolean;
   sources?: Source[];
+  settings: {
+    personalizedAds: boolean;
+  };
 }
 
 interface SourcesWindowState {
@@ -124,7 +129,8 @@ export function ModelResponse({
   onRegenerate,
   feedback = null,
   webSearchEnabled = false,
-  sources = []
+  sources = [],
+  settings // Add this prop
 }: ModelResponseProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
@@ -442,7 +448,8 @@ export function ModelResponse({
           )}
           </div>
           
-          <AdCard ads={SAMPLE_ADS} />
+          {/* Only render AdCard if personalizedAds is enabled in settings */}
+          {settings.personalizedAds && <AdCard ads={SAMPLE_ADS} />}
         </div>
       </div>
     </Card>
