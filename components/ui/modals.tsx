@@ -590,12 +590,12 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
         },
         actions: [
           {
-            label: "Continue with Free Models",
+            label: "OK",
             onClick: () => setShowPromptModal(false),
             variant: "outline"
           },
           {
-            label: "Upgrade to Plus",
+            label: "Upgrade Plan",
             onClick: () => {
               setPlansModalOpen(true);
               setShowPromptModal(false);
@@ -634,16 +634,15 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
             onClick: () => setShowPromptModal(false),
             variant: "outline"
           },
-          {
-            // label: `Upgrade to ${planUpgrade}`,
+          ...(userPlan !== 'plus' ? [{
             label: `Upgrade Plan`,
             onClick: () => {
-              // Handle upgrade
+              setPlansModalOpen(true);
               setShowPromptModal(false);
             },
             variant: "premium",
             icon: <Lock className="h-4 w-4" />
-          }
+          }] : [])
         ]
       });
       setShowPromptModal(true);
@@ -750,7 +749,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const PlanSwitcher = () => (
     <div className="flex items-center gap-2 p-2 bg-backgroundSecondary rounded-lg">
       <span className="text-sm font-medium">Test as:</span>
-      <Select value={userPlan} onValueChange={(value: UserPlan) => setUserPlan(value)}>
+      <Select value={userPlan} onValueChange={(value: UserPlan) => {setUserPlan(value); setTempSelectedModels([]) }}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select plan" />
         </SelectTrigger>

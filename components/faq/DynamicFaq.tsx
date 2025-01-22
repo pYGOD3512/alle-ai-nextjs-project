@@ -19,6 +19,18 @@ const faqComponents = {
   "subscription-billing": dynamic(
     () => import("@/components/faq/account/subscription-billing")
   ),
+  "privacy-policy": dynamic(
+    () => import("@/components/faq/privacy/privacy-policy")
+  ),
+  "terms-service": dynamic(
+    () => import("@/components/faq/privacy/terms-of-service")
+  ),
+  "usage-policies": dynamic(
+    () => import("@/components/faq/privacy/usage-policy")
+  ),
+  "content-policy": dynamic(
+    () => import("@/components/faq/privacy/content-policy")
+  ),
 };
 
 interface DynamicFaqProps {
@@ -29,7 +41,7 @@ const DynamicFaq: FC<DynamicFaqProps> = ({ faqName }) => {
   const SelectedFAQ = faqComponents[faqName];
 
   if (!SelectedFAQ) {
-    return <p>FAQ not found!</p>; // Fallback
+    return <p>FAQ not found!</p>;
   }
 
   return (
