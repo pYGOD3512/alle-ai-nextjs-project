@@ -39,7 +39,7 @@ import { SUMMARY_DATA } from "@/lib/constants";
 
 interface ModelResponseProps {
   model: string;
-  content: string;
+  content: any;
   model_img: string;
   responseId: string;
   onFeedbackChange?: (responseId: string, feedback: 'like' | 'dislike' | null) => void;

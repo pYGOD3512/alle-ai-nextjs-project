@@ -15,6 +15,7 @@ import {
   EXAMPLE_SOURCES,
   EXAMPLE_SOURCES_SIMPLE,
   SUMMARY_RESPONSES,
+  SUMMARY_DATA
 } from "@/lib/constants";
 import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore } from "@/stores";
 import { Source } from "@/lib/types";
@@ -398,7 +399,7 @@ export function ChatArea() {
                     {activeContents[session.id]?.type === 'summary' && (
                       <ModelResponse
                         model="AI Summary"
-                        content={SUMMARY_RESPONSES['default']}
+                        content={SUMMARY_DATA.summary}
                         model_img="/svgs/logo-desktop-mini.png"
                         responseId={`summary-${session.id}`}
                         feedback={responseFeedback[`summary-${session.id}`]}

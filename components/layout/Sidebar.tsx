@@ -440,7 +440,7 @@ export function Sidebar() {
               <Button
                 size="sm"
                 variant="outline"
-                className="w-full text-xs"
+                className="w-full text-xs border-none text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                 onClick={() => setPlansModalOpen(true)}
               >
                 UPGRADE
@@ -449,7 +449,7 @@ export function Sidebar() {
           </>
         ) : (
           <div className="absolute bottom-0 left-0 right-0 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
-            <Button size="sm" variant="outline" className="w-full text-xs">
+            <Button size="sm" variant="outline" className="w-full text-xs text-white border-none bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
               <Gem className="h-4 w-4" />
             </Button>
           </div>

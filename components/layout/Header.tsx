@@ -14,6 +14,7 @@ import {
   HelpCircle,
   LogOut,
   Share,
+  Crown,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -339,9 +340,12 @@ export function Header() {
                       {selectedModelNames.map((model, index) => (
                         <span 
                           key={`${model}-${index}`} 
-                          className="text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none"
+                          className="flex items-center gap-1 text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none"
                         >
-                          {model}
+                          {model.name}
+                          {model.type === 'plus' && (
+                            <Crown className="h-3 w-3 text-yellow-500" />
+                          )}
                         </span>
                       ))}
                     </div>
