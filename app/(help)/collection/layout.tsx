@@ -148,7 +148,7 @@ export default function HelpLayout({
       <header className="w-full px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col">
           <div className="flex justify-around items-center mb-4">
-            <Link href={"/"}>
+            <Link href={"/collection"}>
               <Image
                 src={
                   resolvedTheme === "dark"
