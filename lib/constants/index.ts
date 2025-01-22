@@ -318,7 +318,7 @@ export const CHAT_MODELS = [
     name: "ChatGPT 3.5",
     icon: "/models/gpt-3-5.png",
     provider: "OpenAI",
-    type: "plus",
+    type: "free",
     preview: "Making $1 million in just 5 days is an...",
   },
   {
@@ -342,7 +342,7 @@ export const CHAT_MODELS = [
     name: "Llama 3 70B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
-    type: "standard",
+    type: "plus",
     preview: "The elusive goal of making $1 million in...",
   },
   {
@@ -350,7 +350,7 @@ export const CHAT_MODELS = [
     name: "Llama 3.1 405B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
-    type: "free",
+    type: "plus",
     preview: "Making $1 million in just 5 days is an...",
   },
   {
@@ -406,7 +406,7 @@ export const CHAT_MODELS = [
     name: "Llama 3.1 70B Instruct",
     icon: "/models/meta.png",
     provider: "Meta",
-    type: "free",
+    type: "plus",
     preview: "Making $1 million in just 5 days is an...",
   },
   {

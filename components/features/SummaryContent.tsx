@@ -21,7 +21,7 @@ export function SummaryContent({ summary, consistencies, inconsistencies, finalA
         <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Lightbulb className="w-4 h-4" />
-            Summary
+            Combination
           </TabsTrigger>
           <TabsTrigger value="consistencies" className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
