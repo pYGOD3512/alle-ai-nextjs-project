@@ -113,10 +113,10 @@ interface SelectedModelsStore {
     audio: string[];
     video: string[];
   };
-  tempSelectedModels: string[]; // Here I'm using the tempSelectedModels to store the selected models before the user saves them.
+  tempSelectedModels: string[];
   setTempSelectedModels: (models: string[]) => void;
   saveSelectedModels: (type: 'chat' | 'image' | 'audio' | 'video') => void;
-  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => string[];
+  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => Array<{ name: string; type: string }>;
 }
 
 export const useSelectedModelsStore = create<SelectedModelsStore>()(
@@ -145,8 +145,11 @@ export const useSelectedModelsStore = create<SelectedModelsStore>()(
           : VIDEO_MODELS;
         
         return state.selectedModels[type]
-          .map(id => modelList.find(model => model.id === id)?.name ?? '')
-          .filter(name => name !== '');
+          .map(id => {
+            const model = modelList.find(model => model.id === id);
+            return model ? { name: model.name, type: model.type } : null;
+          })
+          .filter((item): item is { name: string; type: string } => item !== null);
       }
     }),
     {

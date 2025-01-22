@@ -18,7 +18,7 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useUserPlanStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -52,6 +52,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings,
+  ExternalLink,
   User,
   BarChart2,
   Shield,
@@ -112,6 +113,10 @@ import {
   AlertCircle,
   ArrowRight,
   Tag,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  Lock,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -291,6 +296,55 @@ const reportCategories = [
     description: 'Other violations not listed above'
   }
 ];
+
+interface NotificationModalProps {
+  notification: NotificationItem | null;
+  open: boolean;
+  onClose: () => void;
+}
+
+const typeIcons = {
+  feature: Zap,
+  security: Shield,
+  update: Bell,
+  alert: AlertCircle,
+  info: Info,
+};
+
+const priorityColors = {
+  low: 'bg-slate-500',
+  medium: 'bg-yellow-500',
+  high: 'bg-red-500',
+};
+
+interface ActionButton {
+  label: string;
+  onClick: () => void;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'premium' | 'ghost2';
+  icon?: React.ReactNode;
+}
+
+interface PromptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  message: string | React.ReactNode;
+  type?: 'warning' | 'error' | 'success' | 'info' | 'upgrade';
+  actions?: ActionButton[];
+  metadata?: {
+    plan?: string;
+    requiredTokens?: number;
+    currentTokens?: number;
+    models?: string[];
+    link?: {
+      text: string;
+      url: string;
+    };
+  };
+  showConfetti?: boolean;
+}
+
+type UserPlan = 'free' | 'standard' | 'plus';
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [selectedRating, setSelectedRating] = React.useState<number | null>(
@@ -507,6 +561,98 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const { selectedModels, tempSelectedModels, setTempSelectedModels, saveSelectedModels, getSelectedModelNames } = useSelectedModelsStore();
   const [filterType, setFilterType] = React.useState("all");
   const [searchQuery, setSearchQuery] = React.useState("");
+
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [promptConfig, setPromptConfig] = useState<any>(null);
+
+  const [userPlan, setUserPlan] = useState<UserPlan>('free');
+
+  // Plan limits
+  const MODEL_LIMITS = {
+    free: 2,
+    standard: 3,
+    plus: 5
+  };
+
+  const checkModelSelectionRestrictions = (modelId: string) => {
+    const model = getModelsForPage().find(m => m.id === modelId);
+    
+    // Check for premium model restriction
+    if (model?.type === 'plus' && userPlan === 'free') {
+      setPromptConfig({
+        title: "Premium Model",
+        message: "This model is only available for Plus plan users.",
+        type: "upgrade",
+        metadata: {
+          plan: "Plus",
+          models: [model.name],
+        },
+        actions: [
+          {
+            label: "Continue with Free Models",
+            onClick: () => setShowPromptModal(false),
+            variant: "outline"
+          },
+          {
+            label: "Upgrade to Plus",
+            onClick: () => {
+              setPlansModalOpen(true);
+              setShowPromptModal(false);
+            },
+            variant: "premium",
+            icon: <Zap className="h-4 w-4" />
+          }
+        ]
+      });
+      setShowPromptModal(true);
+      return false;
+    }
+
+    // Check for model count limit
+    const newCount = tempSelectedModels.includes(modelId) 
+      ? tempSelectedModels.length - 1 
+      : tempSelectedModels.length + 1;
+
+    if (newCount > MODEL_LIMITS[userPlan]) {
+      const planUpgrade = userPlan === 'free' ? 'Standard' : 'Plus';
+      
+      setPromptConfig({
+        title: "Model Limit Reached",
+        message: `Your ${userPlan} plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
+        type: "warning",
+        metadata: {
+          plan: planUpgrade,
+          models: [...tempSelectedModels.map(id => {
+            const model = getModelsForPage().find(m => m.id === id);
+            return model?.name || id;
+          }), model?.name || modelId],
+        },
+        actions: [
+          {
+            label: "OK",
+            onClick: () => setShowPromptModal(false),
+            variant: "outline"
+          },
+          {
+            // label: `Upgrade to ${planUpgrade}`,
+            label: `Upgrade Plan`,
+            onClick: () => {
+              // Handle upgrade
+              setShowPromptModal(false);
+            },
+            variant: "premium",
+            icon: <Lock className="h-4 w-4" />
+          }
+        ]
+      });
+      setShowPromptModal(true);
+      return false;
+    }
+
+    return true;
+  };
+
   
   useEffect(() => {
     // See selected models when I open the models menu (this is the current models I've selected and interacting with)
@@ -524,11 +670,13 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   };
 
   const toggleModelSelection = (modelId: string) => {
-    setTempSelectedModels(
-      tempSelectedModels.includes(modelId)
-        ? tempSelectedModels.filter(id => id !== modelId)
-        : [...tempSelectedModels, modelId]
-    );
+    if (checkModelSelectionRestrictions(modelId)) {
+      setTempSelectedModels(
+        tempSelectedModels.includes(modelId)
+          ? tempSelectedModels.filter(id => id !== modelId)
+          : [...tempSelectedModels, modelId]
+      );
+    }
   };
 
   const getModelsForPage = () => {
@@ -596,126 +744,167 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   };
 
   const handleRemoveAll = () => {
-    setTempSelectedModels([]); // Clear all temporary selections
+    setTempSelectedModels([]);
   };
 
+  const PlanSwitcher = () => (
+    <div className="flex items-center gap-2 p-2 bg-backgroundSecondary rounded-lg">
+      <span className="text-sm font-medium">Test as:</span>
+      <Select value={userPlan} onValueChange={(value: UserPlan) => setUserPlan(value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select plan" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="free">Free Plan</SelectItem>
+            <SelectItem value="standard">Standard Plan</SelectItem>
+            <SelectItem value="plus">Plus Plan</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <Badge variant="outline" className="ml-auto">
+        {MODEL_LIMITS[userPlan]} models max
+      </Badge>
+    </div>
+  );
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md" id="tooltip-select-menu">
-        <DialogHeader className="space-y-4 relative">
-          <DialogTitle className="">Model Selection</DialogTitle>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md" id="tooltip-select-menu">
+          <DialogHeader className="space-y-4 relative">
+          <PlanSwitcher />
+            <DialogTitle className="">Model Selection</DialogTitle>
 
-          {/* Selected Models */}
-          <div className="space-y-2">
-            {tempSelectedModels.length < 1 ? (
-              ""
-            ) : (
-              <label className="text-sm font-medium">Selected Models</label>
-            )}
-            <div className="flex flex-wrap gap-2">
-              {tempSelectedModels.map((modelId) => {
-                const model = models.find((m) => m.id === modelId);
-                return (
-                  <Badge
-                    variant="outline"
-                    key={modelId}
-                    className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
-                  >
-                    {model?.name}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-700"
-                      onClick={() => toggleModelSelection(modelId)}
-                    />
-                  </Badge>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between">
-            <div className="text-sm font-medium">{getModelTypeText()}</div>
-            <div className="flex flex-row-reverse sm:flex-row items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search models"
-                  className="pl-8 w-[200px] focus-visible:outline-none focus:border-borderColorPrimary"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Select defaultValue="all" onValueChange={setFilterType}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="All models" />
-                </SelectTrigger>
-                <SelectContent className="bg-backgroundSecondary">
-                  {filterOptions.map((option) => (
-                    <SelectItem
-                      className="cursor-pointer"
-                      key={option.value}
-                      value={option.value}
+            {/* Selected Models */}
+            <div className="space-y-2">
+              {tempSelectedModels.length < 1 ? (
+                ""
+              ) : (
+                <label className="text-sm font-medium">Selected Models</label>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {tempSelectedModels.map((modelId) => {
+                  const model = models.find((m) => m.id === modelId);
+                  return (
+                    <Badge
+                      variant="outline"
+                      key={modelId}
+                      className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
                     >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <kbd className="absolute right-4 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">esc</span>
-          </kbd>
-        </DialogHeader>
-
-        {/* Model Grid */}
-        <ScrollArea className="h-[20rem] pr-4 overflow-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
-            {filteredModels.map((model) => (
-              <div
-                key={model.id}
-                onClick={() => toggleModelSelection(model.id)}
-                className={cn(
-                  "flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
-                  tempSelectedModels.includes(model.id) &&
-                    "border-primary bg-accent"
-                )}
-              >
-                <Image
-                  src={model.icon}
-                  height={8}
-                  width={8}
-                  alt={model.name}
-                  className="w-8 h-8 rounded-md"
-                />
-                <div className="overflow-auto scrollbar-thin scrollbar-none">
-                  <h3 className="font-small text-xs whitespace-nowrap">
-                    {model.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground whitespace-nowrap">
-                    {model.provider}
-                  </p>
-                </div>
+                      {model?.name}
+                      {model?.type === 'plus' && (
+                        <Crown className="h-3 w-3 text-yellow-500" />
+                      )}
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-red-700"
+                        onClick={() => toggleModelSelection(modelId)}
+                      />
+                    </Badge>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+            </div>
 
-        {/* Update the buttons section */}
-        <div className="flex justify-end gap-2 mt-4">
-          <Button
-            variant="outline"
-            onClick={handleRemoveAll}
-            className="hover:text-red-600"
-          >
-            Remove all
-          </Button>
-          <Button onClick={handleSave}>
-            Save
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            {/* Search and Filter */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between">
+              <div className="text-sm font-medium">{getModelTypeText()}</div>
+              <div className="flex flex-row-reverse sm:flex-row items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search models"
+                    className="pl-8 w-[200px] focus-visible:outline-none focus:border-borderColorPrimary"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Select defaultValue="all" onValueChange={setFilterType}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="All models" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-backgroundSecondary">
+                    {filterOptions.map((option) => (
+                      <SelectItem
+                        className="cursor-pointer"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <kbd className="absolute right-4 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">esc</span>
+            </kbd>
+          </DialogHeader>
+
+          {/* Model Grid */}
+          <ScrollArea className="h-[20rem] pr-4 overflow-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
+              {filteredModels.map((model) => (
+                <div
+                  key={model.id}
+                  onClick={() => toggleModelSelection(model.id)}
+                  className={cn(
+                    "relative flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
+                    tempSelectedModels.includes(model.id) &&
+                      "border-primary bg-accent"
+                  )}
+                >
+                  <Image
+                    src={model.icon}
+                    height={8}
+                    width={8}
+                    alt={model.name}
+                    className="w-8 h-8 rounded-md"
+                  />
+                  <div className="overflow-auto scrollbar-thin scrollbar-none">
+                    <h3 className="font-small text-xs whitespace-nowrap">
+                      {model.name}
+                    </h3>
+                    <p className="text-xs flex items-center gap-1 text-muted-foreground whitespace-nowrap">
+                      {model.provider}
+                      {model.type === 'plus' && (
+                        <Crown className="h-3 w-3 text-yellow-500" />
+                    )}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          {/* Update the buttons section */}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={handleRemoveAll}
+              className="hover:text-red-600"
+            >
+              Remove all
+            </Button>
+            <Button onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <PlansModal
+        isOpen={plansModalOpen}
+        onClose={() => setPlansModalOpen(false)}
+      />
+      {promptConfig && (
+        <PromptModal
+          isOpen={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
+          {...promptConfig}
+        />
+      )}
+    </>
   );
 }
 
@@ -4169,26 +4358,6 @@ export function TransactionHistoryModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-interface NotificationModalProps {
-  notification: NotificationItem | null;
-  open: boolean;
-  onClose: () => void;
-}
-
-const typeIcons = {
-  feature: Zap,
-  security: Shield,
-  update: Bell,
-  alert: AlertCircle,
-  info: Info,
-};
-
-const priorityColors = {
-  low: 'bg-slate-500',
-  medium: 'bg-yellow-500',
-  high: 'bg-red-500',
-};
-
 export function NotificationModal({
   notification,
   open,
@@ -4268,6 +4437,156 @@ export function NotificationModal({
             )}
           </div>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function PromptModal({
+  isOpen,
+  onClose,
+  title,
+  message,
+  type = 'info',
+  actions,
+  metadata,
+  showConfetti = false,
+}: PromptModalProps) {
+  const [showSparkles, setShowSparkles] = useState(false);
+
+  useEffect(() => {
+    if (showConfetti && isOpen) {
+      // Trigger confetti animation here if needed
+      setShowSparkles(true);
+      const timer = setTimeout(() => setShowSparkles(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, showConfetti]);
+
+  const getIcon = () => {
+    switch (type) {
+      case 'warning':
+        return <AlertTriangle className="h-12 w-12 text-yellow-500" />;
+      case 'error':
+        return <XCircle className="h-12 w-12 text-red-500" />;
+      case 'success':
+        return <CheckCircle2 className="h-12 w-12 text-green-500" />;
+      case 'upgrade':
+        return <Sparkles className="h-12 w-12 text-purple-500" />;
+      default:
+        return <AlertCircle className="h-12 w-12 text-blue-500" />;
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md sm:max-w-lg">
+        <DialogHeader className="space-y-4">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="mx-auto"
+          >
+            {getIcon()}
+          </motion.div>
+          <DialogTitle className="text-center text-xl font-semibold">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Main Message */}
+          <div className="text-center text-muted-foreground">
+            {message}
+          </div>
+
+          {/* Metadata Section */}
+          {metadata && (
+            <div className="space-y-4 rounded-lg bg-muted/50 p-4">
+              {metadata.plan && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Required Plan</span>
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    {metadata.plan}
+                  </Badge>
+                </div>
+              )}
+
+              {metadata.requiredTokens && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Required Tokens</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{metadata.currentTokens}</span>
+                    <ArrowRight className="h-3 w-3" />
+                    <span className="text-sm font-medium text-primary">{metadata.requiredTokens}</span>
+                  </div>
+                </div>
+              )}
+
+              {metadata.models && metadata.models.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-sm">Selected Model(s)</span>
+                  <div className="flex flex-wrap gap-2">
+                    {metadata.models.map((model) => (
+                      <Badge key={model} variant="outline" className="text-xs border-borderColorPrimary">
+                        {model}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {metadata.link && (
+                <a
+                  href={metadata.link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                >
+                  {metadata.link.text}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {actions && actions.length > 0 && (
+            <div className={cn(
+              "flex gap-3",
+              actions.length === 1 ? "justify-center" : "justify-between"
+            )}>
+              {actions.map((action, index) => (
+                <Button
+                  key={index}
+                  onClick={action.onClick}
+                  variant={action.variant || "default"}
+                  className={cn(
+                    "flex-1 gap-2",
+                    action.variant === 'premium' && "text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  )}
+                >
+                  {action.icon && action.icon}
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Sparkles Animation */}
+        {showSparkles && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 pointer-events-none"
+          >
+            {/* Add sparkle elements here */}
+            <Sparkles className="absolute h-6 w-6 text-yellow-400 animate-bounce" />
+          </motion.div>
+        )}
       </DialogContent>
     </Dialog>
   );
