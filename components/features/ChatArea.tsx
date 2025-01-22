@@ -17,7 +17,7 @@ import {
   SUMMARY_RESPONSES,
   SUMMARY_DATA
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore } from "@/stores";
 import { Source } from "@/lib/types";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +50,9 @@ interface ModelResponse {
   status: 'loading' | 'complete' | 'error';
   parentMessageId: string;
   sources?: Source[];
+  settings: {
+    personalizedAds: boolean;
+  };
 }
 
 export function ChatArea() {
@@ -58,6 +61,7 @@ export function ChatArea() {
   const { selectedModels } = useSelectedModelsStore();
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
+  const { personalization } = useSettingsStore();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
     if (content.chat.input) {
       const sessionId = `session-${Date.now()}`;
@@ -78,7 +82,10 @@ export function ChatArea() {
             content: '',
             status: 'loading',
             parentMessageId: messageId,
-            sources: isWebSearch ? EXAMPLE_SOURCES : undefined
+            sources: isWebSearch ? EXAMPLE_SOURCES : undefined,
+            settings: {
+              personalizedAds: personalization.personalizedAds
+            }
           }))
         }]
       }];
@@ -106,7 +113,8 @@ export function ChatArea() {
                   return {
                     ...response,
                     content: MODEL_RESPONSES[modelId],
-                    status: 'complete'
+                    status: 'complete',
+                    settings: response.settings
                   };
                 })
               }))
@@ -155,7 +163,10 @@ export function ChatArea() {
           content: '',
           status: 'loading',
           parentMessageId: messageId,
-          sources: isWebSearch ? EXAMPLE_SOURCES_SIMPLE : undefined
+          sources: isWebSearch ? EXAMPLE_SOURCES_SIMPLE : undefined,
+          settings: {
+            personalizedAds: personalization.personalizedAds
+          }
         }))
       }]
     };
@@ -168,7 +179,6 @@ export function ChatArea() {
   const handleSend = (input: string) => {
     const { sessionId, messageId } = createNewSession(input);
 
-    // Simulate responses for each model
     selectedModels.chat.forEach((modelId) => {
       const randomDelay = Math.random() * 3000 + 2000;
       
@@ -189,7 +199,8 @@ export function ChatArea() {
                   return {
                     ...response,
                     content: MODEL_RESPONSES[modelId],
-                    status: 'complete'
+                    status: 'complete',
+                    settings: response.settings
                   };
                 })
               };
@@ -378,6 +389,7 @@ export function ChatArea() {
                             responseId={session.messages[0].responses.find(r => 
                               r.modelId === session.activeModel
                             )?.id || ""}
+                            sessionId={session.id}
                             feedback={responseFeedback[session.messages[0].responses.find(r => 
                               r.modelId === session.activeModel
                             )?.id || ""]}
@@ -392,6 +404,9 @@ export function ChatArea() {
                             sources={session.messages[0].responses.find(r => 
                               r.modelId === session.activeModel && r.status === 'complete'
                             )?.sources}
+                            settings={session.messages[0].responses.find(r => 
+                              r.modelId === session.activeModel
+                            )?.settings || { personalizedAds: false }}
                           />
                         )}
                       </>
@@ -402,8 +417,10 @@ export function ChatArea() {
                         content={SUMMARY_DATA.summary}
                         model_img="/svgs/logo-desktop-mini.png"
                         responseId={`summary-${session.id}`}
+                        sessionId={session.id}
                         feedback={responseFeedback[`summary-${session.id}`]}
                         onFeedbackChange={handleFeedbackChange}
+                        settings={{ personalizedAds: false }}
                       />
                     )}
                   </div>
