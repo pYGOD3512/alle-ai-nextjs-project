@@ -1,6 +1,6 @@
 const ContentPolicy = () => {
   return (
-    <div className="min-h-screen w-full ">
+    <div>
       <div>
         <div className="p-6 md:p-8">
           {/* Main Title */}

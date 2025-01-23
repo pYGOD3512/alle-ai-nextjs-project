@@ -13,7 +13,6 @@ import { FooterText } from '@/components/FooterText';
 import { useSidebarStore } from "@/stores";
 import { usePathname } from 'next/navigation';
 
-
 const isMaintenance = false;
 
 export default function RootLayout({
@@ -47,11 +46,10 @@ export default function RootLayout({
     <>
       {isSubscribed ? (
         <Frigade.Provider
-        apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
-        userId="my-user-id">
-          <Frigade.Tour
-            flowId="flow_Nx0Q4Shx" 
-          />
+          apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
+          userId="my-user-id"
+        >
+          <Frigade.Tour flowId="flow_Nx0Q4Shx" />
           <div className="h-screen flex overflow-hidden">
             <Sidebar />
             <main className="flex-1 flex flex-col h-full relative">
@@ -61,13 +59,15 @@ export default function RootLayout({
               </div>
               <HelpButton />
               {pathname === "/" && (
-                <FooterText 
-                className={`fixed bottom-0 ${isOpen ? "right-[39%]" : "right-[45%]"} h-6 transition-all duration-300`}
+                <FooterText
+                  className={`fixed bottom-0 ${
+                    isOpen ? "right-[39%]" : "right-[45%]"
+                  } h-6 transition-all duration-300`}
                 />
               )}
             </main>
           </div>
-          </Frigade.Provider>
+        </Frigade.Provider>
       ) : (
         <div className="h-screen flex overflow-hidden">
           <main className="flex-1 flex flex-col h-full relative">

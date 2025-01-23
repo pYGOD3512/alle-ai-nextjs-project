@@ -31,6 +31,12 @@ const faqComponents = {
   "content-policy": dynamic(
     () => import("@/components/faq/privacy/content-policy")
   ),
+  "subscription-discounts": dynamic(
+    () => import("@/components/faq/others/subscription-discount")
+  ),
+  "models-selection": dynamic(
+    () => import("@/components/faq/others/models-selection")
+  ),
 };
 
 interface DynamicFaqProps {

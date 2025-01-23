@@ -12,8 +12,8 @@ export default function ChangePassword() {
           </h2>
 
           <p className=" mb-4">
-            Changing your password regularly is an important step in securing
-            your account. Here's how you can update your password:
+            {`Changing your password regularly is an important step in securing
+            your account. Here's how you can update your password:`}
           </p>
 
           <ol className="list-decimal list-inside mb-6">
@@ -22,7 +22,7 @@ export default function ChangePassword() {
               Navigate to your <strong>Account Settings</strong>.
             </li>
             <li>
-              Select the <strong>"Change Password"</strong> option.
+              {`Select the <strong>"Change Password"</strong> option.`}
             </li>
             <li>Enter your current password.</li>
             <li>
@@ -31,7 +31,7 @@ export default function ChangePassword() {
             </li>
             <li>Confirm the new password by entering it again.</li>
             <li>
-              Click the <strong>"Save"</strong> or <strong>"Update"</strong>{" "}
+              Click the <strong>{`"Save"`}</strong> or <strong>{`"Update"`}</strong>{" "}
               button to finalize the change.
             </li>
             <li>

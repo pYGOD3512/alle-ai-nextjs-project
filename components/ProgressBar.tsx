@@ -5,8 +5,8 @@ import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 interface ProvidersProps {
   children: React.ReactNode; 
 }
-
 const Providers: React.FC<ProvidersProps> = ({ children }) => {
+
   return (
     <>
       {children}

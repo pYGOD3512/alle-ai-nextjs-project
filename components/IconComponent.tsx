@@ -25,6 +25,7 @@ export function IconComponent({ name, className = "" }: IconComponentProps) {
     ThumbsUp: Icons.ThumbsUp,
     ThumbsDown: Icons.ThumbsDown,
     FlagTriangle: Icons.Rocket,
+    FileText: Icons.FileText,
   };
 
   const Icon = IconMap[name];

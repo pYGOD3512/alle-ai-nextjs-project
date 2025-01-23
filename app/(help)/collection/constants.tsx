@@ -404,44 +404,36 @@ export const helpCategories: HelpCategories = {
       },
     ],
   },
-  // "3675931-api": {
-  //   id: "3675931",
-  //   iconName: "Code",
-  //   title: "API",
-  //   description: "Common questions related to our APIs and models",
-  //   sections: [
-  //     {
-  //         title: 'API',
-  //         articles: [
-  //             {
-  //             id: "apis",
-  //             title: "API",
-  //             description: "Read our apis",
-  //             readingTime: "10 min read"
-  //             }
-  //         ]
-  //     }
-  //   ]
-  // },
-  // "3742473-alle-ai": {
-  //   id: "3742473",
-  //   iconName: "MessageCircleMore",
-  //   title: "Alle-AI",
-  //   description: "All things about Alle-AI",
-  //   sections: [
-  //     {
-  //       title: "About Alle-AI",
-  //       articles: [
-  //         {
-  //           id: "1",
-  //           title: "What does Alle-AI do",
-  //           description: "Understanding the concept and process of Alle-AI",
-  //           readingTime: "10 min read",
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
+
+  "3742473-others": {
+    id: "3742473",
+    iconName: "FileText",
+    title: "Others",
+    description: "Anything else",
+    sections: [
+      {
+        title: "Others",
+        articles: [
+          {
+            id: "subscription-discounts",
+            title: "Do you offer any discounts?",
+            description:
+              "Information on available promotions or pricing discounts.",
+            readingTime: "3 min read",
+            keywords: [],
+          },
+          {
+            id: "models-selection",
+            title: "Why Can't You Select Just One Model?",
+            description:
+              "Learn why selecting multiple models gives you more flexibility and options.",
+            readingTime: "2 min read",
+            keywords: [],
+          },
+        ],
+      },
+    ],
+  },
   "7835004-alle-ai-custom": {
     id: "7835004",
     iconName: "FolderCog",
