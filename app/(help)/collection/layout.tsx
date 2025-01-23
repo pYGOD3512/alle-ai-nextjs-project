@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { ScrollText, Search, Globe, Home, Router } from "lucide-react";
+import Providers from "@/components/ProgressBar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -144,136 +145,138 @@ export default function HelpLayout({
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="w-full px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col">
-          <div className="flex justify-around items-center mb-4">
-            <Link href={"/collection"}>
-              <Image
-                src={
-                  resolvedTheme === "dark"
-                    ? "/svgs/logo-desktop-full.png"
-                    : "/svgs/logo-desktop-dark-full.png"
-                }
-                alt="all-ai"
-                height={150}
-                width={150}
-              />
-            </Link>
-
-            <div className="right-10 flex items-center gap-5 text-sm">
-              <Link href={"/docs/developer-guides"} target="_blank">
-                API Docs
+    <>
+      <div className="min-h-screen flex flex-col">
+        <header className="w-full px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col">
+            <div className="flex justify-around items-center mb-4">
+              <Link href={"/collection"}>
+                <Image
+                  src={
+                    resolvedTheme === "dark"
+                      ? "/svgs/logo-desktop-full.png"
+                      : "/svgs/logo-desktop-dark-full.png"
+                  }
+                  alt="all-ai"
+                  height={150}
+                  width={150}
+                />
               </Link>
-              <Link href={"/release-notes"}>Release Notes</Link>
-              <ThemeToggle />
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">
-                  <Globe className="h-4 w-4" />
-                  <span className="text-sm">
-                    {selectedLanguage.code.toUpperCase()}
-                  </span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {languages.map((lang) => (
-                    <DropdownMenuItem
-                      key={lang.code}
-                      onClick={() => setSelectedLanguage(lang)}
-                      className="flex items-center gap-2"
-                    >
-                      <span className="text-sm font-medium">{lang.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({lang.code.toUpperCase()})
-                      </span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
 
-          {pathname === "/collection" ? (
-            <div className="text-center mt-5">
-              <h1 className="text-4xl font-bold mb-3">Help Center</h1>
-              <p className="text-muted-foreground text-lg mb-8">
-                Advice and answers from the Alle AI Team
-              </p>
-            </div>
-          ) : null}
-
-          <div
-            className="w-full max-w-2xl mx-auto relative group transition-all duration-200"
-            ref={searchRef}
-          >
-            <div className="relative rounded-md shadow-sm hover:shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all duration-200">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors duration-200" />
-              <Input
-                placeholder="Search for articles..."
-                className="w-full pl-10 h-12 rounded-md border-0 bg-white dark:bg-[#212121] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ring-offset-background focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 focus-visible:outline-none focus:border-transparent hover:bg-gray-50 dark:hover:bg-[#2c2c2c] transition-all duration-200"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                onFocus={() => setIsSearching(true)}
-              />
-            </div>
-
-            {isSearching && searchQuery.length >= 2 && (
-              <div className="absolute w-full mt-2 bg-white dark:bg-[#212121] rounded-md shadow-lg ring-1 ring-black ring-opacity-5 max-h-[60vh] overflow-y-auto z-50">
-                {searchResults.length > 0 ? (
-                  <div className="py-2">
-                    {searchResults.map((result, index) => (
-                      <div
-                        key={`${result.categoryId}-${result.articleId}-${index}`}
-                        className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer border-b last:border-b-0 border-gray-100 dark:border-gray-800"
-                        onClick={() => handleSearchResultClick(result)}
-                        role="button"
-                        tabIndex={0}
+              <div className="right-10 flex items-center gap-5 text-sm">
+                <Link href={"/docs/developer-guides"} target="_blank">
+                  API Docs
+                </Link>
+                <Link href={"/release-notes"}>Release Notes</Link>
+                <ThemeToggle />
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                    <Globe className="h-4 w-4" />
+                    <span className="text-sm">
+                      {selectedLanguage.code.toUpperCase()}
+                    </span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {languages.map((lang) => (
+                      <DropdownMenuItem
+                        key={lang.code}
+                        onClick={() => setSelectedLanguage(lang)}
+                        className="flex items-center gap-2"
                       >
-                        <div className="text-xs text-gray-500 mb-1">
-                          {result.categoryTitle}
-                        </div>
-                        <div className="text-sm font-medium">
-                          {result.articleTitle}
-                        </div>
-                        {result.articleDescription && (
-                          <div className="text-xs text-gray-500 mt-1 line-clamp-2">
-                            {result.articleDescription}
+                        <span className="text-sm font-medium">{lang.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({lang.code.toUpperCase()})
+                        </span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {pathname === "/collection" ? (
+              <div className="text-center mt-5">
+                <h1 className="text-4xl font-bold mb-3">Help Center</h1>
+                <p className="text-muted-foreground text-lg mb-8">
+                  Advice and answers from the Alle AI Team
+                </p>
+              </div>
+            ) : null}
+
+            <div
+              className="w-full max-w-2xl mx-auto relative group transition-all duration-200"
+              ref={searchRef}
+            >
+              <div className="relative rounded-md shadow-sm hover:shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all duration-200">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors duration-200" />
+                <Input
+                  placeholder="Search for articles..."
+                  className="w-full pl-10 h-12 rounded-md border-0 bg-white dark:bg-[#212121] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ring-offset-background focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 focus-visible:outline-none focus:border-transparent hover:bg-gray-50 dark:hover:bg-[#2c2c2c] transition-all duration-200"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  onFocus={() => setIsSearching(true)}
+                />
+              </div>
+
+              {isSearching && searchQuery.length >= 2 && (
+                <div className="absolute w-full mt-2 bg-white dark:bg-[#212121] rounded-md shadow-lg ring-1 ring-black ring-opacity-5 max-h-[60vh] overflow-y-auto z-50">
+                  {searchResults.length > 0 ? (
+                    <div className="py-2">
+                      {searchResults.map((result, index) => (
+                        <div
+                          key={`${result.categoryId}-${result.articleId}-${index}`}
+                          className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer border-b last:border-b-0 border-gray-100 dark:border-gray-800"
+                          onClick={() => handleSearchResultClick(result)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="text-xs text-gray-500 mb-1">
+                            {result.categoryTitle}
                           </div>
-                        )}
-                        {result.matchedKeywords &&
-                          result.matchedKeywords.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {result.matchedKeywords.map((keyword, idx) => (
-                                <span
-                                  key={idx}
-                                  className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full"
-                                >
-                                  {keyword}
-                                </span>
-                              ))}
+                          <div className="text-sm font-medium">
+                            {result.articleTitle}
+                          </div>
+                          {result.articleDescription && (
+                            <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                              {result.articleDescription}
                             </div>
                           )}
-                        {result.readingTime && (
-                          <div className="text-xs text-gray-400 mt-1">
-                            {result.readingTime}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="px-4 py-3 text-sm text-gray-500">
-                    No results found
-                  </div>
-                )}
-              </div>
-            )}
+                          {result.matchedKeywords &&
+                            result.matchedKeywords.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {result.matchedKeywords.map((keyword, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full"
+                                  >
+                                    {keyword}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          {result.readingTime && (
+                            <div className="text-xs text-gray-400 mt-1">
+                              {result.readingTime}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-gray-500">
+                      No results found
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {children}
-      </main>
-    </div>
+        <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Providers>{children}</Providers>
+        </main>
+      </div>
+    </>
   );
 }
