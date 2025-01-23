@@ -89,15 +89,6 @@ export function Sidebar() {
     }
   }, [isMobile]);
 
-  //
-  useEffect(() => {
-    // load audio,image,video pages background before the user actually navigates
-    // for better user experience
-    router.prefetch("/image");
-    router.prefetch("/audio");
-    router.prefetch("/video");
-  });
-
   const handleNewChat = () => {
     // Clear the conversation link when starting a new chat
     setCurrentConversationLink(null);
