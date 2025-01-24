@@ -130,7 +130,7 @@ export default function HelpLayout({
   const handleSearchResultClick = (result: SearchResult) => {
     //  navigation/action logic
     if (result.categoryKey === "getting-started") {
-      window.open("/hub/getting-started", "_blank");
+      router.push("/hub/getting-started");
     } else router.push(`/collection/${result.categoryKey}/${result.articleId}`);
 
     setIsSearching(false);
