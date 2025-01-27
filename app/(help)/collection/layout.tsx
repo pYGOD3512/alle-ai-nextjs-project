@@ -162,7 +162,7 @@ export default function HelpLayout({
             </Link>
 
             <div className="right-10 flex items-center gap-5 text-sm">
-              <Link href={"/docs/developer-guides"} target="_blank">
+              <Link href={"/docs/developer-getting-started"} target="_blank">
                 API Docs
               </Link>
               <Link href={"/release-notes"}>Release Notes</Link>

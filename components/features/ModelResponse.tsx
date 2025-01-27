@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from "@/components/ui/card";
-import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe, ZoomIn, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe, ZoomIn, X, ChevronLeft, ChevronRight, Circle } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
@@ -357,7 +357,7 @@ export function ModelResponse({
               finalAnswer={SUMMARY_DATA.finalAnswer}
             />
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div className="prose prose-sm dark:prose-invert max-w-none relative">
               <ReactMarkdown
                 key={`${responseId}-${content}`}
                 remarkPlugins={[remarkGfm]}
@@ -365,14 +365,7 @@ export function ModelResponse({
                 components={components}
                 className="text-base text-accent-foreground 
                           [&>*:first-child]:mt-0 [&>*:last-child]:mb-0
-                          [&_a]:no-underline [&_p>a]:before:content-[''] [&_p>a]:after:content-['']
-                          [&_ol]:space-y-2 [&_ul]:space-y-2
-                          [&_li]:pl-1
-                          [&_ol>li]:marker:text-primary/70 [&_ol>li]:marker:font-medium
-                          [&_ul>li]:marker:text-primary/70
-                          [&_p]:my-2
-                          [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:m-0
-                          [&_code]:bg-transparent"
+                          [&_a]:no-underline [&_p>a]:before:content-[''] [&_p>a]:after:content-['']"
               >
                 {textContent}
               </ReactMarkdown>

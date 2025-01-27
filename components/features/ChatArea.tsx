@@ -372,9 +372,9 @@ export function ChatArea() {
                               <div className="w-8 h-8 rounded-full flex items-center justify-center">
                               </div>
                               <div className="flex-1 space-y-3">
-                                <Skeleton className="h-4 w-[250px]" />
-                                <Skeleton className="h-4 w-[400px]" />
-                                <Skeleton className="h-4 w-[300px]" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-1/2" />
                               </div>
                             </div>
                           </Card>

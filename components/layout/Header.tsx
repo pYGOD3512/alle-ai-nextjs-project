@@ -15,6 +15,7 @@ import {
   LogOut,
   Share,
   Crown,
+  Gem,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -35,6 +36,7 @@ import { useAuth } from '@/components/providers/authTest';
 import { AuthSwitch } from "../ui/authSwitch";
 import { NotificationsPanel } from "@/components/NotificationWindow";
 import { NotificationModal } from "@/components/ui/modals";
+import { useRouter } from "next/navigation";
 
 
 export function Header() {
@@ -44,6 +46,8 @@ export function Header() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 1024px)');
   const pathname = usePathname();
+  const router = useRouter();
+
 
   const [mounted, setMounted] = React.useState(false);
   const [recentNotifications, setRecentNotifications] = React.useState<NotificationItem[]>(notificationData);
@@ -99,15 +103,23 @@ export function Header() {
       };
 
       return (
-        <Button 
-          key={index}
-          variant="ghost" 
-          size="icon" 
-          onClick={handleClick}
-          className="hidden md:flex w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
-        >
-          <item.type className="h-5 w-5" />
-        </Button>
+        <TooltipProvider key={index}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleClick}
+                className="hidden md:flex w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
+              >
+                <item.type className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Tour</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     }
 
@@ -122,99 +134,116 @@ export function Header() {
       };
 
       return (
-        <Button 
-          key={index}
-          variant="ghost" 
-          size="icon" 
-          onClick={openModal}
-          className={`${item.type !== MessagesSquare ? 'hidden' : ''} md:flex w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none`}
-        >
-          <item.type className="h-5 w-5" />
-        </Button>
+        <TooltipProvider key={index}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={openModal}
+                className={`${item.type !== MessagesSquare ? 'hidden' : ''} md:flex w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none`}
+              >
+                <item.type className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{item.type === ALargeSmall ? 'Text Size' : 'Feedback'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     }
 
     // navItems that triggers a dropdown
     return (
-      <DropdownMenu key={index}>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
-          >
-            <item.type className="h-5 w-5" />
-            {recentNotifications.some(n => !n.read) && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className={`${unreadNotifications.length === 0 ? 'w-fit' : 'w-64 md:w-80'} mr-20 rounded-xl p-1 md:p-2 bg-backgroundSecondary`}>
-          {unreadNotifications.length > 0 ? (
-            <>
-              <div className="flex justify-between items-center px-3 border-b border-borderColorPrimary">
-                <h4 className="font-small text-sm">Unread Notifications</h4>
+      <TooltipProvider key={index}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size="sm" 
-                  className="text-xs text-muted-foreground hover:text-primary"
-                  onClick={() => {
-                    // Mark all as read instead of clearing
-                    setRecentNotifications(recentNotifications.map(n => ({ ...n, read: true })));
-                    setAllNotifications(allNotifications.map(n => ({ ...n, read: true })));
-                  }}
+                  size="icon" 
+                  className="relative w-8 h-8 p-1 rounded-full text-muted-foreground border border-borderColorPrimary select-none"
                 >
-                  Mark all read
+                  <item.type className="h-5 w-5" />
+                  {recentNotifications.some(n => !n.read) && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+                  )}
                 </Button>
-              </div>
-              {unreadNotifications.map((notification) => (
-                <DropdownMenuItem 
-                  key={notification.id}
-                  className="flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 bg-primary/5"
-                  onClick={() => {
-                    markAsRead(notification.id);
-                    handleNotificationClick(notification);
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="font-medium text-xs">{notification.title}</div>
-                    <span className="w-2 h-2 bg-primary rounded-full" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className={`${unreadNotifications.length === 0 ? 'w-fit' : 'w-64 md:w-80'} mr-20 rounded-xl p-1 md:p-2 bg-backgroundSecondary`}>
+                {unreadNotifications.length > 0 ? (
+                  <>
+                    <div className="flex justify-between items-center px-3 border-b border-borderColorPrimary">
+                      <h4 className="font-small text-sm">Notifications</h4>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs text-muted-foreground hover:text-primary"
+                        onClick={() => {
+                          // Mark all as read instead of clearing
+                          setRecentNotifications(recentNotifications.map(n => ({ ...n, read: true })));
+                          setAllNotifications(allNotifications.map(n => ({ ...n, read: true })));
+                        }}
+                      >
+                        Mark all read
+                      </Button>
+                    </div>
+                    {unreadNotifications.map((notification) => (
+                      <DropdownMenuItem 
+                        key={notification.id}
+                        className="flex flex-col items-start p-2 cursor-pointer hover:bg-hoverColorPrimary gap-1 bg-primary/5"
+                        onClick={() => {
+                          markAsRead(notification.id);
+                          handleNotificationClick(notification);
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium text-xs">{notification.title}</div>
+                          <span className="w-2 h-2 bg-primary rounded-full" />
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {notification.message.length > 50 ? notification.message.slice(0, 50) + '...' : notification.message}
+                        </div>
+                        <div className="text-[0.6rem] text-muted-foreground">
+                          {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
+                            Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
+                            'minute'
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
+                      onClick={() => setNotificationsPanelOpen(true)}
+                    >
+                      See all notifications
+                    </Button>
+                  </>
+                ) : (
+                  <div className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">No unread notifications</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
+                      onClick={() => setNotificationsPanelOpen(true)}
+                    >
+                      See all notifications
+                    </Button>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {notification.message.length > 50 ? notification.message.slice(0, 50) + '...' : notification.message}
-                  </div>
-                  <div className="text-[0.6rem] text-muted-foreground">
-                    {new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(
-                      Math.round((notification.timestamp.getTime() - Date.now()) / (1000 * 60)),
-                      'minute'
-                    )}
-                  </div>
-                </DropdownMenuItem>
-              ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
-                onClick={() => setNotificationsPanelOpen(true)}
-              >
-                See all notifications
-              </Button>
-            </>
-          ) : (
-            <div className="p-4 text-center">
-              <p className="text-sm text-muted-foreground">No unread notifications</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full mt-2 text-xs text-muted-foreground hover:text-primary"
-                onClick={() => setNotificationsPanelOpen(true)}
-              >
-                See all notifications
-              </Button>
-            </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TooltipTrigger>
+          <TooltipContent>
+            Notifications {unreadNotifications.length > 0 ? `(${unreadNotifications.length} unread)` : ''}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   };
 
@@ -232,7 +261,11 @@ export function Header() {
         }
         break;
       case 'link':
-        window.open(item.href, '_blank');
+        if (item.label === 'Developer') {
+          router.push('/developer');
+        } else {
+          window.open(item.href, '_blank');
+        }
         break;
       case 'function':
         const functionMap = {
@@ -344,7 +377,7 @@ export function Header() {
                         >
                           {model.name}
                           {model.type === 'plus' && (
-                            <Crown className="h-3 w-3 text-yellow-500" />
+                            <Gem className="h-3 w-3 text-yellow-500" />
                           )}
                         </span>
                       ))}

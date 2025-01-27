@@ -18,6 +18,7 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
   const userScrolledRef = useRef(false);
   const lastScrollTopRef = useRef(0);
   const { isOpen } = useSidebarStore();
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const scrollToBottom = () => {
     const scrollViewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
@@ -62,8 +63,8 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
 
   // Auto-scroll on initial load and content changes
   useEffect(() => {
-    // Don't auto-scroll if user has manually scrolled
-    if (userScrolledRef.current) return;
+    // Don't auto-scroll if user has manually scrolled or if initial scroll is done
+    if (userScrolledRef.current || initialScrollDone) return;
 
     const timeoutId = setTimeout(() => {
       const scrollViewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
@@ -71,6 +72,7 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
         const { scrollHeight, clientHeight } = scrollViewport as HTMLElement;
         if (scrollHeight > clientHeight) {
           scrollToBottom();
+          setInitialScrollDone(true); // Mark initial scroll as done
         }
       }
     }, 100);
