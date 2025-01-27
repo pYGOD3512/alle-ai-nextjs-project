@@ -1,7 +1,10 @@
+
 import { notFound } from "next/navigation";
 import { helpCategories } from "@/app/(help)/collection/constants";
 import { CategoryKeys } from "@/lib/types";
 import { CategoryContent } from "./categoryContent";
+
+
 
 export default async function CategoryPage({ 
   params 
@@ -15,7 +18,8 @@ export default async function CategoryPage({
     notFound();
   }
 
-  return <CategoryContent 
+  return <
+    CategoryContent 
     category={category} 
     categorySlug={resolvedParams.category} 
   />;

@@ -12,6 +12,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { ScrollText, Search, Globe, Home, Router } from "lucide-react";
 import Providers from "@/components/ProgressBar";
+
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { helpCategories } from "./constants";
+
+
 
 interface SearchResult {
   categoryKey?: string;
@@ -46,6 +50,7 @@ export default function HelpLayout({
   const router = useRouter();
 
   useEffect(() => {
+   
     const handleClickOutside = (event: MouseEvent) => {
       if (
         searchRef.current &&
@@ -61,7 +66,7 @@ export default function HelpLayout({
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-
+ 
     if (query.length < 2) {
       setSearchResults([]);
       setIsSearching(false);
@@ -149,6 +154,7 @@ export default function HelpLayout({
 
   return (
     <>
+    
       <div className="min-h-screen flex flex-col">
         <header className="w-full px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col">
