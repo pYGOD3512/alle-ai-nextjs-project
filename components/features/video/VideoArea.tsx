@@ -1008,7 +1008,7 @@ const VideoArea = () => {
                 <div className="flex items-center gap-2">
                   <Button 
                     onClick={handleSubmit}
-                    disabled={!prompt.trim() || loading || selectedModels.video.length === 0}
+                    disabled={!prompt.trim() || loading || selectedModels.video.length < 2}
                     className={cn(
                       "rounded-xl px-4",
                       "transition-all duration-200",

@@ -7,6 +7,7 @@ import { IconComponent } from "@/components/IconComponent";
 import { useEffect, useRef, useState } from "react";
 import { languages } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+
 export function CategoryContent({
   category,
   categorySlug,
@@ -19,6 +20,7 @@ export function CategoryContent({
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
 
   useEffect(() => {
+    document.title = "Alle-AI | Help Center";
     if (selectedLanguage.code !== "en") {
       toast({
         title: "Coming soon!",

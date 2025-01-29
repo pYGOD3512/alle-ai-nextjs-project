@@ -54,7 +54,7 @@ export default function AboutLayout({
       <header className="w-full  px-4 sm:px-6 lg:px-10 py-6 bg-white dark:bg-zinc-800 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
-          <Link href={"/"}>
+          <Link href={"/collection"}>
             <Image
               src={
                 resolvedTheme === "dark"
