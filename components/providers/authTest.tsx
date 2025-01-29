@@ -14,7 +14,7 @@ export const publicRoutes = ['/', '/plans', '/pricing', '/login', '/register', '
 export const privateRoutes = ['/chat', '/image', '/video', '/audio', '/text', '/changelog'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   return (
     <AuthContext.Provider value={{ 
