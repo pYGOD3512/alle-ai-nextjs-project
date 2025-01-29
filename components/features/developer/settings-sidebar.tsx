@@ -30,7 +30,7 @@ const settingsSections = [
     title: "Billing",
     items: [
       { label: "Billing", href: "/developer/settings/billing", icon: CreditCard },
-      { label: "Limits", href: "/developer/settings/limits", icon: Gauge },
+      { label: "Rate limits", href: "/developer/settings/limits", icon: Gauge },
     ]
   },
   {

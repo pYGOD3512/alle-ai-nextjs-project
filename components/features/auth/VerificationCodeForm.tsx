@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
+import { toast, useToast } from "@/hooks/use-toast";
+
 
 interface VerificationCodeFormProps {
   email: string;
@@ -18,6 +20,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(30);
   const [isResending, setIsResending] = useState(false);
+  const { toast } = useToast();
   
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -85,9 +88,18 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setCountdown(30);
-      // Add your resend logic here
+      
+      toast({
+        title: "Success",
+        description: "Verification code sent successfully!",
+        variant: "default",
+      });
     } catch (error) {
-      setError('Failed to resend code. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to send code. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsResending(false);
     }

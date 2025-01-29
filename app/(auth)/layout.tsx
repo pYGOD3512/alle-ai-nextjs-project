@@ -220,7 +220,7 @@ export default function AuthLayout({
       </div>
       
       {/* Updated right side */}
-      <div className="w-1/2 relative overflow-hidden bg-background">
+      <div className="w-1/2 relative overflow-hidden bg-background cursor-none">
         <AnimatedBackground />
         
         {/* Content wrapper with glassmorphism */}

@@ -3,6 +3,8 @@ import { CheckCircle2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
+import { toast, useToast } from "@/hooks/use-toast";
+
 
 interface ResetPasswordSuccessProps {
     onBackToLogin: () => void;
@@ -12,7 +14,7 @@ interface ResetPasswordSuccessProps {
   export function ResetPasswordSuccess({ onBackToLogin, email }: ResetPasswordSuccessProps) {
     const [isResending, setIsResending] = useState(false);
     const [countdown, setCountdown] = useState(0);
-    const [resendStatus, setResendStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const { toast } = useToast();
 
     // Handle countdown timer
     useEffect(() => {
@@ -24,16 +26,6 @@ interface ResetPasswordSuccessProps {
       }
     }, [countdown]);
 
-    // Reset status after 3 seconds
-    useEffect(() => {
-      if (resendStatus !== 'idle') {
-        const timer = setTimeout(() => {
-          setResendStatus('idle');
-        }, 3000);
-        return () => clearTimeout(timer);
-      }
-    }, [resendStatus]);
-
     const handleResend = useCallback(async () => {
       if (countdown > 0 || isResending) return;
 
@@ -42,14 +34,22 @@ interface ResetPasswordSuccessProps {
         // Simulate API call - replace with your actual resend logic
         await new Promise((resolve) => setTimeout(resolve, 1000));
         
-        setResendStatus('success');
         setCountdown(30); // Start 30s countdown
+        toast({
+          title: "Success",
+          description: "Reset link sent successfully!",
+          variant: "default",
+        });
       } catch (error) {
-        setResendStatus('error');
+        toast({
+          title: "Error",
+          description: "Failed to send reset link. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setIsResending(false);
       }
-    }, [countdown, isResending]);
+    }, [countdown, isResending, toast]);
 
     const renderResendButton = () => {
       if (countdown > 0) {
@@ -72,35 +72,14 @@ interface ResetPasswordSuccessProps {
       );
     };
 
-    const renderStatusMessage = () => {
-      switch (resendStatus) {
-        case 'success':
-          return (
-            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-4 py-2 rounded-md text-sm animate-fade-in-down">
-              Reset link sent successfully!
-            </div>
-          );
-        case 'error':
-          return (
-            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-700 px-4 py-2 rounded-md text-sm animate-fade-in-down">
-              Failed to send reset link. Please try again.
-            </div>
-          );
-        default:
-          return null;
-      }
-    };
-
     return (
       <motion.div
         variants={formVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="space-y-8 py-4 relative"
+        className="space-y-8 py-4"
       >
-        {renderStatusMessage()}
-
         <div className="flex justify-center">
           <div className="relative">
             <div className="absolute inset-0 rounded-full border-4 border-green-500/20 animate-ping" />
