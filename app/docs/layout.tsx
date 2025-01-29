@@ -64,7 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { name: "Welcome", href: "/docs/getting-started" },
-    { name: "User Guide", href: "/docs/guides" },
+    { name: "User Guide", href: "/docs/user-guides" },
     { name: "API Reference", href: "/docs/api" },
     { name: "Changelog", href: "/changelog" },
     { name: "System Status", href: "/status" },
