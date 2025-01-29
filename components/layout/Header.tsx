@@ -401,7 +401,7 @@ export function Header() {
           ) : (
             !isSubscribed && mounted && (
               <Image
-                src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+              src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
                 alt="Logo"
                 width={100}
                 height={100}
