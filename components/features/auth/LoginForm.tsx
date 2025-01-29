@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { GoogleButton } from "./GoogleButton";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 
 
 interface LoginFormProps {
@@ -16,11 +19,20 @@ interface LoginFormProps {
 export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login attempt:", { email, password });
+    setIsLoading(true);
+    try {
+      // Simulate some delay to show the spinner
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      router.push('/ai');
+      console.log("Login attempt:", { email, password });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -79,10 +91,19 @@ export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
         </div>
 
         <Button 
-        variant="secondary"
-        type="submit" 
-        className="w-full bg-black  text-white">
-          Log in
+          variant="secondary"
+          type="submit" 
+          className="w-full bg-black text-white"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
 

@@ -26,14 +26,14 @@ const AnimatedBackground = () => {
       
       {/* Floating AI model logos - distributed across the space */}
       <div className="absolute inset-0">
-        {['dall-e', 'stability-ai', 'anthropic', 'claude-3', 'copilot', 'dream', 'gemini', 'gpt-3-5', 'gpt-4', 'grok', 'kling', 'luma', 'meta', 'mistral-ai', 'perplexity-ai', 'titan', 'midjourney'].map((logo, index) => (
+        {['stability-ai', 'anthropic', 'claude-3', 'deepseek', 'copilot', 'dream', 'gemini', 'gpt-3-5', 'gpt-4', 'grok', 'kling', 'luma', 'meta', 'mistral-ai', 'perplexity-ai', 'titan', 'midjourney'].map((logo, index) => (
           <motion.div
             key={logo}
             className="absolute"
             initial={{ 
               x: Math.random() * window.innerWidth / 2,
               y: Math.random() * window.innerHeight,
-              opacity: 0.6,
+              opacity: 0.8,
               scale: 0.8 + Math.random() * 0.4
             }}
             animate={{ 
@@ -56,13 +56,13 @@ const AnimatedBackground = () => {
             }}
           >
             <div className="relative group">
-              <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300" />
+              <div className="absolute inset-0 rounded-full blur-xs group-hover:blur-sm transition-all duration-300" />
               <Image
                 src={`/models/${logo}.png`}
                 alt={logo}
                 width={48}
                 height={48}
-                className="rounded-full opacity-70 dark:opacity-80 group-hover:opacity-100 transition-all duration-300 relative z-10"
+                className="rounded-full opacity-100 dark:opacity-100 group-hover:opacity-100 transition-all duration-300 relative z-10"
               />
             </div>
           </motion.div>
@@ -224,7 +224,7 @@ export default function AuthLayout({
         <AnimatedBackground />
         
         {/* Content wrapper with glassmorphism */}
-        <div className="absolute inset-0 backdrop-blur-[2px]">
+        <div className="absolute inset-0 backdrop-blur-[1px]">
           <div className="absolute inset-0">
             <AnimatePresence mode="wait">
               <motion.div
