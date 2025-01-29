@@ -38,7 +38,7 @@ const GreetingMessage = ({
   username = "Guest",
   options = defaultOptions,
   handlePressed = () => {},
-  questionText = "How can I help you today?",
+  questionText = "What would you like to do today?",
 }: GreetingMessageProp) => {
   const greetings = textReveal(`Hi! ${username} 🎉`)
   const questionTextArray = textReveal(questionText)

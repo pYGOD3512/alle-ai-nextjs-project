@@ -578,3 +578,123 @@ export const useSettingsStore = create<SettingsState>()(
     }
   )
 );
+
+const generateId = () => {
+  return 'key_' + Math.random().toString(36).substring(2, 15);
+};
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  key: string;
+  workspace: string;
+  createdBy: string;
+  email: string;
+  createdAt: string;
+  lastUsed: string;
+  cost: string;
+  isVisible?: boolean;
+  isDisabled?: boolean;
+}
+
+interface ApiKeyStore {
+  keys: ApiKey[];
+  addKey: (key: Omit<ApiKey, 'id' | 'key' | 'createdAt' | 'lastUsed' | 'cost'>) => void;
+  removeKey: (id: string) => void;
+  toggleKeyVisibility: (id: string) => void;
+  editKeyName: (id: string, newName: string) => void;
+  toggleKeyStatus: (id: string) => void;
+}
+
+export const useApiKeyStore = create<ApiKeyStore>()(
+  persist(
+    (set) => ({
+      keys: [],
+      addKey: (newKey) => set((state) => ({
+        keys: [...state.keys, {
+          ...newKey,
+          id: generateId(),
+          key: `sk-ant-${generateId()}`,
+          createdAt: new Date().toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          }),
+          lastUsed: 'Never',
+          cost: '—',
+          isVisible: false,
+          isDisabled: false
+        }]
+      })),
+      removeKey: (id) => set((state) => ({
+        keys: state.keys.filter(key => key.id !== id)
+      })),
+      toggleKeyVisibility: (id) => set((state) => ({
+        keys: state.keys.map(key => 
+          key.id === id ? { ...key, isVisible: !key.isVisible } : key
+        )
+      })),
+      editKeyName: (id, newName) => set((state) => ({
+        keys: state.keys.map(key => 
+          key.id === id ? { ...key, name: newName } : key
+        )
+      })),
+      toggleKeyStatus: (id) => set((state) => ({
+        keys: state.keys.map(key => 
+          key.id === id ? { ...key, isDisabled: !key.isDisabled } : key
+        )
+      })),
+    }),
+    {
+      name: 'api-keys-storage'
+    }
+  )
+);
+
+export interface PaymentMethod {
+  id: string;
+  type: 'card' | 'link';
+  lastFour?: string;
+  expiryDate?: string;
+  cardBrand?: 'visa' | 'mastercard' | 'amex' | 'other';
+  bankName?: string;
+  isDefault: boolean;
+}
+
+interface PaymentStore {
+  paymentMethods: PaymentMethod[];
+  addPaymentMethod: (method: Omit<PaymentMethod, 'id'>) => void;
+  removePaymentMethod: (id: string) => void;
+  setDefaultPaymentMethod: (id: string) => void;
+  getDefaultPaymentMethod: () => PaymentMethod | undefined;
+}
+
+export const usePaymentStore = create<PaymentStore>()(
+  persist(
+    (set, get) => ({
+      paymentMethods: [],
+      addPaymentMethod: (method) => set((state) => ({
+        paymentMethods: [
+          ...state.paymentMethods.map(m => ({...m, isDefault: false})),
+          { ...method, id: `pm_${Date.now()}`, isDefault: true }
+        ]
+      })),
+      removePaymentMethod: (id) => set((state) => ({
+        paymentMethods: state.paymentMethods.filter(m => m.id !== id)
+      })),
+      setDefaultPaymentMethod: (id) => set((state) => ({
+        paymentMethods: state.paymentMethods.map(method => ({
+          ...method,
+          isDefault: method.id === id
+        }))
+      })),
+      getDefaultPaymentMethod: () => {
+        return get().paymentMethods.find(m => m.isDefault);
+      }
+    }),
+    {
+      name: 'payment-methods-storage'
+    }
+  )
+);
+

@@ -18,7 +18,7 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -119,6 +119,9 @@ import {
   Lock,
   Target,
   ChevronRight,
+  Key,
+  CreditCard,
+  Loader2,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -134,7 +137,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { toast, useToast } from "@/hooks/use-toast";
 
 import { NotificationItem } from "@/lib/types";
 import { driveService } from '@/lib/services/driveServices';
@@ -143,6 +146,7 @@ import { Share } from "next/dist/compiled/@next/font/dist/google";
 import { DataTable } from "./txn/data-table";
 import { columns } from "./txn/columns";
 import { StatCard } from "./stat-card";
+import Cleave from 'cleave.js/react';
 import {
   BarChart,
   Bar,
@@ -159,6 +163,7 @@ import {
   Cell,
 } from 'recharts';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Label as UILabel } from "@/components/ui/label";
 
 interface ModalProps {
   isOpen: boolean;
@@ -326,7 +331,7 @@ interface ActionButton {
   icon?: React.ReactNode;
 }
 
-interface PromptModalProps {
+export interface PromptModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -584,7 +589,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     if (model?.type === 'plus' && userPlan === 'free') {
       setPromptConfig({
         title: "Premium Model",
-        message: "Upgrade to Standard or Plus to use this model",
+        message: "Upgrade Plan to use this model",
         type: "upgrade",
         metadata: {
           plan: "Plus",
@@ -621,7 +626,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
       
       setPromptConfig({
         title: "Model Limit Reached",
-        message: `${userPlan} plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
+        message: `Your current plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
         type: "warning",
         metadata: {
           plan: planUpgrade,
@@ -779,7 +784,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
             {/* Selected Models */}
             <div className="space-y-2">
-              {tempSelectedModels.length > 0 ? (
+              {tempSelectedModels.length > 0 && (
                 <>
                   <label className="text-sm font-medium">Selected Models</label>
                   <div className="flex flex-wrap gap-2">
@@ -793,7 +798,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                         >
                           {model?.name}
                           {model?.type === 'plus' && (
-                            <Crown className="h-3 w-3 text-yellow-500" />
+                            <Gem className="h-3 w-3 text-yellow-500" />
                           )}
                           <X
                             className="h-3 w-3 cursor-pointer hover:text-red-700"
@@ -804,39 +809,8 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                     })}
                   </div>
                 </>
-              ) : (
-                <div className="text-center p-8 space-y-4">
-                  <div className="text-muted-foreground text-sm">
-                    No models selected yet
-                  </div>
-                </div>
               )}
             </div>
-
-            {/* Get Started Section */}
-            {tempSelectedModels.length > MODEL_LIMITS[userPlan] && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-4 rounded-lg border border-primary/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm"
-              >
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="text-sm text-muted-foreground">
-                    Unlock more AI models with Alle-AI
-                  </div>
-                  <a 
-                    href="/get-started" 
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium transition-all hover:from-purple-600 hover:to-pink-600 hover:shadow-lg hover:-translate-y-0.5"
-                  >
-                    Get Started with Alle-AI
-                    <ChevronRight className="h-4 w-4" />
-                  </a>
-                  <span className="text-xs text-muted-foreground opacity-75">
-                    Experience the full power of AI collaboration
-                  </span>
-                </div>
-              </motion.div>
-            )}
 
             {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between">
@@ -901,7 +875,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                     <p className="text-xs flex items-center gap-1 text-muted-foreground whitespace-nowrap">
                       {model.provider}
                       {model.type === 'plus' && (
-                        <Crown className="h-3 w-3 text-yellow-500" />
+                        <Gem className="h-3 w-3 text-yellow-500" />
                     )}
                     </p>
                   </div>
@@ -1028,8 +1002,8 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         enabled: personalization.comparison,
       },
       personalizedAds: {
-        title: "Personalized Ads",
-        description: "See relevant ads based on your conversations and searches. Turning this off will disable ads.",
+        title: "Sponsored content",
+        description: "See relevant contents based on your prompt and responses. Turning this off will disable ads.",
         enabled: personalization.personalizedAds,
       },
     },
@@ -4558,21 +4532,18 @@ export function PromptModal({
           {metadata && (
             <div className="space-y-4 rounded-lg bg-muted/50 p-4">
               {/* Friendly, informative text with inline link */}
-              {metadata.plan && (
                 <div className="text-center space-y-2">
                   <p className="text-sm text-muted-foreground">
                     <a 
                       href="/hub/getting-started" 
                       className="inline-flex items-center gap-1 text-primary hover:underline"
                     >
-                      Read more
+                      Learn more
                       <ChevronRight className="h-3 w-3 inline-block" />
                     </a>
                     {' '}
-                    about this.
                   </p>
                 </div>
-              )}
 
               {metadata.requiredTokens && (
                 <div className="flex items-center justify-between">
@@ -4581,23 +4552,6 @@ export function PromptModal({
                     <span className="text-sm font-medium">{metadata.currentTokens}</span>
                     <ArrowRight className="h-3 w-3" />
                     <span className="text-sm font-medium text-primary">{metadata.requiredTokens}</span>
-                  </div>
-                </div>
-              )}
-
-              {metadata.models && metadata.models.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-sm">Selected Model(s)</span>
-                  <div className="flex flex-wrap gap-2">
-                    {metadata.models.map((model) => (
-                      <Badge 
-                        key={model} 
-                        variant="outline" 
-                        className="text-xs border-borderColorPrimary"
-                      >
-                        {model}
-                      </Badge>
-                    ))}
                   </div>
                 </div>
               )}
@@ -4628,7 +4582,7 @@ export function PromptModal({
                   onClick={action.onClick}
                   variant={action.variant || "default"}
                   className={cn(
-                    "flex-1 gap-2",
+                    "flex-1 gap-2 focus-visible:outline-none",
                     action.variant === 'premium' && "text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                   )}
                 >
@@ -4652,6 +4606,764 @@ export function PromptModal({
           </motion.div>
         )}
       </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
+  const [keyName, setKeyName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const addKey = useApiKeyStore((state) => state.addKey);
+
+  const handleCreateKey = async () => {
+    if (!keyName.trim()) return;
+    
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    addKey({
+      name: keyName,
+      workspace: 'Default',
+      createdBy: 'Pascal',
+      email: 'rogerxt3512@gmail.com',
+    });
+    
+    setIsLoading(false);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5 text-primary" />
+            Create API Key
+          </DialogTitle>
+          <DialogDescription>
+            Create a new API key to use with the Alle-AI API. You can create up to 10 API keys.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Input
+              id="name"
+              placeholder="e.g. Research API Key"
+              value={keyName}
+              onChange={(e) => setKeyName(e.target.value)}
+              className="focus-visible:outline-none focus:border-borderColorPrimary"
+            />
+            <p className="text-[0.8rem] text-muted-foreground">
+              Give your API key a memorable name to identify its use case
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button 
+            onClick={handleCreateKey} 
+            disabled={!keyName.trim() || isLoading}
+            className="gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Loader className="h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Key className="h-4 w-4" />
+                Create Key
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalProps & { keyId: string; initialName: string }) {
+  const [keyName, setKeyName] = useState(initialName);
+  const [isLoading, setIsLoading] = useState(false);
+  const editKeyName = useApiKeyStore((state) => state.editKeyName);
+  const { toast } = useToast();
+
+  const handleEditKey = async () => {
+    if (!keyName.trim()) return;
+    
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    editKeyName(keyId, keyName);
+    
+    toast({
+      title: "API key updated",
+      description: "The API key name has been updated successfully",
+      duration: 2000,
+    });
+    
+    setIsLoading(false);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="h-5 w-5 text-primary" />
+            Edit API Key
+          </DialogTitle>
+          <DialogDescription>
+            Change the name of your API key
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Input
+              id="name"
+              placeholder="e.g. Research API Key"
+              value={keyName}
+              onChange={(e) => setKeyName(e.target.value)}
+            />
+            <p className="text-[0.8rem] text-muted-foreground">
+              Give your API key a memorable name to identify its use case
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button 
+            onClick={handleEditKey} 
+            disabled={!keyName.trim() || isLoading || keyName === initialName}
+            className="gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Loader className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface CardPaymentMethodModalProps extends ModalProps {
+  mode: 'add' | 'pay';
+  onSubmit?: (cardDetails: any) => void;
+  amount?: string;
+}
+
+export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, onSubmit }: CardPaymentMethodModalProps) {
+  const { addPaymentMethod } = usePaymentStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveCard, setSaveCard] = useState(mode === 'add');
+  const { toast } = useToast();
+
+  const [errors, setErrors] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvc: '',
+    cardholderName: ''
+  });
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    email: '',
+    cardNumber: '',
+    expiryDate: '',
+    cvc: '',
+    cardholderName: '',
+    country: ''
+  });
+
+  // Card brand detection
+  const detectCardBrand = (cardNumber: string): 'visa' | 'mastercard' | 'amex' | 'other' => {
+    const cleaned = cardNumber.replace(/\s/g, '');
+    if (/^4/.test(cleaned)) return 'visa';
+    if (/^5[1-5]/.test(cleaned)) return 'mastercard';
+    if (/^3[47]/.test(cleaned)) return 'amex';
+    return 'other';
+  };
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Special handling for different input types
+    let processedValue = value;
+    
+    if (name === 'cardNumber') {
+      // Remove any non-digit characters
+      processedValue = value.replace(/\D/g, '');
+    } else if (name === 'expiryDate') {
+      // Format MM/YY
+      processedValue = value
+        .replace(/\D/g, '')
+        .replace(/^(\d{2})/, '$1/')
+        .substr(0, 5);
+    } else if (name === 'cvc') {
+      // Only allow digits and limit length
+      processedValue = value.replace(/\D/g, '').substr(0, 4);
+    } else if (name === 'cardholderName') {
+      // Capitalize each word
+      processedValue = value
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: processedValue
+    }));
+
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  // Validate card number using Luhn algorithm
+  const validateCardNumber = (number: string) => {
+    const cleaned = number.replace(/\s/g, '');
+    if (!/^\d+$/.test(cleaned)) return false;
+    
+    let sum = 0;
+    let isEven = false;
+    
+    for (let i = cleaned.length - 1; i >= 0; i--) {
+      let digit = parseInt(cleaned[i], 10);
+      
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+      
+      sum += digit;
+      isEven = !isEven;
+    }
+    
+    return sum % 10 === 0;
+  };
+
+  // Validate expiry date
+  const validateExpiryDate = (date: string) => {
+    const [month, year] = date.split('/').map(part => part.trim());
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100;
+    const currentMonth = currentDate.getMonth() + 1;
+
+    
+    const expMonth = parseInt(month, 10);
+    const expYear = parseInt(year, 10);
+    
+    if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({ cardNumber: '', expiryDate: '', cvc: '', cardholderName: '' });
+    
+    // Validation
+    let hasErrors = false;
+    const newErrors = { cardNumber: '', expiryDate: '', cvc: '', cardholderName: '' };
+    
+    if (!validateCardNumber(formData.cardNumber)) {
+      newErrors.cardNumber = 'Invalid card number';
+      hasErrors = true;
+    }
+    
+    if (!validateExpiryDate(formData.expiryDate)) {
+      newErrors.expiryDate = 'Card has expired';
+      hasErrors = true;
+    }
+    
+    if (formData.cvc.length < 3) {
+      newErrors.cvc = 'Invalid CVC';
+      hasErrors = true;
+    }
+    
+    if (formData.cardholderName.trim().length < 3) {
+      newErrors.cardholderName = 'Invalid name';
+      hasErrors = true;
+    }
+    
+    if (hasErrors) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const cardNumber = formData.cardNumber.replace(/\s/g, '');
+      const lastFour = cardNumber.slice(-4);
+      const cardBrand = detectCardBrand(cardNumber);
+
+      if (mode === 'add' || saveCard) {
+        addPaymentMethod({
+          type: 'card',
+          lastFour,
+          expiryDate: formData.expiryDate,
+          cardBrand,
+          isDefault: true
+        });
+      }
+
+      if (mode === 'pay' && onSubmit) {
+        await onSubmit({
+          ...formData,
+          cardBrand,
+          lastFour
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error:', error);
+      // Here you could add error handling/notifications
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] p-0 bg-white dark:bg-zinc-900">
+        <div className="p-8">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-2xl">
+              {mode === 'add' ? 'Add payment method' : 'Pay with card'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email Input */}
+            <div className="space-y-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">
+                Email
+              </label>
+              <Input 
+                name="email"
+                type="email"
+                value={'rogerxt3512@gmail.com'}
+                onChange={handleInputChange}
+                placeholder="email@example.com"
+                className="h-11 bg-white dark:bg-zinc-900 border-gray-300 dark:border-gray-700 focus:border-transparent focus-visible:outline-none"
+                readOnly
+              />
+            </div>
+
+            {/* Card Information Section */}
+            <div className="space-y-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">
+                Card information
+              </label>
+              <div className="space-y-2">
+                {/* Card Number */}
+                <div className="relative">
+                  <Cleave
+                    placeholder="1234 1234 1234 1234"
+                    options={{
+                      creditCard: true,
+                      onCreditCardTypeChanged: (type) => {
+                        console.log('Card type changed:', type);
+                      }
+                    }}
+                    className={cn(
+                      "h-11 w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-700 rounded-md px-3",
+                      "focus:border-borderColorPrimary focus-visible:outline-none pr-12",
+                      errors.cardNumber && "border-red-500"
+                    )}
+                    value={formData.cardNumber}
+                    onChange={(e) => handleInputChange({ target: { name: 'cardNumber', value: e.target.value }} as any)}
+                  />
+                  <div className="absolute right-3 top-2.5 flex gap-1">
+                    <img src="/icons/visa.png" alt="visa" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'visa' ? 'opacity-100' : 'opacity-50'}`} />
+                    <img src="/icons/mastercard.png" alt="mastercard" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'mastercard' ? 'opacity-100' : 'opacity-50'}`} />
+                    <img src="/icons/amex.png" alt="amex" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'amex' ? 'opacity-100' : 'opacity-50'}`} />
+                  </div>
+                </div>
+                {errors.cardNumber && (
+                  <p className="text-sm text-red-500 mt-1">{errors.cardNumber}</p>
+                )}
+
+                {/* Expiry and CVC */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Cleave
+                      placeholder="MM / YY"
+                      options={{
+                        date: true,
+                        datePattern: ['m', 'y']
+                      }}
+                      className={cn(
+                        "h-11 w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-700 rounded-md px-3",
+                        "focus:border-borderColorPrimary focus-visible:outline-none",
+                        errors.expiryDate && "border-red-500"
+                      )}
+                      value={formData.expiryDate}
+                      onChange={(e) => handleInputChange({ target: { name: 'expiryDate', value: e.target.value }} as any)}
+                    />
+                    {errors.expiryDate && (
+                      <p className="text-sm text-red-500 mt-1">{errors.expiryDate}</p>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Input 
+                      name="cvc"
+                      value={formData.cvc}
+                      onChange={handleInputChange}
+                      placeholder="CVC"
+                      className={cn(
+                        "h-11 bg-white dark:bg-zinc-900 border-gray-300 dark:border-gray-700",
+                        "focus:border-borderColorPrimary focus-visible:outline-none",
+                        errors.cvc && "border-red-500"
+                      )}
+                      required
+                    />
+                    <div className="absolute right-3 top-2.5">
+                      <img src="/icons/cvc.png" alt="CVC" className="h-6 w-auto opacity-50" />
+                    </div>
+                    {errors.cvc && (
+                      <p className="text-sm text-red-500 mt-1">{errors.cvc}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cardholder Name */}
+            <div className="space-y-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">
+                Cardholder name
+              </label>
+              <Input 
+                name="cardholderName"
+                value={formData.cardholderName}
+                onChange={handleInputChange}
+                placeholder="Full name on card"
+                className={cn(
+                  "h-11 bg-white dark:bg-zinc-900 border-gray-300 dark:border-gray-700",
+                  "focus:border-borderColorPrimary focus-visible:outline-none",
+                  errors.cardholderName && "border-red-500"
+                )}
+                required
+              />
+              {errors.cardholderName && (
+                <p className="text-sm text-red-500 mt-1">{errors.cardholderName}</p>
+              )}
+            </div>
+
+            {/* Country Selection */}
+            <div className="space-y-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">
+                Country or region
+              </label>
+              <Select>
+                <SelectTrigger className="h-11 bg-white dark:bg-zinc-900 border-gray-300 dark:border-gray-700">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="us">United States</SelectItem>
+                  <SelectItem value="uk">United Kingdom</SelectItem>
+                  <SelectItem value="gh">Ghana</SelectItem>
+                  <SelectItem value="ng">Nigeria</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Save Card Option - Only show in pay mode */}
+            {mode === 'pay' && (
+              <div className="flex items-start space-x-3 pt-4">
+                <Checkbox
+                  id="saveCard"
+                  checked={saveCard}
+                  onCheckedChange={(checked) => setSaveCard(checked as boolean)}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="saveCard"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Save card for future payments
+                  </label>
+                  <p className="text-sm text-muted-foreground">
+                    Save your card details securely to make future purchases faster
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <Button 
+              type="submit"
+              className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              disabled={isLoading}
+              onClick={()=>{
+                mode === 'add' && (
+                  toast({
+                    title: "Success",
+                    description: "Payment method has been added",
+                  })
+                )
+              }}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {mode === 'add' ? 'Adding...' : 'Processing...'}
+                </span>
+              ) : (
+                mode === 'add' ? 'Add payment method' : `Pay ${amount ? `£${amount}` : ''}`
+              )}
+            </Button>
+
+            {/* Terms Text */}
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {mode === 'add' 
+                ? "Your payment information will be stored securely for future transactions."
+                : "By confirming your payment, you allow Alle-AI to charge your card for this transaction."}
+            </p>
+          </form>
+        </div>
+
+        {/* Secure Badge */}
+        <div className="border-t border-gray-200 dark:border-gray-800 p-4">
+          <div className="flex items-center justify-center gap-2">
+            <Lock className="h-4 w-4 text-green-500" />
+            <span className="text-sm text-gray-500">Secure payment</span>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface PaymentOptionsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectMethod: (method: 'card' | 'link' | 'revolut' | 'paypal') => void;
+}
+
+export function PaymentOptionsModal({ isOpen, onClose, onSelectMethod }: PaymentOptionsModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px] p-6">
+        <DialogHeader className="mb-6">
+          <DialogTitle className="text-xl text-center">Add payment method</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {/* Card Option */}
+          <button
+            onClick={() => onSelectMethod('card')}
+            className="w-full p-4 flex items-center gap-4 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all group"
+          >
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <CreditCard className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium">Card</p>
+              <p className="text-sm text-muted-foreground">Pay with credit or debit card</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          </button>
+
+          {/* Link Payment */}
+          <button
+            onClick={() => onSelectMethod('link')}
+            className="w-full p-4 flex items-center gap-4 rounded-lg border border-border hover:border-[#02D132]/50 hover:bg-[#02D132]/5 transition-all group"
+          >
+            <div className="h-10 w-10 rounded-full bg-[#02D132]/10 flex items-center justify-center">
+              <img src="/icons/link.jpeg" alt="Link" className="h-5 w-5 rounded-full" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium">Pay with link</p>
+              <p className="text-sm text-muted-foreground">Pay directly from your bank account</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[#02D132] transition-colors" />
+          </button>
+
+          {/* PayPal */}
+          <button
+            onClick={() => onSelectMethod('paypal')}
+            className="w-full p-4 flex items-center gap-4 rounded-lg border border-border hover:border-[#0070BA]/50 hover:bg-[#0070BA]/5 transition-all group"
+          >
+            <div className="h-10 w-10 rounded-full bg-[#0070BA]/10 flex items-center justify-center">
+              <img src="/icons/paypal.png" alt="PayPal" className="h-5 w-5" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium">PayPal</p>
+              <p className="text-sm text-muted-foreground">Pay with your PayPal account</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[#0070BA] transition-colors" />
+          </button>
+
+          {/* Revolut */}
+          <button
+            onClick={() => onSelectMethod('revolut')}
+            className="w-full p-4 flex items-center gap-4 rounded-lg border border hover:border-[#000]/50 hover:bg-[#000]/5 transition-all group"
+          >
+            <div className="h-10 w-10 rounded-full bg-[#000]/10 flex items-center justify-center">
+              <img src="/icons/revolut.svg" alt="Revolut" className="h-5 w-5" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-white">Revolut Pay</p>
+              <p className="text-sm text-muted-foreground">Pay with your Revolut account</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[#000]/50 transition-colors" />
+          </button>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-border">
+          <div className="flex items-center justify-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Secure payment</span>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BuyCreditsModal({ isOpen, onClose }: ModalProps) {
+  const [amount, setAmount] = useState<string>('10');
+  const [isPaymentOptionsOpen, setIsPaymentOptionsOpen] = useState(false);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const { paymentMethods } = usePaymentStore();
+  const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
+
+  const handlePaymentMethodSelect = (method: 'card' | 'link' | 'revolut' | 'paypal') => {
+    setIsPaymentOptionsOpen(false);
+    if (method === 'card') {
+      setIsCardModalOpen(true);
+    }
+  };
+
+  const handlePayment = () => {
+    console.log('Payment is done')
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle>Buy Credits</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Amount Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Amount</label>
+            <div className="relative">
+              <span className="absolute left-3 top-2 text-muted-foreground">£</span>
+              <Input
+                type="number"
+                min="1"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="pl-7 focus-visible:outline-none focus-borderColorPrimary"
+              />
+            </div>
+          </div>
+
+          {/* Existing Payment Methods */}
+          {paymentMethods.length > 0 && (
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Pay with</label>
+              {paymentMethods.map((method) => (
+                <button
+                  key={method.id}
+                  onClick={() => setSelectedMethodId(method.id)}
+                  className={cn(
+                    "w-full p-3 flex items-center gap-3 rounded-lg border transition-all",
+                    selectedMethodId === method.id 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  {method.type === 'card' ? (
+                    <>
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <CreditCard className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="font-medium">•••• {method.lastFour}</p>
+                        <p className="text-sm text-muted-foreground">Expires {method.expiryDate}</p>
+                      </div>
+                      {method.isDefault && (
+                        <Badge variant="outline" className="ml-auto">Default</Badge>
+                      )}
+                    </>
+                  ) : (
+                    // Similar structure for bank/link payment method
+                    <></>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Add New Payment Method */}
+          <button
+            onClick={() => {
+              setIsPaymentOptionsOpen(true);
+              onClose();
+            }}
+            className="w-full p-3 flex items-center gap-3 rounded-lg border border-dashed border-primary/50 hover:border-primary transition-all text-muted-foreground hover:text-primary"
+          >
+            Use different method
+          </button>
+
+          {/* Pay Button */}
+          <Button 
+            className="w-full"
+            disabled={!selectedMethodId && paymentMethods.length > 0}
+          >
+            Pay £{amount}
+          </Button>
+        </div>
+      </DialogContent>
+
+      {/* Other Modals */}
+      <PaymentOptionsModal 
+        isOpen={isPaymentOptionsOpen}
+        onClose={() => setIsPaymentOptionsOpen(false)}
+        onSelectMethod={handlePaymentMethodSelect}
+      />
+      
+      <CardPaymentMethodModal 
+        isOpen={isCardModalOpen}
+        onClose={() => setIsCardModalOpen(false)}
+        mode="pay"
+        amount={amount}
+        onSubmit={handlePayment}
+      />
     </Dialog>
   );
 }

@@ -1,122 +1,204 @@
 "use client";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { BookText, Code, History, Search } from "lucide-react";
+import { SearchCommand } from "@/components/features/developer/search-command";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+
+interface Guide {
+  title: string;
+  href: string;
+  content?: {
+    title: string;
+    description: string;
+    sections: Array<{
+      id: string;
+      title: string;
+    }>;
+  };
+}
+
+const guides: Guide[] = [
+  { 
+    title: "Initial Setup",
+    href: "/docs/guides/initial-setup",
+    content: {
+      title: "Initial Setup",
+      description: "Register and make a successful API request",
+      sections: [
+        { id: "registration", title: "Registration" },
+        { id: "generate-api-key", title: "Generate an API key" },
+        { id: "make-api-call", title: "Make your API call" }
+      ]
+    }
+  },
+  { 
+    title: "Supported Models",
+    href: "/docs/guides/supported-models",
+    content: {
+      title: "Supported Models",
+      description: "Explore our available AI models",
+      sections: [
+        { id: "available-models", title: "Available Models" },
+        { id: "model-comparison", title: "Model Comparison" },
+        { id: "usage-examples", title: "Usage Examples" }
+      ]
+    }
+  },
+  { title: "Pricing", href: "/docs/guides/pricing" },
+  { title: "Rate Limits and Usage Tiers", href: "/docs/guides/rate-limits" },
+  { title: "Structured Outputs Guide", href: "/docs/guides/structured-outputs" },
+  { title: "Prompt Guide", href: "/docs/guides/prompt-guide" },
+  { title: "PerplexityBot", href: "/docs/guides/perplexity-bot" },
+];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
+  const pathname = usePathname();
+  const [activeSection, setActiveSection] = useState("");
+  const defaultPath = "/docs/guides/initial-setup";
 
-  // Categories data for header
-  const categories = [
-    {
-      name: "Developer Guides",
-      icon: <BookText className="w-5 h-5" />,
-      href: "#",
-    },
-    { name: "API Reference", icon: <Code className="w-5 h-5" />, href: "#" },
-    { name: "Changelogs", icon: <History className="w-5 h-5" />, href: "#" },
+  const navItems = [
+    { name: "Welcome", href: "/docs/getting-started" },
+    { name: "User Guide", href: "/docs/guides" },
+    { name: "API Reference", href: "/docs/api" },
+    { name: "Changelog", href: "/changelog" },
+    { name: "System Status", href: "/status" },
+    { name: "FAQ", href: "/faq" },
+    { name: "Discussions", href: "/discussions" },
   ];
 
-  // Random sidebar data
-  const sidebarLinks = [
-    { name: "Overview", href: "#" },
-    { name: "Getting Started", href: "#" },
-    
-  ];
+  // Only show the three-column layout for guides and API pages
+  const showThreeColumnLayout = pathname.startsWith('/docs/guides') || pathname.startsWith('/docs/api');
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* header desktop */}
-      <header className="flex flex-col justify-between p-4 w-full bg-gray-100 dark:bg-black">
-        {/* Logo and Navigation */}
-        <div className="flex justify-between items-center">
-          <Link href={"/"}>
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 items-center justify-between px-8 max-w-[1400px] mx-auto">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
             <Image
-              src={
-                resolvedTheme === "dark"
-                  ? "/svgs/logo-desktop-full.png"
-                  : "/svgs/logo-desktop-dark-full.png"
-              }
-              alt="all-ai"
-              height={80}
-              width={110}
-              className="h-auto"
+              src={resolvedTheme === "dark" ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+              alt="Logo"
+              height={32}
+              width={32}
+              className="h-8 w-auto"
             />
           </Link>
-          {/* Search Bar */}
-          <div className="flex items-center w-full max-w-md mx-4">
-            <button
-              onClick={() => {
-                // will implement modal here
-              }}
-              className="flex items-center justify-between w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
-            >
-              <Search className="w-5 h-5 dark:text-gray-300 text-gray-600" />
-              <span className="text-sm dark:text-gray-300 text-gray-600">
-                Search
-              </span>
-            </button>
-          </div>
-          {/* nav links */}
-          <div className="flex gap-5 items-center font-medium text-base">
-            <Link
-              className=" font-medium transition duration-200 
-    text-gray-600 dark:text-gray-300 hover:text-gray-800 
-    dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 
-    rounded-lg px-2 py-1"
-              href={"/collection"}
-            >
-              Help Center
-            </Link>
-            <Link
-              href={"/"}
-              className="px-6 py-2 text-sm font-semibold text-blue-500 border border-blue-500 rounded-full hover:bg-blue-500 hover:text-white flex items-center justify-center gap-2 transition duration-200"
-            >
-              Go to ALLE-AI
-            </Link>
+
+          {/* Navigation - centered */}
+          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`transition-colors hover:text-foreground/80 ${
+                  pathname.startsWith(item.href) 
+                    ? "text-foreground font-semibold"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right side items */}
+          <div className="flex items-center space-x-4">
+            <SearchCommand />
             <ThemeToggle />
-          </div>
-        </div>
-        {/* categories section */}
-        <div className="flex gap-3 mt-8">
-          {categories.map((category) => (
             <Link
-              key={category.name}
-              href={category.href}
-              className="flex items-center gap-2 dark:text-gray-400 dark:hover:text-white text-sm font-medium transition duration-200"
+              href="/playground"
+              className="inline-flex items-center justify-center rounded-md bg-[#2DD4BF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2DD4BF]/90"
             >
-              {category.icon}
-              {category.name}
+              Playground
             </Link>
-          ))}
+            {/* API Button */}
+            <Link
+              href="/api"
+              className="inline-flex items-center justify-center rounded-md bg-[#2DD4BF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2DD4BF]/90"
+            >
+              API
+            </Link>
+          </div>
         </div>
       </header>
 
-      {/* sidebar and main content section */}
-      <div className="flex flex-1 w-full h-full">
-        {/* sidebar section */}
-        <div className="w-64 h-full  p-4 overflow-auto">
-          {/* Sidebar content */}
-          <div className="flex flex-col gap-4">
-            {sidebarLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition duration-200"
-              >
-                {link.name}
-              </Link>
-            ))}
+      {/* Main content */}
+      {showThreeColumnLayout ? (
+        <div className="mx-auto w-full max-w-[1400px] flex-1">
+          <div className="flex-1 items-start lg:grid lg:grid-cols-[280px_minmax(0,1fr)_250px] lg:gap-8">
+            {/* Left Navigation */}
+            <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r border-border/40 lg:sticky lg:block">
+              <div className="h-full py-6 pl-8 pr-4">
+                <h2 className="font-medium mb-4">Guides</h2>
+                <nav className="space-y-1">
+                  {guides.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "block py-2 px-3 text-sm transition-all rounded-md",
+                        pathname === item.href
+                          ? "bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-200"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+                      )}
+                    >
+                      {item.title}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+
+            {/* Main content area */}
+            <main className="relative py-6">
+              <ScrollArea className="h-[calc(100vh-3.5rem)]">
+                <div className="px-8">
+                  {children}
+                </div>
+              </ScrollArea>
+            </main>
+
+            {/* Right sidebar - Table of contents */}
+            <aside className="hidden xl:sticky xl:top-14 xl:block xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto">
+              <div className="py-6 pl-4">
+                <h4 className="mb-3 text-sm font-medium">On this page</h4>
+                <nav className="text-sm">
+                  <div className="space-y-1">
+                    {guides.find(g => (pathname === g.href || pathname === "/docs/guides"))?.content?.sections.map((section) => (
+                      <Link 
+                        key={section.id}
+                        href={`#${section.id}`}
+                        className={cn(
+                          "block py-1.5 px-3 rounded-md transition-all",
+                          activeSection === section.id
+                            ? "bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-200"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+                        )}
+                      >
+                        {section.title}
+                      </Link>
+                    ))}
+                  </div>
+                </nav>
+              </div>
+            </aside>
           </div>
         </div>
-
-        {/* main content */}
-        <main className="flex-1 w-full px-4 py-8 max-w-7xl mx-auto">
-          {children}
+      ) : (
+        // Regular single-column layout for home and other pages
+        <main className="flex-1">
+          <div className="mx-auto max-w-4xl py-6 px-8 lg:py-8">
+            {children}
+          </div>
         </main>
-      </div>
+      )}
     </div>
   );
 }

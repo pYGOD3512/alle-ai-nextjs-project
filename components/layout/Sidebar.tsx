@@ -205,16 +205,25 @@ export function Sidebar() {
                   <Plus className={`mr-2 h-4 w-4 ${getSectionStyles(currentType).iconColor} ${getSectionStyles(currentType).iconColor}`} />
                   NEW {currentType.toUpperCase()}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={`${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
-                  onClick={() => setModelSelectionModalOpen(true)}
-                  aria-label="Model Selection"
-                  id="tooltip-select-selector"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
+                        onClick={() => setModelSelectionModalOpen(true)}
+                        aria-label="Model Selection"
+                        id="tooltip-select-selector"
+                      >
+                        <LayoutGrid className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Select models</p>
+                    </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               </div>
 
               <div className="mt-4 px-2 space-y-1" id="tooltip-select-ais">
@@ -302,94 +311,101 @@ export function Sidebar() {
               </div>
               <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
                 <div className="space-y-0.5">
-                  {currentHistory.map((item) => (
-                    <ContextMenu key={item.id}>
-                      <ContextMenuTrigger>
-                        <div 
-                          className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md"
-                          onClick={() => handleHistoryItemClick(item.id)}
-                        >
-                          {editingId === item.id ? (
-                            <Input
-                              value={editingTitle}
-                              onChange={(e) => setEditingTitle(e.target.value)}
-                              onBlur={() => handleRenameSubmit(item.id)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleRenameSubmit(item.id);
-                                if (e.key === 'Escape') setEditingId(null);
-                              }}
-                              autoFocus
-                              className="h-6 text-xs"
-                            />
-                          ) : (
-                            <div className="relative flex-1 min-w-0">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="relative text-xs text-left cursor-pointer">
-                                      <div className="whitespace-nowrap overflow-hidden">
-                                        {item.title.length > 30
-                                          ? `${item.title.substring(0, 30)}`
-                                          : item.title}
-                                        <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
+                  {currentHistory.length > 0 ? (
+                    currentHistory.map((item) => (
+                      <ContextMenu key={item.id}>
+                        <ContextMenuTrigger>
+                          <div 
+                            className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md"
+                            onClick={() => handleHistoryItemClick(item.id)}
+                          >
+                            {editingId === item.id ? (
+                              <Input
+                                value={editingTitle}
+                                onChange={(e) => setEditingTitle(e.target.value)}
+                                onBlur={() => handleRenameSubmit(item.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleRenameSubmit(item.id);
+                                  if (e.key === 'Escape') setEditingId(null);
+                                }}
+                                autoFocus
+                                className="h-6 text-xs"
+                              />
+                            ) : (
+                              <div className="relative flex-1 min-w-0">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="relative text-xs text-left cursor-pointer">
+                                        <div className="whitespace-nowrap overflow-hidden">
+                                          {item.title.length > 30
+                                            ? `${item.title.substring(0, 30)}`
+                                            : item.title}
+                                          <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
+                                        </div>
                                       </div>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent
-                                    side="top"
-                                    className="max-w-[200px] text-xs break-words"
-                                  >
-                                    {item.title}
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          )}
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                      side="top"
+                                      className="max-w-[200px] text-xs break-words"
+                                    >
+                                      {item.title}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            )}
 
-                          <div className="absolute right-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
-                                  aria-label="More Actions"
-                                >
-                                  <EllipsisVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-[160px]">
-                                <DropdownMenuItem onClick={() => handleRename(item.id, item.title)}>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  <span>Rename</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => removeItem(item.id)}
-                                  className="text-red-500"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Delete</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="absolute right-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
+                                    aria-label="More Actions"
+                                  >
+                                    <EllipsisVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-[160px]">
+                                  <DropdownMenuItem onClick={() => handleRename(item.id, item.title)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Rename</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => removeItem(item.id)}
+                                    className="text-red-500"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>Delete</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuContent>
-                        <ContextMenuItem onClick={() => handleRename(item.id, item.title)}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          <span>Rename</span>
-                        </ContextMenuItem>
-                        <ContextMenuItem 
-                          onClick={() => removeItem(item.id)}
-                          className="text-red-500"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                        </ContextMenuItem>
-                      </ContextMenuContent>
-                    </ContextMenu>
-                  ))}
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem onClick={() => handleRename(item.id, item.title)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            <span>Rename</span>
+                          </ContextMenuItem>
+                          <ContextMenuItem 
+                            onClick={() => removeItem(item.id)}
+                            className="text-red-500"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                      {/* <MessageSquare className="w-8 h-8 mb-2" /> */}
+                      <span>No history available</span>
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
             </div>
