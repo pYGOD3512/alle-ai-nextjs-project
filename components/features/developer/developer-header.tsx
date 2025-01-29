@@ -23,7 +23,7 @@ export function DeveloperHeader() {
   return (
   <>
     <header className="fixed top-0 left-0 right-0 bg-backgroundSecondary/95 backdrop-blur-lg supports-[backdrop-filter]:bg-backgroundSecondary/60 z-50">
-      <div className="flex h-14 items-center justify-between px-4 max-w-[1400px] mx-auto">
+      <div className="flex h-14 items-center justify-between px-4 mx-2">
         {/* Left: Logo Section */}
         <div className="w-[200px]">
           <Link href="/developer" className="flex items-center gap-2">

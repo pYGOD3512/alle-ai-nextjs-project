@@ -29,7 +29,6 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
       exit="exit"
       className="space-y-6"
     >
-      <h2 className="text-center text-xl font-semibold">Reset Password</h2>
       <p className="text-center text-sm text-muted-foreground">
         Enter your email address and we'll send you instructions to reset your password.
       </p>
