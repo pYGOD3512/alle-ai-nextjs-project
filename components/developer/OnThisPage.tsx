@@ -22,8 +22,8 @@ const OnThisPage: React.FC = () => {
   }, []);
 
   return (
-    <aside className="w-64 bg-gray-50 p-4 border-l border-gray-300">
-      <h2 className="text-lg font-semibold mb-4">On This Page</h2>
+    <aside className="w-64 ">
+      <h1 className="text-lg font-semibold mb-4">On This Page</h1>
       <ul className="space-y-2">
         {tocItems.map((item) => (
           <li key={item.id}>

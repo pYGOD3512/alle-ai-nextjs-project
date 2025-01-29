@@ -8,53 +8,10 @@ import { SearchCommand } from "@/components/features/developer/search-command";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { guides } from "@/lib/constants/docs";
 
-interface Guide {
-  title: string;
-  href: string;
-  content?: {
-    title: string;
-    description: string;
-    sections: Array<{
-      id: string;
-      title: string;
-    }>;
-  };
-}
 
-const guides: Guide[] = [
-  { 
-    title: "Initial Setup",
-    href: "/docs/guides/initial-setup",
-    content: {
-      title: "Initial Setup",
-      description: "Register and make a successful API request",
-      sections: [
-        { id: "registration", title: "Registration" },
-        { id: "generate-api-key", title: "Generate an API key" },
-        { id: "make-api-call", title: "Make your API call" }
-      ]
-    }
-  },
-  { 
-    title: "Supported Models",
-    href: "/docs/guides/supported-models",
-    content: {
-      title: "Supported Models",
-      description: "Explore our available AI models",
-      sections: [
-        { id: "available-models", title: "Available Models" },
-        { id: "model-comparison", title: "Model Comparison" },
-        { id: "usage-examples", title: "Usage Examples" }
-      ]
-    }
-  },
-  { title: "Pricing", href: "/docs/guides/pricing" },
-  { title: "Rate Limits and Usage Tiers", href: "/docs/guides/rate-limits" },
-  { title: "Structured Outputs Guide", href: "/docs/guides/structured-outputs" },
-  { title: "Prompt Guide", href: "/docs/guides/prompt-guide" },
-  { title: "PerplexityBot", href: "/docs/guides/perplexity-bot" },
-];
+
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
@@ -73,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   // Only show the three-column layout for guides and API pages
-  const showThreeColumnLayout = pathname.startsWith('/docs/guides') || pathname.startsWith('/docs/api');
+  const showThreeColumnLayout = pathname.startsWith('/docs/user-guides') || pathname.startsWith('/docs/api');
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -140,10 +97,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <nav className="space-y-1">
                   {guides.map((item) => (
                     <Link
-                      key={item.href}
-                      href={item.href}
+                      key={item.id}
+                      href={item.id}
                       className={cn(
-                        "block py-2 px-3 text-sm transition-all rounded-md",
+                        "block py-2 text-sm transition-all rounded-md",
                         pathname === item.href
                           ? "bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-200"
                           : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
