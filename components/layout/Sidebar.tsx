@@ -65,7 +65,7 @@ export function Sidebar() {
     // other logics later
     switch (true) {
       case pathname.startsWith("/chat"):
-        router.push("/");
+        router.push("/chat");
         break;
       case pathname.startsWith("/image"):
         router.push("/image");

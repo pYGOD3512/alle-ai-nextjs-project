@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { Sparkles, Wand2, MessagesSquare, Zap } from "lucide-react";
 
 interface option {
-  label: String;
+  label: string;
   icon?: React.ReactNode;
   description?: string;
 }

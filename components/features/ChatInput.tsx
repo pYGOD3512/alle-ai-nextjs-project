@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { ArrowUp, Paperclip, Mic, MicOff, Globe , X } from "lucide-react";
+import { ArrowUp, Paperclip, Globe , X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -248,7 +248,7 @@ export function ChatInput({
   };
 
   const handleSendClick = () => {
-    if ((pathname === "/" && selectedModels.chat.length < 2) || (pathname === "/image" && selectedModels.image.length < 2) ) {
+    if ((pathname === "/chat" && selectedModels.chat.length < 2) || (pathname === "/image" && selectedModels.image.length < 2) ) {
       setShowModelPrompt(true);
       return;
     }
