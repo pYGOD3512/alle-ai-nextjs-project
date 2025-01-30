@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { List } from "lucide-react";
-
+import Link from "next/link";
 interface TableOfContentsProps {
   sections: Array<{ id: string; title: string; level: number }>;
   pathname: string;
@@ -12,25 +12,27 @@ export function OnThisPage({ sections, pathname }: TableOfContentsProps) {
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      let currentSection = "";
-
-      sections.forEach((section) => {
-        const element = document.getElementById(section.id);
-        if (element) {
-          const offsetTop = element.offsetTop - 100; // Adjust for header height
-          if (scrollPosition >= offsetTop) {
-            currentSection = section.id;
+    // Use Intersection Observer for more precise detection of active section
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.target.id) {
+            setActiveSection(entry.target.id);
           }
-        }
-      });
+        });
+      },
+      { rootMargin: "-50px 0px -50% 0px", threshold: 0.1 } // Adjust rootMargin and threshold as needed
+    );
 
-      setActiveSection(currentSection);
-    };
+    sections.forEach((section) => {
+      const element = document.getElementById(section.id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Cleanup on component unmount
+    return () => observer.disconnect();
   }, [sections]);
 
   return (
@@ -46,25 +48,29 @@ export function OnThisPage({ sections, pathname }: TableOfContentsProps) {
         <nav className="text-sm">
           <div className="space-y-1">
             {sections.map((section) => (
-              <a
+              <Link
                 key={section.id}
                 href={`#${section.id}`}
                 className={cn(
                   "block py-1.5 px-3 rounded-md transition-all hover:bg-accent/5 hover:text-accent-foreground",
                   "pl-" + (section.level - 1) * 4,
                   activeSection === section.id
-                    ? "bg-accent text-white"
+                    ? "dark:bg-accent bg-gray-200  rounded-md text-black  dark:text-white"
                     : "text-foreground/80"
                 )}
                 onClick={(e) => {
-                  e.preventDefault(); // Prevent default anchor behavior
+                  e.preventDefault();
                   window.history.pushState({}, "", `#${section.id}`);
                   const element = document.getElementById(section.id);
-                  if (element) element.scrollIntoView({ behavior: "smooth" });
+                  if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                    setActiveSection(section.id); 
+
+                  }
                 }}
               >
                 {section.title}
-              </a>
+              </Link>
             ))}
           </div>
         </nav>
