@@ -22,7 +22,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const { isAuthenticated, setIsAuthenticated, isSubscribed, setIsSubscribed } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +30,8 @@ export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
     try {
       // Simulate some delay to show the spinner
       await new Promise(resolve => setTimeout(resolve, 3000));
-      setIsAuthenticated(true)
+      setIsAuthenticated(true);
+      setIsSubscribed(true);
       console.log("Login attempt:", { email, password });
     } finally {
       setIsLoading(false);

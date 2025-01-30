@@ -1,82 +1,9 @@
-"use client";
+import { MainLayoutClient } from '@/components/MainLayoutClient';
 
-import '@/app/globals.css';
-import React, { useState } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
-import { HelpButton } from '@/components/HelpButton';
-import PlansArea from '@/components/features/plans/PlansArea';
-import { useAuth } from '@/components/providers/authTest';
-import { MaintenancePage } from '@/components/features/maintenance/MaintenancePage';
-import * as Frigade from '@frigade/react';
-import { FooterText } from '@/components/FooterText';
-import { useSidebarStore } from "@/stores";
-import { usePathname } from 'next/navigation';
-
-
-const isMaintenance = false;
-
-export default function RootLayout({
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isSubscribed } = useAuth();
-  const { isOpen } = useSidebarStore();
-  const pathname = usePathname();
-
-  const onRefresh = () => {
-    window.location.reload();
-  }
-
-  // Handle maintenance mode first
-  if (isMaintenance) {
-    return (
-      <MaintenancePage 
-        type="outage"
-        title="Service Unavailable"
-        description="Our service is currently undergoing maintenance. We apologize for the inconvenience."
-        estimatedTime="in approximately 24 hours"
-        showRefreshButton={true}
-        onRefresh={onRefresh}
-      />
-    );
-  }
-
-  return (
-    <>
-      {isSubscribed ? (
-        <Frigade.Provider
-        apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
-        userId="my-user-id">
-          <Frigade.Tour
-            flowId="flow_Nx0Q4Shx" 
-          />
-          <div className="h-screen flex overflow-hidden">
-            <Sidebar />
-            <main className="flex-1 flex flex-col h-full relative">
-              <Header />
-              <div className="flex-1 overflow-auto">
-                {children}
-              </div>
-              <HelpButton />
-              {pathname === "/" && (
-                <FooterText 
-                className={`fixed bottom-0 ${isOpen ? "right-[39%]" : "right-[45%]"} h-6 transition-all duration-300`}
-                />
-              )}
-            </main>
-          </div>
-          </Frigade.Provider>
-      ) : (
-        <div className="h-screen flex overflow-hidden">
-          <main className="flex-1 flex flex-col h-full relative">
-            <Header />
-            <PlansArea />
-            <HelpButton />
-          </main>
-        </div>
-      )}
-    </>
-  );
+  return <MainLayoutClient>{children}</MainLayoutClient>;
 }

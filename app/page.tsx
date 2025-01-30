@@ -9,15 +9,13 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // If authenticated, show the chat interface
     if (isAuthenticated) {
-      router.push('/chat');
+      router.replace('/chat');
     } else {
-      // If not authenticated, redirect to login
-      router.push('/auth');
+      router.replace('/auth');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
-  // You could show a loading state here while the redirect happens
+  // Return null instead of LoadingScreen to avoid client/server mismatch
   return null;
 }

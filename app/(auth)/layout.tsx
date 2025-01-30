@@ -18,6 +18,29 @@ interface Slide {
 
 // Add a new background component
 const AnimatedBackground = () => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Monochromatic gradient mesh background */}
@@ -34,19 +57,19 @@ const AnimatedBackground = () => {
             key={logo}
             className="absolute"
             initial={{ 
-              x: Math.random() * window.innerWidth / 2,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (dimensions.width / 2),
+              y: Math.random() * dimensions.height,
               opacity: 0.8,
               scale: 0.8 + Math.random() * 0.4
             }}
             animate={{ 
               x: [
-                Math.random() * window.innerWidth / 2, 
-                Math.random() * window.innerWidth / 2
+                Math.random() * (dimensions.width / 2), 
+                Math.random() * (dimensions.width / 2)
               ],
               y: [
-                Math.random() * window.innerHeight, 
-                Math.random() * window.innerHeight
+                Math.random() * dimensions.height, 
+                Math.random() * dimensions.height
               ],
               opacity: [0.6, 0.8, 0.6],
               scale: [0.8, 1, 0.8]
@@ -88,14 +111,14 @@ const AnimatedBackground = () => {
               height: 2 + Math.random() * 3 + 'px',
             }}
             initial={{ 
-              x: Math.random() * window.innerWidth / 2,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (dimensions.width / 2),
+              y: Math.random() * dimensions.height,
               scale: 0,
               opacity: 0
             }}
             animate={{
-              x: Math.random() * window.innerWidth / 2,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (dimensions.width / 2),
+              y: Math.random() * dimensions.height,
               scale: [0, 1, 0],
               opacity: [0, 0.7, 0]
             }}
