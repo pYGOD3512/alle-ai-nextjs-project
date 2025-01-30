@@ -63,6 +63,88 @@ export function ChatInput({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handlePaste = async (event: React.ClipboardEvent) => {
+    const items = event.clipboardData.items;
+    
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        const validation = validateFile(file);
+        if (!validation.isValid) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: validation.error
+          });
+          return;
+        }
+
+        try {
+          const fileUrl = URL.createObjectURL(file);
+          
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+
+          const newUploadedFile: UploadedFile = {
+            id: crypto.randomUUID(),
+            name: `IMG ${new Date().toISOString()}.${file.type.split('/')[1]}`,
+            type: file.type,
+            size: file.size,
+            url: fileUrl,
+            status: 'loading',
+            progress: 0
+          };
+
+          setUploadedFile(newUploadedFile);
+
+          let progress = 0;
+          const progressInterval = setInterval(() => {
+            const increment = Math.max(1, (90 - progress) / 10);
+            progress = Math.min(90, progress + increment);
+            
+            setUploadedFile(prev => 
+              prev ? { ...prev, progress } : null
+            );
+          }, 100);
+
+          const { text } = await processFile(file);
+          console.log('content', text);
+
+          clearInterval(progressInterval);
+          
+          setUploadedFile(prev => 
+            prev ? { ...prev, progress: 100 } : null
+          );
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setUploadedFile(prev => 
+            prev ? { ...prev, status: 'ready' } : null
+          );
+
+          toast({
+            title: "Image Uploaded",
+            description: "Image has been uploaded successfully",
+          });
+        } catch (error) {
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+          setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+          toast({
+            variant: "destructive",
+            title: "Processing Failed",
+            description: error instanceof Error ? error.message : "Failed to process file"
+          });
+        }
+      }
+    }
+  };
+
   const handleUploadFromComputer = () => {
     fileInputRef.current?.click();
   };
@@ -287,6 +369,7 @@ export function ChatInput({
                   }
                 }
               }}
+              onPaste={handlePaste}
               rows={1}
               style={{
                 overflowY: value.split('\n').length > 4 || (inputRef?.current?.scrollHeight || 0) > 150 ? 'auto' : 'hidden'

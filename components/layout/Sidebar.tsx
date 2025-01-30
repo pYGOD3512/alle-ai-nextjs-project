@@ -139,9 +139,9 @@ export function Sidebar() {
         };
       case 'video':
         return {
-          bgColor: 'bg-red-500/10',
-          hoverBg: 'hover:bg-red-500/20',
-          iconColor: 'text-red-500'
+          bgColor: 'bg-yellow-500/10',
+          hoverBg: 'hover:bg-yellow-500/20',
+          iconColor: 'text-yellow-500'
         };
       default:
         return {
