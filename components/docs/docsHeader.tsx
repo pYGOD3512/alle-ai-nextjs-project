@@ -10,17 +10,15 @@ export function DocsHeader() {
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
   const navItems = [
-    { name: "Welcome", href: "/docs/getting-started" },
-    { name: "User Guide", href: "/docs/user-guides" },
-    { name: "API Reference", href: "/docs/api" },
-    { name: "Changelog", href: "/changelog" },
-    { name: "System Status", href: "/status" },
+    { name: "Welcome", href: "/docs/getting-started", pageOne: "" },
+    { name: "User Guide", href: "/docs/user-guides", pageOne: "overview" },
+    { name: "API Reference", href: "/docs/api", pageOne: "intro" },
     { name: "FAQ", href: "/faq" },
     { name: "Discussions", href: "/discussions" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 dark:bg-black bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-8 max-w-[1400px] mx-auto">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
@@ -42,7 +40,7 @@ export function DocsHeader() {
           {navItems.map((item) => (
             <Link
               key={item.name}
-              href={item.href}
+              href={`${item.href}/${item.pageOne}`}
               className={`transition-colors hover:text-foreground/80 ${
                 pathname.startsWith(item.href)
                   ? "text-foreground font-semibold"
@@ -60,13 +58,13 @@ export function DocsHeader() {
           <ThemeToggle />
           <Link
             href="/playground"
-            className="inline-flex items-center justify-center rounded-md bg-[#2DD4BF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2DD4BF]/90"
+            className="inline-flex items-center justify-center rounded-md bg-black  dark:bg-white dark:text-black px-4 py-2 text-sm font-medium text-white transition-colors "
           >
             Playground
           </Link>
           <Link
             href="/api"
-            className="inline-flex items-center justify-center rounded-md bg-[#2DD4BF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2DD4BF]/90"
+            className="inline-flex items-center justify-center rounded-md bg-black  dark:bg-white dark:text-black px-4 py-2 text-sm font-medium text-white transition-colors "
           >
             API
           </Link>

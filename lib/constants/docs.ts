@@ -11,7 +11,7 @@ interface Guide {
   description?: string; 
   sections: GuideSection[];
 }
-
+const href = "/docs/user-guides";
 // user guides
 export const guides: Guide[] = [
   {
@@ -22,17 +22,17 @@ export const guides: Guide[] = [
       {
         id: "overview",
         title: "Platform Overview",
-        href: "/aioew",
+        href: href,
       },
       {
         id: "account-setup",
         title: "Account Setup & Login",
-        href: "/account-setup",
+        href: href,
       },
       {
         id: "first-steps",
         title: "Your First Interaction",
-        href: "/first-steps",
+        href: href,
       },
     ],
   },
@@ -44,27 +44,27 @@ export const guides: Guide[] = [
       {
         id: "text-generation",
         title: "Text Generation",
-        href: "/afdioa",
+        href: href,
       },
       {
         id: "audio-generation",
         title: "Audio Generation",
-        href: "/dao",
+        href: href,
       },
       {
         id: "video-generation",
         title: "Video Generation",
-        href: "/daiod",
+        href: href,
       },
       {
         id: "file-uploads",
         title: "Working with Files",
-        href: "/file-uploads",
+        href: href,
       },
       {
         id: "collaborations",
         title: "Collaborating with Others",
-        href: "/collaborations",
+        href: href,
       },
     ],
   },
@@ -76,17 +76,17 @@ export const guides: Guide[] = [
       {
         id: "premium-models",
         title: "Premium Models",
-        href: "",
+        href: href,
       },
       {
         id: "free-models",
         title: "Free Models",
-        href: "/adaio",
+        href: href,
       },
       {
         id: "model-comparison",
         title: "Comparing Models",
-        href: "/model-comparison",
+        href: href,
       },
     ],
   },
@@ -98,12 +98,12 @@ export const guides: Guide[] = [
       {
         id: "price-plans",
         title: "Alle-AI Pricing Plans",
-        href: "/ffda",
+        href: href,
       },
       {
         id: "billing-faq",
         title: "Billing FAQs",
-        href: "/billing-faq",
+        href: href,
       },
     ],
   },
@@ -116,17 +116,17 @@ export const guides: Guide[] = [
       {
         id: "prompt-engineering",
         title: "Prompt Engineering",
-        href: "/ab",
+        href: href,
       },
       {
         id: "fine-tuning-inputs",
         title: "Fine-tuning Inputs",
-        href: "/cd",
+        href: href,
       },
       {
         id: "settings-preferences",
         title: "Settings & Preferences",
-        href: "/settings-preferences",
+        href: href,
       },
     ],
   },
@@ -138,17 +138,17 @@ export const guides: Guide[] = [
       {
         id: "faq",
         title: "Frequently Asked Questions (FAQ)",
-        href: "/faq",
+        href: href,
       },
       {
         id: "contact-us",
         title: "Contact Us",
-        href: "/contact-us",
+        href: href,
       },
       {
         id: "community-forum",
         title: "Community Forum",
-        href: "/community-forum",
+        href: href,
       },
     ],
   },
@@ -160,12 +160,12 @@ export const guides: Guide[] = [
       {
         id: "new-features",
         title: "New Features & Updates",
-        href: "/fb",
+        href: href,
       },
       {
         id: "release-notes",
         title: "Release Notes",
-        href: "/release-notes",
+        href: href,
       },
     ],
   },
