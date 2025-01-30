@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { toast, useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/components/providers/authTest';
+
 
 
 interface VerificationCodeFormProps {
@@ -21,6 +23,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   const [countdown, setCountdown] = useState(30);
   const [isResending, setIsResending] = useState(false);
   const { toast } = useToast();
+    const { isAuthenticated, setIsAuthenticated } = useAuth();
   
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -62,6 +65,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   };
 
   const handleVerify = async (verificationCode: string) => {
+    setIsAuthenticated(true);
     setIsVerifying(true);
     setError('');
 

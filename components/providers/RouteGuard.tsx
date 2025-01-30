@@ -6,47 +6,77 @@ import { publicRoutes, privateRoutes } from './authTest';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { NotFoundPage } from '@/components/features/not-found/404';
 import { useAuth } from './authTest';
+import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 export function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [authorized, setAuthorized] = useState(false);
   const [isValidRoute, setIsValidRoute] = useState(true);
-  const { isSubscribed } = useAuth();
+  const [isChecking, setIsChecking] = useState(true);
+  const { isSubscribed, isAuthenticated } = useAuth();
   
   usePageTitle();
 
   useEffect(() => {
-    const matchRoute = (route: string): boolean => {
-      if (route === pathname) return true;
-      if (route.endsWith('/*') && pathname.startsWith(route.slice(0, -2))) return true;
-      return false;
+    const checkAuthorization = async () => {
+      setIsChecking(true);
+      
+      const matchRoute = (route: string): boolean => {
+        if (route === pathname) return true;
+        if (route.endsWith('/*') && pathname.startsWith(route.slice(0, -2))) return true;
+        return false;
+      };
+
+      const isPublicRoute = publicRoutes.some(route => matchRoute(route));
+      const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
+
+      // Allow access to auth routes when not authenticated
+      if (pathname.startsWith('/auth')) {
+        if (isAuthenticated) {
+          router.replace('/chat');
+          setAuthorized(false);
+        } else {
+          setAuthorized(true);
+        }
+        setIsChecking(false);
+        return;
+      }
+
+      // Check authentication for non-public routes
+      if (!isAuthenticated && !isPublicRoute) {
+        router.replace('/auth');
+        setAuthorized(false);
+        setIsChecking(false);
+        return;
+      }
+
+      // Check subscription for private routes
+      if (isPrivateRoute && !isSubscribed) {
+        router.replace('/plans');
+        setAuthorized(false);
+        setIsChecking(false);
+        return;
+      }
+
+      // Valid route and authorized
+      setIsValidRoute(true);
+      setAuthorized(true);
+      setIsChecking(false);
     };
 
-    const isPublicRoute = publicRoutes.some(route => matchRoute(route));
-    const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
+    // Add a minimum delay to prevent flash
+    const minDelay = 1000; // 1 second minimum loading time
+    const timer = setTimeout(() => {
+      checkAuthorization();
+    }, minDelay);
 
-    // Route doesn't exist at all
-    // if (!isPublicRoute && !isPrivateRoute) {
-    //   setIsValidRoute(false);
-    //   setAuthorized(true);
-    //   return;
-    // }
+    return () => clearTimeout(timer);
+  }, [pathname, router, isAuthenticated, isSubscribed]);
 
-    // Route exists but is private and user isn't subscribed
-    if (isPrivateRoute && !isSubscribed) {
-      router.replace('/');
-      return;
-    }
-
-    // Valid route and authorized
-    setIsValidRoute(true);
-    setAuthorized(true);
-  }, [pathname, router, isSubscribed]);
-
-  // Show nothing while checking authorization
-  if (!authorized) {
-    return null;
+  // Only show loading screen during initial check
+  if (isChecking) {
+    return <LoadingScreen />;
   }
 
   // Show 404 for invalid routes
@@ -61,5 +91,5 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   }
 
   // Show the actual content for valid routes
-  return <>{children}</>;
+  return authorized ? children : null;
 }

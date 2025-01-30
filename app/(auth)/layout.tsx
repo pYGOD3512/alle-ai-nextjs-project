@@ -6,6 +6,9 @@ import { useTheme } from 'next-themes';
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useAuth } from '@/components/providers/authTest';
+import { useRouter } from 'next/navigation';
+
 
 // Define the slides interface
 interface Slide {
@@ -15,6 +18,29 @@ interface Slide {
 
 // Add a new background component
 const AnimatedBackground = () => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Monochromatic gradient mesh background */}
@@ -31,19 +57,19 @@ const AnimatedBackground = () => {
             key={logo}
             className="absolute"
             initial={{ 
-              x: Math.random() * window.innerWidth / 2,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (dimensions.width / 2),
+              y: Math.random() * dimensions.height,
               opacity: 0.8,
               scale: 0.8 + Math.random() * 0.4
             }}
             animate={{ 
               x: [
-                Math.random() * window.innerWidth / 2, 
-                Math.random() * window.innerWidth / 2
+                Math.random() * (dimensions.width / 2), 
+                Math.random() * (dimensions.width / 2)
               ],
               y: [
-                Math.random() * window.innerHeight, 
-                Math.random() * window.innerHeight
+                Math.random() * dimensions.height, 
+                Math.random() * dimensions.height
               ],
               opacity: [0.6, 0.8, 0.6],
               scale: [0.8, 1, 0.8]
@@ -85,14 +111,14 @@ const AnimatedBackground = () => {
               height: 2 + Math.random() * 3 + 'px',
             }}
             initial={{ 
-              x: Math.random() * window.innerWidth / 2,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (dimensions.width / 2),
+              y: Math.random() * dimensions.height,
               scale: 0,
               opacity: 0
             }}
             animate={{
-              x: Math.random() * window.innerWidth / 2,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * (dimensions.width / 2),
+              y: Math.random() * dimensions.height,
               scale: [0, 1, 0],
               opacity: [0, 0.7, 0]
             }}
@@ -165,6 +191,16 @@ export default function AuthLayout({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFirstAnimationComplete, setIsFirstAnimationComplete] = useState(false);
   const [isSecondAnimationComplete, setIsSecondAnimationComplete] = useState(false);
+
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  
+  useEffect(() => {
+    // Redirect to chat if already authenticated
+    if (isAuthenticated) {
+      router.replace('/chat');
+    }
+  }, [isAuthenticated, router]);
   
   // Define your slides with the new prop
   const slides: Slide[] = [
@@ -215,12 +251,12 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left side - Auth Forms */}
-      <div className="w-1/2 p-10 mt-10">
+      <div className="w-full md:w-1/2 p-10 mt-10">
         {children}
       </div>
       
-      {/* Updated right side */}
-      <div className="w-1/2 relative overflow-hidden bg-background cursor-none">
+      {/* Updated right side - hidden on mobile */}
+      <div className="hidden md:block w-1/2 relative overflow-hidden bg-background cursor-none">
         <AnimatedBackground />
         
         {/* Content wrapper with glassmorphism */}
