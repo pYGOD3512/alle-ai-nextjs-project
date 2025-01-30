@@ -19,7 +19,7 @@ export const publicRoutes = ['/', '/auth', '/plans', '/pricing', '/login', '/reg
 export const privateRoutes = ['/chat', '/image', '/video', '/audio', '/text', '/changelog'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Optional: Combine authentication state changes into single functions
