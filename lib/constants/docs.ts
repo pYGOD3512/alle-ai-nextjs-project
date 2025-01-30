@@ -17,7 +17,7 @@ export const guides: Guide[] = [
   {
     id: "getting-started",
     title: "Getting Started",
-    description: "Learn the basics of using Alle-AI.",
+    description: "Learn the basics of using Alle-AI",
     sections: [
       {
         id: "overview",
@@ -39,7 +39,7 @@ export const guides: Guide[] = [
   {
     id: "platform-usage",
     title: "How to Use the Platform",
-    description: "Explore the core functionalities of Alle-AI.",
+    description: "Explore the core functionalities of Alle-AI",
     sections: [
       {
         id: "text-generation",
@@ -71,7 +71,7 @@ export const guides: Guide[] = [
   {
     id: "models",
     title: "Supported Models",
-    description: "Understand the different AI models available on Alle-AI.",
+    description: "Understand the different AI models available on Alle-AI",
     sections: [
       {
         id: "premium-models",
@@ -93,7 +93,7 @@ export const guides: Guide[] = [
   {
     id: "pricing",
     title: "Pricing",
-    description: "Learn about Alle-AI's pricing plans and options.",
+    description: "Learn about Alle-AI's pricing plans and options",
     sections: [
       {
         id: "price-plans",
@@ -110,7 +110,7 @@ export const guides: Guide[] = [
   {
     id: "customization",
     title: "Customization & Control",
-    description: "Master techniques to refine your AI interactions.",
+    description: "Master techniques to refine your AI interactions",
     href: "/docs/user-guides/error-handling",
     sections: [
       {
@@ -133,7 +133,7 @@ export const guides: Guide[] = [
   {
     id: "support",
     title: "Support & Resources",
-    description: "Find help and resources to assist you with Alle-AI.",
+    description: "Find help and resources to assist you with Alle-AI",
     sections: [
       {
         id: "faq",
@@ -155,7 +155,7 @@ export const guides: Guide[] = [
   {
     id: "updates",
     title: "Updates",
-    description: "Stay informed about the latest features and improvements.",
+    description: "Stay informed about the latest features and improvements",
     sections: [
       {
         id: "new-features",

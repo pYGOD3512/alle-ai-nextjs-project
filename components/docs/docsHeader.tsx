@@ -18,7 +18,7 @@ export function DocsHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 dark:bg-black bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-sideBarBackground backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-8 max-w-[1400px] mx-auto">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">

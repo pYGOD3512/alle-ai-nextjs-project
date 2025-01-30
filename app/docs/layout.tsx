@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -74,7 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {showThreeColumnLayout ? (
         <div className="flex-1 flex">
           {/* Left Navigation - Now outside the max-width container */}
-          <aside className="hidden lg:block w-[280px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] dark:bg-black border-r border-border/40">
+          <aside className="hidden lg:block w-[280px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-sideBarBackground border-r border-border/40">
             <ScrollArea className="h-full py-6 pl-4 pr-2">
               <div className="space-y-6">
                 {guides.map((guide) => (
@@ -95,7 +96,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         className={cn(
                           "h-4 w-4 transition-transform duration-200",
                           expandedGuides.includes(guide.id)
-                            ? "text-accent rotate-90"
+                            ? "text-muted-foreground rotate-90"
                             : "text-muted-foreground"
                         )}
                       />

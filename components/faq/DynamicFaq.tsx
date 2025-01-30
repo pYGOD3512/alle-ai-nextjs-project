@@ -3,6 +3,7 @@ import { FC } from "react";
 
 // available faq pages
 const faqComponents = {
+  // help center pages
   "reset-password": dynamic(
     () => import("@/components/faq/account/reset-password")
   ),
@@ -37,6 +38,9 @@ const faqComponents = {
   "models-selection": dynamic(
     () => import("@/components/faq/others/models-selection")
   ),
+
+  // docs center pages
+  overview: dynamic(() => import("@/components/docs/user-guides/Overview")),
 };
 
 interface DynamicFaqProps {
