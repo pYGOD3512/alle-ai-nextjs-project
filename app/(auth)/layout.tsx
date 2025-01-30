@@ -6,6 +6,9 @@ import { useTheme } from 'next-themes';
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useAuth } from '@/components/providers/authTest';
+import { useRouter } from 'next/navigation';
+
 
 // Define the slides interface
 interface Slide {
@@ -165,6 +168,16 @@ export default function AuthLayout({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFirstAnimationComplete, setIsFirstAnimationComplete] = useState(false);
   const [isSecondAnimationComplete, setIsSecondAnimationComplete] = useState(false);
+
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  
+  useEffect(() => {
+    // Redirect to chat if already authenticated
+    if (isAuthenticated) {
+      router.replace('/chat');
+    }
+  }, [isAuthenticated, router]);
   
   // Define your slides with the new prop
   const slides: Slide[] = [
@@ -215,12 +228,12 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left side - Auth Forms */}
-      <div className="w-1/2 p-10 mt-10">
+      <div className="w-full md:w-1/2 p-10 mt-10">
         {children}
       </div>
       
-      {/* Updated right side */}
-      <div className="w-1/2 relative overflow-hidden bg-background cursor-none">
+      {/* Updated right side - hidden on mobile */}
+      <div className="hidden md:block w-1/2 relative overflow-hidden bg-background cursor-none">
         <AnimatedBackground />
         
         {/* Content wrapper with glassmorphism */}

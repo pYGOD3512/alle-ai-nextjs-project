@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { GoogleButton } from "./GoogleButton";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useAuth } from '@/components/providers/authTest';
+
+
 
 
 
@@ -20,15 +22,15 @@ export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       // Simulate some delay to show the spinner
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.push('/ai');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setIsAuthenticated(true)
       console.log("Login attempt:", { email, password });
     } finally {
       setIsLoading(false);
