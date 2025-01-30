@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/authTest';
+import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
+
 
 export default function HomePage() {
   const router = useRouter();

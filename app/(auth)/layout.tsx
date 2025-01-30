@@ -19,13 +19,27 @@ interface Slide {
 // Add a new background component
 const AnimatedBackground = () => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setDimensions({
       width: window.innerWidth,
       height: window.innerHeight
     });
+
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className="absolute inset-0 overflow-hidden">

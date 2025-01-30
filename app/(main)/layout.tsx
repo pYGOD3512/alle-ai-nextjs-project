@@ -45,38 +45,28 @@ export default function RootLayout({
 
   return (
     <>
-      {isSubscribed ? (
-        <Frigade.Provider
-        apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
-        userId="my-user-id">
-          <Frigade.Tour
-            flowId="flow_Nx0Q4Shx" 
-          />
-          <div className="h-screen flex overflow-hidden">
-            <Sidebar />
-            <main className="flex-1 flex flex-col h-full relative">
-              <Header />
-              <div className="flex-1 overflow-auto">
-                {children}
-              </div>
-              <HelpButton />
-              {pathname === "/" && (
-                <FooterText 
-                className={`fixed bottom-0 ${isOpen ? "right-[39%]" : "right-[45%]"} h-6 transition-all duration-300`}
-                />
-              )}
-            </main>
-          </div>
-          </Frigade.Provider>
-      ) : (
+      <Frigade.Provider
+      apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
+      userId="my-user-id">
+        <Frigade.Tour
+          flowId="flow_Nx0Q4Shx" 
+        />
         <div className="h-screen flex overflow-hidden">
+          <Sidebar />
           <main className="flex-1 flex flex-col h-full relative">
             <Header />
-            <PlansArea />
+            <div className="flex-1 overflow-auto">
+              {children}
+            </div>
             <HelpButton />
+            {pathname === "/" && (
+              <FooterText 
+              className={`fixed bottom-0 ${isOpen ? "right-[39%]" : "right-[45%]"} h-6 transition-all duration-300`}
+              />
+            )}
           </main>
         </div>
-      )}
+        </Frigade.Provider>
     </>
   );
 }
