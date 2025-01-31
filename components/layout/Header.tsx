@@ -33,7 +33,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/components/providers/AuthProvider';
-import { AuthSwitch } from "../ui/authSwitch";
 import { NotificationsPanel } from "@/components/NotificationWindow";
 import { NotificationModal } from "@/components/ui/modals";
 import { useRouter } from "next/navigation";
@@ -412,7 +411,6 @@ export function Header() {
           
 
           <div className={`flex items-center gap-2 ${!pathname.includes('/plans') ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            {/* <AuthSwitch /> */}
             {pathname.includes("/chat") && (
               <Button
               variant={'outline'}
