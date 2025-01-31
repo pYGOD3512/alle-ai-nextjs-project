@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { ArrowUp, Paperclip, Mic, MicOff, Globe , X } from "lucide-react";
+import { ArrowUp, Paperclip, Globe , X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -62,6 +62,88 @@ export function ChatInput({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePaste = async (event: React.ClipboardEvent) => {
+    const items = event.clipboardData.items;
+    
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        const validation = validateFile(file);
+        if (!validation.isValid) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: validation.error
+          });
+          return;
+        }
+
+        try {
+          const fileUrl = URL.createObjectURL(file);
+          
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+
+          const newUploadedFile: UploadedFile = {
+            id: crypto.randomUUID(),
+            name: `IMG ${new Date().toISOString()}.${file.type.split('/')[1]}`,
+            type: file.type,
+            size: file.size,
+            url: fileUrl,
+            status: 'loading',
+            progress: 0
+          };
+
+          setUploadedFile(newUploadedFile);
+
+          let progress = 0;
+          const progressInterval = setInterval(() => {
+            const increment = Math.max(1, (90 - progress) / 10);
+            progress = Math.min(90, progress + increment);
+            
+            setUploadedFile(prev => 
+              prev ? { ...prev, progress } : null
+            );
+          }, 100);
+
+          const { text } = await processFile(file);
+          console.log('content', text);
+
+          clearInterval(progressInterval);
+          
+          setUploadedFile(prev => 
+            prev ? { ...prev, progress: 100 } : null
+          );
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setUploadedFile(prev => 
+            prev ? { ...prev, status: 'ready' } : null
+          );
+
+          toast({
+            title: "Image Uploaded",
+            description: "Image has been uploaded successfully",
+          });
+        } catch (error) {
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+          setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+          toast({
+            variant: "destructive",
+            title: "Processing Failed",
+            description: error instanceof Error ? error.message : "Failed to process file"
+          });
+        }
+      }
+    }
+  };
 
   const handleUploadFromComputer = () => {
     fileInputRef.current?.click();
@@ -248,7 +330,7 @@ export function ChatInput({
   };
 
   const handleSendClick = () => {
-    if ((pathname === "/" && selectedModels.chat.length < 2) || (pathname === "/image" && selectedModels.image.length < 2) ) {
+    if ((pathname === "/chat" && selectedModels.chat.length < 2) || (pathname === "/image" && selectedModels.image.length < 2) ) {
       setShowModelPrompt(true);
       return;
     }
@@ -287,6 +369,7 @@ export function ChatInput({
                   }
                 }
               }}
+              onPaste={handlePaste}
               rows={1}
               style={{
                 overflowY: value.split('\n').length > 4 || (inputRef?.current?.scrollHeight || 0) > 150 ? 'auto' : 'hidden'
@@ -330,20 +413,23 @@ export function ChatInput({
                 <MicButton 
                   isListening={isListening} 
                   onClick={toggleListening}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-white dark:text-black bg-bodyColor hover:bg-opacity-70 transition-all duration-200 ${
+                    !isInputEmpty
+                      && "hidden"
+                      }`}
                 />
                 
                 <Button
                   onClick={handleSendClick}
-                  size= {pathname === '/' ? `icon` : null}
-                  className={`flex-shrink-0 ${pathname === '/' ? "rounded-full h-8 w-8" : "rounded-md"} ${
+                  size= {pathname.startsWith('/chat') ? `icon` : `default`}
+                  className={`flex-shrink-0 ${pathname.startsWith('/chat') ? "rounded-full h-8 w-8" : "rounded-md"} ${
                     isInputEmpty
                       ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
                       : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
                   }`}
                   disabled={isInputEmpty || isLoading}
                 >
-                  {pathname === '/' ? <ArrowUp className="h-4 w-4" /> : 'Generate' }
+                  {pathname.startsWith('/chat') ? <ArrowUp className="h-4 w-4" /> : 'Generate' }
                 </Button>
               </div>
             </div>

@@ -1,9 +1,14 @@
 "use client";
 
-import { ChatArea } from "@/components/features/ChatArea";
+import { useSidebarStore } from "@/stores";
+import { useEffect } from "react";
 
-const ChatPage = () => {
-  return <ChatArea />;
+export default function ChatPage() {
+  const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+
+  useEffect(() => {
+    setCurrentPage("chat");
+  }, [setCurrentPage]);
+
+  return null;
 }
-
-export default ChatPage

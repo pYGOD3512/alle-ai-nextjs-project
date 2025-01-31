@@ -161,6 +161,88 @@ export function AudioArea() {
     }
   };
 
+  const handlePaste = async (event: React.ClipboardEvent) => {
+    const items = event.clipboardData.items;
+    
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        const validation = validateFile(file);
+        if (!validation.isValid) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: validation.error
+          });
+          return;
+        }
+
+        try {
+          const fileUrl = URL.createObjectURL(file);
+          
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+
+          const newUploadedFile: UploadedFile = {
+            id: crypto.randomUUID(),
+            name: `IMG ${new Date().toISOString()}.${file.type.split('/')[1]}`,
+            type: file.type,
+            size: file.size,
+            url: fileUrl,
+            status: 'loading',
+            progress: 0
+          };
+
+          setUploadedFile(newUploadedFile);
+
+          let progress = 0;
+          const progressInterval = setInterval(() => {
+            const increment = Math.max(1, (90 - progress) / 10);
+            progress = Math.min(90, progress + increment);
+            
+            setUploadedFile(prev => 
+              prev ? { ...prev, progress } : null
+            );
+          }, 100);
+
+          const { text } = await processFile(file);
+          console.log('content', text);
+
+          clearInterval(progressInterval);
+          
+          setUploadedFile(prev => 
+            prev ? { ...prev, progress: 100 } : null
+          );
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setUploadedFile(prev => 
+            prev ? { ...prev, status: 'ready' } : null
+          );
+
+          toast({
+            title: "Image Uploaded",
+            description: "Image has been uploaded successfully",
+          });
+        } catch (error) {
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+          setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+          toast({
+            variant: "destructive",
+            title: "Processing Failed",
+            description: error instanceof Error ? error.message : "Failed to process file"
+          });
+        }
+      }
+    }
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -581,6 +663,7 @@ export function AudioArea() {
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Describe your audio..."
+                onPaste={handlePaste}
                 className="bg-backgroundSecondary flex-1 min-h-[100px] resize-none border-borderColorPrimary focus-visible:outline-none focus:border-2 scrollbar-thin scrollbar-webkit"
               />
             </div>
@@ -612,7 +695,7 @@ export function AudioArea() {
                 }
               />
 
-              <MicButton className={`w-10 h-10 rounded-md ${isListening ? "border-none" : "border border-borderColorPrimary"} `} isListening={isListening} onClick={toggleListening} />
+              <MicButton className={`w-10 h-10 bg-transparent rounded-md text-black dark:text-white ${isListening ? "border-none" : "border border-borderColorPrimary"} `} isListening={isListening} onClick={toggleListening} />
               
               <div className="ml-auto text-sm text-muted-foreground">
                 {/* Requests left: {credits} */}
