@@ -136,6 +136,7 @@ const VideoResponse = React.memo(({
     setIsFullscreen
   } = useVideoControls();
 
+
   // Calculate progress percentage
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
@@ -181,6 +182,7 @@ const VideoResponse = React.memo(({
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
 
   const togglePlay = useCallback(() => {
     if (videoRef.current) {
@@ -375,6 +377,88 @@ const VideoArea = () => {
   const showSettingInfo = (setting: 'aspectRatio' | 'quality' | 'duration' | 'display') => {
     setCurrentSettingInfo(setting);
     setInfoModalOpen(true);
+  };
+
+  const handlePaste = async (event: React.ClipboardEvent) => {
+    const items = event.clipboardData.items;
+    
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        const validation = validateFile(file);
+        if (!validation.isValid) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: validation.error
+          });
+          return;
+        }
+
+        try {
+          const fileUrl = URL.createObjectURL(file);
+          
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+
+          const newUploadedFile: UploadedFile = {
+            id: crypto.randomUUID(),
+            name: `IMG ${new Date().toISOString()}.${file.type.split('/')[1]}`,
+            type: file.type,
+            size: file.size,
+            url: fileUrl,
+            status: 'loading',
+            progress: 0
+          };
+
+          setUploadedFile(newUploadedFile);
+
+          let progress = 0;
+          const progressInterval = setInterval(() => {
+            const increment = Math.max(1, (90 - progress) / 10);
+            progress = Math.min(90, progress + increment);
+            
+            setUploadedFile(prev => 
+              prev ? { ...prev, progress } : null
+            );
+          }, 100);
+
+          const { text } = await processFile(file);
+          console.log('content', text);
+
+          clearInterval(progressInterval);
+          
+          setUploadedFile(prev => 
+            prev ? { ...prev, progress: 100 } : null
+          );
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setUploadedFile(prev => 
+            prev ? { ...prev, status: 'ready' } : null
+          );
+
+          toast({
+            title: "Image Uploaded",
+            description: "Image has been uploaded successfully",
+          });
+        } catch (error) {
+          if (uploadedFile?.url) {
+            URL.revokeObjectURL(uploadedFile.url);
+          }
+          setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
+          toast({
+            variant: "destructive",
+            title: "Processing Failed",
+            description: error instanceof Error ? error.message : "Failed to process file"
+          });
+        }
+      }
+    }
   };
 
   const formatDuration = (seconds: number) => {
@@ -985,6 +1069,7 @@ const VideoArea = () => {
                   placeholder="Describe your video..."
                   className="flex-1 bg-transparent border-0 outline-none text-base resize-none overflow-auto min-h-[2rem] max-h-[10rem] p-0 focus:border-0 focus:ring-0"
                   value={prompt}
+                  onPaste={handlePaste}
                   onChange={(e) => {
                     e.target.style.height = 'inherit';
                     e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
@@ -1003,7 +1088,12 @@ const VideoArea = () => {
                   }}
                 />
 
-                <MicButton isListening={isListening} onClick={toggleListening} />
+                <MicButton isListening={isListening} onClick={toggleListening} 
+                className={`rounded-full h-8 w-8 bg-bodyColor hover:bg-opacity-70 transition-all duration-200 text-white dark:text-black ${
+                    prompt.trim()
+                      && "hidden"
+                      }`}
+                />
 
                 <div className="flex items-center gap-2">
                   <Button 

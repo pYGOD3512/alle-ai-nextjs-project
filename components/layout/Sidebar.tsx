@@ -65,7 +65,7 @@ export function Sidebar() {
     // other logics later
     switch (true) {
       case pathname.startsWith("/chat"):
-        router.push("/");
+        router.push("/chat");
         break;
       case pathname.startsWith("/image"):
         router.push("/image");
@@ -77,14 +77,14 @@ export function Sidebar() {
         router.push("/video");
         break;
       default:
-        router.push("/");
+        router.push("/chat");
     }
   };
   // active helper 
  const isActiveRoute = (itemHref: string, pathname: string): boolean => {
    // Exact match for specific routes
-   if (itemHref === "/")
-     return pathname === "/" || pathname.startsWith("/chat/res");
+   if (itemHref === "/chat")
+     return pathname === "/chat" || pathname.startsWith("/chat/res");
    if (itemHref === "/image")
      return pathname === "/image" || pathname.startsWith("/image/res");
    if (itemHref === "/audio")
@@ -139,9 +139,9 @@ export function Sidebar() {
         };
       case 'video':
         return {
-          bgColor: 'bg-red-500/10',
-          hoverBg: 'hover:bg-red-500/20',
-          iconColor: 'text-red-500'
+          bgColor: 'bg-yellow-500/10',
+          hoverBg: 'hover:bg-yellow-500/20',
+          iconColor: 'text-yellow-500'
         };
       default:
         return {
@@ -229,7 +229,7 @@ export function Sidebar() {
               <div className="mt-4 px-2 space-y-1" id="tooltip-select-ais">
                 {sidebarMenuItems.map((item, i) => {
                   const isActive = isActiveRoute(item.href, pathname);
-                  const type = item.href === "/" ? "chat" 
+                  const type = item.href === "/chat" ? "chat" 
                     : item.href === "/image" ? "image"
                     : item.href === "/audio" ? "audio"
                     : "video";
