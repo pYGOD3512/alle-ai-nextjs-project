@@ -695,7 +695,7 @@ export function AudioArea() {
                 }
               />
 
-              <MicButton className={`w-10 h-10 rounded-md ${isListening ? "border-none" : "border border-borderColorPrimary"} `} isListening={isListening} onClick={toggleListening} />
+              <MicButton className={`w-10 h-10 bg-transparent rounded-md text-black dark:text-white ${isListening ? "border-none" : "border border-borderColorPrimary"} `} isListening={isListening} onClick={toggleListening} />
               
               <div className="ml-auto text-sm text-muted-foreground">
                 {/* Requests left: {credits} */}

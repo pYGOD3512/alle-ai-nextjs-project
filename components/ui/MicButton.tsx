@@ -15,9 +15,9 @@ export function MicButton({ isListening, onClick, className }: MicButtonProps) {
         <TooltipTrigger asChild>
           <div className="relative">
             <Button
-              variant="ghost"
+              variant="default"
               size="icon"
-              className={`flex-shrink-0 rounded-full h-9 w-9 focus-visible:outline-none transition-all duration-300 ${
+              className={`flex-shrink-0 rounded-full border-none h-8 w-8 focus-visible:outline-none transition-all duration-300 ${
                 isListening 
                   ? 'bg-green-500/10 text-green-500 dark:bg-green-900/20' 
                   : ''

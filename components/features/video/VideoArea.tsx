@@ -1088,7 +1088,12 @@ const VideoArea = () => {
                   }}
                 />
 
-                <MicButton isListening={isListening} onClick={toggleListening} />
+                <MicButton isListening={isListening} onClick={toggleListening} 
+                className={`rounded-full h-8 w-8 bg-bodyColor hover:bg-opacity-70 transition-all duration-200 text-white dark:text-black ${
+                    prompt.trim()
+                      && "hidden"
+                      }`}
+                />
 
                 <div className="flex items-center gap-2">
                   <Button 

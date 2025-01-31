@@ -413,20 +413,23 @@ export function ChatInput({
                 <MicButton 
                   isListening={isListening} 
                   onClick={toggleListening}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-white dark:text-black bg-bodyColor hover:bg-opacity-70 transition-all duration-200 ${
+                    !isInputEmpty
+                      && "hidden"
+                      }`}
                 />
                 
                 <Button
                   onClick={handleSendClick}
-                  size= {pathname === '/' ? `icon` : null}
-                  className={`flex-shrink-0 ${pathname === '/' ? "rounded-full h-8 w-8" : "rounded-md"} ${
+                  size= {pathname.startsWith('/chat') ? `icon` : `default`}
+                  className={`flex-shrink-0 ${pathname.startsWith('/chat') ? "rounded-full h-8 w-8" : "rounded-md"} ${
                     isInputEmpty
                       ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
                       : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
                   }`}
                   disabled={isInputEmpty || isLoading}
                 >
-                  {pathname === '/' ? <ArrowUp className="h-4 w-4" /> : 'Generate' }
+                  {pathname.startsWith('/chat') ? <ArrowUp className="h-4 w-4" /> : 'Generate' }
                 </Button>
               </div>
             </div>
