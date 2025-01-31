@@ -7,32 +7,38 @@ import { GoogleButton } from "./GoogleButton";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { useAuth } from '@/components/providers/authTest';
-
-
-
-
+import { useAuth } from '@/components/providers/AuthProvider';
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 interface LoginFormProps {
   onSwitchMode: () => void;
   onForgotPassword: () => void;
+  onVerify: (email: string) => void;
 }
 
-export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
+export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, setIsAuthenticated, isSubscribed, setIsSubscribed } = useAuth();
+  const { login } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
     try {
-      // Simulate some delay to show the spinner
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setIsAuthenticated(true);
-      setIsSubscribed(true);
-      console.log("Login attempt:", { email, password });
+      const result = await login(email, password);
+      if (result.data.to === 'verify-email') {
+        onVerify(email);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.response?.data?.message || "Please check your credentials and try again",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -125,13 +131,13 @@ export function LoginForm({ onSwitchMode, onForgotPassword }: LoginFormProps) {
       {/* Terms */}
       <div className="text-center text-xs text-muted-foreground">
         By continuing, you agree to Alle-AI's{" "}
-        <a href="#" className="underline">
-          Terms of Service
-        </a>{" "}
-        &{" "}
-        <a href="#" className="underline">
-          Privacy Policy
-        </a>
+        <Link href="/terms-of-service" target="_blank" className="underline">
+          Terms of Service 
+        </Link>{" "}
+        &
+        {" "}<Link href="/privacy-policy" target="_blank" className="underline">
+           Privacy Policy
+        </Link>
       </div>
     </motion.div>
   );

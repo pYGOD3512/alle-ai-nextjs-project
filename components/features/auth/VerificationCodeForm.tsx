@@ -6,14 +6,37 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { toast, useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/components/providers/authTest';
-
-
+import { useAuth } from '@/components/providers/AuthProvider';
+import { authApi } from '@/lib/api/auth';
+import { useRouter } from "next/navigation";
 
 interface VerificationCodeFormProps {
   email: string;
   onSuccess: () => void;
   onBackToLogin: () => void;
+}
+
+interface User {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    is_verified: boolean;
+    created_at: string;
+    updated_at: string;
+    ip_address: string;
+    user_agent: string;
+    registration_type: string;
+  }
+
+interface VerificationResponse {
+  data: {
+    user: User;
+    to: string;
+  };
+  is_valid: boolean;
+  message: string;
+  status: boolean;
 }
 
 export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: VerificationCodeFormProps) {
@@ -23,9 +46,11 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   const [countdown, setCountdown] = useState(30);
   const [isResending, setIsResending] = useState(false);
   const { toast } = useToast();
-    const { isAuthenticated, setIsAuthenticated } = useAuth();
-  
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  // Add useAuth to handle verification state
+  const { user, verifyEmail } = useAuth();
+  const router = useRouter();
 
   // Handle countdown timer
   useEffect(() => {
@@ -65,20 +90,42 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   };
 
   const handleVerify = async (verificationCode: string) => {
-    setIsAuthenticated(true);
     setIsVerifying(true);
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Make sure the code is complete
+      if (verificationCode.length !== 6) {
+        throw new Error('Please enter all 6 digits');
+      }
+
+      //code with A- prefix
+      const formattedCode = `A-${verificationCode}`;
+      console.log('Sending verification code:', formattedCode);
       
-      // Add your verification logic here
-      console.log('Verifying code:', verificationCode);
+      await verifyEmail(formattedCode);
+      
+      toast({
+        title: "Success",
+        description: "Email verified successfully!",
+        variant: "default",
+      });
       
       onSuccess();
-    } catch (error) {
-      setError('Invalid verification code. Please try again.');
+      
+    } catch (error: any) {
+      console.error('Verification error:', error); // For debugging
+      setError(error.message || 'Verification failed. Please try again.');
+      toast({
+        title: "Verification failed",
+        description: error.message || "Please check your code and try again",
+        variant: "destructive",
+      });
+      
+      // Clear the code on error
+      setCode(['', '', '', '', '', '']);
+      // Focus the first input
+      inputs.current[0]?.focus();
     } finally {
       setIsVerifying(false);
     }
@@ -89,19 +136,24 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
 
     setIsResending(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setCountdown(30);
+      const response = await authApi.resendVerification();
       
+      setCountdown(30);
       toast({
         title: "Success",
-        description: "Verification code sent successfully!",
+        description: response.message || "Verification code sent successfully!",
         variant: "default",
       });
-    } catch (error) {
+      
+      // Clear existing code inputs
+      setCode(['', '', '', '', '', '']);
+      // Focus on first input
+      inputs.current[0]?.focus();
+      
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to send code. Please try again.",
+        description: error.response?.data?.message || "Failed to send code. Please try again.",
         variant: "destructive",
       });
     } finally {

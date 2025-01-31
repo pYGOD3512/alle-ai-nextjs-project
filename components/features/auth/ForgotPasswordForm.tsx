@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { authApi } from '@/lib/api/auth';
 
 interface ForgotPasswordFormProps {
   onSwitchMode: () => void;
@@ -13,12 +16,35 @@ interface ForgotPasswordFormProps {
 
 export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle password reset logic here
-    console.log("Password reset attempt:", { email });
-    onSuccess(email);
+    setIsLoading(true);
+
+    try {
+      const response = await authApi.forgotPassword(email);
+      
+      if (response.status) {
+        console.log('res  ', response);
+        toast({
+          title: "Success",
+          description: "Password reset link have been sent to your email",
+        });
+        onSuccess(email);
+      } else {
+        throw new Error(response.message || 'Failed to send reset link');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Failed to reset password",
+        description: error.response?.data?.message || "Please check your email and try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -29,9 +55,12 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
       exit="exit"
       className="space-y-6"
     >
-      <p className="text-center text-sm text-muted-foreground">
-        Enter your email address and we'll send you instructions to reset your password.
-      </p>
+      <div className="space-y-2 text-center">
+        <h3 className="text-lg font-semibold">Forgot Password</h3>
+        <p className="text-sm text-muted-foreground">
+          Enter your email address and we'll send you instructions to reset your password.
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
@@ -47,16 +76,24 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
           variant="secondary"
           type="submit" 
           className="w-full bg-black text-white"
+          disabled={isLoading}
         >
-          Send Email
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            </>
+          ) : (
+            "Send"
+          )}
         </Button>
       </form>
 
+      {/* Back to Login */}
       <div className="text-center text-sm">
         <Button
           variant="link"
           onClick={onSwitchMode}
-          className="text-muted-foreground hover:underline font-medium p-0"
+          className="text-muted-foreground hover:text-foreground"
         >
           Back to Login
         </Button>

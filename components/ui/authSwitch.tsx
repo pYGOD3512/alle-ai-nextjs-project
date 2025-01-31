@@ -1,4 +1,4 @@
-import { useAuth } from '@/components/providers/authTest';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { Switch } from '@/components/ui/switch';
 
 export function AuthSwitch() {

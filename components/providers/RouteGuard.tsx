@@ -2,10 +2,10 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { publicRoutes, privateRoutes } from './authTest';
+import { publicRoutes, privateRoutes } from './AuthProvider';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { NotFoundPage } from '@/components/features/not-found/404';
-import { useAuth } from './authTest';
+import { useAuth } from './AuthProvider';
 import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 export function RouteGuard({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   const [authorized, setAuthorized] = useState(false);
   const [isValidRoute, setIsValidRoute] = useState(true);
   const [isChecking, setIsChecking] = useState(true);
-  const { isSubscribed, isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   
   usePageTitle();
 
@@ -31,10 +31,10 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       const isPublicRoute = publicRoutes.some(route => matchRoute(route));
       const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
 
-      // Allow access to auth routes when not authenticated
+      // Handle auth routes
       if (pathname.startsWith('/auth')) {
-        if (isAuthenticated) {
-          router.replace('/chat');
+        if (isAuthenticated && user?.to !== 'verify-email') {
+          router.replace('/plans');
           setAuthorized(false);
         } else {
           setAuthorized(true);
@@ -43,7 +43,15 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Check authentication for non-public routes
+      // Handle verification state based on server response
+      if (isAuthenticated && user?.to === 'verify-email' && !pathname.startsWith('/auth')) {
+        router.replace('/auth');
+        setAuthorized(false);
+        setIsChecking(false);
+        return;
+      }
+
+      // Handle non-public routes
       if (!isAuthenticated && !isPublicRoute) {
         router.replace('/auth');
         setAuthorized(false);
@@ -51,28 +59,17 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Check subscription for private routes
-      if (isPrivateRoute && !isSubscribed) {
-        router.replace('/plans');
-        setAuthorized(false);
-        setIsChecking(false);
-        return;
-      }
-
-      // Valid route and authorized
       setIsValidRoute(true);
       setAuthorized(true);
       setIsChecking(false);
     };
 
-    // Add a minimum delay to prevent flash
-    const minDelay = 1000; // 1 second minimum loading time
     const timer = setTimeout(() => {
       checkAuthorization();
-    }, minDelay);
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, [pathname, router, isAuthenticated, isSubscribed]);
+  }, [pathname, router, isAuthenticated, user]);
 
   // Only show loading screen during initial check
   if (isChecking) {

@@ -6,7 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { HelpButton } from '@/components/HelpButton';
 import PlansArea from '@/components/features/plans/PlansArea';
-import { useAuth } from '@/components/providers/authTest';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { MaintenancePage } from '@/components/features/maintenance/MaintenancePage';
 import * as Frigade from '@frigade/react';
 import { FooterText } from '@/components/FooterText';

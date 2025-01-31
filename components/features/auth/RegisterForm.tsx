@@ -7,7 +7,11 @@ import { GoogleButton } from "./GoogleButton";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { useAuth } from '@/components/providers/AuthProvider';
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
+import Link from "next/link";
 
 interface RegisterFormProps {
   onSwitchMode: () => void;
@@ -21,6 +25,10 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { register } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,19 +39,24 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
         throw new Error("Passwords don't match");
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      console.log("Register attempt:", {
-        firstName,
-        lastName,
+      const result = await register({
+        first_name: firstName,
+        last_name: lastName,
         email,
         password,
-        confirmPassword,
+        password_confirmation: confirmPassword,
       });
 
-      onRegister(email);
-    } catch (error) {
-      console.error("Registration failed:", error);
+      if (result && result.to === 'verify-email') {
+        onRegister(email);
+      } 
+      
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.response?.data?.message || "Please check your information and try again",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -148,13 +161,13 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
       {/* Terms */}
       <div className="text-center text-xs text-muted-foreground">
         By continuing, you agree to Alle-AI's{" "}
-        <a href="#" className="underline">
-          Terms of Service
-        </a>{" "}
-        &{" "}
-        <a href="#" className="underline">
-          Privacy Policy
-        </a>
+        <Link href="/terms-of-service" target="_blank" className="underline">
+          Terms of Service 
+        </Link>{" "}
+        &
+        {" "}<Link href="/privacy-policy" target="_blank" className="underline">
+           Privacy Policy
+        </Link>
       </div>
     </motion.div>
   );

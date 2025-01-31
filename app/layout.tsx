@@ -4,7 +4,7 @@ import '@/app/globals.css';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from '@/components/providers/authTest';
+import { AuthProvider } from '@/components/providers/AuthProvider';
 import { RouteGuard } from '@/components/providers/RouteGuard';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 
@@ -28,9 +28,9 @@ export default function RootLayout({
         >
           <AuthProvider>
             <ConnectionStatus />
-              <RouteGuard>
+              {/* <RouteGuard> */}
                 {children}
-              </RouteGuard>
+              {/* </RouteGuard> */}
           </AuthProvider>
           <Toaster />
         </ThemeProvider>

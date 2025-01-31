@@ -14,6 +14,12 @@ import {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  // Only show the toggle after mounting to avoid hydration mismatch
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleThemeToggle = () => {
     if (theme === 'light') {
@@ -35,6 +41,11 @@ export function ThemeToggle() {
     }
   };
 
+  // Don't render anything until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -45,9 +56,26 @@ export function ThemeToggle() {
             onClick={handleThemeToggle}
             className="hidden md:flex w-8 h-8 p-1 text-muted-foreground rounded-full border border-borderColorPrimary"
           >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:scale-0 dark:-rotate-90 [&[data-theme='system']]:scale-0 [&[data-theme='system']]:rotate-90" data-theme={theme} />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 [&[data-theme='system']]:scale-0 [&[data-theme='system']]:rotate-90" data-theme={theme} />
-            <Monitor className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all [&[data-theme='system']]:rotate-0 [&[data-theme='system']]:scale-100" data-theme={theme} />
+            <Sun 
+              className={`h-[1.2rem] w-[1.2rem] transition-all ${
+                theme === 'dark' ? 'scale-0 -rotate-90' : 
+                theme === 'system' ? 'scale-0 rotate-90' : 
+                'rotate-0 scale-100'
+              }`}
+            />
+            <Moon 
+              className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${
+                theme === 'dark' ? 'rotate-0 scale-100' : 
+                theme === 'system' ? 'scale-0 rotate-90' : 
+                'rotate-90 scale-0'
+              }`}
+            />
+            <Monitor 
+              className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${
+                theme === 'system' ? 'rotate-0 scale-100' : 
+                'rotate-90 scale-0'
+              }`}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
