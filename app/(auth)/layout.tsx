@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useAuth } from '@/components/providers/authTest';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 
@@ -194,13 +194,6 @@ export default function AuthLayout({
 
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  
-  useEffect(() => {
-    // Redirect to chat if already authenticated
-    if (isAuthenticated) {
-      router.replace('/chat');
-    }
-  }, [isAuthenticated, router]);
   
   // Define your slides with the new prop
   const slides: Slide[] = [

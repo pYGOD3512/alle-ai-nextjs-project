@@ -80,3 +80,13 @@ export const formVariants = {
     }
   }
 };
+
+export const getQueryParam = (name: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get(name);
+};
+
+export const hasQueryParam = (name: string): boolean => {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).has(name);
+};
