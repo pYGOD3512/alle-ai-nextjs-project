@@ -32,15 +32,14 @@ import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferMod
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
-import { useAuth } from '@/components/providers/authTest';
-import { AuthSwitch } from "../ui/authSwitch";
+import { useAuth } from '@/components/providers/AuthProvider';
 import { NotificationsPanel } from "@/components/NotificationWindow";
 import { NotificationModal } from "@/components/ui/modals";
 import { useRouter } from "next/navigation";
 
 
 export function Header() {
-  const { isSubscribed } = useAuth();
+  // const { isSubscribed } = useAuth();
 
   const { isOpen, toggle } = useSidebarStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -315,7 +314,7 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
-        {isSubscribed ? (
+        {!pathname.includes('/plans') ? (
         <div className={`absolute left-0 h-14 flex items-center justify-center transition-all duration-6300 z-10
           ${isOpen ? 'w-60' : 'w-16'} 
           ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
@@ -362,9 +361,9 @@ export function Header() {
         )}
 
         <div className={`flex h-14 items-center transition-all duration-300 
-        ${isSubscribed ? (isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')) : 'justify-around'}`}
+        ${!pathname.includes('/plans') ? (isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')) : 'justify-around'}`}
         >
-          {!isChangelogPage && mounted && isSubscribed ? (
+          {!isChangelogPage && mounted && !pathname.includes('/plans') ? (
             selectedModelNames.length > 0 ? (
               <TooltipProvider>
                 <Tooltip>
@@ -399,7 +398,7 @@ export function Header() {
               </div>
             )
           ) : (
-            !isSubscribed && mounted && (
+            pathname.includes('/plans') && mounted && (
               <Image
               src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
                 alt="Logo"
@@ -411,8 +410,7 @@ export function Header() {
           )}
           
 
-          <div className={`flex items-center gap-2 ${isSubscribed ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            {/* <AuthSwitch /> */}
+          <div className={`flex items-center gap-2 ${!pathname.includes('/plans') ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
             {pathname.includes("/chat") && (
               <Button
               variant={'outline'}
@@ -427,7 +425,7 @@ export function Header() {
 
             <ThemeToggle />
             {navItems.filter(item => 
-              isSubscribed || 
+              !pathname.includes('/plans') || 
               !(item.type === HelpCircle || item.type === ALargeSmall)
             ).map((item, index) => renderNavItem(item, index))}
             <DropdownMenu>
@@ -456,7 +454,7 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>
                 {userMenuItems.filter(item => 
-                  isSubscribed || 
+                  !pathname.includes('/plans') || 
                   !(item.label === 'Profile' || item.label === 'Developer' || item.label === 'Refer' || item.label === 'Album' || item.label === 'Settings')
                 ).map((item, index) => (
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">

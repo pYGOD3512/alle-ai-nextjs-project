@@ -1,28 +1,33 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
-  withCredentials: true, // Required for Sanctum
 });
 
-// Request interceptor
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('user_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Add a request interceptor to include the token for all requests
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('user_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-// Response interceptor
+// Add a response interceptor to handle token expiration
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
+      // Handle token expiration
       localStorage.removeItem('user_token');
       window.location.href = '/auth';
     }

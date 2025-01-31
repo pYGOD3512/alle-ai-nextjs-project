@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function PrivacyPolicyContent() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState('');
 
@@ -76,7 +76,7 @@ export default function PrivacyPolicyContent() {
             <div className="container mx-auto px-4 md:px-6 lg:px-8 flex h-14 items-center justify-between">
               {mounted && (
                 <Image 
-                src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"} 
+                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"} 
                 alt="Alle-AI Logo" 
                 width={110} 
                 height={110} />
