@@ -5,7 +5,6 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/components/providers/AuthProvider';
-import { RouteGuard } from '@/components/providers/RouteGuard';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 
 
