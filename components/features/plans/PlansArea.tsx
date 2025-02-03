@@ -6,10 +6,60 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react"; 
+import { Check, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { authApi } from '@/lib/api/auth';
+import { useRouter } from 'next/navigation';
 
 const PlansArea = () => {
   const [isYearly, setIsYearly] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleCustomPlan = () => {
+    toast({
+      title: "Coming Soon",
+      description: "This plan is coming soon!",
+      variant: "default",
+    });
+  };
+
+  const handleCheckout = async (planName: string) => {
+    if (planName.toLowerCase() === 'custom') {
+      handleCustomPlan();
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const response = await authApi.checkout({
+        plan: planName.toLowerCase() as 'free' | 'standard' | 'plus' | 'custom',
+        billing_cycle: isYearly ? 'yearly' : 'monthly',
+      });
+
+      if (response.status && response.to) {
+        // For free plan, we might redirect internally
+        if (planName.toLowerCase() === 'free') {
+          router.push(response.to);
+        } else {
+          // For paid plans, might redirect to payment provider
+          window.location.href = response.to;
+        }
+      } else {
+        throw new Error(response.message || 'Checkout failed');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Checkout Failed",
+        description: error.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const plans = [
     {
@@ -25,7 +75,7 @@ const PlansArea = () => {
         "2 AI Models/conversation",
         "Limited model Usage",
       ],
-      buttonText: "Upgrade to Free",
+      buttonText: "Get Started",
       highlighted: false,
     },
     {
@@ -138,6 +188,13 @@ const PlansArea = () => {
                     </span>
                   )}
                 </motion.div>
+                {plan.name === "Free" && (
+                  <div className="mt-1 relative">
+                    <span className="animate-gradient bg-clip-text text-transparent bg-[length:200%_auto] bg-gradient-to-r from-gray-700 via-gray-200 to-gray-700 text-xs font-medium">
+                      No credit card required
+                    </span>
+                  </div>
+                )}
               </div>
 
               <p className={`text-sm text-muted-foreground pb-4`}>
@@ -161,15 +218,28 @@ const PlansArea = () => {
               </ul>
 
               <Button
-                    className={`w-full absolute bottom-0 ${
-                      plan.highlighted
-                        ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
-                        : ""
-                    }`}
-                    variant={plan.highlighted ? "default" : "outline"}
-                  >
-                  {plan.buttonText}
-                </Button>
+                className={`w-full absolute bottom-0 ${
+                  plan.highlighted
+                    ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
+                    : ""
+                }`}
+                variant={plan.highlighted ? "default" : "outline"}
+                onClick={() => 
+                  plan.name.toLowerCase() === 'custom' 
+                    ? handleCustomPlan() 
+                    : handleCheckout(plan.name)
+                }
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  plan.buttonText
+                )}
+              </Button>
             </div>
           </motion.div>
         ))}

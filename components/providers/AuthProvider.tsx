@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { authApi } from '@/lib/api/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useAuthStore } from '@/stores';
+import { LoadingScreen } from '../features/auth/LoadingScreen';
 
 interface User {
   id: number;
@@ -29,6 +31,7 @@ interface VerificationResponse {
   data: {
     user: User;
     to: string;
+    token: string;
   };
   is_valid: boolean;
   message: string;
@@ -64,62 +67,103 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Move these to a separate config file if you want to use them elsewhere
 export const publicRoutes = ['/', '/auth', '/plans', '/pricing', '/login', '/register', '/model-glossary', '/privacy-policy', '/terms-of-service', '/loading'];
-export const privateRoutes = ['/chat', '/image', '/video', '/audio', '/text', '/changelog'];
+export const authRoutes = ['/login', '/register', '/auth'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+  const { 
+    setAuth, 
+    clearAuth, 
+    isLoading,
+    token,
+    setVerificationStatus,
+    setPlanStatus,
+    setLoading
+  } = useAuthStore();
 
+  // Define protected routes that require authentication
+  const protectedRoutes = ['/chat', '/plans', '/settings', '/billing'];
+  
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const isInitialCheck = isLoading;
-    
-    try {
-      const token = localStorage.getItem('user_token');
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
-      const userData = await authApi.getUser();
-      // console.log('userData', userData);
-      
-      if (userData && userData.data) {
-        setUser(userData.data);
-        // Handle routing based on server response
-        if (userData.data.to === 'verify-email') {
-          router.push('/auth');
+    const initAuth = async () => {
+      try {
+        // If no token and on protected route, redirect to home
+        if (!token) {
+          if (!publicRoutes.includes(pathname)) {
+            router.replace('/');
+          }
+          setLoading(false);
+          return;
         }
-      } else {
-        setUser(null);
-        localStorage.removeItem('user_token');
+
+        // Check auth status
+        const userData = await authApi.getUser();
+        
+        if (userData.status) {
+          // Update auth store with user data
+          setAuth(userData.data.user, token);
+          setVerificationStatus(userData.data.is_verified);
+          setPlanStatus(userData.plan);
+
+          // Handle routing based on auth state
+          if (authRoutes.includes(pathname)) {
+            // If on auth routes but authenticated, redirect appropriately
+            if (!userData.data.is_verified) {
+              if (pathname !== '/auth') {
+                router.replace('/auth');
+              }
+            } else if (!userData.plan) {
+              if (pathname !== '/plans') {
+                router.replace('/plans');
+              }
+            } else {
+              router.replace('/chat');
+            }
+            return;
+          }
+
+          // Handle protected routes access
+          if (protectedRoutes.includes(pathname)) {
+            if (!userData.data.is_verified) {
+              router.replace('/auth');
+              return;
+            }
+            if (!userData.plan && pathname !== '/plans') {
+              router.replace('/plans');
+              return;
+            }
+          }
+        } else {
+          // Invalid or expired token
+          clearAuth();
+          if (!publicRoutes.includes(pathname)) {
+            router.replace('/');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        clearAuth();
+        if (!publicRoutes.includes(pathname)) {
+          router.replace('/');
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.log('Auth check failed:', error);
-      setUser(null);
-      localStorage.removeItem('user_token');
-    } finally {
-      if (isInitialCheck) {
-        setIsLoading(false);
-      }
-    }
-  };
+    };
+
+    initAuth();
+  }, [pathname]);
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
       const response: LoginResponse = await authApi.login({ email, password });
-      localStorage.setItem('user_token', response.data.token);
-      setUser(response.data.user);
-      
-      // Only handle chat routing here
+      setAuth(response.data.user, response.data.token);
+      console.log(response.data, 'response.data');
       if (response.data.to === 'chat') {
         router.push('/chat');
       }
-      // Return the response so the component can handle verification
+      
       return response;
     } catch (error) {
       console.error('Login failed:', error);
@@ -136,8 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }): Promise<RegisterResponse['data'] | void> => {
     try {
       const response: RegisterResponse = await authApi.register(data);
-      localStorage.setItem('user_token', response.data.token);
-      setUser(response.data.user);
+      setAuth(response.data.user, response.data.token);
       return response.data;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -148,8 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await authApi.logout();
-      localStorage.removeItem('user_token');
-      setUser(null);
+      clearAuth();
       router.push('/auth');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -164,7 +206,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (response.is_valid) {
-        setUser(response.data.user);
+        const currentToken = useAuthStore.getState().token;
+        if (!currentToken) {
+          throw new Error('No authentication token found');
+        }
+        setAuth(response.data.user, currentToken);
         router.push('/plans');
         return;
       } else {
@@ -178,11 +224,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  if (isLoading) {
+    return <LoadingScreen />; // Or your loading component
+  }
+
   return (
     <AuthContext.Provider value={{
-      user,
+      user: useAuthStore.getState().user,
       isLoading,
-      isAuthenticated: !!user,
+      isAuthenticated: useAuthStore.getState().isAuthenticated,
       login,
       register,
       logout,

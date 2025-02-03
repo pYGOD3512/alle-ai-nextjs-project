@@ -1,6 +1,6 @@
 'use client'; 
 
-import { Paperclip, HardDrive, Cloud } from "lucide-react";
+import { Plus, HardDrive, Cloud } from "lucide-react";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -244,7 +244,7 @@ export function FileUploadButton({
         <DropdownMenuTrigger asChild>
           {buttonIcon ? buttonIcon : (
             <Button variant="ghost2" className="p-0 flex-shrink-0 focus-visible:outline-none rounded-full" aria-label="Upload File">
-              <Paperclip className="h-4 w-4" />
+              <Plus className="h-8 w-8 border border-borderColorPrimary p-2 rounded-full" />
             </Button>
           )}
         </DropdownMenuTrigger>

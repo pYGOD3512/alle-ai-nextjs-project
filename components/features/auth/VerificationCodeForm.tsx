@@ -94,15 +94,11 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
     setError('');
 
     try {
-      // Make sure the code is complete
       if (verificationCode.length !== 6) {
         throw new Error('Please enter all 6 digits');
       }
 
-      //code with A- prefix
       const formattedCode = `A-${verificationCode}`;
-      console.log('Sending verification code:', formattedCode);
-      
       await verifyEmail(formattedCode);
       
       toast({
@@ -114,7 +110,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
       onSuccess();
       
     } catch (error: any) {
-      console.error('Verification error:', error); // For debugging
+      console.error('Verification error:', error);
       setError(error.message || 'Verification failed. Please try again.');
       toast({
         title: "Verification failed",
@@ -122,11 +118,8 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
         variant: "destructive",
       });
       
-      // Clear the code on error
       setCode(['', '', '', '', '', '']);
-      // Focus the first input
       inputs.current[0]?.focus();
-    } finally {
       setIsVerifying(false);
     }
   };
@@ -145,10 +138,9 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
         variant: "default",
       });
       
-      // Clear existing code inputs
       setCode(['', '', '', '', '', '']);
-      // Focus on first input
       inputs.current[0]?.focus();
+      setIsResending(false);
       
     } catch (error: any) {
       toast({
@@ -156,7 +148,6 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
         description: error.response?.data?.message || "Failed to send code. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsResending(false);
     }
   };
@@ -244,13 +235,13 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
           )}
         </div>
 
-        <Button
+        {/* <Button
           variant="link"
           onClick={onBackToLogin}
           className="text-sm text-muted-foreground hover:text-foreground"
         >
           Back to Login
-        </Button>
+        </Button> */}
       </div>
     </motion.div>
   );

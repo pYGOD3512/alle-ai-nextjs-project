@@ -11,6 +11,7 @@ import { ResetPasswordSuccess } from "@/components/features/auth/ResetPasswordSu
 import { VerificationCodeForm } from "@/components/features/auth/VerificationCodeForm";
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useAuthStore } from '@/stores';
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
 
@@ -18,7 +19,7 @@ export default function AuthPage() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [resetEmail, setResetEmail] = useState<string>("");
   const [email, setEmail] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const { isAuthenticated, user, isVerified } = useAuthStore();
   const { theme, resolvedTheme } = useTheme();
   const router = useRouter();
 
@@ -78,7 +79,16 @@ export default function AuthPage() {
     }
   };
 
+  useEffect(() => {
+    // If user is authenticated but not verified, show verification form
+    if (isAuthenticated && !isVerified && user?.email) {
+      setEmail(user.email);
+      setAuthMode('verify-email');
+    }
+  }, [isAuthenticated, isVerified, user]);
+
   // Add useEffect to handle mounting
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
