@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
   onSwitchMode: () => void;
@@ -23,6 +24,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +34,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       const result = await login(email, password);
       if (result.data.to === 'verify-email') {
         onVerify(email);
+        setIsLoading(false);
       }
     } catch (error: any) {
       toast({
@@ -39,7 +42,6 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
         description: error.response?.data?.message || "Please check your credentials and try again",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };

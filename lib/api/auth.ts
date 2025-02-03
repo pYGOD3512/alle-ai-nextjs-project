@@ -32,6 +32,17 @@ export interface RegisterResponse {
   };
 }
 
+export interface AuthResponse {
+  status: boolean;
+  data: {
+    user: User;
+    is_verified: boolean;
+    to: string;
+  };
+  message: string;
+  plan: boolean;
+}
+
 export interface LoginResponse {
   status: boolean;
   data: {
@@ -57,6 +68,39 @@ interface ForgotPasswordResponse {
   message: string;
 }
 
+interface CheckoutResponse {
+  status: boolean;
+  to: string;
+  message?: string;
+}
+
+export interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+  ip_address: string;
+  user_agent: string;
+  registration_type: string;
+  email_verified_at?: string | null;
+  photo_url?: string | null;
+  google_id?: string | null;
+  stripe_id?: string | null;
+  pm_type?: string | null;
+  pm_last_four?: string | null;
+  referral_code?: string;
+  referral_balance?: string;
+  referral_amount_used?: string;
+  combination?: number;
+  comparison?: number;
+  summary?: number;
+  trial_ends_at?: string | null;
+  subscriptions?: any[];
+}
+
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await api.post('/login', credentials);
@@ -75,10 +119,8 @@ export const authApi = {
     return response.data;
   },
 
-  getUser: async () => {
-    const response = await api.get('/auth');
-    console.log('user data', response);
-    console.log('user data status', response.status);
+  getUser: async (): Promise<AuthResponse> => {
+    const response = await api.post('/auth');
     return response.data;
   },
 
@@ -114,6 +156,14 @@ export const authApi = {
     password_confirmation: string 
   }) => {
     const response = await api.post('/reset-password', data);
+    return response.data;
+  },
+
+  checkout: async (data: { 
+    plan: 'free' | 'standard' | 'plus' | 'custom';
+    billing_cycle: 'monthly' | 'yearly';
+  }): Promise<CheckoutResponse> => {
+    const response = await api.post('/checkout', data);
     return response.data;
   },
 };

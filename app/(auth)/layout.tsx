@@ -52,7 +52,7 @@ const AnimatedBackground = () => {
       
       {/* Floating AI model logos - distributed across the space */}
       <div className="absolute inset-0">
-        {['stability-ai', 'anthropic', 'claude-3', 'deepseek', 'copilot', 'dream', 'gemini', 'gpt-3-5', 'gpt-4', 'grok', 'kling', 'luma', 'meta', 'mistral-ai', 'perplexity-ai', 'titan', 'midjourney'].map((logo, index) => (
+        {['stability-ai', 'qwen', 'anthropic', 'claude-3', 'deepseek', 'copilot', 'dream', 'gemini', 'gpt-3-5', 'gpt-4', 'grok', 'kling', 'luma', 'meta', 'mistral-ai', 'perplexity-ai', 'titan', 'midjourney'].map((logo, index) => (
           <motion.div
             key={logo}
             className="absolute"
@@ -250,10 +250,10 @@ export default function AuthLayout({
       
       {/* Updated right side - hidden on mobile */}
       <div className="hidden md:block w-1/2 relative overflow-hidden bg-background cursor-none">
-        <AnimatedBackground />
+        {/* <AnimatedBackground />I */}
         
         {/* Content wrapper with glassmorphism */}
-        <div className="absolute inset-0 backdrop-blur-[1px]">
+        {/* <div className="absolute inset-0 backdrop-blur-[1px]">
           <div className="absolute inset-0">
             <AnimatePresence mode="wait">
               <motion.div
@@ -268,10 +268,10 @@ export default function AuthLayout({
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        </div> */}
 
         {/* Updated navigation dots */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+        {/* <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {slides.map((slide) => (
             <button
               key={slide.id}
@@ -284,7 +284,7 @@ export default function AuthLayout({
               aria-label={`Go to slide ${slide.id + 1}`}
             />
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
         description: "Your password has been reset. You can now log in with your new password.",
       });
 
-      // Redirect to login page
+      // Don't reset isLoading - keep button disabled during navigation
       router.push('/auth');
     } catch (error: any) {
       toast({
@@ -57,8 +57,7 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
         description: error.response?.data?.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Reset only on error
     }
   };
 

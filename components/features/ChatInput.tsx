@@ -351,7 +351,7 @@ export function ChatInput({
             <Textarea 
               ref={inputRef}
               placeholder={"Message multiple models..."}
-              className="w-full bg-transparent min-h-[2rem] max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
+              className="w-full bg-transparent min-h-[2.5rem] max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
               value={value}
               onChange={(e) => {
                 const target = e.target;
@@ -376,8 +376,8 @@ export function ChatInput({
               }}
             />
             
-            <div className="flex items-center justify-between px-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between px-3">
+              <div className="flex items-center gap-1">
                 <FileUploadButton
                   onUploadFromComputer={handleUploadFromComputer}
                   onUploadFromDrive={handleUploadFromDrive}
@@ -389,16 +389,14 @@ export function ChatInput({
                       <TooltipTrigger asChild>
                         <button
                           onClick={handleWebSearchToggle}
-                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 px-2 py-1 ${
+                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.3rem] ${
                             isWebSearch 
-                              ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' 
-                              : 'text-muted-foreground hover:text-foreground'
+                              ? 'border border-green-500/10 bg-green-500/10 text-green-500 hover:bg-green-500/20' 
+                              : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
                           }`}
                         >
-                          <Globe size={16} />
-                          <span className="text-xs">
-                            {isWebSearch ? "Web search" : ""}
-                          </span>
+                          <Globe size={14} />
+                          <span className="text-[12px]">Search</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>

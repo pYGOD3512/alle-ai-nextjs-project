@@ -20,22 +20,37 @@ interface AIModel {
 
 const aiModels: AIModel[] = [
   {
-    id: "chatgpt-3.5",
-    name: "ChatGPT 3.5",
-    provider: "OpenAI",
-    icon: "/models/gpt-3-5.png"
-  },
-  {
-    id: "gpt-4",
+    id: "gpt-4o",
     name: "GPT-4o",
     provider: "OpenAI",
     icon: "/models/gpt-4o.png"
+  },
+  {
+    id: "deepseek",
+    name: "DeepSeek V2",
+    provider: "DeepSeek",
+    icon: "/models/deepseek.png",
+    isPro: false
   },
   {
     id: "gemini-pro",
     name: "Gemini 1.5",
     provider: "Google",
     icon: "/models/gemini.png",
+    isPro: false
+  },
+  {
+      id: "qwen-2-5",
+      name: "Qwen 2.5",
+      provider: "Alibaba",
+      icon: "/models/qwen.png",
+      isPro: false
+  },
+  {
+    id: "claude-3-5-sonnet",
+    name: "Claude 3.5",
+    provider: "Anthropic",
+    icon: "/models/claude-3.png",
     isPro: false
   },
   {
@@ -46,10 +61,45 @@ const aiModels: AIModel[] = [
     isPro: false
   },
   {
-    id: "claude-3-5-sonnet",
-    name: "Claude 3.5",
-    provider: "Anthropic",
-    icon: "/models/claude-3.png",
+    id: "grok",
+    name: "Grok",
+    provider: "xAI",
+    icon: "/models/grok.png",
+    isPro: false
+  },
+  {
+    id: "mistral",
+    name: "Mistral",
+    provider: "Mistral AI",
+    icon: "/models/mistral-ai.png",
+    isPro: false
+  },
+  {
+    "id": "claude-3-haiku",
+    "name": "Claude 3 Haiku",
+    "provider": "Anthropic",
+    "icon": "/models/claude-3.png",
+    "isPro": false
+  },
+  {
+    id: "phi",
+    name: "Phi",
+    provider: "Microsoft",
+    icon: "/models/microsoft.png",
+    isPro: false
+  },
+  {
+    id: "yi",
+    name: "Yi",
+    provider: "01.AI",
+    icon: "/models/yi.png",
+    isPro: false
+  },
+  {
+    id: "copilot",
+    name: "Copilot",
+    provider: "Microsoft",
+    icon: "/models/copilot.png",
     isPro: false
   },
   // ... add more models as needed
@@ -157,7 +207,7 @@ export function PlatformChatPreview({ onAnimationComplete }: PlatformPreviewProp
     setTimeout(() => {
       const modelResponses = {
         'chatgpt-3.5': "Building a wall requires proper planning...",
-        'gpt-4': "To construct a wall, begin with a detailed plan...",
+        'gpt-4o': "To construct a wall, begin with a detailed plan...",
         'gemini-pro': "Wall construction involves several key steps...",
         'claude-3-5-sonnet': "The process of building a wall involves...",
         'llama-70b': "When building a wall, start with foundation..."
@@ -287,7 +337,7 @@ export function PlatformChatPreview({ onAnimationComplete }: PlatformPreviewProp
         y: screenRect.height / 2
       };
       
-      const modelsToSelect = ['chatgpt-3.5', 'gpt-4', 'gemini-pro', 'claude-3-5-sonnet'];
+      const modelsToSelect = ['gpt-4o', 'deepseek','claude-3-5-sonnet', 'qwen-2-5'];
       const demoPrompt = "How do I build a wall?";
       
       // Animation constants
