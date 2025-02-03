@@ -169,9 +169,13 @@
   100% { background-position: 0% 50%; }
 }
 
-.animate-gradient {
+/* .animate-gradient {
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
+} */
+
+.animate-gradient {
+  animation: gradient 2s linear infinite;
 }
 
 .bg-grid-pattern {

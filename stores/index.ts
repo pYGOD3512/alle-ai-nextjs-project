@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { authApi } from '@/lib/api/auth';
+import { User } from '@/lib/api/auth';
 
 import { driveService } from '@/lib/services/driveServices';
 
@@ -698,3 +700,116 @@ export const usePaymentStore = create<PaymentStore>()(
   )
 );
 
+interface AuthStore {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isVerified: boolean;
+  hasPlan: boolean;
+  setAuth: (user: User, token: string) => void;
+  clearAuth: () => void;
+  checkAuth: () => Promise<void>;
+  setVerificationStatus: (status: boolean) => void;
+  setPlanStatus: (status: boolean) => void;
+  setLoading: (status: boolean) => void;
+}
+
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: true,
+      isVerified: false,
+      hasPlan: false,
+
+      setAuth: (user: User, token: string) => {
+        if (!user || !token) return;
+        set({ 
+          user, 
+          token, 
+          isAuthenticated: true,
+          isVerified: user.is_verified,
+        });
+      },
+
+      clearAuth: () => {
+        set({ 
+          user: null, 
+          token: null, 
+          isAuthenticated: false,
+          isVerified: false,
+          hasPlan: false,
+        });
+      },
+
+      setVerificationStatus: (status) => {
+        set({ isVerified: status });
+      },
+
+      setPlanStatus: (status) => {
+        set({ hasPlan: status });
+      },
+
+      setLoading: (status) => {
+        set({ isLoading: status });
+      },
+
+      checkAuth: async () => {
+        try {
+          const state = get();
+          if (!state.token) {
+            set({ isLoading: false });
+            return;
+          }
+
+          const userData = await authApi.getUser();
+          if (userData && userData.data) {
+            set({ 
+              user: userData.data.user,
+              isAuthenticated: true,
+              isVerified: userData.data.is_verified,
+              hasPlan: userData.plan,
+            });
+          } else {
+            get().clearAuth();
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          get().clearAuth();
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({ 
+        token: state.token,
+        user: state.user,
+        isVerified: state.isVerified,
+        hasPlan: state.hasPlan,
+      }),
+    }
+  )
+);
+
+interface PlanStore {
+  selectedPlan: 'free' | 'standard' | 'plus' | 'custom';
+  billingCycle: 'monthly' | 'yearly';
+  isProcessing: boolean;
+  setSelectedPlan: (plan: 'free' | 'standard' | 'plus' | 'custom') => void;
+  setBillingCycle: (cycle: 'monthly' | 'yearly') => void;
+  setIsProcessing: (status: boolean) => void;
+}
+
+export const usePlanStore = create<PlanStore>((set) => ({
+  selectedPlan: 'free',
+  billingCycle: 'monthly',
+  isProcessing: false,
+  setSelectedPlan: (plan) => set({ selectedPlan: plan }),
+  setBillingCycle: (cycle) => set({ billingCycle: cycle }),
+  setIsProcessing: (status) => set({ isProcessing: status }),
+}));

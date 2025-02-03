@@ -49,7 +49,8 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
 
       if (result && result.to === 'verify-email') {
         onRegister(email);
-      } 
+        setIsLoading(false);
+      }
       
     } catch (error: any) {
       toast({
@@ -57,7 +58,6 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
         description: error.response?.data?.message || "Please check your information and try again",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
