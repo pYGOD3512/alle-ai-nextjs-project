@@ -66,8 +66,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Move these to a separate config file if you want to use them elsewhere
-export const publicRoutes = ['/', '/auth', '/plans', '/pricing', '/login', '/register', '/model-glossary', '/privacy-policy', '/terms-of-service', '/loading'];
-export const authRoutes = ['/login', '/register', '/auth'];
+export const publicRoutes = ['/', '/plans', '/pricing', '/login', '/register', '/model-glossary', '/privacy-policy', '/terms-of-service', '/loading'];
+export const authRoutes = ['/auth'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -82,18 +82,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading
   } = useAuthStore();
 
-  // Define protected routes that require authentication
-  const protectedRoutes = ['/chat', '/plans', '/settings', '/billing'];
+  // Define routes
+  const protectedRoutes = ['/chat', '/settings', '/billing'];
+  const publicRoutes = ['/', '/plans', '/pricing', '/model-glossary', '/privacy-policy', '/terms-of-service'];
   
   useEffect(() => {
     const initAuth = async () => {
+      setLoading(true);
       try {
-        // If no token and on protected route, redirect to home
+        // If no token and trying to access protected route, redirect to auth
         if (!token) {
           if (!publicRoutes.includes(pathname)) {
-            router.replace('/');
+            router.replace('/auth');
           }
-          setLoading(false);
           return;
         }
 
@@ -106,24 +107,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setVerificationStatus(userData.data.is_verified);
           setPlanStatus(userData.plan);
 
-          // Handle routing based on auth state
-          if (authRoutes.includes(pathname)) {
-            // If on auth routes but authenticated, redirect appropriately
+          // Handle routing based on verification and plan status
+          if (pathname === '/auth') {
             if (!userData.data.is_verified) {
-              if (pathname !== '/auth') {
-                router.replace('/auth');
-              }
-            } else if (!userData.plan) {
-              if (pathname !== '/plans') {
-                router.replace('/plans');
-              }
-            } else {
-              router.replace('/chat');
+              // Stay on /auth for verification
+              return;
             }
+            if (!userData.plan) {
+              router.replace('/plans');
+              return;
+            }
+            router.replace('/chat');
             return;
           }
 
-          // Handle protected routes access
+          // Protect routes based on verification and plan status
           if (protectedRoutes.includes(pathname)) {
             if (!userData.data.is_verified) {
               router.replace('/auth');
@@ -135,17 +133,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
         } else {
-          // Invalid or expired token
+          // Invalid token
           clearAuth();
           if (!publicRoutes.includes(pathname)) {
-            router.replace('/');
+            router.replace('/auth');
           }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         clearAuth();
         if (!publicRoutes.includes(pathname)) {
-          router.replace('/');
+          router.replace('/auth');
         }
       } finally {
         setLoading(false);
@@ -153,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
-  }, [pathname]);
+  }, [pathname, token]);
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
@@ -224,8 +222,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Show loading screen only during initial auth check
   if (isLoading) {
-    return <LoadingScreen />; // Or your loading component
+    return <LoadingScreen />;
   }
 
   return (
