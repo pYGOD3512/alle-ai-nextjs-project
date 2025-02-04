@@ -65,10 +65,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Move these to a separate config file if you want to use them elsewhere
-export const publicRoutes = ['/', '/plans', '/pricing', '/login', '/register', '/model-glossary', '/privacy-policy', '/terms-of-service', '/loading'];
-export const authRoutes = ['/auth'];
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -84,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Define route groups
   const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service'];
-  const authPage = '/';
+  const authPage = '/auth';
   const plansPage = '/plans';
   const protectedRoutes = ['/chat', '/settings', '/billing'];
   
