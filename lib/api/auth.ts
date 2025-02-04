@@ -40,7 +40,7 @@ export interface AuthResponse {
     to: string;
   };
   message: string;
-  plan: boolean;
+  plan: string | null;
 }
 
 export interface LoginResponse {
@@ -116,6 +116,7 @@ export const authApi = {
 
   logout: async () => {
     const response = await api.post('/logout');
+    console.log(response,'logged out')
     return response.data;
   },
 

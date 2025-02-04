@@ -706,12 +706,12 @@ interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   isVerified: boolean;
-  hasPlan: boolean;
+  hasPlan: string | null;
   setAuth: (user: User, token: string) => void;
   clearAuth: () => void;
   checkAuth: () => Promise<void>;
   setVerificationStatus: (status: boolean) => void;
-  setPlanStatus: (status: boolean) => void;
+  setPlanStatus: (plan: string | null) => void;
   setLoading: (status: boolean) => void;
 }
 
@@ -723,7 +723,7 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       isLoading: true,
       isVerified: false,
-      hasPlan: false,
+      hasPlan: null,
 
       setAuth: (user: User, token: string) => {
         if (!user || !token) return;
@@ -741,7 +741,7 @@ export const useAuthStore = create<AuthStore>()(
           token: null, 
           isAuthenticated: false,
           isVerified: false,
-          hasPlan: false,
+          hasPlan: null,
         });
       },
 
@@ -749,8 +749,8 @@ export const useAuthStore = create<AuthStore>()(
         set({ isVerified: status });
       },
 
-      setPlanStatus: (status) => {
-        set({ hasPlan: status });
+      setPlanStatus: (plan) => {
+        set({ hasPlan: plan });
       },
 
       setLoading: (status) => {
@@ -771,7 +771,7 @@ export const useAuthStore = create<AuthStore>()(
               user: userData.data.user,
               isAuthenticated: true,
               isVerified: userData.data.is_verified,
-              hasPlan: userData.plan,
+              hasPlan: userData.plan || null,
             });
           } else {
             get().clearAuth();
