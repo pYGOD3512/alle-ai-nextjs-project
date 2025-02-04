@@ -243,8 +243,8 @@ export function FileUploadButton({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {buttonIcon ? buttonIcon : (
-            <Button variant="ghost2" className="p-0 flex-shrink-0 focus-visible:outline-none rounded-full" aria-label="Upload File">
-              <Plus className="h-8 w-8 border border-borderColorPrimary p-2 rounded-full" />
+            <Button variant="ghost2" className="flex-shrink-0 focus-visible:outline-none border-none p-0" aria-label="Upload File">
+              <Plus size={28} className="border border-borderColorPrimary rounded-full p-[0.3rem]" />
             </Button>
           )}
         </DropdownMenuTrigger>

@@ -456,7 +456,7 @@ export function Sidebar() {
               <Button
                 size="sm"
                 variant="outline"
-                className="gap-1 w-full text-xs border-none text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                className="gap-1 w-full text-xs relative overflow-hidden group border-none dark:bg-white dark:text-black bg-black text-white"
                 onClick={() => setPlansModalOpen(true)}
               >
                 <Gem className="h-4 w-4" />
@@ -466,7 +466,7 @@ export function Sidebar() {
           </>
         ) : (
           <div className="absolute bottom-0 left-0 right-0 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
-            <Button size="sm" variant="outline" className="w-full text-xs text-white border-none bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+            <Button size="sm" variant="outline" className="w-full text-xs text-white border-none dark:bg-white dark:text-black bg-black">
               <Gem className="h-4 w-4" />
             </Button>
           </div>

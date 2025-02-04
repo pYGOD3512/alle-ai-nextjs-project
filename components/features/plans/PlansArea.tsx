@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 const PlansArea = () => {
   const [isYearly, setIsYearly] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -31,7 +31,7 @@ const PlansArea = () => {
       return;
     }
 
-    setIsProcessing(true);
+    setProcessingPlan(planName);
 
     try {
       const response = await authApi.checkout({
@@ -40,11 +40,9 @@ const PlansArea = () => {
       });
 
       if (response.status && response.to) {
-        // For free plan, we might redirect internally
         if (planName.toLowerCase() === 'free') {
           router.push(response.to);
         } else {
-          // For paid plans, might redirect to payment provider
           window.location.href = response.to;
         }
       } else {
@@ -57,7 +55,7 @@ const PlansArea = () => {
         variant: "destructive",
       });
     } finally {
-      setIsProcessing(false);
+      setProcessingPlan(null);
     }
   };
 
@@ -229,9 +227,9 @@ const PlansArea = () => {
                     ? handleCustomPlan() 
                     : handleCheckout(plan.name)
                 }
-                disabled={isProcessing}
+                disabled={processingPlan !== null}
               >
-                {isProcessing ? (
+                {processingPlan === plan.name ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Processing...</span>
