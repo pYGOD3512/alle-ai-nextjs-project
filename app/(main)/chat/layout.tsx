@@ -27,6 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { setIsWebSearch } = useWebSearchStore();
+    const { isOpen } = useSidebarStore();
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -45,7 +46,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <>
+    <div
+    className={`transition-all duration-300 ${
+      isOpen ? "pl-60" : "pl-0"
+    }`}
+    >
       {pathname === "/chat" && (
         <>
           <div className="mt-20">
@@ -71,6 +76,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </>
       )}
       <div className="flex-1">{children}</div>
-    </>
+    </div>
   );
 }

@@ -18,7 +18,7 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -141,7 +141,7 @@ import { toast, useToast } from "@/hooks/use-toast";
 
 import { NotificationItem } from "@/lib/types";
 import { driveService } from '@/lib/services/driveServices';
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Share } from "next/dist/compiled/@next/font/dist/google";
 import { DataTable } from "./txn/data-table";
 import { columns } from "./txn/columns";
@@ -164,6 +164,8 @@ import {
 } from 'recharts';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label as UILabel } from "@/components/ui/label";
+import { useAuth } from "../providers/AuthProvider";
+import { authApi } from "@/lib/api/auth";
 
 interface ModalProps {
   isOpen: boolean;
@@ -501,6 +503,22 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
 }
 
 export function LogoutModal({ isOpen, onClose, mode = 'current', deviceInfo }: LogoutModalProps) {
+
+   const { logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      await logout();
+      onClose();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const title = mode === 'current' ? 'Logout' : `Logout Device`;
   const description = mode === 'current' 
     ? "You will be logged out of your current session. You'll need to log in again to access your account."
@@ -547,7 +565,7 @@ export function LogoutModal({ isOpen, onClose, mode = 'current', deviceInfo }: L
               variant="destructive"
               onClick={() => {
                 if (mode === 'current') {
-                  console.log("Logging out current session...");
+                  handleLogout();
                 } else if (deviceInfo) {
                   console.log(`Logging out device: ${deviceInfo.id}`);
                 }
@@ -2515,6 +2533,72 @@ export function SubscriptionConfirmModal({
 
 export function PlansModal({ isOpen, onClose }: ModalProps) {
   const [isYearly, setIsYearly] = useState(false);
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  const { toast } = useToast();
+  const router = useRouter();
+  const userPlan = useAuthStore((state) => state.hasPlan);
+
+  const handleCustomPlan = () => {
+    toast({
+      title: "Coming Soon",
+      description: "This plan is coming soon!",
+      variant: "default",
+    });
+  };
+
+  const handleCheckout = async (planName: string) => {
+    if (planName.toLowerCase() === 'custom') {
+      handleCustomPlan();
+      return;
+    }
+
+    setProcessingPlan(planName);
+
+    try {
+      const response = await authApi.checkout({
+        plan: planName.toLowerCase() as 'free' | 'standard' | 'plus' | 'custom',
+        billing_cycle: isYearly ? 'yearly' : 'monthly',
+      });
+
+      if (response.status && response.to) {
+        if (planName.toLowerCase() === 'free') {
+          router.push(response.to);
+        } else {
+          window.location.href = response.to;
+        }
+      } else {
+        throw new Error(response.message || 'Checkout failed');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Checkout Failed",
+        description: error.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingPlan(null);
+    }
+  };
+
+  const isCurrentPlan = (planName: string) => {
+    if (!userPlan) return false;
+    
+    const normalizedUserPlan = userPlan.toLowerCase();
+    const normalizedPlanName = planName.toLowerCase();
+    
+    if (normalizedPlanName === 'free') {
+      return normalizedUserPlan === 'free';
+    }
+    
+    return normalizedUserPlan === `${normalizedPlanName}-${isYearly ? 'yearly' : 'monthly'}`;
+  };
+
+  const getButtonText = (planName: string) => {
+    if (isCurrentPlan(planName)) {
+      return "Your Current Plan";
+    }
+    return planName === "Custom" ? "Coming Soon" : `Upgrade to ${planName}`;
+  };
 
   const plans = [
     {
@@ -2692,8 +2776,21 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
                         : ""
                     }`}
                     variant={plan.highlighted ? "default" : "outline"}
+                    onClick={() => 
+                      plan.name.toLowerCase() === 'custom' 
+                        ? handleCustomPlan() 
+                        : handleCheckout(plan.name)
+                    }
+                    disabled={processingPlan !== null || isCurrentPlan(plan.name)}
                   >
-                    {plan.buttonText}
+                    {processingPlan === plan.name ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Processing...</span>
+                      </div>
+                    ) : (
+                      getButtonText(plan.name)
+                    )}
                   </Button>
                 </div>
               </motion.div>
@@ -4583,7 +4680,7 @@ export function PromptModal({
                   variant={action.variant || "default"}
                   className={cn(
                     "flex-1 gap-2 focus-visible:outline-none",
-                    action.variant === 'premium' && "text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                    action.variant === 'premium' && "text-white dark:bg-white dark:text-black bg-black text-white"
                   )}
                 >
                   {action.icon && action.icon}
