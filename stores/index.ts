@@ -731,7 +731,7 @@ export const useAuthStore = create<AuthStore>()(
           user, 
           token, 
           isAuthenticated: true,
-          isVerified: user.is_verified,
+          isVerified: !!user.email_verified_at,
         });
       },
 
@@ -770,7 +770,7 @@ export const useAuthStore = create<AuthStore>()(
             set({ 
               user: userData.data.user,
               isAuthenticated: true,
-              isVerified: userData.data.is_verified,
+              isVerified: !!userData.data.user.email_verified_at,
               hasPlan: userData.plan || null,
             });
           } else {

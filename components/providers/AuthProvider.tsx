@@ -17,6 +17,7 @@ interface User {
   ip_address: string;
   user_agent: string;
   registration_type: string;
+  email_verified_at?: string | null;
 }
 
 interface RegisterResponse {
@@ -73,97 +74,118 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAuth, 
     isLoading,
     token,
+    user,
+    isVerified,
+    hasPlan,
     setVerificationStatus,
     setPlanStatus,
     setLoading
   } = useAuthStore();
 
   // Define route groups
-  const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service'];
+  const publicRoutes = ['/', '/model-glossary', '/privacy-policy', '/terms-of-service'];
   const authPage = '/auth';
   const plansPage = '/plans';
-  const protectedRoutes = ['/chat', '/settings', '/billing'];
+  const protectedRoutes = ['/chat', '/image', '/audio', '/settings', '/billing'];
   
   useEffect(() => {
     const initAuth = async () => {
-      setLoading(true);
-      try {
-        // Case 1: No token
-        if (!token) {
-          // Allow public routes
-          if (!publicRoutes.includes(pathname)) {
-            router.replace(authPage);
-          }
-          setLoading(false);
-          return;
-        }
+      // If on a public route, don't do anything
+      if (publicRoutes.includes(pathname)) {
+        setLoading(false);
+        return;
+      }
 
-        // Case 2: Has token - verify authentication
+      // No token = not authenticated
+      if (!token) {
+        if (!publicRoutes.includes(pathname)) {
+          router.replace(authPage);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // If we have all the necessary user data in store, use that instead of making an API call
+      if (user && typeof isVerified === 'boolean' && typeof hasPlan === 'string') {
+        handleRouting();
+        setLoading(false);
+        return;
+      }
+
+      // Only fetch user data if we don't have it or it's incomplete
+      try {
+        setLoading(true);
         const userData = await authApi.getUser();
         
         if (userData.status) {
-          // Update auth store
           setAuth(userData.data.user, token);
           setVerificationStatus(userData.data.is_verified);
           setPlanStatus(userData.plan);
-
-          // Case 2.1: User is on auth page but authenticated
-          if (pathname === authPage) {
-            if (!userData.data.is_verified) {
-              // Stay on auth for verification
-              return;
-            }
-            // Redirect to plans if no plan, otherwise to chat
-            router.replace(userData.plan ? '/chat' : plansPage);
-            return;
-          }
-
-          // Case 2.2: User is on plans page
-          if (pathname === plansPage && userData.plan) {
-            // Redirect to chat if user already has a plan
-            router.replace('/chat');
-            return;
-          }
-
-          // Case 2.3: User accessing protected routes
-          if (protectedRoutes.includes(pathname)) {
-            if (!userData.data.is_verified) {
-              router.replace(authPage);
-              return;
-            }
-            if (!userData.plan) {
-              router.replace(plansPage);
-              return;
-            }
-          }
+          handleRouting();
         } else {
-          // Invalid token
           clearAuth();
-          if (!publicRoutes.includes(pathname)) {
-            router.replace(authPage);
-          }
+          router.replace(authPage);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         clearAuth();
-        if (!publicRoutes.includes(pathname)) {
-          router.replace(authPage);
-        }
+        router.replace(authPage);
       } finally {
         setLoading(false);
       }
     };
 
+    // Separate routing logic for cleaner code
+    const handleRouting = () => {
+      // On auth page but authenticated
+      if (pathname === authPage) {
+        if (!isVerified) return; // Stay for verification
+        router.replace(hasPlan ? '/chat' : plansPage);
+        return;
+      }
+
+      // On plans page with plan
+      if (pathname === plansPage && hasPlan) {
+        router.replace('/chat');
+        return;
+      }
+
+      // Protected routes access
+      if (protectedRoutes.includes(pathname)) {
+        if (!isVerified) {
+          router.replace(authPage);
+          return;
+        }
+        if (!hasPlan && pathname !== plansPage) {
+          router.replace(plansPage);
+          return;
+        }
+      }
+    };
+
     initAuth();
-  }, [pathname, token]);
+  }, [pathname]);
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
       const response: LoginResponse = await authApi.login({ email, password });
+      
+      // Check verification status first
+      if (!response.data.user.email_verified_at) {
+        // Set auth state but don't redirect
+        setAuth(response.data.user, response.data.token);
+        return response; // Let the login form handle verification
+      }
+
+      // User is verified, set full auth state
       setAuth(response.data.user, response.data.token);
-      console.log(response.data, 'response.data');
-      if (response.data.to === 'chat') {
-        router.push('/chat');
+      
+      // Get plan status in parallel with setting auth
+      const userData = await authApi.getUser();
+      if (userData.status) {
+        setPlanStatus(userData.plan);
+        // Direct routing based on plan
+        router.push(userData.plan ? '/chat' : '/plans');
       }
       
       return response;
