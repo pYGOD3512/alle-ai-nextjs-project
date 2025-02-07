@@ -47,9 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-    className={`transition-all duration-300 ${
-      isOpen ? "pl-60" : "pl-0"
-    }`}
+    className={`transition-all duration-300`}
     >
       {pathname === "/chat" && (
         <>

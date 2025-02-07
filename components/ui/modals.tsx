@@ -797,7 +797,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md" id="tooltip-select-menu">
           <DialogHeader className="space-y-4 relative">
-            <PlanSwitcher />
+            {/* <PlanSwitcher /> */}
             <DialogTitle className="">Model Selection</DialogTitle>
 
             {/* Selected Models */}
