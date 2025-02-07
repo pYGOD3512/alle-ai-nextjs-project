@@ -32,16 +32,20 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
     
     try {
       const result = await login(email, password);
-      if (result.data.to === 'verify-email') {
+      
+      // Only handle verification if needed
+      if (!result.data.user.email_verified_at) {
         onVerify(email);
-        setIsLoading(false);
+        return;
       }
+      // Login function will handle other redirects
     } catch (error: any) {
       toast({
         title: "Login failed",
         description: error.response?.data?.message || "Please check your credentials and try again",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
