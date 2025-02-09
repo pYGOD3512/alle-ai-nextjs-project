@@ -124,6 +124,7 @@ export const authApi = {
 
   getUser: async (): Promise<AuthResponse> => {
     const response = await api.post('/auth');
+    console.log('getuser response')
     return response.data;
   },
 

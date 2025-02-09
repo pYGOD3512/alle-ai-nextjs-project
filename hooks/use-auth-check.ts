@@ -17,14 +17,14 @@ interface UseAuthCheckReturn {
 export const useAuthCheck = (options: UseAuthCheckOptions = {}): UseAuthCheckReturn => {
   const { token, setLoading, isLoading } = useAuthStore();
   const router = useRouter();
-  const { onVerifyEmail, redirectIfAuthenticated = true } = options;
+  const { onVerifyEmail} = options;
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
     const checkAuth = async () => {
-      if (token && redirectIfAuthenticated) {
+      if (token) {
         try {
           const response = await authApi.getUser();
           
@@ -38,7 +38,7 @@ export const useAuthCheck = (options: UseAuthCheckOptions = {}): UseAuthCheckRet
           );
 
           // If user is verified, send them directly to chat
-          if (response.data.user.email_verified_at) {
+          if (response.data.to === 'chat') {
             router.replace('/chat');
             return;
           }
@@ -69,7 +69,7 @@ export const useAuthCheck = (options: UseAuthCheckOptions = {}): UseAuthCheckRet
     return () => {
       mounted = false;
     };
-  }, [token, redirectIfAuthenticated]);
+  }, [token]);
 
   return {
     shouldRender,
