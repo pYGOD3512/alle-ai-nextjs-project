@@ -3,19 +3,19 @@
 import PlansArea from "@/components/features/plans/PlansArea";
 import { HelpButton } from "@/components/HelpButton";
 import { Header } from "@/components/layout/Header";
-import { useAuthCheck } from "@/hooks/use-auth-check";
+// import { useAuthCheck } from "@/hooks/use-auth-check";
 import { LoadingScreen } from "@/components/features/auth/LoadingScreen";
 
 export default function PlansPage() {
-  const { isLoading, shouldRender } = useAuthCheck();
+  // const { isLoading, shouldRender } = useAuthCheck();
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  // if (isLoading) {
+  //   return <LoadingScreen />;
+  // }
 
-  if (!shouldRender) {
-    return null;
-  }
+  // if (!shouldRender) {
+  //   return null;
+  // }
 
   return (
     <div className="h-screen flex overflow-hidden">
