@@ -160,7 +160,7 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
 
       {/* Terms */}
       <div className="text-center text-xs text-muted-foreground">
-        By continuing, you agree to Alle-AI's{" "}
+        By continuing, you agree to Alle-AI&apos;s{" "}
         <Link href="/terms-of-service" target="_blank" className="underline">
           Terms of Service 
         </Link>{" "}
