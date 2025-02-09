@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
@@ -18,7 +19,8 @@ import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
 
-export default function AuthPage() {
+// Create an inner component for the auth page logic
+function AuthPageInner() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [resetEmail, setResetEmail] = useState<string>("");
   const [email, setEmail] = useState("");
@@ -36,6 +38,17 @@ export default function AuthPage() {
 
   useEffect(() => {
     setMounted(true);
+
+    // Get URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const emailParam = params.get('email');
+
+    // Set auth mode and email if provided in URL
+    if (mode === 'verify-email' && emailParam) {
+      setAuthMode('verify-email');
+      setEmail(emailParam);
+    }
   }, []);
 
   // Show loading screen while checking auth
@@ -141,5 +154,14 @@ export default function AuthPage() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+// Main component wrapped in Suspense
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <AuthPageInner />
+    </Suspense>
   );
 }

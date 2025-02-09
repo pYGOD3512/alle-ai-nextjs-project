@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, ReactNode, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, ReactNode, useState, Suspense } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores';
 import { LoadingScreen } from './LoadingScreen';
 import { authApi } from '@/lib/api/auth';
@@ -13,18 +13,26 @@ interface RouteGuardProps {
 const authRoutes = ['/', '/auth', '/plans'];
 const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes'];
 
-export function RouteGuard({ children }: RouteGuardProps) {
+// Create a separate component for the route guard logic
+function RouteGuardInner({ children }: RouteGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { token, setAuth, clearAuth } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
   const [canRender, setCanRender] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Reset states on route change
       setIsChecking(true);
       setCanRender(false);
+
+      // Special case: If we're on the auth page with verify-email mode
+      if (pathname === '/auth' && searchParams.get('mode') === 'verify-email') {
+        setCanRender(true);
+        setIsChecking(false);
+        return;
+      }
 
       // CASE 1: No token - only allow access to auth routes and public routes
       if (!token) {
@@ -37,17 +45,28 @@ export function RouteGuard({ children }: RouteGuardProps) {
         return;
       }
 
-      // CASE 2: Has token and trying to access auth routes
+      // CASE 2: Has token and trying to access auth routes (except /plans after verification)
       if (token && authRoutes.includes(pathname)) {
         try {
           const response = await authApi.getUser();
           setAuth(response.data.user, token, response.plan);
 
-          if (response.data.to === 'chat' && response.plan) {
+          // Special case: Allow access to /plans if user is verified but has no plan
+          if (pathname === '/plans' && response.data.user.email_verified_at) {
+            setCanRender(true);
+            setIsChecking(false);
+            return;
+          }
+
+          if (response.data.to === 'verify-email') {
+            router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
+            return;
+          } else if (response.data.to === 'chat' && response.plan) {
             router.replace('/chat');
             return;
-          } else if (!response.plan){
-            router.replace('/plans')
+          } else if (!response.plan) {
+            router.replace('/plans');
+            return;
           }
         } catch (error) {
           clearAuth();
@@ -62,10 +81,13 @@ export function RouteGuard({ children }: RouteGuardProps) {
     };
 
     checkAuth();
-  }, [pathname, token]);
+  }, [pathname, token, searchParams]);
 
   // Show loading screen when authenticated user tries to access auth routes
-  if (isChecking && token && authRoutes.includes(pathname)) {
+  // except for verify-email mode and plans page for verified users
+  if (isChecking && token && authRoutes.includes(pathname) && 
+      !(pathname === '/auth' && searchParams.get('mode') === 'verify-email') &&
+      !(pathname === '/plans' && useAuthStore.getState().user?.email_verified_at)) {
     return <LoadingScreen />;
   }
 
@@ -74,6 +96,14 @@ export function RouteGuard({ children }: RouteGuardProps) {
     return null;
   }
 
-  // Render children only after we've confirmed access is allowed
   return <>{children}</>;
+}
+
+// Main component wrapped in Suspense
+export function RouteGuard({ children }: RouteGuardProps) {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <RouteGuardInner>{children}</RouteGuardInner>
+    </Suspense>
+  );
 }
