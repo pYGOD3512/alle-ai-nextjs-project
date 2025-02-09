@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authApi.login({ email, password });
       
       // Always set the basic auth state
-      setAuth(response.data.user, response.data.token);
+      setAuth(response.data.user, response.data.token); //I'll make Dickson add plans to the login response
       
       // Handle routing based on response
       if (!response.data.user.email_verified_at) {
