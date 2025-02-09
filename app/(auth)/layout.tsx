@@ -244,12 +244,12 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left side - Auth Forms */}
-      <div className="w-full md:w-1/2 p-10 mt-10">
+      <div className="w-full xl:w-1/3 2xl:w-1/2 p-10 mt-10">
         {children}
       </div>
       
       {/* Updated right side - hidden on mobile */}
-      <div className="hidden md:block w-1/2 relative overflow-hidden bg-background cursor-none">
+      <div className="hidden md:block xl:w-2/3 relative overflow-hidden bg-background cursor-none">
         <AnimatedBackground />
         
         {/* Content wrapper with glassmorphism */}

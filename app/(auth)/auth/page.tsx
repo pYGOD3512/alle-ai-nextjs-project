@@ -12,6 +12,9 @@ import { VerificationCodeForm } from "@/components/features/auth/VerificationCod
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useAuthStore } from '@/stores';
+import { authApi } from "@/lib/api/auth";
+import { useAuthCheck } from "@/hooks/use-auth-check";
+import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
 
@@ -19,9 +22,31 @@ export default function AuthPage() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [resetEmail, setResetEmail] = useState<string>("");
   const [email, setEmail] = useState("");
-  const { isAuthenticated, user, isVerified } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
   const { theme, resolvedTheme } = useTheme();
   const router = useRouter();
+
+  // Use the hook with a callback for verification
+  const { isLoading, shouldRender } = useAuthCheck({
+    onVerifyEmail: (email) => {
+      setEmail(email);
+      setAuthMode('verify-email');
+    }
+  });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading screen while checking auth
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // Don't render if we shouldn't (e.g., user is authenticated)
+  if (!shouldRender) {
+    return null;
+  }
 
   const handleForgotPassword = () => {
     setAuthMode('forgot-password');
@@ -78,20 +103,6 @@ export default function AuthPage() {
         );
     }
   };
-
-  useEffect(() => {
-    // If user is authenticated but not verified, show verification form
-    if (isAuthenticated && !isVerified && user?.email) {
-      setEmail(user.email);
-      setAuthMode('verify-email');
-    }
-  }, [isAuthenticated, isVerified, user]);
-
-  // Add useEffect to handle mounting
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Modify the logo section
   const logoSrc = mounted && resolvedTheme === 'dark' 
