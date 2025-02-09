@@ -23,7 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { navItems, userMenuItems, notifications as notificationData} from '@/lib/constants';
+import { navItems, userMenuItems, notifications as notificationData, CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS} from '@/lib/constants';
 import { NotificationItem } from "@/lib/types";
 import { useSidebarStore, useSelectedModelsStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
@@ -36,6 +36,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { NotificationsPanel } from "@/components/NotificationWindow";
 import { NotificationModal } from "@/components/ui/modals";
 import { useRouter } from "next/navigation";
+import { Switch } from "@/components/ui/switch";
 
 
 export function Header() {
@@ -63,15 +64,21 @@ export function Header() {
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
 
-  const currentPage = useSidebarStore((state) => state.currentPage);
-  const selectedModels = useSelectedModelsStore((state) => state.selectedModels);
-  const getSelectedModelNames = useSelectedModelsStore((state) => state.getSelectedModelNames);
+  const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate } = useSelectedModelsStore(
+    (state) => ({
+      getSelectedModelNames: state.getSelectedModelNames,
+      toggleModelActive: state.toggleModelActive,
+      inactiveModels: state.inactiveModels,
+      lastUpdate: state.lastUpdate
+    })
+  );
 
-  
+  const { currentPage } = useSidebarStore();
+
   // Get current selected model names based on the current page
   const selectedModelNames = React.useMemo(() => 
     getSelectedModelNames(currentPage as 'chat' | 'image' | 'audio' | 'video'),
-    [currentPage, selectedModels, getSelectedModelNames]
+    [currentPage, getSelectedModelNames, inactiveModels, lastUpdate]
   );
 
   const isChangelogPage = pathname.includes('changelog');
@@ -368,25 +375,69 @@ export function Header() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="w-2/5 sm:w-1/2 md:w-fit absolute overflow-auto whitespace-nowrap flex items-center ml-8 border border-muted-foreground rounded-md py-1">
+                    <div className="w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-8 border border-muted-foreground rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors">
                       {selectedModelNames.map((model, index) => (
                         <span 
                           key={`${model}-${index}`} 
-                          className="flex items-center gap-1 text-xs dark:text-gray-400 text-gray-800 border-r px-1 border-muted-foreground last:border-none"
+                          className={`flex items-center gap-1 text-xs border-r px-1 border-muted-foreground last:border-none ${
+                            !model.isActive ? 'text-muted-foreground opacity-50' : 'dark:text-gray-400 text-gray-800'
+                          }`}
                         >
                           {model.name}
                           {model.type === 'plus' && (
-                            <Gem className="h-3 w-3 text-yellow-500" />
+                            <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
                           )}
                         </span>
                       ))}
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side="bottom"
-                    className="max-w-[300px] break-words"
-                  >
-                    Selected Models
+                  <TooltipContent side="bottom" sideOffset={5} className="w-64 p-0">
+                    <div className="w-full bg-backgroundSecondary rounded-lg">
+                      <div className="flex items-center justify-between px-4 py-2 border-b border-borderColorPrimary">
+                        <Text className="text-xs font-medium">Selected Models</Text>
+                        <Text className="text-xs text-muted-foreground">{selectedModelNames.length} active</Text>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto py-2">
+                        {selectedModelNames.map((model, index) => {
+                          const modelList = currentPage === 'chat' ? CHAT_MODELS 
+                            : currentPage === 'image' ? IMAGE_MODELS
+                            : currentPage === 'audio' ? AUDIO_MODELS
+                            : VIDEO_MODELS;
+
+                          const modelInfo = modelList.find(m => m.name === model.name);
+                          
+                          return (
+                            <div 
+                              key={index}
+                              className={`flex items-center justify-between px-4 py-2 hover:bg-hoverColorPrimary cursor-pointer ${
+                                !model.isActive ? 'opacity-50' : ''
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="flex flex-col">
+                                  <Text className={`text-xs ${!model.isActive ? 'text-muted-foreground' : ''}`}>
+                                    {model.name}
+                                  </Text>
+                                </div>
+                                {model.type === 'plus' && (
+                                  <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
+                                )}
+                              </div>
+                              <Switch
+                                variant="sm"
+                                checked={model.isActive}
+                                onCheckedChange={() => {
+                                  if (modelInfo) {
+                                    toggleModelActive(modelInfo.id);
+                                  }
+                                }}
+                                className="ml-2"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -411,7 +462,7 @@ export function Header() {
           
 
           <div className={`flex items-center gap-2 ${!pathname.includes('/plans') ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            {pathname.includes("/chat") && (
+            {/* {pathname.includes("/chat") && (
               <Button
               variant={'outline'}
               className="h-8 rounded-full gap-1 p-2 text-muted-foreground"
@@ -420,7 +471,7 @@ export function Header() {
                 <Share className="w-4 h-4"/>
                 Share
               </Button>
-            )}
+            )} */}
             
 
             <ThemeToggle />

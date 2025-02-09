@@ -2536,7 +2536,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
-  const userPlan = useAuthStore((state) => state.hasPlan);
+  const userPlan = useAuthStore((state) => state.plan);
 
   const handleCustomPlan = () => {
     toast({

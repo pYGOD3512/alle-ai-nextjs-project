@@ -396,7 +396,7 @@ export function ChatInput({
                           }`}
                         >
                           <Globe size={14} />
-                          <span className="text-[12px]">Search</span>
+                          <span className="text-[12px]">Web search</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
