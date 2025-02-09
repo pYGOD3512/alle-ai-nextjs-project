@@ -74,92 +74,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAuth, 
     isLoading,
     token,
-    user,
-    isVerified,
-    hasPlan,
-    setVerificationStatus,
-    setPlanStatus,
     setLoading
   } = useAuthStore();
 
   // Define route groups
-  const publicRoutes = ['/', '/model-glossary', '/privacy-policy', '/terms-of-service'];
+  const publicRoutes = ['/', '/model-glossary', '/privacy-policy', '/terms-of-service', '/collection'];
   const authPage = '/auth';
-  const plansPage = '/plans';
-  const protectedRoutes = ['/chat', '/image', '/audio', '/settings', '/billing'];
-  
+
   useEffect(() => {
     const initAuth = async () => {
-      // If on a public route, don't do anything
-      if (publicRoutes.includes(pathname)) {
-        setLoading(false);
-        return;
-      }
-
-      // No token = not authenticated
-      if (!token) {
-        if (!publicRoutes.includes(pathname)) {
-          router.replace(authPage);
-        }
-        setLoading(false);
-        return;
-      }
-
-      // If we have all the necessary user data in store, use that instead of making an API call
-      if (user && typeof isVerified === 'boolean' && typeof hasPlan === 'string') {
-        handleRouting();
-        setLoading(false);
-        return;
-      }
-
-      // Only fetch user data if we don't have it or it's incomplete
+      setLoading(true);
+      
       try {
-        setLoading(true);
-        const userData = await authApi.getUser();
-        
-        if (userData.status) {
-          setAuth(userData.data.user, token);
-          setVerificationStatus(userData.data.is_verified);
-          setPlanStatus(userData.plan);
-          handleRouting();
-        } else {
-          clearAuth();
-          router.replace(authPage);
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        clearAuth();
-        router.replace(authPage);
+        console.log('trying')
+        // Only redirect to auth page if no token and trying to access protected route
+        // if (!token && !publicRoutes.includes(pathname) && pathname !== authPage) {
+        //   router.replace(authPage);
+        //   return;
+        // }
       } finally {
         setLoading(false);
-      }
-    };
-
-    // Separate routing logic for cleaner code
-    const handleRouting = () => {
-      // On auth page but authenticated
-      if (pathname === authPage) {
-        if (!isVerified) return; // Stay for verification
-        router.replace(hasPlan ? '/chat' : plansPage);
-        return;
-      }
-
-      // On plans page with plan
-      if (pathname === plansPage && hasPlan) {
-        router.replace('/chat');
-        return;
-      }
-
-      // Protected routes access
-      if (protectedRoutes.includes(pathname)) {
-        if (!isVerified) {
-          router.replace(authPage);
-          return;
-        }
-        if (!hasPlan && pathname !== plansPage) {
-          router.replace(plansPage);
-          return;
-        }
       }
     };
 
@@ -168,24 +102,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
-      const response: LoginResponse = await authApi.login({ email, password });
+      const response = await authApi.login({ email, password });
       
-      // Check verification status first
-      if (!response.data.user.email_verified_at) {
-        // Set auth state but don't redirect
-        setAuth(response.data.user, response.data.token);
-        return response; // Let the login form handle verification
-      }
-
-      // User is verified, set full auth state
+      // Always set the basic auth state
       setAuth(response.data.user, response.data.token);
       
-      // Get plan status in parallel with setting auth
-      const userData = await authApi.getUser();
-      if (userData.status) {
-        setPlanStatus(userData.plan);
-        // Direct routing based on plan
-        router.push(userData.plan ? '/chat' : '/plans');
+      // Handle routing based on response
+      if (!response.data.user.email_verified_at) {
+        // User needs to verify email
+        return response;
+      }
+
+      // User is verified, check where to redirect
+      if (response.data.to === 'chat') {
+        router.push('/chat');
+      } else if (response.data.to === 'plans') {
+        router.push('/plans');
       }
       
       return response;
@@ -203,8 +135,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password_confirmation: string;
   }): Promise<RegisterResponse['data'] | void> => {
     try {
-      const response: RegisterResponse = await authApi.register(data);
+      const response = await authApi.register(data);
+      
+      // Set initial auth state
       setAuth(response.data.user, response.data.token);
+      
+      // New registrations always need verification
       return response.data;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -248,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Show loading screen only during initial auth check
+  // Show loading screen only during auth operations
   if (isLoading) {
     return <LoadingScreen />;
   }

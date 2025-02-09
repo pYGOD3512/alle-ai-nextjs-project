@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { textReveal } from "@/lib/utils";
 import { motion } from "framer-motion"
 import { Sparkles, Wand2, MessagesSquare, Zap } from "lucide-react";
@@ -40,6 +40,13 @@ const GreetingMessage = ({
   handlePressed = () => {},
   questionText = "What would you like to do today?",
 }: GreetingMessageProp) => {
+  const handleOptionClick = (option: option) => {
+    handlePressed({
+      ...option,
+      label: `${option.description?.toLowerCase()}`
+    });
+  };
+
   const greetings = textReveal(`Hi! ${username} 🎉`)
   const questionTextArray = textReveal(questionText)
 
@@ -87,32 +94,25 @@ const GreetingMessage = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+          className="flex flex-wrap gap-2 justify-center"
         >
           {options.map((option, index) => (
             <motion.button
               key={index}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
-                delay: 0.8 + (index * 0.1),
-                duration: 0.2
-              }}
-              whileHover={{ 
-                scale: 1.02,
-                transition: { duration: 0.2 }
-              }}
+              transition={{ delay: 0.8 + (index * 0.1), duration: 0.2 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => handlePressed(option)}
-              className="group relative flex items-center gap-2 p-2 sm:p-3 bg-background/50 hover:bg-primary/5 border border-borderColorPrimary hover:border-primary/30 rounded-xl transition-all duration-200"
+              onClick={() => handleOptionClick(option)}
+              className="group inline-flex items-center gap-2 px-3 py-1.5 bg-background/50 hover:bg-primary/5 border border-borderColorPrimary hover:border-primary/30 rounded-full text-sm transition-all duration-200"
             >
-              <div className="flex-shrink-0 p-2 rounded-lg text-primary group-hover:bg-primary/10 transition-colors">
+              <div className="flex-shrink-0 text-primary group-hover:text-primary/80 transition-colors">
                 {option.icon}
               </div>
-              <span className="font-medium text-sm text-foreground/80 group-hover:text-foreground transition-colors">
+              <span className="font-medium text-foreground/80 group-hover:text-foreground transition-colors">
                 {option.label}
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300" />
             </motion.button>
           ))}
         </motion.div>

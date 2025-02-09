@@ -28,6 +28,7 @@ export interface RegisterResponse {
       ip_address: string;
       user_agent: string;
       registration_type: string;
+      email_verified_at?: string | null;
     };
   };
 }
@@ -59,6 +60,7 @@ export interface LoginResponse {
       ip_address: string;
       user_agent: string;
       registration_type: string;
+      email_verified_at?: string | null;
     };
   }
 }

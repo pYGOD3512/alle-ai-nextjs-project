@@ -12,6 +12,7 @@ import { VerificationCodeForm } from "@/components/features/auth/VerificationCod
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useAuthStore } from '@/stores';
+import { authApi } from "@/lib/api/auth";
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
 
@@ -19,7 +20,7 @@ export default function AuthPage() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [resetEmail, setResetEmail] = useState<string>("");
   const [email, setEmail] = useState("");
-  const { isAuthenticated, user, isVerified } = useAuthStore();
+  const { token } = useAuthStore();
   const { theme, resolvedTheme } = useTheme();
   const router = useRouter();
 
@@ -80,12 +81,38 @@ export default function AuthPage() {
   };
 
   useEffect(() => {
-    // If user is authenticated but not verified, show verification form
-    if (isAuthenticated && !isVerified && user?.email) {
-      setEmail(user.email);
-      setAuthMode('verify-email');
-    }
-  }, [isAuthenticated, isVerified, user]);
+    const checkAuth = async () => {
+      console.log('checking auth on entry point');
+      // If there's no token, allow access to auth page
+      if (!token) return;
+
+      try {
+        const response = await authApi.getUser();
+        
+        // Handle routing based on server response
+        switch (response.data.to) {
+          case 'verify-email':
+            // If email needs verification, show verification form
+            setEmail(response.data.user.email);
+            setAuthMode('verify-email');
+            break;
+          case 'plans':
+            router.replace('/plans');
+            break;
+          case 'chat':
+          default:
+            router.replace('/chat');
+            break;
+        }
+      } catch (error) {
+        // If token is invalid, clear auth state
+        useAuthStore.getState().clearAuth();
+        // Stay on auth page
+      }
+    };
+
+    checkAuth();
+  }, [token, router]);
 
   // Add useEffect to handle mounting
   const [mounted, setMounted] = useState(false);

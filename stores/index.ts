@@ -115,14 +115,17 @@ interface SelectedModelsStore {
     audio: string[];
     video: string[];
   };
+  inactiveModels: string[];
   tempSelectedModels: string[];
   setTempSelectedModels: (models: string[]) => void;
   saveSelectedModels: (type: 'chat' | 'image' | 'audio' | 'video') => void;
-  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => Array<{ name: string; type: string }>;
+  toggleModelActive: (modelId: string) => void;
+  getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => any[];
+  lastUpdate: number;
 }
 
-export const useSelectedModelsStore = create<SelectedModelsStore>()(
-  persist(
+export const useSelectedModelsStore = create(
+  persist<SelectedModelsStore>(
     (set, get) => ({
       selectedModels: {
         chat: [],
@@ -130,15 +133,27 @@ export const useSelectedModelsStore = create<SelectedModelsStore>()(
         audio: [],
         video: [],
       },
+      inactiveModels: [],
       tempSelectedModels: [],
+      lastUpdate: Date.now(),
       setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
-      saveSelectedModels: (type) => set((state) => ({
-        selectedModels: {
-          ...state.selectedModels,
-          [type]: state.tempSelectedModels
-        },
-        tempSelectedModels: [] // So here we empty the tempSelectedModels
-      })),
+      saveSelectedModels: (type) => {
+        set((state) => ({
+          selectedModels: {
+            ...state.selectedModels,
+            [type]: state.tempSelectedModels
+          },
+          lastUpdate: Date.now()
+        }));
+      },
+      toggleModelActive: (modelId) => {
+        set((state) => ({
+          inactiveModels: state.inactiveModels.includes(modelId)
+            ? state.inactiveModels.filter(id => id !== modelId)
+            : [...state.inactiveModels, modelId],
+          lastUpdate: Date.now()
+        }));
+      },
       getSelectedModelNames: (type) => {
         const state = get();
         const modelList = type === 'chat' ? CHAT_MODELS 
@@ -149,9 +164,13 @@ export const useSelectedModelsStore = create<SelectedModelsStore>()(
         return state.selectedModels[type]
           .map(id => {
             const model = modelList.find(model => model.id === id);
-            return model ? { name: model.name, type: model.type } : null;
+            return model ? { 
+              name: model.name, 
+              type: model.type,
+              isActive: !state.inactiveModels.includes(id)
+            } : null;
           })
-          .filter((item): item is { name: string; type: string } => item !== null);
+          .filter((item): item is { name: string; type: string; isActive: boolean } => item !== null);
       }
     }),
     {
@@ -705,25 +724,19 @@ interface AuthStore {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  isVerified: boolean;
-  hasPlan: string | null;
+
   setAuth: (user: User, token: string) => void;
   clearAuth: () => void;
-  checkAuth: () => Promise<void>;
-  setVerificationStatus: (status: boolean) => void;
-  setPlanStatus: (plan: string | null) => void;
   setLoading: (status: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isAuthenticated: false,
       isLoading: true,
-      isVerified: false,
-      hasPlan: null,
 
       setAuth: (user: User, token: string) => {
         if (!user || !token) return;
@@ -731,7 +744,6 @@ export const useAuthStore = create<AuthStore>()(
           user, 
           token, 
           isAuthenticated: true,
-          isVerified: !!user.email_verified_at,
         });
       },
 
@@ -740,48 +752,11 @@ export const useAuthStore = create<AuthStore>()(
           user: null, 
           token: null, 
           isAuthenticated: false,
-          isVerified: false,
-          hasPlan: null,
         });
-      },
-
-      setVerificationStatus: (status) => {
-        set({ isVerified: status });
-      },
-
-      setPlanStatus: (plan) => {
-        set({ hasPlan: plan });
       },
 
       setLoading: (status) => {
         set({ isLoading: status });
-      },
-
-      checkAuth: async () => {
-        try {
-          const state = get();
-          if (!state.token) {
-            set({ isLoading: false });
-            return;
-          }
-
-          const userData = await authApi.getUser();
-          if (userData && userData.data) {
-            set({ 
-              user: userData.data.user,
-              isAuthenticated: true,
-              isVerified: !!userData.data.user.email_verified_at,
-              hasPlan: userData.plan || null,
-            });
-          } else {
-            get().clearAuth();
-          }
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          get().clearAuth();
-        } finally {
-          set({ isLoading: false });
-        }
       },
     }),
     {
@@ -789,8 +764,6 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({ 
         token: state.token,
         user: state.user,
-        isVerified: state.isVerified,
-        hasPlan: state.hasPlan,
       }),
     }
   )

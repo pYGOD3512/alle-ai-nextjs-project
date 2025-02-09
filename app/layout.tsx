@@ -26,7 +26,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             {/* <RouteGuard> */}
-              <ConnectionStatus />
+              {/* <ConnectionStatus /> */}
                 {children}
             {/* </RouteGuard> */}
           </AuthProvider>

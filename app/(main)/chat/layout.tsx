@@ -5,18 +5,28 @@ import { ChatInput } from "@/components/features/ChatInput";
 import { useSidebarStore, useContentStore, useWebSearchStore } from "@/stores";
 import { useRouter, usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
-import { SquareTerminal, Lightbulb } from "lucide-react";
+import { SquareTerminal, Lightbulb, Code, Bug, Wrench, Sparkles, NotebookPen, Brain  } from "lucide-react";
 
 const options = [
   {
-    label: "Help me debug my React code",
-    icon: <SquareTerminal className="w-4 h-4 text-violet-600" />,
-    description: "Get programming assistance"
+    label: "Debug",
+    icon: <Bug className="w-4 h-4 text-red-500" />,
+    description: "Help me find the bug in my code"
   },
   {
-    label: "Explain quantum computing simply",
-    icon: <Lightbulb className="w-4 h-4 text-amber-400"/>,
-    description: "Break down complex concepts"
+    label: "Summarize",
+    icon: <NotebookPen className="w-4 h-4 text-green-500" />,
+    description: "Help me summarize the article"
+  },
+  {
+    label: "Brainstorm",
+    icon: <Brain className="w-4 h-4 text-blue-500" />,
+    description: "Help me brainstorm ideas"
+  },
+  {
+    label: "Analyze",
+    icon: <Sparkles className="w-4 h-4 text-yellow-500" />,
+    description: "Help me analyze the data"
   },
 ];
 
@@ -34,6 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const chatId = crypto.randomUUID();
     setContent("chat", "input", input);
     router.push(`/chat/res/${chatId}`);
+    setInput("");
   };
 
   const handleClicked = (opt: { label: string }) => {
@@ -46,20 +57,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div
-    className={`transition-all duration-300`}
-    >
+    <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
       {pathname === "/chat" && (
-        <>
-          <div className="mt-20">
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col justify-center items-center gap-8">
             <GreetingMessage
               username="Pascal"
               options={options}
               handlePressed={handleClicked}
             />
-          </div>
-          <div className="flex justify-center items-center p-4">
-            <div className="w-full max-w-3xl">
+            <div className="w-full max-w-3xl px-4">
               <ChatInput
                 value={input}
                 onChange={setInput}
@@ -71,7 +78,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               />
             </div>
           </div>
-        </>
+        </div>
       )}
       <div className="flex-1">{children}</div>
     </div>
