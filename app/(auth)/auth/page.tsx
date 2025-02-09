@@ -36,6 +36,17 @@ export default function AuthPage() {
 
   useEffect(() => {
     setMounted(true);
+
+    // Get URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const emailParam = params.get('email');
+
+    // Set auth mode and email if provided in URL
+    if (mode === 'verify-email' && emailParam) {
+      setAuthMode('verify-email');
+      setEmail(emailParam);
+    }
   }, []);
 
   // Show loading screen while checking auth
