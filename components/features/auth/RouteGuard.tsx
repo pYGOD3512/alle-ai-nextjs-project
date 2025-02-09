@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, ReactNode, useState } from 'react';
+import { useEffect, ReactNode, useState, Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores';
 import { LoadingScreen } from './LoadingScreen';
@@ -13,7 +13,8 @@ interface RouteGuardProps {
 const authRoutes = ['/', '/auth', '/plans'];
 const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes'];
 
-export function RouteGuard({ children }: RouteGuardProps) {
+// Create a separate component for the route guard logic
+function RouteGuardInner({ children }: RouteGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -96,4 +97,13 @@ export function RouteGuard({ children }: RouteGuardProps) {
   }
 
   return <>{children}</>;
+}
+
+// Main component wrapped in Suspense
+export function RouteGuard({ children }: RouteGuardProps) {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <RouteGuardInner>{children}</RouteGuardInner>
+    </Suspense>
+  );
 }
