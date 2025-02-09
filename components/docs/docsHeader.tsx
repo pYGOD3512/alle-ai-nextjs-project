@@ -12,8 +12,11 @@ export function DocsHeader() {
   const navItems = [
     { name: "Welcome", href: "/docs/getting-started", pageOne: "" },
     { name: "User Guide", href: "/docs/user-guides", pageOne: "overview" },
-    { name: "API Reference", href: "/docs/api", pageOne: "intro" },
-    { name: "FAQ", href: "/faq" },
+    {
+      name: "API Reference",
+      href: "/docs/api-reference",
+      pageOne: "quickstart",
+    },
     { name: "Discussions", href: "/discussions" },
   ];
 

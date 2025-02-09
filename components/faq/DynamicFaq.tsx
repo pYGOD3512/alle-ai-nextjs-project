@@ -38,17 +38,52 @@ const faqComponents = {
   "models-selection": dynamic(
     () => import("@/components/faq/others/models-selection")
   ),
-
-  // docs center pages
+  chat: dynamic(() => import("@/components/docs/user-guides/text-generation")),
+  audio: dynamic(() => import("@/components/docs/user-guides/text-generation")),
+  video: dynamic(() => import("@/components/docs/user-guides/text-generation")),
+  image: dynamic(() => import("@/components/docs/user-guides/text-generation")),
+  history: dynamic(() => import("@/components/docs/user-guides/History")),
+  //api reference  pages
   overview: dynamic(() => import("@/components/docs/user-guides/Overview")),
+  quickstart: dynamic(
+    () => import("@/components/docs/reference/initial-setup")
+  ),
+  "text-generation": dynamic(
+    () => import("@/components/docs/reference/text-generation")
+  ),
+  "image-generation": dynamic(
+    () => import("@/components/docs/reference/image-generation")
+  ),
+  limits: dynamic(() => import("@/components/docs/reference/limits")),
+  "audio-generation": dynamic(
+    () => import("@/components/docs/reference/audio-generation")
+  ),
+  "file-uploads": dynamic(
+    () => import("@/components/docs/reference/file-uploads")
+  ),
+  "video-generation": dynamic(
+    () => import("@/components/docs/reference/video-generation")
+  ),
+  prompts: dynamic(() => import("@/components/docs/user-guides/prompts")),
+  pricing: dynamic(() => import("@/components/docs/reference/pricing")),
+  "error-codes": dynamic(() => import("@/components/docs/reference/Errors")),
+
+  // user guides pages
+  "using-platform": dynamic(
+    () => import("@/components/docs/user-guides/use-platform")
+  ),
+  models: dynamic(() => import("@/components/docs/reference/models")),
 };
 
+type FaqName = keyof typeof faqComponents;
+
 interface DynamicFaqProps {
-  faqName: keyof typeof faqComponents; // get name of faq component
+  faqName: string;
 }
 
 const DynamicFaq: FC<DynamicFaqProps> = ({ faqName }) => {
-  const SelectedFAQ = faqComponents[faqName];
+  const SelectedFAQ =
+    faqName in faqComponents ? faqComponents[faqName as FaqName] : null;
 
   if (!SelectedFAQ) {
     return <p>FAQ not found!</p>;
