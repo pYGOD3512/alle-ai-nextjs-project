@@ -43,12 +43,11 @@ export function RouteGuard({ children }: RouteGuardProps) {
           const response = await authApi.getUser();
           setAuth(response.data.user, token, response.plan);
 
-          if (response.data.user.email_verified_at) {
+          if (response.data.to === 'chat' && response.plan) {
             router.replace('/chat');
             return;
-          } else {
-            router.replace('/auth?mode=verify-email');
-            return;
+          } else if (!response.plan){
+            router.replace('/plans')
           }
         } catch (error) {
           clearAuth();
