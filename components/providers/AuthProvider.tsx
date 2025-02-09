@@ -73,32 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuth, 
     clearAuth, 
     isLoading,
-    token,
     setLoading
   } = useAuthStore();
-
-  // Define route groups
-  const publicRoutes = ['/', '/model-glossary', '/privacy-policy', '/terms-of-service', '/collection'];
-  const authPage = '/auth';
-
-  useEffect(() => {
-    const initAuth = async () => {
-      setLoading(true);
-      
-      try {
-        console.log('trying')
-        // Only redirect to auth page if no token and trying to access protected route
-        // if (!token && !publicRoutes.includes(pathname) && pathname !== authPage) {
-        //   router.replace(authPage);
-        //   return;
-        // }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, [pathname]);
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
@@ -150,12 +126,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      // Set loading state first
+      setLoading(true);
+      
+      // Call logout API
       await authApi.logout();
+      
+      // Clear auth state and redirect in one go
       clearAuth();
-      router.push('/auth');
+      
+      // Use replace instead of push to prevent back navigation
+      router.replace('/auth');
     } catch (error) {
       console.error('Logout failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -185,9 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Show loading screen only during auth operations
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  // if (isLoading) {
+  //   return <LoadingScreen />;
+  // }
 
   return (
     <AuthContext.Provider value={{

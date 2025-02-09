@@ -724,10 +724,12 @@ interface AuthStore {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  plan: string | null;
 
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User, token: string, plan?: string | null) => void;
   clearAuth: () => void;
   setLoading: (status: boolean) => void;
+  setPlan: (plan: string | null) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -737,13 +739,15 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       isAuthenticated: false,
       isLoading: true,
+      plan: null,
 
-      setAuth: (user: User, token: string) => {
+      setAuth: (user: User, token: string, plan: string | null = null) => {
         if (!user || !token) return;
         set({ 
           user, 
           token, 
           isAuthenticated: true,
+          plan,
         });
       },
 
@@ -752,11 +756,16 @@ export const useAuthStore = create<AuthStore>()(
           user: null, 
           token: null, 
           isAuthenticated: false,
+          plan: null,
         });
       },
 
       setLoading: (status) => {
         set({ isLoading: status });
+      },
+
+      setPlan: (plan) => {
+        set({ plan });
       },
     }),
     {
@@ -764,6 +773,7 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({ 
         token: state.token,
         user: state.user,
+        plan: state.plan,
       }),
     }
   )
