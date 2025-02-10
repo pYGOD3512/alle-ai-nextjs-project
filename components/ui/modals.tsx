@@ -2954,6 +2954,20 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "oldest" | "az" | "za">("recent");
 
+  const formatTimeDistance = (timestamp: Date | string) => {
+    try {
+      const date = new Date(timestamp);
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   // Get history for current type and filter based on search
   const filteredHistory = getHistoryByType(currentType)
     .filter(item => 
@@ -3034,7 +3048,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(item.timestamp))} ago
+                        {formatTimeDistance(item.timestamp)}
                       </div>
                     </div>
                   </div>
