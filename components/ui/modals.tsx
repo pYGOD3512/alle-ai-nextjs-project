@@ -18,7 +18,7 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -5471,12 +5471,22 @@ export function BuyCreditsModal({ isOpen, onClose }: ModalProps) {
 
 export function ProjectModal({ isOpen, onClose }: ModalProps) {
   const [projectName, setProjectName] = useState("");
+  const router = useRouter();
+  const { addProject } = useProjectStore();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle project creation
+    if (!projectName.trim()) return;
+    
+    // Create project and get the slug
+    const slug = addProject(projectName.trim());
+    
+    // Close the modal
     onClose();
     setProjectName("");
+    
+    // Navigate to the new project
+    router.push(`/project/${slug}`);
   };
 
   return (
