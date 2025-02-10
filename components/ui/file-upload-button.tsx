@@ -18,8 +18,8 @@ import { dropboxService } from "@/lib/services/dropboxServices";
 import { oneDriveService, OneDriveResponse } from '@/lib/services/onedriveServices';
 
 interface FileUploadButtonProps {
-  onUploadFromComputer: (file: File) => Promise<void>;
-  onUploadFromDrive: (file: File) => Promise<void>;
+  onUploadFromComputer: () => void;
+  onUploadFromDrive: (file: File) => void; 
   buttonIcon?: React.ReactNode;
 }
 
@@ -238,22 +238,6 @@ export function FileUploadButton({
     return mimeTypes[ext || ''] || 'application/octet-stream';
   };
 
-  const handleUploadFromComputer = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = '.pdf,.doc,.docx,.txt,.csv';
-    input.onchange = async (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (files) {
-        for (const file of Array.from(files)) {
-          await onUploadFromComputer(file);
-        }
-      }
-    };
-    input.click();
-  };
-
   return (
     <>
       <DropdownMenu>
@@ -301,7 +285,7 @@ export function FileUploadButton({
             />
             <span>Add from OneDrive</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleUploadFromComputer} className="gap-2">
+          <DropdownMenuItem onClick={onUploadFromComputer} className="gap-2">
             <HardDrive className="h-4 w-4" />
             <span>Upload from computer</span>
           </DropdownMenuItem>
