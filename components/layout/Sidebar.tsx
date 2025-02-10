@@ -13,12 +13,12 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video  } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video, Folder } from "lucide-react";
 import Image from "next/image";
 import {
   sidebarMenuItems,
 } from "@/lib/constants";
-import { useSidebarStore, useHistoryStore } from "@/stores";
+import { useSidebarStore, useHistoryStore, useProjectStore, Project } from "@/stores";
 import {
   Tooltip,
   TooltipContent,
@@ -35,6 +35,16 @@ import { ModelSelectionModal, PlansModal, ProjectModal, SearchHistoryModal } fro
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 export function Sidebar() {
@@ -45,6 +55,7 @@ export function Sidebar() {
   const { history, removeHistory: removeItem, renameHistory: renameItem, getHistoryByType } = useHistoryStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const { projects, currentProject, setCurrentProject, removeProject } = useProjectStore();
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
@@ -52,6 +63,8 @@ export function Sidebar() {
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
 
+  // Add confirmation dialog state
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -178,6 +191,23 @@ export function Sidebar() {
     setSectionId(`${currentType}Id`, itemId);
   };
 
+  // Add this helper function for projects
+  const handleProjectClick = (project: Project) => {
+    setCurrentProject(project);
+    router.push(`/project/${project.slug}`);
+  };
+
+  // Handle project deletion
+  const handleDeleteProject = (projectId: string) => {
+    removeProject(projectId);
+    setProjectToDelete(null);
+    
+    // If we're deleting the current project, redirect to home
+    if (currentProject?.id === projectId) {
+      router.push('/');
+    }
+  };
+
   return (
     <>
       {/* Backdrop overlay for mobile when sidebar is open */}
@@ -194,9 +224,10 @@ export function Sidebar() {
           ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}
           border-r bg-sideBarBackground flex flex-col`}
       >
-        <div className="p-2">
-          {isOpen ? (
-            <>
+        {isOpen ? (
+          <>
+            {/* Top section with fixed content */}
+            <div className="p-2 flex-shrink-0">
               <div className="flex gap-2 px-2">
                 <Button
                   onClick={handleNewChat}
@@ -250,92 +281,92 @@ export function Sidebar() {
                   );
                 })}
               </div>
-
-              <div className="mt-4 px-2">
-              {/* <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
-                {currentType}
-                Projects
-              </div> */}
-                <Button
-                  variant="ghost"
-                  className="w-full border-none justify-start gap-2 text-sm text-foreground hover:text-foreground px-2"
-                  onClick={() => setProjectModalOpen(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                  New project
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="space-y-2">
-              <div className="space-y-2 mb-8">
-                <Button
-                  onClick={handleNewChat}
-                  variant="outline"
-                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg}`}
-                >
-                  <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
-                </Button>
-                <Button
-                  variant="outline"
-                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
-                  onClick={() => setModelSelectionModalOpen(true)}
-                  id="tooltip-select-selector"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </div>
-              {sidebarMenuItems.map((item, i) => {
-                const isActive = isActiveRoute(item.href, pathname);
-                const type = item.href === "/" ? "chat" 
-                  : item.href === "/image" ? "image"
-                  : item.href === "/audio" ? "audio"
-                  : "video";
-                const styles = getSectionStyles(type);
-                
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
-                      ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                      ${styles.hoverBg}`}
-                    id="tooltip-select-ais"
-                  >
-                    <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
-                  </Link>
-                );
-              })}
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-full"
-                onClick={() => setProjectModalOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
             </div>
-          )}
-        </div>
 
-        {isOpen ? (
-          <>
-            <div className="px-4 mt-5">
-              <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
-                {currentType.toUpperCase()} HISTORY
-                <Button
-                variant={`ghost`}
-                size={`icon`}
-                className="p-0 h-8 w-8"
-                onClick={() => setHistorySearchModalOpen(true)}
-                aria-label="Search History"
-                >
-                  <Search   className="w-4 h-4"/>
-                </Button>
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+              {/* Projects Section */}
+              {(pathname.includes('chat') || pathname.includes('project')) && (
+                <>
+                  <div className="flex-shrink-0 px-2">
+                    <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
+                      <Button
+                        variant="ghost"
+                        className="w-full p-0 gap-2 border-none justify-start px-2"
+                        onClick={() => setProjectModalOpen(true)}
+                        aria-label="New Project"
+                      >
+                        <Plus className="w-4 h-4"/>
+                        New project
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable projects list */}
+                  <ScrollArea className="flex-shrink-0 max-h-[30vh]">
+                    <div className="px-4 space-y-0.5">
+                      {projects.length > 0 ? (
+                        projects.map((project) => (
+                          <ContextMenu key={project.id}>
+                            <ContextMenuTrigger>
+                              <div 
+                                className={`group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md cursor-pointer ${
+                                  currentProject?.id === project.id ? 'bg-secondary' : ''
+                                }`}
+                                onClick={() => handleProjectClick(project)}
+                              >
+                                <Folder className="mr-2 h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm truncate">{project.name}</span>
+                              </div>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                              <ContextMenuItem onClick={() => {
+                                // TODO: Implement rename project
+                              }}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                <span>Rename</span>
+                              </ContextMenuItem>
+                              <ContextMenuItem 
+                                onClick={() => {
+                                  setProjectToDelete(project.id);
+                                }}
+                                className="text-red-500 focus:text-red-500"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete</span>
+                              </ContextMenuItem>
+                            </ContextMenuContent>
+                          </ContextMenu>
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
+                          <span className="text-xs">No projects</span>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </>
+              )}
+
+              {/* History Section */}
+              <div className="flex-shrink-0 px-4 mt-4">
+                <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
+                  {currentType.toUpperCase()} HISTORY
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="p-0 h-8 w-8"
+                    onClick={() => setHistorySearchModalOpen(true)}
+                    aria-label="Search History"
+                  >
+                    <Search className="w-4 h-4"/>
+                  </Button>
+                </div>
               </div>
-              <ScrollArea className="flex-1 h-[calc(100vh-45rem)]">
-                <div className="space-y-0.5">
+
+              {/* Scrollable history list */}
+              <ScrollArea className="flex-1">
+                <div className="px-4 space-y-0.5">
                   {currentHistory.length > 0 ? (
                     currentHistory.map((item) => (
                       <ContextMenu key={item.id}>
@@ -426,40 +457,41 @@ export function Sidebar() {
                       </ContextMenu>
                     ))
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                      {/* <MessageSquare className="w-8 h-8 mb-2" /> */}
-                      <span>No history available</span>
+                    <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
+                      <span className="text-xs">No history available</span>
                     </div>
                   )}
                 </div>
               </ScrollArea>
+
+              {/* More section */}
+              <div className="flex-shrink-0 px-4 mt-4">
+                <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md bg-backgroundSecondary text-xs font-medium text-muted-foreground hover:text-primary">
+                    MORE
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'transform rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-1 mt-1">
+                    <Link href={`/model-glossary`} legacyBehavior>
+                      <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
+                        <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
+                      </a>
+                    </Link>
+                    <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
+                      <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
+                        <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
+                      </a>
+                    </Link>
+                    <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
+                        <History  className="w-4 h-4 ml-4"/> Changelog
+                    </Link>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             </div>
 
-            <div className="px-4 mt-8">
-              <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md bg-backgroundSecondary text-xs font-medium text-muted-foreground hover:text-primary">
-                  MORE
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isMoreOpen ? 'transform rotate-180' : ''}`} />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-1 mt-1">
-                  <Link href={`/model-glossary`} legacyBehavior>
-                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
-                      <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
-                    </a>
-                  </Link>
-                  <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
-                    <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
-                      <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
-                    </a>
-                  </Link>
-                  <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
-                      <History  className="w-4 h-4 ml-4"/> Changelog
-                  </Link>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-
-            <div className="absolute bottom-0 left-0 right-0 p-4 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
+            {/* User section at bottom */}
+            <div className="flex-shrink-0 p-4 mt-auto">
               <div className="flex items-center gap-3 mb-4">
                 <Image
                   src="/user.jpg"
@@ -490,9 +522,53 @@ export function Sidebar() {
             </div>
           </>
         ) : (
-          <div className="absolute bottom-0 left-0 right-0 rounded-md m-2 cursor-pointer hover:bg-background transition-all duration-200">
-            <Button size="sm" variant="outline" className="w-full text-xs text-white border-none dark:bg-white dark:text-black bg-black">
-              <Gem className="h-4 w-4" />
+          <div className="space-y-2">
+            <div className="space-y-2 mb-8">
+              <Button
+                onClick={handleNewChat}
+                variant="outline"
+                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg}`}
+              >
+                <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
+              </Button>
+              <Button
+                variant="outline"
+                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
+                onClick={() => setModelSelectionModalOpen(true)}
+                id="tooltip-select-selector"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
+            {sidebarMenuItems.map((item, i) => {
+              const isActive = isActiveRoute(item.href, pathname);
+              const type = item.href === "/" ? "chat" 
+                : item.href === "/image" ? "image"
+                : item.href === "/audio" ? "audio"
+                : "video";
+              const styles = getSectionStyles(type);
+              
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
+                    ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
+                    ${styles.hoverBg}`}
+                  id="tooltip-select-ais"
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
+                </Link>
+              );
+            })}
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-full"
+              onClick={() => setProjectModalOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
         )}
@@ -514,6 +590,27 @@ export function Sidebar() {
         isOpen={projectModalOpen}
         onClose={() => setProjectModalOpen(false)}
       />
+
+      {/* Add confirmation dialog */}
+      <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this project? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => projectToDelete && handleDeleteProject(projectToDelete)}
+              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
