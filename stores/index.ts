@@ -796,3 +796,50 @@ export const usePlanStore = create<PlanStore>((set) => ({
   setBillingCycle: (cycle) => set({ billingCycle: cycle }),
   setIsProcessing: (status) => set({ isProcessing: status }),
 }));
+
+
+interface Project {
+  id: string;
+  name: string;
+  slug: string;
+  files: string[];
+  instructions: string;
+  createdAt: Date;
+}
+
+interface ProjectStore {
+  projects: Project[];
+  currentProject: Project | null;
+  addProject: (name: string) => string; // returns the slug
+  updateProject: (id: string, data: Partial<Project>) => void;
+  setCurrentProject: (project: Project | null) => void;
+}
+
+export const useProjectStore = create<ProjectStore>((set) => ({
+  projects: [],
+  currentProject: null,
+  addProject: (name) => {
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const newProject = {
+      id: crypto.randomUUID(),
+      name,
+      slug,
+      files: [],
+      instructions: '',
+      createdAt: new Date(),
+    };
+    set((state) => ({
+      projects: [...state.projects, newProject],
+      currentProject: newProject,
+    }));
+    return slug;
+  },
+  updateProject: (id, data) => {
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === id ? { ...p, ...data } : p
+      ),
+    }));
+  },
+  setCurrentProject: (project) => set({ currentProject: project }),
+}));

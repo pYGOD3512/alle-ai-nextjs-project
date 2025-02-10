@@ -31,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal, PlansModal, SearchHistoryModal } from "../ui/modals";
+import { ModelSelectionModal, PlansModal, ProjectModal, SearchHistoryModal } from "../ui/modals";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,7 @@ export function Sidebar() {
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(true);
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
+  const [projectModalOpen, setProjectModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -249,6 +250,21 @@ export function Sidebar() {
                   );
                 })}
               </div>
+
+              <div className="mt-4 px-2">
+              {/* <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
+                {currentType}
+                Projects
+              </div> */}
+                <Button
+                  variant="ghost"
+                  className="w-full border-none justify-start gap-2 text-sm text-foreground hover:text-foreground px-2"
+                  onClick={() => setProjectModalOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  New project
+                </Button>
+              </div>
             </>
           ) : (
             <div className="space-y-2">
@@ -290,6 +306,15 @@ export function Sidebar() {
                   </Link>
                 );
               })}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-full"
+                onClick={() => setProjectModalOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
           )}
         </div>
@@ -309,7 +334,7 @@ export function Sidebar() {
                   <Search   className="w-4 h-4"/>
                 </Button>
               </div>
-              <ScrollArea className="flex-1 h-[calc(100vh-40rem)]">
+              <ScrollArea className="flex-1 h-[calc(100vh-45rem)]">
                 <div className="space-y-0.5">
                   {currentHistory.length > 0 ? (
                     currentHistory.map((item) => (
@@ -484,6 +509,10 @@ export function Sidebar() {
         isOpen={historySearchModalOpen} 
         onClose={() => setHistorySearchModalOpen(false)} 
         currentType={currentType}
+      />
+      <ProjectModal
+        isOpen={projectModalOpen}
+        onClose={() => setProjectModalOpen(false)}
       />
     </>
   );
