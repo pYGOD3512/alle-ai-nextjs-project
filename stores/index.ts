@@ -253,7 +253,8 @@ export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
 interface HistoryItem {
   id: string;
   title: string;
-  createdAt: Date;
+  message: string;
+  timestamp: Date;
   type: 'chat' | 'image' | 'audio' | 'video';
 }
 
@@ -797,33 +798,40 @@ export const usePlanStore = create<PlanStore>((set) => ({
   setIsProcessing: (status) => set({ isProcessing: status }),
 }));
 
-interface Project {
+export interface Project {
   id: string;
   name: string;
   slug: string;
+  description: string;
   files: ProjectFile[];
   instructions: string;
   createdAt: Date;
   histories: HistoryItem[];
 }
 
-interface ProjectFile {
+export interface ProjectFile {
   id: string;
   name: string;
-  content: string;
+  status: 'accessible' | 'not-accessible';
   type: string;
+  content: string;
+  size: number;
+  mimeType: string;
+  url?: string;
+  createdAt: Date;
 }
 
 interface ProjectStore {
   projects: Project[];
   currentProject: Project | null;
-  addProject: (name: string) => string;
+  addProject: (name: string, description: string) => string;
   updateProject: (id: string, data: Partial<Project>) => void;
   setCurrentProject: (project: Project | null) => void;
   addProjectHistory: (projectId: string, history: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
   removeProjectHistory: (projectId: string, historyId: string) => void;
-  addProjectFile: (projectId: string, file: Omit<ProjectFile, 'id'>) => void;
+  addProjectFile: (projectId: string, file: File) => Promise<void>;
   removeProjectFile: (projectId: string, fileId: string) => void;
+  removeProject: (id: string) => void;
 }
 
 export const useProjectStore = create<ProjectStore>()(
@@ -832,12 +840,13 @@ export const useProjectStore = create<ProjectStore>()(
       projects: [],
       currentProject: null,
       
-      addProject: (name) => {
+      addProject: (name: string, description: string = "") => {
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         const newProject = {
           id: crypto.randomUUID(),
           name,
           slug,
+          description,
           files: [],
           instructions: '',
           histories: [],
@@ -867,7 +876,8 @@ export const useProjectStore = create<ProjectStore>()(
         const newHistory = {
           ...history,
           id: crypto.randomUUID(),
-          createdAt: new Date(),
+          timestamp: new Date(),
+          message: history.message || ''
         };
         set((state) => ({
           projects: state.projects.map((p) =>
@@ -894,21 +904,46 @@ export const useProjectStore = create<ProjectStore>()(
         }));
       },
 
-      addProjectFile: (projectId, file) => {
-        const newFile = {
-          ...file,
-          id: crypto.randomUUID(),
-        };
-        set((state) => ({
-          projects: state.projects.map((p) =>
-            p.id === projectId
-              ? { ...p, files: [...p.files, newFile] }
-              : p
-          ),
-          currentProject: state.currentProject?.id === projectId
-            ? { ...state.currentProject, files: [...state.currentProject.files, newFile] }
-            : state.currentProject,
-        }));
+      addProjectFile: async (projectId, file) => {
+        try {
+          // Convert file to base64 for storage
+          const base64Content = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64 = reader.result as string;
+              resolve(base64);
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+          });
+
+          // Only create and add the file after successful conversion
+          const newFile: ProjectFile = {
+            id: crypto.randomUUID(),
+            name: file.name,
+            status: 'accessible',
+            type: 'file',
+            content: base64Content,
+            size: file.size,
+            mimeType: file.type,
+            createdAt: new Date(),
+          };
+
+          set((state) => ({
+            projects: state.projects.map((p) =>
+              p.id === projectId
+                ? { ...p, files: [...p.files, newFile] }
+                : p
+            ),
+            currentProject: state.currentProject?.id === projectId
+              ? { ...state.currentProject, files: [...state.currentProject.files, newFile] }
+              : state.currentProject,
+          }));
+
+          return newFile;
+        } catch (error) {
+          throw new Error('Failed to process file: ' + (error as Error).message);
+        }
       },
 
       removeProjectFile: (projectId, fileId) => {
@@ -921,6 +956,13 @@ export const useProjectStore = create<ProjectStore>()(
           currentProject: state.currentProject?.id === projectId
             ? { ...state.currentProject, files: state.currentProject.files.filter((f) => f.id !== fileId) }
             : state.currentProject,
+        }));
+      },
+
+      removeProject: (id) => {
+        set((state) => ({
+          projects: state.projects.filter((p) => p.id !== id),
+          currentProject: state.currentProject?.id === id ? null : state.currentProject,
         }));
       },
     }),
