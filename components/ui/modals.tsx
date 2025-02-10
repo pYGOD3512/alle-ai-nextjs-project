@@ -5608,6 +5608,24 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
     }
   };
 
+  const handleComputerUpload = () => {
+    // Create an input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp';
+    
+    // Handle file selection
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+    };
+    
+    // Trigger file selection
+    input.click();
+  };
+
   const handleDownload = (file: ProjectFile) => {
     if (!file.content) {
       toast({
@@ -5650,7 +5668,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
           <DialogTitle>Project files</DialogTitle>
           <div className="flex items-center gap-2">
             <FileUploadButton
-              onUploadFromComputer={handleFileUpload}
+              onUploadFromComputer={handleComputerUpload}
               onUploadFromDrive={handleFileUpload}
               buttonIcon={
                 <Button variant="secondary" size="sm">
