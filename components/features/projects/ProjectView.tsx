@@ -3,13 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Folder, Pencil, FileText, Settings, FilePlus2 } from "lucide-react";
 import { ChatInput } from "@/components/features/ChatInput";
 import { ProjectFilesModal, ProjectInstructionsModal } from "@/components/ui/modals";
+import { useProjectStore } from "@/stores";
 
-interface ProjectViewProps {
-  projectName?: string;
-  modelName?: string;
-}
-
-export function ProjectView({ projectName = "Project Name" }: ProjectViewProps) {
+export function ProjectView() {
+  const { currentProject } = useProjectStore();
+  
   // Chat input handlers
   const [inputValue, setInputValue] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -21,14 +19,18 @@ export function ProjectView({ projectName = "Project Name" }: ProjectViewProps) 
     console.log("Sending message:", inputValue);
   };
 
+  if (!currentProject) {
+    return <div>No project selected</div>;
+  }
+
   return (
     <div className="flex flex-col h-full w-full max-w-5xl mx-auto px-4 py-6 space-y-8">
-      {/* Project Header - Updated with folder icon */}
+      {/* Project Header */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <Folder className="h-6 w-6 text-muted-foreground" />
-            <h1 className="text-xl font-semibold">{projectName}</h1>
+            <h1 className="text-xl font-semibold">{currentProject.name}</h1>
           </div>
           <Button variant="ghost" size="icon" className="h-6 w-6">
             <Pencil className="h-4 w-4" />
@@ -75,13 +77,13 @@ export function ProjectView({ projectName = "Project Name" }: ProjectViewProps) 
       <ProjectFilesModal
         isOpen={filesModalOpen}
         onClose={() => setFilesModalOpen(false)}
-        projectName={projectName}
+        projectName={currentProject.name}
       />
 
       <ProjectInstructionsModal
         isOpen={instructionsModalOpen}
         onClose={() => setInstructionsModalOpen(false)}
-        projectName={projectName}
+        projectName={currentProject.name}
       />
     </div>
   );
