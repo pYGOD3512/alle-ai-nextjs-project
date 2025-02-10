@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
@@ -25,16 +25,49 @@ function AuthPageInner() {
   const [resetEmail, setResetEmail] = useState<string>("");
   const [email, setEmail] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
   const { theme, resolvedTheme } = useTheme();
   const router = useRouter();
 
-  // Use the hook with a callback for verification
-  // const { isLoading, shouldRender } = useAuthCheck({
-  //   onVerifyEmail: (email) => {
-  //     setEmail(email);
-  //     setAuthMode('verify-email');
-  //   }
-  // });
+  const headingTexts = [
+    "Your All-in-One AI Platform",
+    "Your All-in-One AI Platform",
+    "Your All-in-One AI Platform",
+    "Your All-in-One AI Platform",
+  ];
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    let currentIndex = 0;
+    let currentChar = 0;
+
+    const typeText = () => {
+      if (currentChar <= headingTexts[currentTextIndex].length) {
+        setDisplayText(headingTexts[currentTextIndex].slice(0, currentChar));
+        currentChar++;
+        timeout = setTimeout(typeText, 50); // Adjust typing speed here
+      } else {
+        // Wait before starting to erase
+        timeout = setTimeout(eraseText, 5000);
+      }
+    };
+
+    const eraseText = () => {
+      if (currentChar > 0) {
+        setDisplayText(headingTexts[currentTextIndex].slice(0, currentChar));
+        currentChar--;
+        timeout = setTimeout(eraseText, 30); // Adjust erasing speed here
+      } else {
+        // Move to next text
+        setCurrentTextIndex((prev) => (prev + 1) % headingTexts.length);
+      }
+    };
+
+    typeText();
+
+    return () => clearTimeout(timeout);
+  }, [currentTextIndex]);
 
   useEffect(() => {
     setMounted(true);
@@ -50,16 +83,6 @@ function AuthPageInner() {
       setEmail(emailParam);
     }
   }, []);
-
-  // Show loading screen while checking auth
-  // if (isLoading) {
-  //   return <LoadingScreen />;
-  // }
-
-  // Don't render if we shouldn't (e.g., user is authenticated)
-  // if (!shouldRender) {
-  //   return null;
-  // }
 
   const handleForgotPassword = () => {
     setAuthMode('forgot-password');
@@ -135,8 +158,9 @@ function AuthPageInner() {
       </div>
 
       {/* Heading */}
-      <h1 className="text-center text-lg font-semibold mb-6">
-        Your All-in-One AI Platform
+      <h1 className="text-center text-lg font-semibold mb-6 min-h-[28px]">
+        {displayText}
+        <span className="animate-blink">|</span>
       </h1>
 
       {/* Auth form container */}
