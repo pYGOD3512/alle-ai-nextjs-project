@@ -18,7 +18,7 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore, ProjectFile } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -125,7 +125,8 @@ import {
   CreditCard,
   Loader2,
   LightbulbIcon,
-  FileText ,
+  FileText, 
+  Download,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -2959,8 +2960,8 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
 
       switch (sortBy) {
         case "oldest":
@@ -3023,7 +3024,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(item.createdAt))} ago
+                        {formatDistanceToNow(new Date(item.timestamp))} ago
                       </div>
                     </div>
                   </div>
@@ -5470,42 +5471,68 @@ export function BuyCreditsModal({ isOpen, onClose }: ModalProps) {
 }
 
 export function ProjectModal({ isOpen, onClose }: ModalProps) {
-  const [projectName, setProjectName] = useState("");
-  const router = useRouter();
   const { addProject } = useProjectStore();
+  const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState(""); // Add this
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim()) return;
+
+    setIsLoading(true);
     
-    // Create project and get the slug
-    const slug = addProject(projectName.trim());
+    // Simulate loading
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Close the modal
-    onClose();
+    // Add description to project creation
+    addProject(projectName.trim(), description.trim());
+    
+    setIsLoading(false);
     setProjectName("");
-    
-    // Navigate to the new project
-    router.push(`/project/${slug}`);
+    setDescription(""); // Reset description
+    onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[500px] sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Project name</DialogTitle>
+          <DialogTitle>Create new project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="space-y-4">
-              <Input
-                id="project-name"
-                placeholder="E.g. Marketing Strategy"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="col-span-3 focus-visible:outline-none focus:border-borderColorPrimary"
-                autoFocus
-              />
+              {/* Project Name Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Project name
+                </label>
+                <Input
+                  id="project-name"
+                  placeholder="E.g. Marketing Strategy"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  className="col-span-3"
+                  autoFocus
+                />
+              </div>
+
+              {/* Project Description Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Description <span className="text-muted-foreground">(optional)</span>
+                </label>
+                <Textarea
+                  id="project-description"
+                  placeholder="Describe what this project is about..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="resize-none"
+                  rows={3}
+                />
+              </div>
+
               <div className="flex items-start gap-2 rounded-md bg-muted p-3">
                 <div className="rounded-full bg-primary/10 p-1">
                   <LightbulbIcon className="h-4 w-4 text-primary" />
@@ -5518,11 +5545,18 @@ export function ProjectModal({ isOpen, onClose }: ModalProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" onClick={onClose}>
+            <Button variant="outline" type="button" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!projectName.trim()}>
-              Create project
+            <Button type="submit" disabled={!projectName.trim() || isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating project...
+                </>
+              ) : (
+                'Create project'
+              )}
             </Button>
           </DialogFooter>
         </form>
@@ -5535,87 +5569,77 @@ export function ProjectModal({ isOpen, onClose }: ModalProps) {
 // Add these imports if not already present
 
 interface ProjectModalProps extends ModalProps {
-  projectName?: string;
+  projectName: string;
 }
 
-interface ProjectFile {
-  name: string;
-  status: 'accessible' | 'not-accessible';
-  type: string;
-}
-
-interface ProjectFile {
-  id: string;
-  name: string;
-  status: 'accessible' | 'not-accessible';
-  type: string;
-}
-
-export function ProjectFilesModal({ isOpen, onClose, projectName = "" }: ProjectModalProps) {
+export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalProps) {
+  const { currentProject, addProjectFile, removeProjectFile } = useProjectStore();
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  const handleFileUpload = (file: File) => {
-    // Check if file with same name already exists
-    if (files.some(f => f.name === file.name)) {
+  useEffect(() => {
+    if (currentProject) {
+      setFiles(currentProject.files || []);
+    }
+  }, [currentProject]);
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      if (!currentProject?.id) return;
+      
+      // Validate file size (e.g., 100MB limit)
+      if (file.size > 100 * 1024 * 1024) {
+        throw new Error('File size exceeds 100MB limit');
+      }
+
+      await addProjectFile(currentProject.id, file);
+
       toast({
-        title: "File already exists",
-        description: `${file.name} is already in your project`,
-        variant: "destructive"
+        title: "File uploaded",
+        description: `${file.name} has been added successfully`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload file"
+      });
+    }
+  };
+
+  const handleDownload = (file: ProjectFile) => {
+    if (!file.content) {
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "File content not available"
       });
       return;
     }
 
-    const newFile: ProjectFile = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      status: 'accessible',
-      type: file.type
-    };
-    setFiles(prev => [...prev, newFile]);
-  };
-
-  const handleUploadFromComputer = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = '.pdf,.doc,.docx,.txt,.csv';
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (files) {
-        Array.from(files).forEach(file => handleFileUpload(file));
-      }
-    };
-    input.click();
-  };
-
-  const toggleFileSelection = (fileId: string) => {
-    setSelectedFiles(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(fileId)) {
-        newSelection.delete(fileId);
-      } else {
-        newSelection.add(fileId);
-      }
-      return newSelection;
-    });
-  };
-
-  const handleDeleteSelected = () => {
-    setFiles(prev => prev.filter(file => !selectedFiles.has(file.id)));
-    setSelectedFiles(new Set());
-    toast({
-      title: "Files deleted",
-      description: `${selectedFiles.size} file(s) removed from project`
-    });
-  };
-
-  const selectAll = () => {
-    if (selectedFiles.size === files.length) {
-      setSelectedFiles(new Set());
-    } else {
-      setSelectedFiles(new Set(files.map(f => f.id)));
+    try {
+      // Convert base64 back to blob
+      const content = file.content.split(',')[1];
+      const blob = new Blob([Buffer.from(content, 'base64')], { type: file.mimeType });
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "Failed to download file"
+      });
     }
   };
 
@@ -5626,7 +5650,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName = "" }: Project
           <DialogTitle>Project files</DialogTitle>
           <div className="flex items-center gap-2">
             <FileUploadButton
-              onUploadFromComputer={handleUploadFromComputer}
+              onUploadFromComputer={handleFileUpload}
               onUploadFromDrive={handleFileUpload}
               buttonIcon={
                 <Button variant="secondary" size="sm">
@@ -5634,42 +5658,10 @@ export function ProjectFilesModal({ isOpen, onClose, projectName = "" }: Project
                 </Button>
               }
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
-        {files.length > 0 && (
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Checkbox 
-                checked={selectedFiles.size === files.length}
-                onClick={selectAll}
-              />
-              <span className="text-sm text-muted-foreground">
-                {selectedFiles.size} selected
-              </span>
-            </div>
-            {selectedFiles.size > 0 && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteSelected}
-                className="gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete selected
-              </Button>
-            )}
-          </div>
-        )}
-
+        {/* File List */}
         <ScrollArea className="h-[400px] w-full pr-4">
           <div className="space-y-2">
             {files.length > 0 ? (
@@ -5679,34 +5671,41 @@ export function ProjectFilesModal({ isOpen, onClose, projectName = "" }: Project
                   className="flex items-center justify-between p-4 rounded-lg bg-muted/50 group hover:bg-muted/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Checkbox 
-                      checked={selectedFiles.has(file.id)}
-                      onClick={() => toggleFileSelection(file.id)}
-                    />
                     <div className="p-2 rounded-md bg-background">
                       <FileText className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{file.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        File contents may not be accessible
+                        {formatFileSize(file.size)}
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => {
-                      setFiles(prev => prev.filter(f => f.id !== file.id));
-                      toast({
-                        title: "File removed",
-                        description: `${file.name} removed from project`
-                      });
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDownload(file)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        if (!currentProject?.id) return;
+                        removeProjectFile(currentProject.id, file.id);
+                        toast({
+                          title: "File removed",
+                          description: `${file.name} removed from project`
+                        });
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -5731,12 +5730,40 @@ export function ProjectFilesModal({ isOpen, onClose, projectName = "" }: Project
   );
 }
 
-export function ProjectInstructionsModal({ isOpen, onClose, projectName = "" }: ProjectModalProps) {
-  const [instructions, setInstructions] = useState("");
+// Helper function to format file size
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+export function ProjectInstructionsModal({ isOpen, onClose, projectName }: ProjectModalProps) {
+  const { currentProject, updateProject } = useProjectStore();
+  const [instructions, setInstructions] = useState(currentProject?.instructions || "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize instructions from currentProject when modal opens
+  useEffect(() => {
+    if (isOpen && currentProject) {
+      setInstructions(currentProject.instructions || "");
+    }
+  }, [isOpen, currentProject]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle instructions submission
+    if (!currentProject?.id) return;
+    
+    setIsSaving(true);
+    
+    // Simulate loading
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Update project instructions
+    updateProject(currentProject.id, { instructions: instructions.trim() });
+    
+    setIsSaving(false);
     onClose();
   };
 
@@ -5779,10 +5806,19 @@ export function ProjectInstructionsModal({ isOpen, onClose, projectName = "" }: 
           </div>
 
           <DialogFooter>
-            <Button variant="outline" type="button" onClick={onClose}>
+            <Button variant="outline" type="button" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
-            <Button type="submit">Save instructions</Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving instructions...
+                </>
+              ) : (
+                'Save instructions'
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
