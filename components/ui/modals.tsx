@@ -48,6 +48,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -79,6 +80,7 @@ import {
   ArrowLeft,
   LogIn,
   RefreshCw,
+  FilePlus2 ,
   Link,
   Clock9,
   MessageSquare,
@@ -122,6 +124,8 @@ import {
   Key,
   CreditCard,
   Loader2,
+  LightbulbIcon,
+  FileText ,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -354,6 +358,12 @@ export interface PromptModalProps {
 }
 
 type UserPlan = 'free' | 'standard' | 'plus';
+
+interface PaymentOptionsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectMethod: (method: 'card' | 'link' | 'revolut' | 'paypal') => void;
+}
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [selectedRating, setSelectedRating] = React.useState<number | null>(
@@ -5261,12 +5271,6 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
   );
 }
 
-interface PaymentOptionsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSelectMethod: (method: 'card' | 'link' | 'revolut' | 'paypal') => void;
-}
-
 export function PaymentOptionsModal({ isOpen, onClose, onSelectMethod }: PaymentOptionsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -5461,6 +5465,317 @@ export function BuyCreditsModal({ isOpen, onClose }: ModalProps) {
         amount={amount}
         onSubmit={handlePayment}
       />
+    </Dialog>
+  );
+}
+
+export function ProjectModal({ isOpen, onClose }: ModalProps) {
+  const [projectName, setProjectName] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Handle project creation
+    onClose();
+    setProjectName("");
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[500px] sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Project name</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <Input
+                id="project-name"
+                placeholder="E.g. Marketing Strategy"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                className="col-span-3 focus-visible:outline-none focus:border-borderColorPrimary"
+                autoFocus
+              />
+              <div className="flex items-start gap-2 rounded-md bg-muted p-3">
+                <div className="rounded-full bg-primary/10 p-1">
+                  <LightbulbIcon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <div className="font-medium">What&apos;s a project?</div>
+                  <div>Projects keep chats, files, and custom instructions in one place. Use them for ongoing work, or just to keep things tidy.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!projectName.trim()}>
+              Create project
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+// Add these imports if not already present
+
+interface ProjectModalProps extends ModalProps {
+  projectName?: string;
+}
+
+interface ProjectFile {
+  name: string;
+  status: 'accessible' | 'not-accessible';
+  type: string;
+}
+
+interface ProjectFile {
+  id: string;
+  name: string;
+  status: 'accessible' | 'not-accessible';
+  type: string;
+}
+
+export function ProjectFilesModal({ isOpen, onClose, projectName = "" }: ProjectModalProps) {
+  const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
+  const handleFileUpload = (file: File) => {
+    // Check if file with same name already exists
+    if (files.some(f => f.name === file.name)) {
+      toast({
+        title: "File already exists",
+        description: `${file.name} is already in your project`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newFile: ProjectFile = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: file.name,
+      status: 'accessible',
+      type: file.type
+    };
+    setFiles(prev => [...prev, newFile]);
+  };
+
+  const handleUploadFromComputer = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = '.pdf,.doc,.docx,.txt,.csv';
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files) {
+        Array.from(files).forEach(file => handleFileUpload(file));
+      }
+    };
+    input.click();
+  };
+
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFiles(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(fileId)) {
+        newSelection.delete(fileId);
+      } else {
+        newSelection.add(fileId);
+      }
+      return newSelection;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    setFiles(prev => prev.filter(file => !selectedFiles.has(file.id)));
+    setSelectedFiles(new Set());
+    toast({
+      title: "Files deleted",
+      description: `${selectedFiles.size} file(s) removed from project`
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedFiles.size === files.length) {
+      setSelectedFiles(new Set());
+    } else {
+      setSelectedFiles(new Set(files.map(f => f.id)));
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle>Project files</DialogTitle>
+          <div className="flex items-center gap-2">
+            <FileUploadButton
+              onUploadFromComputer={handleUploadFromComputer}
+              onUploadFromDrive={handleFileUpload}
+              buttonIcon={
+                <Button variant="secondary" size="sm">
+                  Add files
+                </Button>
+              }
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
+
+        {files.length > 0 && (
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                checked={selectedFiles.size === files.length}
+                onClick={selectAll}
+              />
+              <span className="text-sm text-muted-foreground">
+                {selectedFiles.size} selected
+              </span>
+            </div>
+            {selectedFiles.size > 0 && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                className="gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete selected
+              </Button>
+            )}
+          </div>
+        )}
+
+        <ScrollArea className="h-[400px] w-full pr-4">
+          <div className="space-y-2">
+            {files.length > 0 ? (
+              files.map((file) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50 group hover:bg-muted/70 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Checkbox 
+                      checked={selectedFiles.has(file.id)}
+                      onClick={() => toggleFileSelection(file.id)}
+                    />
+                    <div className="p-2 rounded-md bg-background">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        File contents may not be accessible
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => {
+                      setFiles(prev => prev.filter(f => f.id !== file.id));
+                      toast({
+                        title: "File removed",
+                        description: `${file.name} removed from project`
+                      });
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-[300px] rounded-lg bg-muted/50 border border-dashed">
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <div className="mb-4">
+                    <FilePlus2 className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-2 max-w-sm">
+                    <p>Add documents, code files, images, and more.</p>
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">{projectName}</span> can access their contents when you chat inside the project.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ProjectInstructionsModal({ isOpen, onClose, projectName = "" }: ProjectModalProps) {
+  const [instructions, setInstructions] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Handle instructions submission
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle>Add instructions</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Tailor the way your get responds in this project
+              </label>
+              <Textarea
+                placeholder="E.g. You are a financial advisor helping me plan my investments..."
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                className="min-h-[100px] resize-none"
+              />
+            </div>
+            
+            <div className="flex items-start gap-2 rounded-md bg-muted p-3">
+              <div className="rounded-full bg-primary/10 p-1">
+                <LightbulbIcon className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>These instructions will be included in every message on this platform in this project.</p>
+                <p className="mt-1">Use them to specify:</p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li>Role and tone</li>
+                  <li>Background context</li>
+                  <li>Preferred format</li>
+                  <li>What to include or avoid</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Save instructions</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

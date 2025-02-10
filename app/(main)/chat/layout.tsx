@@ -6,6 +6,7 @@ import { useSidebarStore, useContentStore, useWebSearchStore } from "@/stores";
 import { useRouter, usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { SquareTerminal, Lightbulb, Code, Bug, Wrench, Sparkles, NotebookPen, Brain  } from "lucide-react";
+// import { ProjectView } from "@/components/features/projects/ProjectView";
 
 const options = [
   {
@@ -79,6 +80,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+          // <ProjectView />
       )}
       <div className="flex-1">{children}</div>
     </div>
