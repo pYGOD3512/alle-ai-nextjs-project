@@ -9,23 +9,23 @@ import { Badge } from "@/components/ui/badge";
 const FileAvatars = ({ files }: { files: any[] }) => {
   const maxVisible = 3;
   const remainingCount = files.length - maxVisible;
+  const visibleFiles = files.slice(0, maxVisible);
 
   return (
     <div className="flex items-center">
-      <div className="flex -space-x-4">
-        {files.slice(0, maxVisible).map((file, index) => (
+      <div className="flex -space-x-3">
+        {visibleFiles.map((file, index) => (
           <div
             key={file.id}
-            className="relative ring-1 ring-white h-8 w-8 rounded-full bg-green-400 flex items-center justify-center"
+            className="h-6 w-6 rounded-full border-2 border-background bg-primary/10 flex items-center justify-center"
             style={{ zIndex: maxVisible - index }}
           >
-            <FileText className="h-4 w-4 text-primary" />
+            <FileText className="h-3 w-3 text-primary" />
           </div>
         ))}
         {remainingCount > 0 && (
           <div 
-            className="relative h-8 w-8 rounded-full bg-green-400 flex items-center justify-center text-xs font-medium"
-            style={{ zIndex: 0 }}
+            className="h-6 w-6 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-medium ml-1"
           >
             +{remainingCount}
           </div>
@@ -184,7 +184,7 @@ export function ProjectView() {
               {currentProject.files && currentProject.files.length > 0 ? (
                 <div className="flex items-center gap-2">
                   <FileAvatars files={currentProject.files} />
-                  <Badge variant="secondary">{currentProject.files.length}</Badge>
+                  {/* <Badge variant="secondary">{currentProject.files.length}</Badge> */}
                 </div>
               ) : (
                 <Badge variant="secondary">0</Badge>
