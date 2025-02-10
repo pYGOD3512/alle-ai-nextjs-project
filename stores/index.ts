@@ -797,49 +797,135 @@ export const usePlanStore = create<PlanStore>((set) => ({
   setIsProcessing: (status) => set({ isProcessing: status }),
 }));
 
-
 interface Project {
   id: string;
   name: string;
   slug: string;
-  files: string[];
+  files: ProjectFile[];
   instructions: string;
   createdAt: Date;
+  histories: HistoryItem[];
+}
+
+interface ProjectFile {
+  id: string;
+  name: string;
+  content: string;
+  type: string;
 }
 
 interface ProjectStore {
   projects: Project[];
   currentProject: Project | null;
-  addProject: (name: string) => string; // returns the slug
+  addProject: (name: string) => string;
   updateProject: (id: string, data: Partial<Project>) => void;
   setCurrentProject: (project: Project | null) => void;
+  addProjectHistory: (projectId: string, history: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
+  removeProjectHistory: (projectId: string, historyId: string) => void;
+  addProjectFile: (projectId: string, file: Omit<ProjectFile, 'id'>) => void;
+  removeProjectFile: (projectId: string, fileId: string) => void;
 }
 
-export const useProjectStore = create<ProjectStore>((set) => ({
-  projects: [],
-  currentProject: null,
-  addProject: (name) => {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const newProject = {
-      id: crypto.randomUUID(),
-      name,
-      slug,
-      files: [],
-      instructions: '',
-      createdAt: new Date(),
-    };
-    set((state) => ({
-      projects: [...state.projects, newProject],
-      currentProject: newProject,
-    }));
-    return slug;
-  },
-  updateProject: (id, data) => {
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === id ? { ...p, ...data } : p
-      ),
-    }));
-  },
-  setCurrentProject: (project) => set({ currentProject: project }),
-}));
+export const useProjectStore = create<ProjectStore>()(
+  persist(
+    (set, get) => ({
+      projects: [],
+      currentProject: null,
+      
+      addProject: (name) => {
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const newProject = {
+          id: crypto.randomUUID(),
+          name,
+          slug,
+          files: [],
+          instructions: '',
+          histories: [],
+          createdAt: new Date(),
+        };
+        set((state) => ({
+          projects: [...state.projects, newProject],
+          currentProject: newProject,
+        }));
+        return slug;
+      },
+
+      updateProject: (id, data) => {
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === id ? { ...p, ...data } : p
+          ),
+          currentProject: state.currentProject?.id === id 
+            ? { ...state.currentProject, ...data }
+            : state.currentProject,
+        }));
+      },
+
+      setCurrentProject: (project) => set({ currentProject: project }),
+
+      addProjectHistory: (projectId, history) => {
+        const newHistory = {
+          ...history,
+          id: crypto.randomUUID(),
+          createdAt: new Date(),
+        };
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId
+              ? { ...p, histories: [newHistory, ...p.histories] }
+              : p
+          ),
+          currentProject: state.currentProject?.id === projectId
+            ? { ...state.currentProject, histories: [newHistory, ...state.currentProject.histories] }
+            : state.currentProject,
+        }));
+      },
+
+      removeProjectHistory: (projectId, historyId) => {
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId
+              ? { ...p, histories: p.histories.filter((h) => h.id !== historyId) }
+              : p
+          ),
+          currentProject: state.currentProject?.id === projectId
+            ? { ...state.currentProject, histories: state.currentProject.histories.filter((h) => h.id !== historyId) }
+            : state.currentProject,
+        }));
+      },
+
+      addProjectFile: (projectId, file) => {
+        const newFile = {
+          ...file,
+          id: crypto.randomUUID(),
+        };
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId
+              ? { ...p, files: [...p.files, newFile] }
+              : p
+          ),
+          currentProject: state.currentProject?.id === projectId
+            ? { ...state.currentProject, files: [...state.currentProject.files, newFile] }
+            : state.currentProject,
+        }));
+      },
+
+      removeProjectFile: (projectId, fileId) => {
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId
+              ? { ...p, files: p.files.filter((f) => f.id !== fileId) }
+              : p
+          ),
+          currentProject: state.currentProject?.id === projectId
+            ? { ...state.currentProject, files: state.currentProject.files.filter((f) => f.id !== fileId) }
+            : state.currentProject,
+        }));
+      },
+    }),
+    {
+      name: 'project-storage',
+    }
+  )
+);

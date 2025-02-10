@@ -395,7 +395,9 @@ export function Header() {
                     <div className="w-full bg-backgroundSecondary rounded-lg">
                       <div className="flex items-center justify-between px-4 py-2 border-b border-borderColorPrimary">
                         <Text className="text-xs font-medium">Selected Models</Text>
-                        <Text className="text-xs text-muted-foreground">{selectedModelNames.length} active</Text>
+                        <Text className="text-xs text-muted-foreground">
+                          {selectedModelNames.filter(model => model.isActive).length} active
+                        </Text>
                       </div>
                       <div className="max-h-[300px] overflow-y-auto py-2">
                         {selectedModelNames.map((model, index) => {
