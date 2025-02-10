@@ -260,7 +260,7 @@ interface HistoryItem {
 
 interface HistoryStore {
   history: HistoryItem[];
-  addHistory: (item: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
+  addHistory: (item: Omit<HistoryItem, 'id' | 'timestamp'>) => void;
   removeHistory: (id: string) => void;
   renameHistory: (id: string, newTitle: string) => void;
   getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
@@ -281,7 +281,7 @@ export const useHistoryStore = create<HistoryStore>()(
             {
               ...item,
               id: generateId(),
-              createdAt: new Date(),
+              timestamp: new Date().toISOString(),
             },
             ...state.history,
           ],
@@ -297,11 +297,41 @@ export const useHistoryStore = create<HistoryStore>()(
           ),
         })),
       getHistoryByType: (type) => {
-        return get().history.filter((item) => item.type === type);
+        return get().history
+          .filter((item) => item.type === type)
+          .map(item => ({
+            ...item,
+            timestamp: new Date(item.timestamp)
+          }));
       },
     }),
     {
       name: 'history-storage',
+      serialize: (state) => JSON.stringify({
+        ...state,
+        state: {
+          ...state.state,
+          history: state.state.history.map((item: HistoryItem) => ({
+            ...item,
+            timestamp: item.timestamp instanceof Date 
+              ? item.timestamp.toISOString()
+              : item.timestamp
+          }))
+        }
+      }),
+      deserialize: (str) => {
+        const parsed = JSON.parse(str);
+        return {
+          ...parsed,
+          state: {
+            ...parsed.state,
+            history: parsed.state.history.map((item: HistoryItem) => ({
+              ...item,
+              timestamp: new Date(item.timestamp)
+            }))
+          }
+        };
+      }
     }
   )
 );

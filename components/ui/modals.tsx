@@ -2960,18 +2960,28 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      const dateA = new Date(a.timestamp);
-      const dateB = new Date(b.timestamp);
+      try {
+        const dateA = new Date(a.timestamp);
+        const dateB = new Date(b.timestamp);
 
-      switch (sortBy) {
-        case "oldest":
-          return dateA.getTime() - dateB.getTime();
-        case "az":
-          return a.title.localeCompare(b.title);
-        case "za":
-          return b.title.localeCompare(a.title);
-        default: // "recent"
-          return dateB.getTime() - dateA.getTime();
+        // Validate dates
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+          return 0; // Keep original order if dates are invalid
+        }
+
+        switch (sortBy) {
+          case "oldest":
+            return dateA.getTime() - dateB.getTime();
+          case "az":
+            return a.title.localeCompare(b.title);
+          case "za":
+            return b.title.localeCompare(a.title);
+          default: // "recent"
+            return dateB.getTime() - dateA.getTime();
+        }
+      } catch (error) {
+        console.error('Error sorting history:', error);
+        return 0; // Keep original order if error occurs
       }
     });
 
