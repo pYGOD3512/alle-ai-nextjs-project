@@ -2954,24 +2954,48 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "oldest" | "az" | "za">("recent");
 
+  const formatTimeDistance = (timestamp: Date | string) => {
+    try {
+      const date = new Date(timestamp);
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   // Get history for current type and filter based on search
   const filteredHistory = getHistoryByType(currentType)
     .filter(item => 
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      const dateA = new Date(a.timestamp);
-      const dateB = new Date(b.timestamp);
+      try {
+        const dateA = new Date(a.timestamp);
+        const dateB = new Date(b.timestamp);
 
-      switch (sortBy) {
-        case "oldest":
-          return dateA.getTime() - dateB.getTime();
-        case "az":
-          return a.title.localeCompare(b.title);
-        case "za":
-          return b.title.localeCompare(a.title);
-        default: // "recent"
-          return dateB.getTime() - dateA.getTime();
+        // Validate dates
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+          return 0; // Keep original order if dates are invalid
+        }
+
+        switch (sortBy) {
+          case "oldest":
+            return dateA.getTime() - dateB.getTime();
+          case "az":
+            return a.title.localeCompare(b.title);
+          case "za":
+            return b.title.localeCompare(a.title);
+          default: // "recent"
+            return dateB.getTime() - dateA.getTime();
+        }
+      } catch (error) {
+        console.error('Error sorting history:', error);
+        return 0; // Keep original order if error occurs
       }
     });
 
@@ -3024,7 +3048,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(item.timestamp))} ago
+                        {formatTimeDistance(item.timestamp)}
                       </div>
                     </div>
                   </div>
