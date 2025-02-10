@@ -45,18 +45,11 @@ function RouteGuardInner({ children }: RouteGuardProps) {
         return;
       }
 
-      // CASE 2: Has token and trying to access auth routes (except /plans after verification)
-      if (token && authRoutes.includes(pathname)) {
+      // CASE 2: Has token and trying to access auth routes or /plans
+      if (token && (authRoutes.includes(pathname))) {
         try {
           const response = await authApi.getUser();
           setAuth(response.data.user, token, response.plan);
-
-          // Special case: Allow access to /plans if user is verified but has no plan
-          if (pathname === '/plans' && response.data.user.email_verified_at) {
-            setCanRender(true);
-            setIsChecking(false);
-            return;
-          }
 
           if (response.data.to === 'verify-email') {
             router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
@@ -65,6 +58,12 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             router.replace('/chat');
             return;
           } else if (!response.plan) {
+            // Only allow rendering plans page if user needs to select a plan
+            if (pathname === '/plans') {
+              setCanRender(true);
+              setIsChecking(false);
+              return;
+            }
             router.replace('/plans');
             return;
           }
@@ -83,11 +82,9 @@ function RouteGuardInner({ children }: RouteGuardProps) {
     checkAuth();
   }, [pathname, token, searchParams]);
 
-  // Show loading screen when authenticated user tries to access auth routes
-  // except for verify-email mode and plans page for verified users
-  if (isChecking && token && authRoutes.includes(pathname) && 
-      !(pathname === '/auth' && searchParams.get('mode') === 'verify-email') &&
-      !(pathname === '/plans' && useAuthStore.getState().user?.email_verified_at)) {
+  // Show loading screen for authenticated users accessing auth routes or plans
+  if (isChecking && token && (authRoutes.includes(pathname)) && 
+      !(pathname === '/auth' && searchParams.get('mode') === 'verify-email')) {
     return <LoadingScreen />;
   }
 
