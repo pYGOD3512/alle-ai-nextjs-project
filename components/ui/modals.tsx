@@ -18,7 +18,6 @@ import {
   categoryUsageData,
   timeSeriesData
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore, ProjectFile } from "@/stores";
 import {
   Select,
   SelectContent,
@@ -170,7 +169,13 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label as UILabel } from "@/components/ui/label";
 import { useAuth } from "../providers/AuthProvider";
+
+
 import { authApi } from "@/lib/api/auth";
+import { modelsApi } from '@/lib/api/models';
+
+import { useModelsStore } from '@/stores/models';
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore, ProjectFile } from "@/stores";
 
 interface ModalProps {
   isOpen: boolean;
@@ -604,6 +609,15 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   const [userPlan, setUserPlan] = useState<UserPlan>('plus');
 
+  const { 
+    chatModels, 
+    imageModels, 
+    audioModels, 
+    videoModels,
+    isLoading,
+    error
+  } = useModelsStore();
+
   // Plan limits
   const MODEL_LIMITS = {
     free: 2,
@@ -612,17 +626,17 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   };
 
   const checkModelSelectionRestrictions = (modelId: string) => {
-    const model = getModelsForPage().find(m => m.id === modelId);
+    const model = getModelsForPage().find(m => m.model_uid === modelId);
     
     // Check for premium model restriction
-    if (model?.type === 'plus' && userPlan === 'free') {
+    if (model?.model_plan === 'plus' && userPlan === 'free') {
       setPromptConfig({
         title: "Premium Model",
         message: "Upgrade Plan to use this model",
         type: "upgrade",
         metadata: {
           plan: "Plus",
-          models: [model.name],
+          models: [model.model_name],
         },
         actions: [
           {
@@ -660,9 +674,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
         metadata: {
           plan: planUpgrade,
           models: [...tempSelectedModels.map(id => {
-            const model = getModelsForPage().find(m => m.id === id);
-            return model?.name || id;
-          }), model?.name || modelId],
+            const model = getModelsForPage().find(m => m.model_uid === id);
+            return model?.model_name || id;
+          }), model?.model_name || modelId],
         },
         actions: [
           {
@@ -688,7 +702,6 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     return true;
   };
 
-  
   useEffect(() => {
     // See selected models when I open the models menu (this is the current models I've selected and interacting with)
     setTempSelectedModels(selectedModels[currentPage as keyof typeof selectedModels] || []);
@@ -714,20 +727,38 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     }
   };
 
+  // const getModelsForPage = () => {
+  //   switch (currentPage) {
+  //     case "chat":
+  //       return CHAT_MODELS;
+  //     case "image":
+  //       return IMAGE_MODELS;
+  //     case "audio":
+  //       return AUDIO_MODELS;
+  //     case "video":
+  //       return VIDEO_MODELS;
+  //     default:
+  //       return CHAT_MODELS;
+  //   }
+  // };
+
   const getModelsForPage = () => {
+    console.log('these are the chat models', chatModels)
     switch (currentPage) {
       case "chat":
-        return CHAT_MODELS;
+        return chatModels || [];
       case "image":
-        return IMAGE_MODELS;
+        return imageModels || [];
       case "audio":
-        return AUDIO_MODELS;
+        return audioModels || [];
       case "video":
-        return VIDEO_MODELS;
+        return videoModels || [];
       default:
-        return CHAT_MODELS;
+        return [];
     }
   };
+
+  const models = getModelsForPage();
 
   const filterOptions = [
     {
@@ -752,16 +783,18 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     },
   ];
 
-  const models = getModelsForPage();
-
   // Filter and search models
-  const filteredModels = models.filter((model) => {
-    const matchesSearch =
-      model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      model.provider?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterType === "all" || model.type === filterType;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredModels = React.useMemo(() => {
+    if (!models) return [];
+    
+    return models.filter((model) => {
+      const matchesSearch =
+        model.model_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        model.model_provider?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesFilter = filterType === "all" || model.model_plan === filterType;
+      return matchesSearch && matchesFilter;
+    });
+  }, [models, searchQuery, filterType]);
 
   const getModelTypeText = () => {
     switch (currentPage) {
@@ -818,16 +851,16 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                   <label className="text-sm font-medium">Selected Models</label>
                   <div className="flex flex-wrap gap-2">
                     {tempSelectedModels.map((modelId) => {
-                      const model = models.find((m) => m.id === modelId);
+                      const model = models.find((m) => m.model_uid === modelId);
                       return (
                         <Badge
                           variant="outline"
                           key={modelId}
                           className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
                         >
-                          {model?.name}
-                          {model?.type === 'plus' && (
-                            <Gem className="h-3 w-3 text-yellow-500" />
+                          {model?.model_name}
+                          {model?.model_plan === 'standard' && (
+                            <Gem className="h-2.5 w-2.5 text-yellow-500" />
                           )}
                           <X
                             className="h-3 w-3 cursor-pointer hover:text-red-700"
@@ -878,40 +911,57 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
           </DialogHeader>
 
           {/* Model Grid */}
-          <ScrollArea className="h-[20rem] pr-4 overflow-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
-              {filteredModels.map((model) => (
-                <div
-                  key={model.id}
-                  onClick={() => toggleModelSelection(model.id)}
-                  className={cn(
-                    "relative flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
-                    tempSelectedModels.includes(model.id) &&
-                      "border-primary bg-accent"
-                  )}
-                >
-                  <Image
-                    src={model.icon}
-                    height={8}
-                    width={8}
-                    alt={model.name}
-                    className="w-8 h-8 rounded-md"
-                  />
-                  <div className="overflow-auto scrollbar-thin scrollbar-none">
-                    <h3 className="font-small text-xs whitespace-nowrap">
-                      {model.name}
-                    </h3>
-                    <p className="text-xs flex items-center gap-1 text-muted-foreground whitespace-nowrap">
-                      {model.provider}
-                      {model.type === 'plus' && (
-                        <Gem className="h-3 w-3 text-yellow-500" />
-                    )}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-40">
+              {/* <LoadingSpinner /> */}
+              Loading...
             </div>
-          </ScrollArea>
+          ) : error ? (
+            <div className="text-center text-red-500 p-4">
+              {error}
+            </div>
+          ) : models.length === 0 ? (
+            <div className="text-center text-muted-foreground p-4">
+              No models available
+            </div>
+          ) : (
+            <ScrollArea className="h-[20rem] pr-4 overflow-auto">
+              <div className="grid pt-1 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
+                {filteredModels.map((model) => (
+                  <div
+                    key={model.model_uid}
+                    onClick={() => toggleModelSelection(model.model_uid)}
+                    className={cn(
+                      "relative flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
+                      tempSelectedModels.includes(model.model_uid) &&
+                        "border-primary bg-accent"
+                    )}
+                  >
+                    {model.model_plan === 'standard' && (
+                      <div className="absolute top-0 -left-0.5 text-[8px] font-medium text-yellow-500 px-2 py-0.5 rounded-br-md shadow-sm flex items-center gap-1">
+                        <Gem className="h-2.5 w-2.5" />
+                      </div>
+                    )}
+                    <Image
+                      src={model.model_image}
+                      height={8}
+                      width={8}
+                      alt={model.model_name}
+                      className="w-8 h-8 rounded-md"
+                    />
+                    <div className="overflow-auto scrollbar-thin scrollbar-none">
+                      <h3 className="font-small text-xs whitespace-nowrap">
+                        {model.model_name}
+                      </h3>
+                      <p className="text-xs flex items-center gap-1 text-muted-foreground whitespace-nowrap">
+                        {model.model_provider}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
 
           {/* Update the buttons section */}
           <div className="flex justify-end gap-2 mt-4">

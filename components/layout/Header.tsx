@@ -385,7 +385,7 @@ export function Header() {
                         >
                           {model.name}
                           {model.type === 'plus' && (
-                            <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
+                            <Gem className={`h-2.5 w-2.5 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
                           )}
                         </span>
                       ))}
