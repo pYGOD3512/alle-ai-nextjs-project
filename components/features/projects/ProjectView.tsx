@@ -100,7 +100,7 @@ export function ProjectView() {
       <div className="rounded-full bg-primary/10 p-3 mb-4">
         <MessagesSquare className="h-6 w-6 text-primary" />
       </div>
-      <h3 className="font-semibold mb-2">No history available</h3>
+      <h3 className="font-semibold mb-2">No history in {projectName}</h3>
       <p className="text-sm text-muted-foreground max-w-sm mb-6">
         Start a new conversation by typing a message below.
       </p>
