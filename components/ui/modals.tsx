@@ -5496,8 +5496,9 @@ export function BuyCreditsModal({ isOpen, onClose }: ModalProps) {
 
 export function ProjectModal({ isOpen, onClose }: ModalProps) {
   const { addProject } = useProjectStore();
+  const router = useRouter();
   const [projectName, setProjectName] = useState("");
-  const [description, setDescription] = useState(""); // Add this
+  const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -5509,13 +5510,18 @@ export function ProjectModal({ isOpen, onClose }: ModalProps) {
     // Simulate loading
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Add description to project creation
-    addProject(projectName.trim(), description.trim());
+    // Add project and get the new project data
+    const newProject = addProject(projectName.trim(), description.trim());
     
     setIsLoading(false);
     setProjectName("");
-    setDescription(""); // Reset description
+    setDescription("");
     onClose();
+
+    // Navigate to the new project
+    if (newProject) {
+      router.push(`/project/${newProject.slug}`);
+    }
   };
 
   return (
