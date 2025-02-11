@@ -635,6 +635,14 @@ const generateId = () => {
   return 'key_' + Math.random().toString(36).substring(2, 15);
 };
 
+const generateSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphens
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+    .substring(0, 50); // Limit length
+};
+
 export interface ApiKey {
   id: string;
   name: string;
@@ -854,7 +862,7 @@ export interface ProjectFile {
 interface ProjectStore {
   projects: Project[];
   currentProject: Project | null;
-  addProject: (name: string, description: string) => string;
+  addProject: (name: string, description: string) => Project;
   updateProject: (id: string, data: Partial<Project>) => void;
   setCurrentProject: (project: Project | null) => void;
   addProjectHistory: (projectId: string, history: Omit<HistoryItem, 'id' | 'createdAt'>) => void;
@@ -870,23 +878,24 @@ export const useProjectStore = create<ProjectStore>()(
       projects: [],
       currentProject: null,
       
-      addProject: (name: string, description: string = "") => {
-        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      addProject: (name: string, description: string) => {
         const newProject = {
-          id: crypto.randomUUID(),
+          id: generateId(),
           name,
-          slug,
           description,
+          slug: generateSlug(name),
           files: [],
-          instructions: '',
           histories: [],
+          instructions: "",
           createdAt: new Date(),
         };
+
         set((state) => ({
           projects: [...state.projects, newProject],
           currentProject: newProject,
         }));
-        return slug;
+
+        return newProject;
       },
 
       updateProject: (id, data) => {

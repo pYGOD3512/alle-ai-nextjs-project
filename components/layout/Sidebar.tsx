@@ -311,7 +311,7 @@ export function Sidebar() {
                             <ContextMenuTrigger>
                               <div 
                                 className={`group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md cursor-pointer ${
-                                  currentProject?.id === project.id ? 'bg-secondary' : ''
+                                  currentProject?.id === project.id && pathname.startsWith('/project/') ? 'bg-secondary' : ''
                                 }`}
                                 onClick={() => handleProjectClick(project)}
                               >
