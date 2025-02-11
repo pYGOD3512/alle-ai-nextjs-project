@@ -94,7 +94,7 @@ const Overview = () => {
           {quickLinks.map((section, index) => (
             <Card
               key={index}
-              className={`${section.span} dark:bg-zinc-800 hover:border-purple-400 cursor-pointer transition-all duration-200`}
+              className={`${section.span} dark:bg-zinc-800 hover:border-blue-600 cursor-pointer transition-all duration-200`}
             >
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
@@ -117,7 +117,7 @@ const Overview = () => {
           <div className="text-center space-y-4 mt-12">
             <Sparkles className="w-12 h-12 mx-auto text-black dark:text-white" />
             <h2
-              id="your-all-in-one-ai-platform"
+              id="platform-capabilities"
               className="text-4xl font-bold "
             >
               Your All-in-One AI Platform
@@ -136,7 +136,7 @@ const Overview = () => {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="hover:border-purple-400 cursor-pointer dark:bg-zinc-800 transition-shadow duration-300"
+                className="hover:border-blue-600 cursor-pointer dark:bg-zinc-800 transition-shadow duration-300"
               >
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
@@ -166,7 +166,7 @@ const Overview = () => {
               {quickStartSteps.map((step, index) => (
                 <div
                   key={index}
-                  className="flex items-center space-x-3 p-4 dark:bg-zinc-800  rounded-lg border border-zinc-900 hover:border-purple-400 cursor-pointer transition-colors"
+                  className="flex items-center space-x-3 p-4 dark:bg-zinc-800  rounded-lg border border-zinc-900 hover:border-blue-600 cursor-pointer transition-colors"
                 >
                   <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-900 dark:text-white text-black font-semibold">
                     {index + 1}
@@ -179,7 +179,7 @@ const Overview = () => {
 
           {/* Button */}
           <div className="text-center mt-12">
-            <button className="inline-flex items-center px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-slate-400 transition-colors">
+            <button className="inline-flex items-center px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-slate-200 transition-colors">
               Get Started Now
               <ChevronRight className="ml-2 w-5 h-5" />
             </button>

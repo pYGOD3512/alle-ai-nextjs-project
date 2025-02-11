@@ -6,13 +6,10 @@ import {
   Copy,
   MessageCircle,
   Image,
-  Code2,
-  Volume2,
+  FileAudio,
   Mic,
-  Shield,
-  Settings,
   Clock,
-  BookOpen,
+  TvMinimalPlay,
 } from "lucide-react";
 import Prism from "prismjs";
 import "prismjs/themes/prism-tomorrow.css";
@@ -35,13 +32,6 @@ const nextSteps = [
   },
 
   {
-    name: "Text-to-speech",
-    description:
-      "Generate human-like voice recordings with our text-to-speech model",
-    icon: <Volume2 className="w-6 h-6" />,
-    link: "#",
-  },
-  {
     name: "Speech-to-text",
     description:
       "Create transcriptions of voice recordings with our Whisper model",
@@ -49,28 +39,22 @@ const nextSteps = [
     link: "#",
   },
   {
-    name: "Video generation",
+    name: "Audio generation",
     description:
       "Analyze and filter user-created content with our moderation model",
-    icon: <Shield className="w-6 h-6" />,
+    icon: <FileAudio className="w-6 h-6" />,
     link: "#",
   },
   {
     name: "Video generation",
-    description: "Fine-tune our models with your own data",
-    icon: <Settings className="w-6 h-6" />,
+    description: "Interact with multiple video models",
+    icon: <TvMinimalPlay className="w-6 h-6" />,
     link: "#",
   },
   {
     name: "Batch",
     description: "Batch requests for async jobs",
     icon: <Clock className="w-6 h-6" />,
-    link: "#",
-  },
-  {
-    name: "Full API Reference",
-    description: "View the full REST API reference for OpenAI",
-    icon: <BookOpen className="w-6 h-6" />,
     link: "#",
   },
 ];

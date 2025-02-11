@@ -29,7 +29,8 @@ interface userGuides {
 }
 
 const href = "/docs/api";
-// user guides
+
+// api reference guides
 export const guides: Guide[] = [
   {
     id: "get-started",
@@ -99,7 +100,7 @@ export const guides: Guide[] = [
         href: "",
       },
       {
-        id: "prompts",
+        id: "prompts-inputs",
         title: "Prompt examples",
         href: "",
       },
@@ -161,6 +162,10 @@ export const guides: Guide[] = [
     ],
   },
 ];
+
+
+
+
 
 // user guides
 

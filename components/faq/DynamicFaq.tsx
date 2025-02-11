@@ -41,7 +41,7 @@ const faqComponents = {
   chat: dynamic(() => import("@/components/docs/user-guides/text-generation")),
   audio: dynamic(() => import("@/components/docs/user-guides/text-generation")),
   video: dynamic(() => import("@/components/docs/user-guides/text-generation")),
-  image: dynamic(() => import("@/components/docs/user-guides/text-generation")),
+  image: dynamic(() => import("@/components/docs/user-guides/image-generation")),
   history: dynamic(() => import("@/components/docs/user-guides/History")),
   //api reference  pages
   overview: dynamic(() => import("@/components/docs/user-guides/Overview")),
@@ -67,6 +67,9 @@ const faqComponents = {
   prompts: dynamic(() => import("@/components/docs/user-guides/prompts")),
   pricing: dynamic(() => import("@/components/docs/reference/pricing")),
   "error-codes": dynamic(() => import("@/components/docs/reference/Errors")),
+  "prompts-inputs": dynamic(
+    () => import("@/components/docs/reference/fine-tuning-inputs")
+  ),
 
   // user guides pages
   "using-platform": dynamic(

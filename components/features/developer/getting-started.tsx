@@ -1,12 +1,18 @@
-import Link from "next/link"
-import { ArrowRight, PlayCircle, Code2, HelpCircle, Activity } from "lucide-react"
-import { LucideIcon } from "lucide-react"
+import Link from "next/link";
+import {
+  ArrowRight,
+  PlayCircle,
+  Code2,
+  HelpCircle,
+  Activity,
+} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 interface DocCard {
-  title: string
-  description: string
-  href: string
-  icon: LucideIcon
+  title: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
 }
 
 const docCards: DocCard[] = [
@@ -34,26 +40,24 @@ const docCards: DocCard[] = [
     href: "https://alle-ai.instatus.com/",
     icon: Activity,
   },
-]
+];
 
 function DocCard({ title, description, href, icon: Icon }: DocCard) {
   return (
-    <Link 
-      href={href} 
+    <Link
+      href={href}
       target="_blank"
-      className="group flex items-start gap-4 rounded-xl border border-borderColorPrimary p-6 transition-all hover:border-[#2DD4BF]/20 hover:bg-[#2DD4BF]/5"
+      className="group flex items-start gap-4 rounded-xl border border-borderColorPrimary p-6 transition-all bg-background  "
     >
-      <div className="rounded-lg bg-[#2DD4BF]/10 p-3">
-        <Icon className="h-6 w-6 text-[#2DD4BF]" />
+      <div className="rounded-lg bg-slate-100 text-black dark:bg-accent dark:text-white p-3">
+        <Icon className="h-6 w-6 " />
       </div>
       <div>
         <h3 className="font-semibold mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground">
-          {description}
-        </p>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </Link>
-  )
+  );
 }
 
 export default function Docs() {
@@ -62,14 +66,15 @@ export default function Docs() {
       {/* Hero Section */}
       <section className="w-full py-24 flex flex-col items-center justify-center text-center px-4">
         <h1 className="text-5xl font-bold tracking-tight mb-6">
-          Welcome to Alle-AI 
+          Welcome to Alle-AI
         </h1>
         <p className="text-xl text-muted-foreground max-w-[750px] mb-8">
-          Power your products with unparalleled real-time, web-wide research and Q&A capabilities.
+          Power your products with unparalleled real-time, web-wide research and
+          Q&A capabilities.
         </p>
         <Link
           href="/guides"
-          className="inline-flex items-center justify-center rounded-lg bg-[#2DD4BF] px-6 py-3 text-sm font-medium text-white transition-all hover:bg-[#2DD4BF]/90 hover:scale-105"
+          className="inline-flex items-center justify-center rounded-lg  px-6 py-3 text-sm font-medium bg-black text-white dark:bg-white  hover:bg-zinc-800 dark:hover:bg-slate-200 dark:text-black hover:scale-105"
         >
           Get Started
           <ArrowRight className="ml-2 h-4 w-4" />
@@ -88,5 +93,5 @@ export default function Docs() {
         </div>
       </section>
     </div>
-  )
+  );
 }
