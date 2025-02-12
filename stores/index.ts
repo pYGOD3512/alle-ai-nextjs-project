@@ -251,6 +251,7 @@ interface HistoryItem {
   id: string;
   title: string;
   session: string;
+  message?: string;
   type: 'chat' | 'image' | 'audio' | 'video';
   timestamp: Date;
 }
