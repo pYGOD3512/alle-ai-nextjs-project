@@ -20,7 +20,6 @@ export const historyApi = {
       const response = await api.get(`/conversations/${type}`, {
         params: { page }
       });
-      console.log('history call running', page , response)
       return {
         data: response.data.map((item: any) => ({
           id: item.session,

@@ -314,7 +314,7 @@ export const userMenuItems = [
 
 export const CHAT_MODELS = [
   {
-    id: "chatgpt-3-5-turbo",
+    id: "gpt-3-5-turbo",
     name: "ChatGPT 3.5",
     icon: "/models/gpt-3-5.png",
     provider: "OpenAI",
