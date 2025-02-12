@@ -7,6 +7,7 @@ import { User } from '@/lib/api/auth';
 import { driveService } from '@/lib/services/driveServices';
 
 import { CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS, chatHistory, imageHistory, audioHistory, videoHistory } from '@/lib/constants';
+import { useModelsStore } from "./models";
 
 type ContentKey = "input" | "voice" | "attachment";
 type ContentType = "chat" | "image" | "audio" | "video";
@@ -124,60 +125,56 @@ interface SelectedModelsStore {
   lastUpdate: number;
 }
 
-export const useSelectedModelsStore = create(
-  persist<SelectedModelsStore>(
-    (set, get) => ({
+export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => ({
+  selectedModels: {
+    chat: [],
+    image: [],
+    audio: [],
+    video: [],
+  },
+  inactiveModels: [],
+  tempSelectedModels: [],
+  lastUpdate: Date.now(),
+  setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
+  saveSelectedModels: (type) => {
+    set((state) => ({
       selectedModels: {
-        chat: [],
-        image: [],
-        audio: [],
-        video: [],
+        ...state.selectedModels,
+        [type]: state.tempSelectedModels
       },
-      inactiveModels: [],
-      tempSelectedModels: [],
-      lastUpdate: Date.now(),
-      setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
-      saveSelectedModels: (type) => {
-        set((state) => ({
-          selectedModels: {
-            ...state.selectedModels,
-            [type]: state.tempSelectedModels
-          },
-          lastUpdate: Date.now()
-        }));
-      },
-      toggleModelActive: (modelId) => {
-        set((state) => ({
-          inactiveModels: state.inactiveModels.includes(modelId)
-            ? state.inactiveModels.filter(id => id !== modelId)
-            : [...state.inactiveModels, modelId],
-          lastUpdate: Date.now()
-        }));
-      },
-      getSelectedModelNames: (type) => {
-        const state = get();
-        const modelList = type === 'chat' ? CHAT_MODELS 
-          : type === 'image' ? IMAGE_MODELS
-          : type === 'audio' ? AUDIO_MODELS
-          : VIDEO_MODELS;
-        
-        return state.selectedModels[type]
-          .map(id => {
-            const model = modelList.find(model => model.id === id);
-            return model ? { 
-              name: model.name, 
-              type: model.type,
-              isActive: !state.inactiveModels.includes(id)
-            } : null;
-          })
-          .filter((item): item is { name: string; type: string; isActive: boolean } => item !== null);
-      }
-    }),
-    {
-      name: 'selected-models-storage'
-    }
-  )
-);
+      lastUpdate: Date.now()
+    }));
+  },
+  toggleModelActive: (modelId) => {
+    set((state) => ({
+      inactiveModels: state.inactiveModels.includes(modelId)
+        ? state.inactiveModels.filter(id => id !== modelId)
+        : [...state.inactiveModels, modelId],
+      lastUpdate: Date.now()
+    }));
+  },
+  getSelectedModelNames: (type) => {
+    const state = get();
+    const modelsStore = useModelsStore.getState();
+    
+    const modelList = type === 'chat' ? modelsStore.chatModels
+      : type === 'image' ? modelsStore.imageModels
+      : type === 'audio' ? modelsStore.audioModels
+      : modelsStore.videoModels;
+    
+    return state.selectedModels[type]
+      .map(modelUid => {
+        const model = modelList.find(m => m.model_uid === modelUid);
+        return model ? {
+          name: model.model_name,
+          uid: model.model_uid,
+          type: model.model_plan,
+          isActive: !state.inactiveModels.includes(modelUid)
+        } : null;
+      })
+      .filter((item): item is { name: string; uid: string; type: string; isActive: boolean } => item !== null);
+  }
+}));
 
 interface ImageResponse {
   modelId: string;
@@ -253,88 +250,63 @@ export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
 interface HistoryItem {
   id: string;
   title: string;
-  message: string;
-  timestamp: Date;
+  session: string;
   type: 'chat' | 'image' | 'audio' | 'video';
+  timestamp: Date;
 }
 
 interface HistoryStore {
   history: HistoryItem[];
+  isLoading: boolean;
+  currentPage: number;
+  hasMore: boolean;
+  error: string | null;
+  setHistory: (items: HistoryItem[]) => void;
   addHistory: (item: Omit<HistoryItem, 'id' | 'timestamp'>) => void;
   removeHistory: (id: string) => void;
   renameHistory: (id: string, newTitle: string) => void;
   getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
+  setLoading: (status: boolean) => void;
+  setError: (error: string | null) => void;
+  setPage: (page: number) => void;
+  setHasMore: (hasMore: boolean) => void;
+  clearHistory: () => void;
 }
 
-export const useHistoryStore = create<HistoryStore>()(
-  persist(
-    (set, get) => ({
-      history: [
-        ...chatHistory,
-        ...imageHistory,
-        ...audioHistory,
-        ...videoHistory
-      ],
-      addHistory: (item) =>
-        set((state) => ({
-          history: [
-            {
-              ...item,
-              id: generateId(),
-              timestamp: new Date().toISOString(),
-            },
-            ...state.history,
-          ],
-        })),
-      removeHistory: (id) =>
-        set((state) => ({
-          history: state.history.filter((item) => item.id !== id),
-        })),
-      renameHistory: (id, newTitle) =>
-        set((state) => ({
-          history: state.history.map((item) =>
-            item.id === id ? { ...item, title: newTitle } : item
-          ),
-        })),
-      getHistoryByType: (type) => {
-        return get().history
-          .filter((item) => item.type === type)
-          .map(item => ({
-            ...item,
-            timestamp: new Date(item.timestamp)
-          }));
+export const useHistoryStore = create<HistoryStore>((set, get) => ({
+  history: [],
+  isLoading: false,
+  currentPage: 1,
+  hasMore: true,
+  error: null,
+  setHistory: (items) => set({ history: items }),
+  addHistory: (item) => set((state) => ({
+    history: [
+      {
+        ...item,
+        id: item.session,
+        timestamp: new Date(),
       },
-    }),
-    {
-      name: 'history-storage',
-      serialize: (state) => JSON.stringify({
-        ...state,
-        state: {
-          ...state.state,
-          history: state.state.history.map((item: HistoryItem) => ({
-            ...item,
-            timestamp: item.timestamp instanceof Date 
-              ? item.timestamp.toISOString()
-              : item.timestamp
-          }))
-        }
-      }),
-      deserialize: (str) => {
-        const parsed = JSON.parse(str);
-        return {
-          ...parsed,
-          state: {
-            ...parsed.state,
-            history: parsed.state.history.map((item: HistoryItem) => ({
-              ...item,
-              timestamp: new Date(item.timestamp)
-            }))
-          }
-        };
-      }
-    }
-  )
-);
+      ...state.history,
+    ],
+  })),
+  removeHistory: (id) => set((state) => ({
+    history: state.history.filter((item) => item.id !== id),
+  })),
+  renameHistory: (id, newTitle) => set((state) => ({
+    history: state.history.map((item) =>
+      item.id === id ? { ...item, title: newTitle } : item
+    ),
+  })),
+  getHistoryByType: (type) => {
+    return get().history.filter((item) => item.type === type);
+  },
+  setLoading: (status) => set({ isLoading: status }),
+  setError: (error) => set({ error }),
+  setPage: (page) => set({ currentPage: page }),
+  setHasMore: (hasMore) => set({ hasMore }),
+  clearHistory: () => set({ history: [], currentPage: 1, hasMore: true }),
+}));
 
 export interface LikedMediaItem {
   id: string;

@@ -322,7 +322,7 @@ export const CHAT_MODELS = [
     preview: "Making $1 million in just 5 days is an...",
   },
   {
-    id: "gpt4-o",
+    id: "gpt-4o",
     name: "GPT-4o",
     icon: "/models/gpt-4o.png",
     provider: "OpenAI",

@@ -30,3 +30,20 @@ interface ModelsState {
     setLoading: (status) => set({ isLoading: status }),
     setError: (error) => set({ error }),
   }));
+
+  interface ConversationStore {
+    conversationId: string | null;
+    promptId: string | null;
+    setConversationId: (id: string | null) => void;
+    setPromptId: (id: string | null) => void;
+    clearConversation: () => void;
+  }
+  
+  export const useConversationStore = create<ConversationStore>((set) => ({
+    conversationId: null,
+    promptId: null,
+    setConversationId: (id) => set({ conversationId: id }),
+    setPromptId: (id) => set({ promptId: id }),
+    clearConversation: () => set({ conversationId: null, promptId: null })
+  }));
+  
