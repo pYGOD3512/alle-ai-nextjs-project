@@ -7,6 +7,7 @@ export interface Model {
     model_image: string;
     model_plan: 'free' | 'standard' | 'plus' | 'custom';
     preview?: string;
+    favorite: boolean;
   }
   
   export interface ModelsResponse extends Array<Model> {}
@@ -15,7 +16,7 @@ export interface Model {
     getChatModels: async (): Promise<Model[]> => {
       try {
         const response = await api.get<ModelsResponse>('/models/chat');
-        console.log('Chat models', response.data);
+        console.log('chat models', response)
         return response.data;
       } catch (error) {
         console.error('Error fetching chat models:', error);
@@ -26,7 +27,6 @@ export interface Model {
     getImageModels: async (): Promise<Model[]> => {
       try {
         const response = await api.get<ModelsResponse>('/models/image');
-        console.log('Image models', response.data);
         return response.data;
       } catch (error) {
         console.error('Error fetching image models:', error);
@@ -37,7 +37,6 @@ export interface Model {
     getAudioModels: async (): Promise<Model[]> => {
       try {
         const response = await api.get<ModelsResponse>('/models/audio');
-        console.log('Audio models', response.data);
         return response.data;
       } catch (error) {
         console.error('Error fetching audio models:', error);
@@ -48,10 +47,22 @@ export interface Model {
     getVideoModels: async (): Promise<Model[]> => {
       try {
         const response = await api.get<ModelsResponse>('/models/video');
-        console.log('Video models', response.data);
         return response.data;
       } catch (error) {
         console.error('Error fetching video models:', error);
+        throw error;
+      }
+    },
+  
+    toggleFavorite: async (modelUid: string, state: boolean): Promise<{ success: boolean }> => {
+      try {
+        const response = await api.post('/models/favorite', {
+          model: modelUid,
+          state: state
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
         throw error;
       }
     },

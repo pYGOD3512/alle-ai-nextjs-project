@@ -172,10 +172,11 @@ import { useAuth } from "../providers/AuthProvider";
 
 
 import { authApi } from "@/lib/api/auth";
-import { modelsApi } from '@/lib/api/models';
+import { modelsApi, Model } from '@/lib/api/models';
 
 import { useModelsStore } from '@/stores/models';
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore, ProjectFile } from "@/stores";
+import { LogoLoader } from "../features/AlleAILoader";
 
 interface ModalProps {
   isOpen: boolean;
@@ -602,6 +603,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const { selectedModels, tempSelectedModels, setTempSelectedModels, saveSelectedModels, getSelectedModelNames } = useSelectedModelsStore();
   const [filterType, setFilterType] = React.useState("all");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [favoriteLoading, setFavoriteLoading] = useState<string | null>(null); // Track which model is being favorited
 
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [showPromptModal, setShowPromptModal] = useState(false);
@@ -615,7 +617,11 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     audioModels, 
     videoModels,
     isLoading,
-    error
+    error,
+    setChatModels,
+    setImageModels,
+    setAudioModels,
+    setVideoModels,
   } = useModelsStore();
 
   // Plan limits
@@ -623,6 +629,43 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     free: 2,
     standard: 3,
     plus: 5
+  };
+
+  const handleFavoriteToggle = async (e: React.MouseEvent, model: Model) => {
+    e.stopPropagation(); // Prevent model selection when clicking favorite
+    setFavoriteLoading(model.model_uid); // Set loading state for this model
+
+    try {
+      await modelsApi.toggleFavorite(model.model_uid, !model.favorite);
+      
+      // Update the models in the store with the new favorite state
+      const updateModels = (models: Model[]) => 
+        models.map(m => 
+          m.model_uid === model.model_uid 
+            ? { ...m, favorite: !m.favorite }
+            : m
+        );
+
+      switch (currentPage) {
+        case "chat":
+          setChatModels(updateModels(chatModels));
+          break;
+        case "image":
+          setImageModels(updateModels(imageModels));
+          break;
+        case "audio":
+          setAudioModels(updateModels(audioModels));
+          break;
+        case "video":
+          setVideoModels(updateModels(videoModels));
+          break;
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+      // Optionally show an error toast/notification
+    } finally {
+      setFavoriteLoading(null); // Clear loading state
+    }
   };
 
   const checkModelSelectionRestrictions = (modelId: string) => {
@@ -727,23 +770,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     }
   };
 
-  // const getModelsForPage = () => {
-  //   switch (currentPage) {
-  //     case "chat":
-  //       return CHAT_MODELS;
-  //     case "image":
-  //       return IMAGE_MODELS;
-  //     case "audio":
-  //       return AUDIO_MODELS;
-  //     case "video":
-  //       return VIDEO_MODELS;
-  //     default:
-  //       return CHAT_MODELS;
-  //   }
-  // };
-
   const getModelsForPage = () => {
-    console.log('these are the chat models', chatModels)
     switch (currentPage) {
       case "chat":
         return chatModels || [];
@@ -791,7 +818,11 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
       const matchesSearch =
         model.model_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         model.model_provider?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter = filterType === "all" || model.model_plan === filterType;
+      
+      const matchesFilter = 
+        filterType === "all" || 
+        (filterType === "favorite" ? model.favorite : model.model_plan === filterType);
+      
       return matchesSearch && matchesFilter;
     });
   }, [models, searchQuery, filterType]);
@@ -860,7 +891,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                         >
                           {model?.model_name}
                           {model?.model_plan === 'standard' && (
-                            <Gem className="h-2.5 w-2.5 text-yellow-500" />
+                            <Gem className="h-3 w-3 text-yellow-500" />
                           )}
                           <X
                             className="h-3 w-3 cursor-pointer hover:text-red-700"
@@ -888,7 +919,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                   />
                 </div>
                 <Select defaultValue="all" onValueChange={setFilterType}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-[140px] border-borderColorSecondary">
                     <SelectValue placeholder="All models" />
                   </SelectTrigger>
                   <SelectContent className="bg-backgroundSecondary">
@@ -913,8 +944,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
           {/* Model Grid */}
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              {/* <LoadingSpinner /> */}
-              Loading...
+              <LogoLoader size="sm" />
             </div>
           ) : error ? (
             <div className="text-center text-red-500 p-4">
@@ -926,11 +956,12 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
             </div>
           ) : (
             <ScrollArea className="h-[20rem] pr-4 overflow-auto">
-              <div className="grid pt-1 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 overflow-hidden">
                 {filteredModels.map((model) => (
                   <div
                     key={model.model_uid}
                     onClick={() => toggleModelSelection(model.model_uid)}
+                    title={`${model.model_name}`}
                     className={cn(
                       "relative flex items-center gap-3 p-4 border border-borderColorPrimary rounded-lg cursor-pointer hover:bg-accent/50 transition-colors select-none",
                       tempSelectedModels.includes(model.model_uid) &&
@@ -938,8 +969,10 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                     )}
                   >
                     {model.model_plan === 'standard' && (
-                      <div className="absolute top-0 -left-0.5 text-[8px] font-medium text-yellow-500 px-2 py-0.5 rounded-br-md shadow-sm flex items-center gap-1">
-                        <Gem className="h-2.5 w-2.5" />
+                      <div className="absolute top-0 right-0">
+                        <div className="relative flex items-center gap-1 bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 text-[10px] font-medium text-white pl-2 pr-2 py-0.5 rounded-tr-md rounded-bl-lg">
+                          <Gem className="h-2.5 w-2.5" />
+                        </div>
                       </div>
                     )}
                     <Image
@@ -957,6 +990,25 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                         {model.model_provider}
                       </p>
                     </div>
+                    <button
+                      onClick={(e) => handleFavoriteToggle(e, model)}
+                      className={cn(
+                        "absolute bottom-1 right-1 p-1 rounded-full hover:bg-accent/50",
+                        model.favorite ? "text-red-500" : "text-gray-400"
+                      )}
+                      disabled={favoriteLoading === model.model_uid}
+                    >
+                      {favoriteLoading === model.model_uid ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Heart
+                          className={cn(
+                            "h-3 w-3",
+                            model.favorite && "fill-current"
+                          )}
+                        />
+                      )}
+                    </button>
                   </div>
                 ))}
               </div>

@@ -9,12 +9,9 @@ import { ModelResponse, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import {
   CHAT_MODELS as MODELS,
-  Message,
-  initialMessages,
   MODEL_RESPONSES,
   EXAMPLE_SOURCES,
   EXAMPLE_SOURCES_SIMPLE,
-  SUMMARY_RESPONSES,
   SUMMARY_DATA
 } from "@/lib/constants";
 import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore } from "@/stores";

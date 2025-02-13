@@ -191,7 +191,7 @@ export function ChatInput({
 
       if (file.size > 0) {
         const { text } = await processFile(file);
-        console.log('content', text);
+        console.log('content uuuuuu', text);
 
         clearInterval(progressInterval);
         

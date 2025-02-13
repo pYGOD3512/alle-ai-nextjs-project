@@ -13,7 +13,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video, Folder } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video, Folder, Loader2 } from "lucide-react";
 import Image from "next/image";
 import {
   sidebarMenuItems,
@@ -52,7 +52,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const isMobile = useMediaQuery('(max-width: 1024px)');
-  const { history, removeHistory: removeItem, renameHistory: renameItem, getHistoryByType } = useHistoryStore();
+  const { history, removeHistory: removeItem, renameHistory: renameItem, getHistoryByType, isLoading } = useHistoryStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const { projects, currentProject, setCurrentProject, removeProject } = useProjectStore();
@@ -367,7 +367,11 @@ export function Sidebar() {
               {/* Scrollable history list */}
               <ScrollArea className="flex-1">
                 <div className="px-4 space-y-0.5">
-                  {currentHistory.length > 0 ? (
+                  {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : currentHistory.length > 0 ? (
                     currentHistory.map((item) => (
                       <ContextMenu key={item.id}>
                         <ContextMenuTrigger>
