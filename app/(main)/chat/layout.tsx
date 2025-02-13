@@ -6,7 +6,9 @@ import { useSidebarStore, useContentStore, useWebSearchStore } from "@/stores";
 import { useRouter, usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { SquareTerminal, Lightbulb, Code, Bug, Wrench, Sparkles, NotebookPen, Brain  } from "lucide-react";
-// import { ProjectView } from "@/components/features/projects/ProjectView";
+import { chatApi } from '@/lib/api/chat';
+import { useSelectedModelsStore } from '@/stores';
+import { useConversationStore } from '@/stores/models';
 
 const options = [
   {
@@ -38,14 +40,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { setIsWebSearch } = useWebSearchStore();
-    const { isOpen } = useSidebarStore();
+  const { isOpen } = useSidebarStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const { selectedModels, inactiveModels } = useSelectedModelsStore();
+  const { setConversationId, setPromptId } = useConversationStore();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    const chatId = crypto.randomUUID();
-    setContent("chat", "input", input);
-    router.push(`/chat/res/${chatId}`);
-    setInput("");
+    
+    setIsLoading(true);
+    try {
+      const allSelectedModels = selectedModels.chat;
+      
+      const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
+      const conversationId = conversationResponse.session;
+
+      const promptResponse = await chatApi.createPrompt(conversationId, input);
+      const promptId = promptResponse.id;
+
+      // Store conversation and prompt IDs in the store
+      setConversationId(conversationId);
+      setPromptId(promptId);
+      
+      setContent("chat", "input", input);
+      router.push(`/chat/res/${conversationId}`);
+      setInput("");
+
+      const activeModels = allSelectedModels.filter(
+        modelId => !inactiveModels.includes(modelId)
+      );
+
+      // Start generations
+      activeModels.forEach(modelId => {
+        chatApi.generateResponse({
+            conversation: conversationId,
+            model: modelId,
+            is_new: true,
+          prompt: promptId
+        })
+        .then(response => {
+          console.log(`Response from model ${modelId}:`, response);
+        })
+        .catch(error => {
+          console.error(`Error from model ${modelId}:`, error);
+        });
+      });
+
+    } catch (error) {
+      console.error('Error in chat flow:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClicked = (opt: { label: string }) => {
@@ -73,14 +118,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onChange={setInput}
                 onSend={handleSend}
                 inputRef={inputRef}
-                isLoading={false}
+                isLoading={isLoading}
                 isWeb={true}
                 onWebSearchToggle={handleWebSearchToggle}
               />
             </div>
           </div>
         </div>
-          // <ProjectView />
       )}
       <div className="flex-1">{children}</div>
     </div>

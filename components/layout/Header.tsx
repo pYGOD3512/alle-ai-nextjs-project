@@ -37,6 +37,7 @@ import { NotificationsPanel } from "@/components/NotificationWindow";
 import { NotificationModal } from "@/components/ui/modals";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
+import { chatApi } from "@/lib/api/chat";
 
 
 export function Header() {
@@ -63,6 +64,8 @@ export function Header() {
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [loadingModels, setLoadingModels] = useState<string[]>([]);
+  const conversationId = pathname.includes('/chat/res/') ? pathname.split('/').pop() : null;
 
   const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate } = useSelectedModelsStore(
     (state) => ({
@@ -318,6 +321,39 @@ export function Header() {
     [recentNotifications]
   );
 
+  const handleModelToggle = async (model: { name: string, uid: string, isActive: boolean }) => {
+    if (!conversationId) {
+      toggleModelActive(model.uid);
+      return;
+    }
+
+    setLoadingModels(prev => [...prev, model.uid]);
+    
+    try {
+      const newActiveState = !model.isActive;
+      
+      const response = await chatApi.toggleModelInstance(
+        conversationId, 
+        model.uid,
+        newActiveState
+      );
+
+      // If the server returns status: true, then update the UI
+      if (response.status) {
+        toggleModelActive(model.uid);
+      } else {
+        // If status is false, show error message
+        console.error('Failed to toggle model:', response.message);
+        // Optionally show an error toast/notification here
+      }
+    } catch (error) {
+      console.error('Failed to toggle model:', error);
+      // Optionally show an error toast/notification here
+    } finally {
+      setLoadingModels(prev => prev.filter(id => id !== model.uid));
+    }
+  };
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
@@ -401,13 +437,7 @@ export function Header() {
                       </div>
                       <div className="max-h-[300px] overflow-y-auto py-2">
                         {selectedModelNames.map((model, index) => {
-                          const modelList = currentPage === 'chat' ? CHAT_MODELS 
-                            : currentPage === 'image' ? IMAGE_MODELS
-                            : currentPage === 'audio' ? AUDIO_MODELS
-                            : VIDEO_MODELS;
-
-                          const modelInfo = modelList.find(m => m.name === model.name);
-                          
+                          const isLoading = loadingModels.includes(model.uid);
                           return (
                             <div 
                               key={index}
@@ -425,16 +455,20 @@ export function Header() {
                                   <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
                                 )}
                               </div>
-                              <Switch
-                                variant="sm"
-                                checked={model.isActive}
-                                onCheckedChange={() => {
-                                  if (modelInfo) {
-                                    toggleModelActive(modelInfo.id);
-                                  }
-                                }}
-                                className="ml-2"
-                              />
+                              <div className="relative ml-2">
+                                {isLoading ? (
+                                  <div className="w-8 h-5 flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+                                  </div>
+                                ) : (
+                                  <Switch
+                                    variant="sm"
+                                    checked={model.isActive}
+                                    onCheckedChange={() => handleModelToggle(model)}
+                                    disabled={loadingModels.includes(model.uid)}
+                                  />
+                                )}
+                              </div>
                             </div>
                           );
                         })}
