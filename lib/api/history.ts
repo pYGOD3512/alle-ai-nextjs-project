@@ -5,7 +5,8 @@ export interface HistoryItem {
   title: string;
   session: string;
   type: 'chat' | 'image' | 'audio' | 'video';
-  timestamp: Date;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface HistoryResponse {
@@ -14,25 +15,46 @@ export interface HistoryResponse {
   hasMore: boolean;
 }
 
+interface GetTitleResponse {
+  title: string;
+}
+
 export const historyApi = {
   getHistory: async (type: string, page: number = 1): Promise<HistoryResponse> => {
     try {
       const response = await api.get(`/conversations/${type}`, {
         params: { page }
       });
+      console.log(response, 'this is the raw response');
+      console.log(response.data, 'this is the data');
       return {
         data: response.data.map((item: any) => ({
           id: item.session,
           title: item.title,
           session: item.session,
           type: type as 'chat' | 'image' | 'audio' | 'video',
-          timestamp: new Date(item.created_at || Date.now())
+          timestamp: new Date(item.created_at || Date.now()),
+          created_at: item.created_at,
+          updated_at: item.updated_at
         })),
         page,
         hasMore: response.data.length > 0
       };
     } catch (error) {
       console.error(`Error fetching ${type} history:`, error);
+      throw error;
+    }
+  },
+
+  getConversationTitle: async (conversation: string, prompt: string): Promise<GetTitleResponse> => {
+    try {
+      const response = await api.post<GetTitleResponse>('/get-title', {
+        conversation: conversation,
+        prompt: prompt
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting conversation title:', error);
       throw error;
     }
   }

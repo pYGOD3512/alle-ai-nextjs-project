@@ -8,14 +8,14 @@ import { ChatInput } from "./ChatInput";
 import { ModelResponse, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import {
-  CHAT_MODELS as MODELS,
   MODEL_RESPONSES,
   EXAMPLE_SOURCES,
   EXAMPLE_SOURCES_SIMPLE,
   SUMMARY_DATA
 } from "@/lib/constants";
-import { useSidebarStore, useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore } from "@/stores";
-import { Source } from "@/lib/types";
+import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore } from "@/stores";
+import { useModelsStore, useConversationStore } from "@/stores/models";
+import { chatApi } from '@/lib/api/chat';
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
@@ -23,17 +23,18 @@ import { useToast } from "@/hooks/use-toast";
 import { SourcesWindow } from "../SourcesWindow";
 import { Summary } from "./Summary";
 import { Card } from "@/components/ui/card";
-
+import { Model } from "@/lib/api/models";
 
 interface ChatSession {
-  id: string;
+  id: string; // conversation UUID
+  title: string;
   messages: ChatMessage[];
   activeModel: string;
   status: 'active' | 'complete';
 }
 
 interface ChatMessage {
-  id: string;
+  id: string; // prompt ID
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
@@ -41,90 +42,174 @@ interface ChatMessage {
 }
 
 interface ModelResponse {
-  id: string;
-  modelId: string;
+  id: string; // response ID
+  modelId: string; // model_uid
   content: string;
   status: 'loading' | 'complete' | 'error';
-  parentMessageId: string;
-  sources?: Source[];
-  settings: {
-    personalizedAds: boolean;
-  };
+  error?: string;
 }
 
 export function ChatArea() {
   const { toast } = useToast();
   const { content } = useContentStore();
-  const { selectedModels } = useSelectedModelsStore();
+  const { selectedModels, inactiveModels } = useSelectedModelsStore();
+  const { chatModels } = useModelsStore();
+  const { conversationId, promptId } = useConversationStore();
+  const { personalization } = useSettingsStore();
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
-  const { personalization } = useSettingsStore();
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
-    if (content.chat.input) {
-      const sessionId = `session-${Date.now()}`;
-      const messageId = `msg-${Date.now()}`;
+    if (!conversationId || !promptId) return [];
+    const initialPrompt = content.chat.input;
+    
+    return [{
+      id: conversationId,
+      title: "New Chat",
+      activeModel: selectedModels.chat[0],
+      status: 'active',
+      messages: [{
+        id: promptId,
+        content: initialPrompt, // Use the stored input content
+        sender: 'user',
+        timestamp: new Date(),
+        responses: selectedModels.chat.map(modelId => ({
+          id: `temp-${modelId}`,
+          modelId,
+          content: '',
+          status: 'loading'
+        }))
+      }]
+    }];
+  });
+
+  // Handle real-time response updates
+  useEffect(() => {
+    if (!conversationId || !promptId) return;
+
+    const activeModels = selectedModels.chat.filter(
+      modelId => !inactiveModels.includes(modelId)
+    );
+
+    activeModels.forEach(async (modelId) => {
+      try {
+        const response = await chatApi.generateResponse({
+          conversation: conversationId,
+          model: modelId,
+          is_new: true,
+          prompt: promptId
+        });
+
+        if (response.status && response.data) {
+          setChatSessions(prev => prev.map(session => ({
+            ...session,
+            messages: session.messages.map(msg => ({
+              ...msg,
+              responses: msg.responses.map(resp => 
+                resp.modelId === modelId ? {
+                  ...resp,
+                  id: String(response.data.id),
+                  content: response.data.response,
+                  status: 'complete'
+                } : resp
+              )
+            }))
+          })));
+        } else {
+          // Handle error state
+          setChatSessions(prev => prev.map(session => ({
+            ...session,
+            messages: session.messages.map(msg => ({
+              ...msg,
+              responses: msg.responses.map(resp => 
+                resp.modelId === modelId ? {
+                  ...resp,
+                  status: 'error',
+                  error: response.message || 'Failed to generate response'
+                } : resp
+              )
+            }))
+          })));
+        }
+      } catch (error) {
+        console.error(`Error generating response for model ${modelId}:`, error);
+        // Update error state in UI
+        setChatSessions(prev => prev.map(session => ({
+          ...session,
+          messages: session.messages.map(msg => ({
+            ...msg,
+            responses: msg.responses.map(resp => 
+              resp.modelId === modelId ? {
+                ...resp,
+                status: 'error',
+                error: 'Failed to generate response'
+              } : resp
+            )
+          }))
+        })));
+      }
+    });
+  }, [conversationId, promptId, selectedModels.chat, inactiveModels]);
+
+  const handleInputChange = (value: string) => {
+    setInput(value);
+  };
+
+  const handleSendMessage = async (fileContent?: {
+    uploaded_files: Array<{
+      file_name: string;
+      file_size: string;
+      file_type: string;
+      file_content: string;
+    }>;
+  }) => {
+    if (!input.trim() || !conversationId) return;
+    
+    setIsLoading(true);
+    try {
+      // Create new prompt with file content if available
+      const promptResponse = await chatApi.createPrompt(
+        conversationId, 
+        input,
+        fileContent ? {
+          input_content: fileContent
+        } : undefined
+      );
+      const promptContent = input; // Store input before clearing
       
-      return [{
-        id: sessionId,
-        activeModel: selectedModels.chat[0],
-        status: 'active',
-        messages: [{
-          id: messageId,
-          content: content.chat.input,
+      // Update UI with new message
+      setChatSessions(prev => prev.map(session => ({
+        ...session,
+        messages: [...session.messages, {
+          id: String(promptResponse.id),
+          content: promptContent, // Use stored input content
           sender: 'user',
           timestamp: new Date(),
           responses: selectedModels.chat.map(modelId => ({
-            id: `response-${modelId}-${Date.now()}`,
+            id: `temp-${modelId}`,
             modelId,
             content: '',
-            status: 'loading',
-            parentMessageId: messageId,
-            sources: isWebSearch ? EXAMPLE_SOURCES : undefined,
-            settings: {
-              personalizedAds: personalization.personalizedAds
-            }
+            status: 'loading'
           }))
         }]
-      }];
-    }
-    return [];
-  });
+      })));
 
-  useEffect(() => {
-    if (content.chat.input && chatSessions.length > 0) {
-      const session = chatSessions[0];
-      selectedModels.chat.forEach((modelId) => {
-        const randomDelay = Math.random() * 3000 + 2000;
-        
-        setTimeout(() => {
-          setChatSessions(prev => prev.map(s => {
-            if (s.id !== session.id) return s;
-            
-            return {
-              ...s,
-              messages: s.messages.map(msg => ({
-                ...msg,
-                responses: msg.responses.map(response => {
-                  if (response.modelId !== modelId) return response;
-                  
-                  return {
-                    ...response,
-                    content: MODEL_RESPONSES[modelId],
-                    status: 'complete',
-                    settings: response.settings
-                  };
-                })
-              }))
-            };
-          }));
-        }, randomDelay);
+      setInput(""); // Clear input after updating UI
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
   const [activeSessionId, setActiveSessionId] = useState<string>();
-  const [input, setInput] = useState("");
-  const [responseFeedback, setResponseFeedback] = useState<Record<string, 'like' | 'dislike' | null>>({});
+  const [responseFeedback, setResponseFeedback] = useState<Record<string, 'liked' | 'disliked' | null>>({});
   const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
   const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
   const [activeContents, setActiveContents] = useState<Record<string, {
@@ -132,95 +217,9 @@ export function ChatArea() {
     id: string;
   }>>({});
 
-  const handleInputChange = (value: string) => {
-    setInput(value);
-  };
-
-  const createNewSession = (messageContent: string) => {
-    const sessionId = `session-${Date.now()}`;
-    const messageId = `msg-${Date.now()}`;
-    
-    setActiveContents(prev => ({
-      ...prev,
-      [sessionId]: { type: 'model', id: selectedModels.chat[2] }
-    }));
-
-    const newSession: ChatSession = {
-      id: sessionId,
-      activeModel: selectedModels.chat[0],
-      status: 'active',
-      messages: [{
-        id: messageId,
-        content: messageContent,
-        sender: 'user',
-        timestamp: new Date(),
-        responses: selectedModels.chat.map(modelId => ({
-          id: `response-${modelId}-${Date.now()}`,
-          modelId,
-          content: '',
-          status: 'loading',
-          parentMessageId: messageId,
-          sources: isWebSearch ? EXAMPLE_SOURCES_SIMPLE : undefined,
-          settings: {
-            personalizedAds: personalization.personalizedAds
-          }
-        }))
-      }]
-    };
-
-    setChatSessions(prev => [...prev, newSession]);
-    setActiveSessionId(sessionId);
-    return { sessionId, messageId };
-  };
-
-  const handleSend = (input: string) => {
-    const { sessionId, messageId } = createNewSession(input);
-
-    selectedModels.chat.forEach((modelId) => {
-      const randomDelay = Math.random() * 3000 + 2000;
-      
-      setTimeout(() => {
-        setChatSessions(prev => prev.map(session => {
-          if (session.id !== sessionId) return session;
-          
-          return {
-            ...session,
-            messages: session.messages.map(msg => {
-              if (msg.id !== messageId) return msg;
-              
-              return {
-                ...msg,
-                responses: msg.responses.map(response => {
-                  if (response.modelId !== modelId) return response;
-                  
-                  return {
-                    ...response,
-                    content: MODEL_RESPONSES[modelId],
-                    status: 'complete',
-                    settings: response.settings
-                  };
-                })
-              };
-            })
-          };
-        }));
-      }, randomDelay);
-    });
-  };
-
-  const handleSendMessage = () => {
-    if (!input.trim()) return;
-    handleSend(input);
-    setInput("");
-  };
-
-  const handleWebSearchToggle = (enabled: boolean) => {
-    useWebSearchStore.getState().setIsWebSearch(enabled);
-  };
-
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const handleFeedbackChange = (responseId: string, feedback: 'like' | 'dislike' | null) => {
+  const handleFeedbackChange = (responseId: string, feedback: 'liked' | 'disliked' | null) => {
     setResponseFeedback(prev => ({
       ...prev,
       [responseId]: feedback
@@ -311,7 +310,7 @@ export function ChatArea() {
                 )}
                 <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
                   {selectedModels.chat.map((modelId, index) => {
-                    const model = MODELS.find(m => m.id === modelId);
+                    const model = chatModels.find(m => m.model_uid === modelId);
                     if (!model) return null;
 
                     const response = session.messages[0].responses?.[index];
@@ -326,8 +325,8 @@ export function ChatArea() {
                           <div className="flex items-center justify-center w-full space-x-2">
                             <div className="relative">
                               <Image
-                                src={model.icon}
-                                alt={model.name}
+                                src={model.model_image}
+                                alt={model.model_name}
                                 width={24}
                                 height={24}
                                 className="rounded-full animate-pulse"
@@ -335,7 +334,7 @@ export function ChatArea() {
                               <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                             </div>
                             <span className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-auto scrollbar-none">
-                              {model.name}
+                              {model.model_name}
                             </span>
                           </div>
                           <div className="w-full mt-3 space-y-2">
@@ -348,7 +347,10 @@ export function ChatArea() {
                     return (
                       <ModelSelector
                         key={modelId}
-                        models={[model]}
+                        models={[{
+                          ...model,
+                          response: response?.content
+                        } as Model]}
                         activeModel={activeContents[session.id]?.type === 'model' ? session.activeModel : ''}
                         onSelect={(modelId) => handleModelSelect(modelId, session.id)}
                       />
@@ -370,19 +372,17 @@ export function ChatArea() {
                               </div>
                               <div className="flex-1 space-y-3">
                                 <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-1/2" />
                               </div>
                             </div>
                           </Card>
                         ) : (
                           <ModelResponse
                             key={`${session.id}-${session.activeModel}`}
-                            model={MODELS.find(m => m.id === session.activeModel)?.name || ""}
+                            model={chatModels.find(m => m.model_uid === session.activeModel)?.model_name || ""}
                             content={session.messages[0].responses.find(r => 
                               r.modelId === session.activeModel
                             )?.content || ""}
-                            model_img={MODELS.find(m => m.id === session.activeModel)?.icon || ""}
+                            model_img={chatModels.find(m => m.model_uid === session.activeModel)?.model_image || ""}
                             responseId={session.messages[0].responses.find(r => 
                               r.modelId === session.activeModel
                             )?.id || ""}
@@ -398,12 +398,12 @@ export function ChatArea() {
                               });
                             }}
                             webSearchEnabled={isWebSearch}
-                            sources={session.messages[0].responses.find(r => 
-                              r.modelId === session.activeModel && r.status === 'complete'
-                            )?.sources}
-                            settings={session.messages[0].responses.find(r => 
-                              r.modelId === session.activeModel
-                            )?.settings || { personalizedAds: false }}
+                            // sources={session.messages[0].responses.find(r => 
+                            //   r.modelId === session.activeModel && r.status === 'complete'
+                            // )?.sources}
+                            // settings={session.messages[0].responses.find(r => 
+                            //   r.modelId === session.activeModel
+                            // )?.settings || { personalizedAds: true }}
                           />
                         )}
                       </>
@@ -437,9 +437,9 @@ export function ChatArea() {
         onChange={handleInputChange}
         onSend={handleSendMessage}
         inputRef={useRef<HTMLTextAreaElement>(null)}
-        isLoading={false}
+        isLoading={isLoading}
         isWeb={true}
-        onWebSearchToggle={handleWebSearchToggle}
+        onWebSearchToggle={() => {}}
       />
       <SourcesWindow
         sources={sources}

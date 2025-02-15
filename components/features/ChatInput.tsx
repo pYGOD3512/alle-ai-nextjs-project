@@ -30,7 +30,14 @@ declare global {
 interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
-  onSend: () => void;
+  onSend: (fileContent?: {
+    uploaded_files: Array<{
+      file_name: string;
+      file_size: string;
+      file_type: string;
+      file_content: string;
+    }>;
+  }) => void;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   isLoading: boolean;
   isWeb?: boolean;
@@ -52,7 +59,14 @@ export function ChatInput({
   const { selectedModels } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
-
+  const [fileContent, setFileContent] = useState<{
+    uploaded_files: Array<{
+      file_name: string;
+      file_size: string;
+      file_type: string;
+      file_content: string;
+    }>;
+  } | null>(null);
 
   const pathname = usePathname();
 
@@ -126,6 +140,8 @@ export function ChatInput({
             prev ? { ...prev, status: 'ready' } : null
           );
 
+          await handleProcessFile(file, text);
+
           toast({
             title: "Image Uploaded",
             description: "Image has been uploaded successfully",
@@ -191,7 +207,6 @@ export function ChatInput({
 
       if (file.size > 0) {
         const { text } = await processFile(file);
-        console.log('content uuuuuu', text);
 
         clearInterval(progressInterval);
         
@@ -203,6 +218,8 @@ export function ChatInput({
         setUploadedFile(prev => 
           prev ? { ...prev, status: 'ready' } : null
         );
+
+        await handleProcessFile(file, text);
 
         toast({
           title: "File Processed",
@@ -237,6 +254,10 @@ export function ChatInput({
     }
 
     try {
+      const { text } = await processFile(file);
+      await handleProcessFile(file, text);
+      console.log('uploaded file content is', text);
+
       const fileUrl = URL.createObjectURL(file);
       
       if (uploadedFile?.url) {
@@ -264,9 +285,6 @@ export function ChatInput({
           prev ? { ...prev, progress } : null
         );
       }, 100);
-
-      const { text } = await processFile(file);
-      console.log('content', text);
 
       clearInterval(progressInterval);
       
@@ -305,6 +323,7 @@ export function ChatInput({
       URL.revokeObjectURL(uploadedFile.url);
       setUploadedFile(null);
     }
+    setFileContent(null);
   };
 
   useEffect(() => {
@@ -334,7 +353,20 @@ export function ChatInput({
       setShowModelPrompt(true);
       return;
     }
-    onSend();
+    onSend(fileContent || undefined);
+  };
+
+  const handleProcessFile = async (file: File, text: string) => {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    setFileContent({
+      uploaded_files: [{
+        file_name: file.name,
+        file_size: `${(file.size / 1024).toFixed(1)}KB`,
+        // file_type: file.type.split('/')[1],
+        file_type: fileExtension || 'unknown',
+        file_content: text
+      }]
+    });
   };
 
   return (
@@ -351,7 +383,7 @@ export function ChatInput({
             <Textarea 
               ref={inputRef}
               placeholder={"Message multiple models..."}
-              className="w-full bg-transparent min-h-[2.5rem] max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
+              className={`w-full bg-transparent ${(pathname === '/chat' || pathname === '/image') ? 'min-h-[3.5rem]': 'min-h-[2.5rem]' }  max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300`}
               value={value}
               onChange={(e) => {
                 const target = e.target;
@@ -396,7 +428,7 @@ export function ChatInput({
                           }`}
                         >
                           <Globe size={14} />
-                          <span className="text-[12px]">Web search</span>
+                          <span className="text-[12px]">Search</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -420,7 +452,7 @@ export function ChatInput({
                 <Button
                   onClick={handleSendClick}
                   size= {pathname.startsWith('/chat') ? `icon` : `default`}
-                  className={`flex-shrink-0 ${pathname.startsWith('/chat') ? "rounded-full h-8 w-8" : "rounded-md"} ${
+                  className={`flex-shrink-0 h-8 ${pathname.startsWith('/chat') ? "rounded-full w-8" : "rounded-full"} ${
                     isInputEmpty
                       ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
                       : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"

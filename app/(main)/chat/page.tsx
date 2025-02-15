@@ -21,8 +21,8 @@ export default function ChatPage() {
   useEffect(() => {
     setCurrentPage("chat");
     // Clear history when component mounts
-    clearHistory();
-  }, [setCurrentPage, clearHistory]);
+    // clearHistory();
+  }, [setCurrentPage]);
 
   // Load chat models on mount if not already loaded
   useEffect(() => {

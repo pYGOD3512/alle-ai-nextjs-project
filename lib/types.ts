@@ -44,6 +44,7 @@ export interface UploadedFile {
   url: string;
   status: "loading" | "ready" | "error";
   progress?: number;
+  processedContent?: string;
 }
 
 export interface ChatThread {
