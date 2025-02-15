@@ -37,19 +37,20 @@ import { MarkdownCode } from '@/components/markdown/MarkdownCode';
 import { SummaryContent } from "./SummaryContent";
 import { SUMMARY_DATA } from "@/lib/constants";
 import { useSettingsStore } from "@/stores";
+import { chatApi, LikeState } from "@/lib/api/chat";
 
 interface ModelResponseProps {
   model: string;
-  content: any;
+  content: string;
   model_img: string;
   responseId: string;
-  sessionId: string; // Add this prop
-  onFeedbackChange?: (responseId: string, feedback: 'like' | 'dislike' | null) => void;
+  sessionId: string;
+  feedback?: 'liked' | 'disliked' | null;
+  onFeedbackChange: (responseId: string, feedback: 'liked' | 'disliked' | null) => void;
   onRegenerate?: (responseId: string) => void;
-  feedback?: 'like' | 'dislike' | null;
   webSearchEnabled?: boolean;
   sources?: Source[];
-  settings: {
+  settings?: {
     personalizedAds: boolean;
   };
 }
@@ -121,16 +122,17 @@ function extractImagesFromMarkdown(content: string): { src: string; alt: string;
 }
 
 export function ModelResponse({ 
-  model_img, 
   model, 
   content, 
+  model_img, 
   responseId,
+  sessionId,
+  feedback,
   onFeedbackChange,
   onRegenerate,
-  feedback = null,
   webSearchEnabled = false,
   sources = [],
-  settings // Add this prop
+  settings
 }: ModelResponseProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
@@ -139,6 +141,7 @@ export function ModelResponse({
   const initVoices = useVoiceStore((state) => state.initVoices);
   const { setSources, close } = useSourcesWindowStore();
   const [showAllImages, setShowAllImages] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Initialize voices when component mounts
@@ -184,24 +187,36 @@ export function ModelResponse({
     });
   };
 
-  const handleLike = () => {
-    onFeedbackChange?.(responseId, feedback === 'like' ? null : 'like');
-    toast({
-      title: feedback === 'like' ? "Feedback removed" : "Response liked",
-      description: feedback === 'like' 
-        ? "Your feedback has been removed." 
-        : "Thank you for your feedback!",
-    });
-  };
+  const handleFeedback = async (newState: 'liked' | 'disliked' | null) => {
+    if (isSubmitting) return;
 
-  const handleDislike = () => {
-    onFeedbackChange?.(responseId, feedback === 'dislike' ? null : 'dislike');
-    toast({
-      title: feedback === 'dislike' ? "Feedback removed" : "Response disliked",
-      description: feedback === 'dislike' 
-        ? "Your feedback has been removed." 
-        : "Thank you for your feedback!",
-    });
+    setIsSubmitting(true);
+    try {
+      // If clicking the same button, set to 'none'
+      const state = newState === feedback ? 'none' : newState;
+      
+      const response = await chatApi.updateLikeState(responseId, state as LikeState);
+      console.log('Response from updateLikeState:', response);
+      
+      if (response.status) {
+        onFeedbackChange(responseId, state === 'none' ? null : state as 'liked' | 'disliked');
+        
+        if (state !== 'none') {
+          toast({
+            title: "Success",
+            description: `Response ${state === 'liked' ? 'liked' : 'disliked'}`,
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong, please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Memoize the components object
@@ -394,10 +409,13 @@ export function ModelResponse({
             <Button
               variant="ghost"
               size="icon"
-              className={`rounded-full h-8 w-8 ${
-                feedback === 'like' ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground'
-              }`}
-              onClick={handleLike}
+              className={cn(
+                "rounded-full h-8 w-8",
+                feedback === 'liked' ? "text-green-500 bg-green-500/10" : "text-muted-foreground",
+                isSubmitting && "opacity-50 cursor-not-allowed"
+              )}
+              onClick={() => handleFeedback('liked')}
+              disabled={isSubmitting}
             >
               <ThumbsUp className="h-4 w-4" />
             </Button>
@@ -405,10 +423,13 @@ export function ModelResponse({
             <Button
               variant="ghost"
               size="icon"
-              className={`rounded-full h-8 w-8 ${
-                feedback === 'dislike' ? 'text-red-500 bg-red-500/10' : 'text-muted-foreground'
-              }`}
-              onClick={handleDislike}
+              className={cn(
+                "rounded-full h-8 w-8",
+                feedback === 'disliked' ? "text-red-500 bg-red-500/10" : "text-muted-foreground",
+                isSubmitting && "opacity-50 cursor-not-allowed"
+              )}
+              onClick={() => handleFeedback('disliked')}
+              disabled={isSubmitting}
             >
               <ThumbsDown className="h-4 w-4" />
             </Button>
@@ -442,7 +463,7 @@ export function ModelResponse({
           </div>
           
           {/* Only render AdCard if personalizedAds is enabled in settings */}
-          {settings.personalizedAds && <AdCard ads={SAMPLE_ADS} />}
+          {settings?.personalizedAds && <AdCard ads={SAMPLE_ADS} />}
         </div>
       </div>
     </Card>

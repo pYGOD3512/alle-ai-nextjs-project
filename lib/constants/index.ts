@@ -545,7 +545,7 @@ export const VIDEO_MODELS = [
 ];
 
 export const MODEL_RESPONSES: { [key: string]: string } = {
-  "chatgpt-3-5-turbo": `Achieving a million dollars in just five days is an extremely ambitious goal and, for most people, unrealistic without prior preparation, substantial resources, or extraordinary circumstances. However, if you're aiming to build significant wealth over time, here are some strategies that can guide you toward financial success:
+  "gpt-3-5-turbo": `Achieving a million dollars in just five days is an extremely ambitious goal and, for most people, unrealistic without prior preparation, substantial resources, or extraordinary circumstances. However, if you're aiming to build significant wealth over time, here are some strategies that can guide you toward financial success:
 
 **1. Start with Passion**
 

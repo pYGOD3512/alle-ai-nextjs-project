@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import { navItems, userMenuItems, notifications as notificationData, CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS} from '@/lib/constants';
 import { NotificationItem } from "@/lib/types";
-import { useSidebarStore, useSelectedModelsStore } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useAuthStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal, LogoutModal } from "../ui/modals";
@@ -48,6 +48,9 @@ export function Header() {
   const isMobile = useMediaQuery('(max-width: 1024px)');
   const pathname = usePathname();
   const router = useRouter();
+
+  const { user, plan } = useAuthStore();
+
 
 
   const [mounted, setMounted] = React.useState(false);
@@ -528,15 +531,15 @@ export function Header() {
               <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-backgroundSecondary">
                 <DropdownMenuItem className="flex items-start p-2 gap-4 cursor-pointer">
                   <Image
-                    src="/user.jpg"
+                    src={user?.photo_url || "/user.jpg"}
                     alt="User Image"
                     width={35}
                     height={35}
                     className="rounded-full mx-auto cursor-pointer"
                   />
                   <div className="flex flex-col mr-4">
-                    <Text className="text-sm">Osei-Wusu Pascal</Text>
-                    <Text className="text-xs">pascal@gmail.com</Text>
+                    <Text className="text-sm">{user?.first_name} {user?.last_name}</Text>
+                    <Text className="text-xs">{user?.email}</Text>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { textReveal } from "@/lib/utils";
 import { motion } from "framer-motion"
 import { Sparkles, Wand2, MessagesSquare, Zap } from "lucide-react";
+import { useAuthStore } from "@/stores";
 
 interface option {
   label: string;
@@ -34,8 +35,15 @@ const defaultOptions = [
   },
 ];
 
+const getTimeBasedGreeting = (): string => {
+  const hour = new Date().getHours();
+  
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+};
+
 const GreetingMessage = ({
-  username = "Guest",
   options = defaultOptions,
   handlePressed = () => {},
   questionText = "What would you like to do today?",
@@ -47,7 +55,9 @@ const GreetingMessage = ({
     });
   };
 
-  const greetings = textReveal(`Hi! ${username} 🎉`)
+  const { user } = useAuthStore();
+
+  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name} 🎉`)
   const questionTextArray = textReveal(questionText)
 
   return (
