@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { guides } from "@/lib/constants/docs";
+import { apiReference } from "@/lib/constants/docs";
 import DynamicFaq from "@/components/faq/DynamicFaq";
 interface Section {
   id: string;
@@ -20,9 +20,9 @@ export default function Page() {
   const pathname = usePathname();
 
   const getTitle = (): { title: string; des: string; param?: string } => {
-    for (const item of guides as Guide[]) {
+    for (const item of apiReference as Guide[]) {
       for (const secs of item.sections) {
-        if (pathname === `/docs/api-reference/${secs.id}`) {
+        if (pathname.startsWith(`/docs/api-reference/${secs.id}`)) {
           return { title: secs.title, param: secs.id, des: secs.description };
         }
       }

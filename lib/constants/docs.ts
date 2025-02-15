@@ -30,6 +30,8 @@ interface userGuides {
 
 const href = "/docs/api";
 
+// api reference base url
+const hrefApi = "/docs/api-reference";
 // api reference guides
 export const guides: Guide[] = [
   {
@@ -163,10 +165,6 @@ export const guides: Guide[] = [
   },
 ];
 
-
-
-
-
 // user guides
 
 export const userGuides: userGuides[] = [
@@ -233,6 +231,12 @@ export const userGuides: userGuides[] = [
         href: "",
         searchParams: [],
       },
+      {
+        id: "advance-concepts",
+        title: "Advanced Guides",
+        href: "",
+        searchParams: [],
+      },
     ],
   },
   {
@@ -288,4 +292,245 @@ export const userGuides: userGuides[] = [
       },
     ],
   },
+];
+
+// main api reference
+interface endPointProps {
+  id: string;
+  keywords: [];
+  title: string;
+  href: string;
+}
+interface sectionProps {
+  id: string;
+  title: string;
+  href: string;
+  sections?: endPointProps[];
+}
+interface apiREfprops {
+  title: string;
+  sections: sectionProps[];
+  id: string;
+}
+
+export const apiReference: apiREfprops[] = [
+  {
+    title: "API Reference",
+    id: "reference",
+    sections: [
+      {
+        id: "introduction",
+        title: "Introduction",
+        href: "",
+      },
+      {
+        id: "authentication",
+        title: "Authentication",
+        href: "",
+      },
+      {
+        id: "streaming",
+        title: "Streaming",
+        href: "",
+      },
+      {
+        id: "sdk",
+        title: "SDK & Libraries",
+        href: "",
+      },
+    ],
+  },
+  {
+    title: "Endpoints",
+    id: "endpoints",
+    sections: [
+      {
+        id: "chat",
+        title: "Chat",
+        href: "/docs/api-reference",
+        sections: [
+          {
+            id: "chat",
+            title: "Completion",
+            keywords: [],
+            href: `${hrefApi}/chat`,
+          },
+          {
+            id: "search",
+            title: "Search",
+            keywords: [],
+            href: `${hrefApi}/search`,
+          },
+          {
+            id: "comparison",
+            title: "Comparison",
+            keywords: [],
+            href: `${hrefApi}/comparison`,
+          },
+          {
+            id: "summary",
+            title: "Summary",
+            keywords: [],
+            href: `${hrefApi}/summary`,
+          },
+          {
+            id: "combination",
+            title: "Combination",
+            keywords: [],
+            href: `${hrefApi}/combination`,
+          },
+        ],
+      },
+      {
+        id: "image-generation",
+        title: "Image Generation",
+        href: "",
+        sections: [
+          {
+            id: "single-image",
+            title: "Single Image Generation",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "batch-processing",
+            title: "Batch Processing",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "inpainting",
+            title: "Inpainting & Editing",
+            keywords: [],
+            href: "",
+          },
+        ],
+      },
+      {
+        id: "video-generation",
+        title: "Video Generation",
+        href: "",
+        sections: [
+          {
+            id: "short-videos",
+            title: "Short Videos",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "high-resolution",
+            title: "High-Resolution Generation",
+            keywords: [],
+            href: "",
+          },
+        ],
+      },
+      {
+        id: "audio-generation",
+        title: "Audio Generation",
+        href: "",
+        sections: [
+          {
+            id: "text-to-speech",
+            title: "Text-to-Speech",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "music-generation",
+            title: "Music Generation",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "voice-cloning",
+            title: "Voice Cloning",
+            keywords: [],
+            href: "",
+          },
+        ],
+      },
+      {
+        id: "multi-modal",
+        title: "Multi-Modal Processing",
+        href: "",
+        sections: [
+          {
+            id: "text-to-image",
+            title: "Text to Image",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "text-to-video",
+            title: "Text to Video",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "image-to-text",
+            title: "Image to Text",
+            keywords: [],
+            href: "",
+          },
+          {
+            id: "speech-to-text",
+            title: "Speech to Text",
+            keywords: [],
+            href: "",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "files",
+    title: "Files",
+    sections: [
+      {
+        id: "upload",
+        title: "Upload",
+        href: "",
+      },
+      {
+        id: "management",
+        title: "File Management",
+        href: "",
+      },
+      {
+        id: "storage",
+        title: "Storage & Retrieval",
+        href: "",
+      },
+    ],
+  },
+  {
+    id: "analytics",
+    title: "Analytics & Monitoring",
+    sections: [
+      {
+        id: "usage-metrics",
+        title: "Usage Metrics",
+        href: "",
+      },
+      {
+        id: "performance-monitoring",
+        title: "Performance Monitoring",
+        href: "",
+      },
+      {
+        id: "logs",
+        title: "API Logs",
+        href: "",
+      },
+    ],
+  },
+];
+
+export const apiEndPoints = [
+  "chat",
+  "search",
+  "comparison",
+  "summary",
+  "combination",
 ];

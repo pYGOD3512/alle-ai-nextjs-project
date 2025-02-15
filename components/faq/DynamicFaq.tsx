@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import { FC } from "react";
+import Introduction from "../docs/api-reference/introduction";
 
 // available faq pages
 const faqComponents = {
@@ -39,9 +40,11 @@ const faqComponents = {
     () => import("@/components/faq/others/models-selection")
   ),
   chat: dynamic(() => import("@/components/docs/user-guides/text-generation")),
-  audio: dynamic(() => import("@/components/docs/user-guides/text-generation")),
-  video: dynamic(() => import("@/components/docs/user-guides/text-generation")),
-  image: dynamic(() => import("@/components/docs/user-guides/image-generation")),
+  audio: dynamic(() => import("@/components/docs/user-guides/audioGeneration")),
+  video: dynamic(() => import("@/components/docs/user-guides/videoGeneration")),
+  image: dynamic(
+    () => import("@/components/docs/user-guides/image-generation")
+  ),
   history: dynamic(() => import("@/components/docs/user-guides/History")),
   //api reference  pages
   overview: dynamic(() => import("@/components/docs/user-guides/Overview")),
@@ -76,6 +79,12 @@ const faqComponents = {
     () => import("@/components/docs/user-guides/use-platform")
   ),
   models: dynamic(() => import("@/components/docs/reference/models")),
+
+  // main api reference
+  introduction: dynamic(
+    () => import("@/components/docs/api-reference/introduction")
+  ),
+  endpoints: dynamic(() => import("@/components/docs/api-reference/endpoints")),
 };
 
 type FaqName = keyof typeof faqComponents;

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react"; // Import Lucide icons
+
 const faqData = [
   {
     question: "AI response delay",
@@ -27,22 +28,42 @@ const faqData = [
     answer: "Close unnecessary applications running in the background.",
   },
 ];
+
+const readNextData = [
+  {
+    title: "Image Generation",
+    href: "/docs/user-guides/image",
+    description: "Learn how to create stunning images using our AI tools.",
+  },
+  {
+    title: "Video Generation",
+    href: "/docs/user-guides/video",
+    description: "Explore the process of generating videos with AI assistance.",
+  },
+  {
+    title: "Understanding AI models",
+    href: "/docs/user-guides/models",
+    description:
+      "Gain a deeper understanding of the AI models powering our platform.",
+  },
+];
 const handleContactSupport = () => {
   const email = "support@alle.com";
   const subject = "Support Request"; // Optional: You can customize the subject
   const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
   window.location.href = mailtoLink;
 };
+
 const TextGenerationPlatform = () => {
   const { resolvedTheme } = useTheme();
- const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
- const toggleAnswer = (index: number) => {
-   setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
+  const toggleAnswer = (index: number) => {
+    setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
 
- };
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div></div>
       <h1 className="text-3xl mb-4 font-semibold">
         A Quick Tour of the Text Generation Interface
@@ -56,12 +77,14 @@ const TextGenerationPlatform = () => {
         distinct strengths of each model.`}
       </p>
       {/* Video Walkthrough Placeholder */}
-      <aside className="mb-8">
-        <iframe
-          src="https://scribehow.com/embed/Accessing_GPT-4o_Chat_and_Saving_Summary__NQZpM_PXQ6mfOV17aHIq2A?as=video"
-          width="70%"
-          height="400"
-        ></iframe>
+      <aside id="walkthrough" className="mb-8 flex justify-center">
+        <div className="w-full max-w-4xl">
+          <iframe
+            src="https://scribehow.com/embed/Accessing_GPT-4o_Chat_and_Saving_Summary__NQZpM_PXQ6mfOV17aHIq2A?as=video"
+            width="100%"
+            height="400"
+          ></iframe>
+        </div>
       </aside>
 
       {/* Using the Text Generation Page */}
@@ -290,12 +313,14 @@ const TextGenerationPlatform = () => {
             4. Summarization Feature
           </h3>
           {/* Video Walkthrough Placeholder */}
-          <aside className="mb-5">
-            <iframe
-              src="https://scribehow.com/embed/Accessing_GPT-4o_Chat_and_Saving_Summary__NQZpM_PXQ6mfOV17aHIq2A?as=video"
-              width="70%"
-              height="400"
-            ></iframe>
+          <aside className="mb-5 flex justify-center">
+            <div className="w-full max-w-4xl">
+              <iframe
+                src="https://scribehow.com/embed/Accessing_GPT-4o_Chat_and_Saving_Summary__NQZpM_PXQ6mfOV17aHIq2A?as=video"
+                width="100%"
+                height="400"
+              ></iframe>
+            </div>
           </aside>
         </div>
         <div className="p-3">
@@ -447,27 +472,47 @@ const TextGenerationPlatform = () => {
             ))}
           </ul>
         </div>
+      </section>
 
-        {/* Contact Support */}
-        <div>
-          <h3 className="text-xl font-semibold mb-2"> Contact Support</h3>
-          <p className="text-muted-foreground">
-            For further assistance, visit our &nbsp;
-            <span className="text-blue-600">
-              <Link target="_blank" href={"/collection"}>Help Center</Link>
-            </span>{" "}
-            or contact customer support at{" "}
-            <span>
-              <button
-                onClick={handleContactSupport}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              >
-                support@alle-ai.com
-              </button>
-            </span>
-          </p>
+      {/* What to Read Next Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {readNextData.map((item, index) => (
+            <Link
+              key={index}
+              href={item.href}
+              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+            >
+              <h3 className="font-medium">{item.title}</h3>
+              <p className="text-sm text-muted-foreground mt-2">
+               {item.description}
+              </p>
+            </Link>
+          ))}
         </div>
       </section>
+      {/* Contact Support */}
+      <div>
+        <h3 className="text-xl font-semibold mb-2"> Contact Support</h3>
+        <p className="text-muted-foreground">
+          For further assistance, visit our &nbsp;
+          <span className="text-blue-600">
+            <Link target="_blank" href={"/collection"}>
+              Help Center
+            </Link>
+          </span>{" "}
+          or contact customer support at{" "}
+          <span>
+            <button
+              onClick={handleContactSupport}
+              className="  text-blue-600 rounded-lg hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              support@alle-ai.com
+            </button>
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

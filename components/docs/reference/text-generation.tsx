@@ -1,21 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Copy, Info, CheckCircle2 } from "lucide-react";
 import { models } from "@/lib/models";
 import type { ModelDetails } from "@/lib/types";
-import Prism from "prismjs";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-tomorrow.css";
-import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
+import RenderCode from "@/components/RenderCode";
 
 // Static data
 const suggestions = [
-  { title: "Image Generation", href: "/image-generation" },
-  { title: "Audio Generation", href: "/audio-generation" },
-  { title: "Video Generation", href: "/video-generation" },
+  {
+    title: "Image Generation",
+    href: "/image-generation",
+    description:
+      "Generate images from text prompts or other input using our powerful API.  Create stunning visuals for your applications, marketing materials, or creative projects by making simple API calls.",
+  },
+  {
+    title: "Audio Generation",
+    href: "/audio-generation",
+    description:
+      "Create realistic or stylized audio using our API.  Generate speech, music, sound effects, and more programmatically. Integrate audio creation seamlessly into your workflows with easy-to-use API calls.",
+  },
+  {
+    title: "Video Generation",
+    href: "/video-generation",
+    description:
+      "Generate videos from text, images, or other media with our API.  Automate video production, create dynamic content, and personalize video experiences by leveraging our API's video generation capabilities through simple API calls.",
+  },
 ];
 
 const faqs = [
@@ -48,10 +60,8 @@ export default function TextGenerationDocs() {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   // Example code for Python
-  const exampleCodePython = (modelNames: string[]) => (
-    <pre className="language-python bg-gray-900 text-white p-4 rounded-md">
-      <code>
-        {`import alleai
+  const exampleCodePython = (modelNames: string[]) => `
+import alleai
 
 client = alleai.Client(api_key="[YOUR API KEY HERE]")
 
@@ -78,16 +88,12 @@ response = client.generate_text(
 # Access response metadata
 print(f"Generation time: {response.metadata.generation_time}s")
 print(f"Models used: {response.metadata.models}")
-print(f"Total cost: {response.metadata.cost} credits")`}
-      </code>
-    </pre>
-  );
+print(f"Total cost: {response.metadata.cost} credits")
+`;
 
   // Example code for JavaScript
-  const exampleCodeJS = (modelNames: string[]) => (
-    <pre className="language-javascript bg-gray-900 text-white p-4 rounded-md">
-      <code>
-        {`const alleai = require('alleai');
+  const exampleCodeJS = (modelNames: string[]) => `
+const alleai = require('alleai');
 
 const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
 
@@ -121,14 +127,8 @@ async function generateText() {
   }
 }
 
-generateText();`}
-      </code>
-    </pre>
-  );
-
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [activeTab]);
+generateText();
+`;
 
   return (
     <div className="pb-16 w-full max-w-[100%] pr-4">
@@ -255,17 +255,17 @@ generateText();`}
             </TabsList>
             <TabsContent value="python">
               <div className="relative rounded-md">
-                {exampleCodePython(selectedModels)}
+                <RenderCode
+                  code={exampleCodePython(selectedModels)}
+                  language="python"
+                />
                 <Button
                   className="absolute top-2 right-2"
                   variant="ghost"
                   onClick={() => {
-                    const codeElement = document.querySelector(
-                      "pre.language-python code"
+                    navigator.clipboard.writeText(
+                      exampleCodePython(selectedModels)
                     );
-                    if (codeElement?.textContent) {
-                      navigator.clipboard.writeText(codeElement.textContent);
-                    }
                   }}
                 >
                   <Copy size={16} />
@@ -274,17 +274,17 @@ generateText();`}
             </TabsContent>
             <TabsContent value="javascript">
               <div className="relative rounded-md">
-                {exampleCodeJS(selectedModels)}
+                <RenderCode
+                  code={exampleCodeJS(selectedModels)}
+                  language="javascript"
+                />
                 <Button
                   className="absolute top-2 right-2"
                   variant="ghost"
                   onClick={() => {
-                    const codeElement = document.querySelector(
-                      "pre.language-javascript code"
+                    navigator.clipboard.writeText(
+                      exampleCodeJS(selectedModels)
                     );
-                    if (codeElement?.textContent) {
-                      navigator.clipboard.writeText(codeElement.textContent);
-                    }
                   }}
                 >
                   <Copy size={16} />
@@ -348,21 +348,23 @@ generateText();`}
         </div>
 
         {/* What to Read Next Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">What to Read Next</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {suggestions.map((suggestion, index) => (
-              <Link key={index} href={suggestion.href}>
-                <div className="block p-4 bg-black text-white rounded-lg shadow-md dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-zinc-300 transition duration-200">
-                  <div className="flex items-center justify-between">
-                    <span>{suggestion.title}</span>
-                    <ChevronRight className="text-current" />
-                  </div>
-                </div>
+        <section className="bg-background">
+          <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {suggestions.map((item, index) => (
+              <Link
+                key={index}
+                href={item.href}
+                className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <h3 className="font-medium">{item.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {item.description}
+                </p>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

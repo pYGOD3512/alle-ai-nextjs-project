@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
-  Check,
-  Copy,
   MessageCircle,
   Image,
   FileAudio,
@@ -11,7 +9,8 @@ import {
   Clock,
   TvMinimalPlay,
 } from "lucide-react";
-import Prism from "prismjs";
+import RenderCode from "@/components/RenderCode";
+
 import "prismjs/themes/prism-tomorrow.css";
 import "prismjs/components/prism-python";
 import "prismjs/components/prism-javascript";
@@ -59,42 +58,11 @@ const nextSteps = [
   },
 ];
 
-const CodeBlock = ({ code, language }) => {
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="relative">
-      <button
-        onClick={copyToClipboard}
-        className="absolute right-2 top-2 p-2 rounded-md hover:bg-gray-700 transition-colors"
-      >
-        {copied ? (
-          <Check className="w-4 h-4 text-green-500" />
-        ) : (
-          <Copy className="w-4 h-4 text-gray-400" />
-        )}
-      </button>
-      <pre className="mt-2">
-        <code className={`language-${language}`}>{code}</code>
-      </pre>
-    </div>
-  );
-};
-
 export default function Quickstart() {
   const [installToggle, setInstallToggle] = useState("python");
   const [apiToggle, setApiToggle] = useState("python");
 
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [installToggle, apiToggle]);
-
+  
   const CodeToggle = ({ value, onChange }) => {
     return (
       <ToggleGroup
@@ -181,7 +149,7 @@ client.generateText({ prompt: 'Hello, world!' })
         <div className="mb-5">
           <CodeToggle value={installToggle} onChange={setInstallToggle} />
         </div>
-        <CodeBlock
+        <RenderCode
           code={installCommands[installToggle]}
           language={installToggle}
         />
@@ -198,7 +166,7 @@ client.generateText({ prompt: 'Hello, world!' })
         <div className="mb-5">
           <CodeToggle value={apiToggle} onChange={setApiToggle} />
         </div>
-        <CodeBlock code={apiCode[apiToggle]} language={apiToggle} />
+        <RenderCode code={apiCode[apiToggle]} language={apiToggle} />
       </section>
 
       <section className="mb-6">

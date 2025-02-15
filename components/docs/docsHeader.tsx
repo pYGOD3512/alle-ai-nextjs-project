@@ -15,7 +15,7 @@ export function DocsHeader() {
     {
       name: "API Reference",
       href: "/docs/api-reference",
-      pageOne: "quickstart",
+      pageOne: "introduction",
     },
     { name: "Discussions", href: "/discussions" },
   ];
