@@ -65,7 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="mt-20">
           <GreetingMessage
             options={options}
-            username="Pascal"
+            // username="Pascal"
             handlePressed={handleClicked}
             questionText="ready to create something amazing today?"
           />

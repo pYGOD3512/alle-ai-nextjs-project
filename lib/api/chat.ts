@@ -2,6 +2,7 @@ import api from './axios';
 
 interface CreateConversationResponse {
   session: string;
+  title: string;
 }
 
 interface CreatePromptResponse {
@@ -22,10 +23,37 @@ interface GenerateResponseParams {
 }
 
 interface GenerateResponseResult {
-  success: boolean;
-  response_id?: string;
-  content?: string;
-  error?: string;
+  status: boolean;
+  message: string;
+  data: {
+    id: number;
+    model_uid: string;
+    response: string;
+    model_plan: string;
+    input_cost: string;
+    // ... any other fields from the response
+  };
+}
+
+interface CreatePromptParams {
+  conversation: string;
+  prompt: string;
+  position: [number, number];
+  input_content?: {
+    uploaded_files: Array<{
+      file_name: string;
+      file_size: string;
+      file_type: string;
+      file_content: string;
+    }>;
+  };
+}
+
+export type LikeState = 'liked' | 'disliked' | 'none';
+
+interface LikeStateResponse {
+  status: boolean;
+  message: string;
 }
 
 export const chatApi = {
@@ -35,6 +63,7 @@ export const chatApi = {
         models,
         type
       });
+      console.log('Response from createConversation:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating conversation:', error);
@@ -42,13 +71,19 @@ export const chatApi = {
     }
   },
 
-  createPrompt: async (conversation: string, prompt: string): Promise<CreatePromptResponse> => {
+  createPrompt: async (
+    conversation: string, 
+    prompt: string,
+    options?: { input_content?: CreatePromptParams['input_content'] }
+  ): Promise<CreatePromptResponse> => {
     try {
       const response = await api.post<CreatePromptResponse>('/create/prompt', {
         conversation,
         prompt,
-        position: [0,0]
+        position: [0, 0],
+        ...(options?.input_content && { input_content: options.input_content })
       });
+      console.log('Response from createPrompt:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating prompt:', error);
@@ -63,7 +98,7 @@ export const chatApi = {
         model_instance: model_uid,
         active: active
       });
-
+      console.log('Response from toggleModelInstance:', response.data);
       // Return the response data directly since we just need to know if it was successful
       return {
         status: response.data.status,
@@ -84,10 +119,25 @@ export const chatApi = {
         prompt: params.prompt,
         prompt_response: params.prompt_response
       });
-      
+      console.log('Response from generateResponse:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error generating response:', error);
+      throw error;
+    }
+  },
+
+  updateLikeState: async (responseId: string, state: LikeState): Promise<LikeStateResponse> => {
+    console.log('Updating like state for response:', responseId, 'to state:', state);
+    try {
+      const response = await api.post<LikeStateResponse>('/like-state', {
+        response: responseId,
+        state: state
+      });
+      console.log('Response from updateLikeState:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating like state:', error);
       throw error;
     }
   }

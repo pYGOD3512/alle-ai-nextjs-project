@@ -47,7 +47,7 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
   return (
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
-        <Card className="flex items-center gap-3 p-3 rounded-2xl bg-backgroundSecondary">
+        <Card className="flex items-start gap-3 p-3 rounded-2xl bg-backgroundSecondary">
           <div className="hidden sm:flex w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <Image
               src={sender === 'user' 
@@ -66,7 +66,7 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
                   ref={textareaRef}
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full p-3 bg-backgroundSecondary rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
+                  className="w-full p-1 bg-backgroundSecondary rounded-lg text-sm focus:outline-none bg-[#2C2C2C] resize-none min-h-[40px]"
                   placeholder="Edit message..."
                 />
               </div>

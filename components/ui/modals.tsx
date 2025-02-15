@@ -8,10 +8,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  CHAT_MODELS,
-  IMAGE_MODELS,
-  AUDIO_MODELS,
-  VIDEO_MODELS,
   socialMediaOptions,
   transactions,
   modelUsageData,
@@ -175,8 +171,12 @@ import { authApi } from "@/lib/api/auth";
 import { modelsApi, Model } from '@/lib/api/models';
 
 import { useModelsStore } from '@/stores/models';
-import { useSidebarStore, useSelectedModelsStore, useHistoryStore, useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, useProjectStore, ProjectFile } from "@/stores";
+import { useSidebarStore, useSelectedModelsStore, useHistoryStore, 
+  useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, 
+  useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, 
+  useProjectStore, ProjectFile } from "@/stores";
 import { LogoLoader } from "../features/AlleAILoader";
+import { HistoryItem } from "@/lib/api/history";
 
 interface ModalProps {
   isOpen: boolean;
@@ -2204,12 +2204,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
 }
 
 export function UserProfileModal({ isOpen, onClose }: ModalProps) {
-  const [firstName, setFirstName] = React.useState("Pascal");
-  const [lastName, setLastName] = React.useState("Osei-Wusu");
-  const [email, setEmail] = React.useState("pascal@alle-ai.com");
+  const { user, plan } = useAuthStore() ;
   const [profilePhoto, setProfilePhoto] = React.useState("/user.jpg");
   const [isEditing, setIsEditing] = React.useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
+
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -2228,19 +2227,19 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
             <div className="flex flex-col items-center w-full gap-2">
               <div className="relative">
                 <Image
-                  src={profilePhoto}
+                  src={user?.photo_url || "/user.jpg"}
                   alt="Profile"
                   className="h-16 w-16 sm:w-20 sm:h-20 rounded-full"
                   width={20}
                   height={20}
                 />
                 <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                  <Badge variant="default">Free</Badge>
+                  <Badge variant="default">{plan}</Badge>
                 </div>
               </div>
               <div className="text-center">
-                <DialogTitle className="text-md sm:text-xl">{firstName} {lastName}</DialogTitle>
-                <p className="text-xs sm:text-sm text-muted-foreground">{email}</p>
+                <DialogTitle className="text-md sm:text-xl">{user?.first_name} {user?.last_name}</DialogTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
             <div className="absolute right-4 top-4 flex gap-2">
@@ -2275,8 +2274,8 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">First name</label>
                     <Input
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      value={user?.first_name}
+                      onChange={(e) => console.log(e.target.value)}
                       placeholder="First name"
                       disabled={!isEditing}
                     />
@@ -2284,8 +2283,8 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Last name</label>
                     <Input
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      value={user?.last_name}
+                      onChange={(e) => console.log(e.target.value)}
                       placeholder="Last name"
                       disabled={!isEditing}
                     />
@@ -2311,7 +2310,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
             )}
 
             <div className="flex justify-between gap-2 pt-4 border-t">
-              <Button className='p-2 sm:p-3 text-xs sm:text-sm border-none text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' variant="outline" onClick={() => {
+              <Button className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' variant="outline" onClick={() => {
                 setPlansModalOpen(true);
                 onClose();
                 }}>
@@ -3056,10 +3055,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "oldest" | "az" | "za">("recent");
 
-  const formatTimeDistance = (timestamp: Date | string) => {
+  const formatTimeDistance = (item: HistoryItem) => {
     try {
-      const date = new Date(timestamp);
-      // Check if date is valid
+      const date = new Date(item.created_at);
       if (isNaN(date.getTime())) {
         return 'Invalid date';
       }
@@ -3077,27 +3075,21 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
     )
     .sort((a, b) => {
       try {
-        const dateA = new Date(a.timestamp);
-        const dateB = new Date(b.timestamp);
-
-        // Validate dates
-        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-          return 0; // Keep original order if dates are invalid
-        }
-
         switch (sortBy) {
           case "oldest":
-            return dateA.getTime() - dateB.getTime();
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          case "recent":
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           case "az":
             return a.title.localeCompare(b.title);
           case "za":
             return b.title.localeCompare(a.title);
-          default: // "recent"
-            return dateB.getTime() - dateA.getTime();
+          default:
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         }
       } catch (error) {
         console.error('Error sorting history:', error);
-        return 0; // Keep original order if error occurs
+        return 0;
       }
     });
 
@@ -3150,7 +3142,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {formatTimeDistance(item.timestamp)}
+                        {/* {formatTimeDistance(item)} */}
+                        created at {item.created_at}
+                        updated at {item.updated_at}
                       </div>
                     </div>
                   </div>
@@ -4688,7 +4682,7 @@ export function NotificationModal({
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-4 w-4 mr-2" />
-              {format(notification.timestamp, 'PPpp')}
+              {format(notification.timestamp, '')}
             </div>
             
             {notification.actionUrl && (

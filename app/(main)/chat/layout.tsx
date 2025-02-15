@@ -2,11 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { ChatInput } from "@/components/features/ChatInput";
-import { useSidebarStore, useContentStore, useWebSearchStore } from "@/stores";
+import { useSidebarStore, useContentStore, useWebSearchStore, useHistoryStore } from "@/stores";
 import { useRouter, usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { SquareTerminal, Lightbulb, Code, Bug, Wrench, Sparkles, NotebookPen, Brain  } from "lucide-react";
 import { chatApi } from '@/lib/api/chat';
+import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
 
@@ -35,17 +36,25 @@ const options = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { setContent } = useContentStore();
   const router = useRouter();
   const pathname = usePathname();
   const { setIsWebSearch } = useWebSearchStore();
   const { isOpen } = useSidebarStore();
-  const [isLoading, setIsLoading] = useState(false);
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const { setConversationId, setPromptId } = useConversationStore();
+  const { addHistory, updateHistoryTitle } = useHistoryStore();
 
-  const handleSend = async () => {
+  const handleSend = async (fileContent?: {
+    uploaded_files: Array<{
+      file_name: string;
+      file_size: string;
+      file_type: string;
+      file_content: string;
+    }>;
+  }) => {
     if (!input.trim()) return;
     
     setIsLoading(true);
@@ -54,37 +63,40 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
-
-      const promptResponse = await chatApi.createPrompt(conversationId, input);
-      const promptId = promptResponse.id;
-
-      // Store conversation and prompt IDs in the store
-      setConversationId(conversationId);
-      setPromptId(promptId);
       
+      // Add all required properties when adding to history
+      addHistory({
+        id: conversationId,
+        session: conversationId,
+        title: conversationResponse.title,
+        type: 'chat',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      const promptResponse = await chatApi.createPrompt(
+        conversationId, 
+        input,
+        fileContent ? {
+          input_content: fileContent
+        } : undefined
+      );
+
+      // Get actual title based on prompt
+      historyApi.getConversationTitle(conversationId, input)
+        .then(response => {
+          updateHistoryTitle(conversationId, response.title);
+        })
+        .catch(error => {
+          console.error('Error getting conversation title:', error);
+        });
+
+      // Continue with the rest of your logic
+      setConversationId(conversationId);
+      setPromptId(promptResponse.id);
       setContent("chat", "input", input);
       router.push(`/chat/res/${conversationId}`);
       setInput("");
-
-      const activeModels = allSelectedModels.filter(
-        modelId => !inactiveModels.includes(modelId)
-      );
-
-      // Start generations
-      activeModels.forEach(modelId => {
-        chatApi.generateResponse({
-            conversation: conversationId,
-            model: modelId,
-            is_new: true,
-          prompt: promptId
-        })
-        .then(response => {
-          console.log(`Response from model ${modelId}:`, response);
-        })
-        .catch(error => {
-          console.error(`Error from model ${modelId}:`, error);
-        });
-      });
 
     } catch (error) {
       console.error('Error in chat flow:', error);
@@ -108,7 +120,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col">
           <div className="flex-1 flex flex-col justify-center items-center gap-8">
             <GreetingMessage
-              username="Pascal"
               options={options}
               handlePressed={handleClicked}
             />

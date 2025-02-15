@@ -220,11 +220,6 @@ export function ProjectView() {
       <div className="flex-1 flex flex-col space-y-6">
         {/* Chat History Section */}
         <div className="flex-1 space-y-4">
-          {/* <div className="flex items-center gap-2 mb-4">
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            <h2 className="font-medium">Chats</h2>
-          </div> */}
-
           {currentProject.histories && currentProject.histories.length > 0 ? (
             <div className="space-y-3">
               {/* Your existing chat history items */}
@@ -241,12 +236,9 @@ export function ProjectView() {
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="font-medium truncate">{chat.title}</h3>
                         <span className="text-xs text-muted-foreground shrink-0">
-                          {chat.timestamp.toLocaleDateString()}
+                          {chat.created_at}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {chat.message}
-                      </p>
                     </div>
                   </div>
                 </div>

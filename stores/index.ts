@@ -8,6 +8,7 @@ import { driveService } from '@/lib/services/driveServices';
 
 import { CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS, chatHistory, imageHistory, audioHistory, videoHistory } from '@/lib/constants';
 import { useModelsStore } from "./models";
+import { HistoryItem } from '@/lib/api/history';
 
 type ContentKey = "input" | "voice" | "attachment";
 type ContentType = "chat" | "image" | "audio" | "video";
@@ -247,14 +248,15 @@ export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
   )
 );
 
-interface HistoryItem {
-  id: string;
-  title: string;
-  session: string;
-  message?: string;
-  type: 'chat' | 'image' | 'audio' | 'video';
-  timestamp: Date;
-}
+// interface HistoryItem {
+//   created_at: string | number | Date;
+//   id: any;
+//   title: string;
+//   session: string;
+//   message?: string;
+//   type: 'chat' | 'image' | 'audio' | 'video';
+//   timestamp: Date;
+// }
 
 interface HistoryStore {
   history: HistoryItem[];
@@ -262,11 +264,12 @@ interface HistoryStore {
   currentPage: number;
   hasMore: boolean;
   error: string | null;
-  setHistory: (items: HistoryItem[]) => void;
-  addHistory: (item: Omit<HistoryItem, 'id' | 'timestamp'>) => void;
+  setHistory: (history: HistoryItem[]) => void;
+  addHistory: (item: HistoryItem) => void;
   removeHistory: (id: string) => void;
   renameHistory: (id: string, newTitle: string) => void;
-  getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
+  updateHistoryTitle: (id: string, newTitle: string) => void;
+  getHistoryByType: (type: 'chat' | 'image' | 'audio' | 'video') => HistoryItem[];
   setLoading: (status: boolean) => void;
   setError: (error: string | null) => void;
   setPage: (page: number) => void;
@@ -280,7 +283,7 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
   currentPage: 1,
   hasMore: true,
   error: null,
-  setHistory: (items) => set({ history: items }),
+  setHistory: (history) => set({ history }),
   addHistory: (item) => set((state) => ({
     history: [
       {
@@ -299,6 +302,12 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       item.id === id ? { ...item, title: newTitle } : item
     ),
   })),
+  updateHistoryTitle: (id, newTitle) => 
+    set((state) => ({
+      history: state.history.map((item) => 
+        item.session === id ? { ...item, title: newTitle } : item
+      )
+    })),
   getHistoryByType: (type) => {
     return get().history.filter((item) => item.type === type);
   },

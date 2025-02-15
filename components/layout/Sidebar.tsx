@@ -18,7 +18,7 @@ import Image from "next/image";
 import {
   sidebarMenuItems,
 } from "@/lib/constants";
-import { useSidebarStore, useHistoryStore, useProjectStore, Project } from "@/stores";
+import { useSidebarStore, useHistoryStore, useProjectStore, Project, useAuthStore } from "@/stores";
 import {
   Tooltip,
   TooltipContent,
@@ -62,6 +62,7 @@ export function Sidebar() {
   const [isMoreOpen, setIsMoreOpen] = useState(true);
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
+  const { user, plan } = useAuthStore();
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -373,26 +374,33 @@ export function Sidebar() {
                     </div>
                   ) : currentHistory.length > 0 ? (
                     currentHistory.map((item) => (
-                      <ContextMenu key={item.id}>
+                      <ContextMenu key={item.session}>
                         <ContextMenuTrigger>
-                          <div 
-                            className="group relative flex items-center px-2 py-1.5 hover:bg-secondary/80 rounded-md"
-                            onClick={() => handleHistoryItemClick(item.id)}
+                          <div
+                            className={`group flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer ${
+                              editingId === item.session ? "bg-secondary" : "hover:bg-secondary/80"
+                            }`}
+                            onClick={() => {
+                              router.push(`/${currentType}/res/${item.session}`);
+                              handleHistoryItemClick(item.session);
+                            }}
                           >
-                            {editingId === item.id ? (
-                              <Input
-                                value={editingTitle}
-                                onChange={(e) => setEditingTitle(e.target.value)}
-                                onBlur={() => handleRenameSubmit(item.id)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleRenameSubmit(item.id);
-                                  if (e.key === 'Escape') setEditingId(null);
-                                }}
-                                autoFocus
-                                className="h-6 text-xs"
-                              />
-                            ) : (
-                              <div className="relative flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              {editingId === item.session ? (
+                                <Input
+                                  value={editingTitle}
+                                  onChange={(e) => setEditingTitle(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      handleRenameSubmit(item.session);
+                                    }
+                                  }}
+                                  onBlur={() => handleRenameSubmit(item.session)}
+                                  autoFocus
+                                  className="h-6 text-xs"
+                                />
+                              ) : (
+                                <div className="relative flex-1 min-w-0">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -413,9 +421,9 @@ export function Sidebar() {
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
-                              </div>
-                            )}
-
+                                </div>
+                              )}
+                            </div>
                             <div className="absolute right-2">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -429,12 +437,12 @@ export function Sidebar() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-[160px]">
-                                  <DropdownMenuItem onClick={() => handleRename(item.id, item.title)}>
+                                  <DropdownMenuItem onClick={() => handleRename(item.session, item.title)}>
                                     <Pencil className="mr-2 h-4 w-4" />
                                     <span>Rename</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem 
-                                    onClick={() => removeItem(item.id)}
+                                    onClick={() => removeItem(item.session)}
                                     className="text-red-500"
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
@@ -446,12 +454,12 @@ export function Sidebar() {
                           </div>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
-                          <ContextMenuItem onClick={() => handleRename(item.id, item.title)}>
+                          <ContextMenuItem onClick={() => handleRename(item.session, item.title)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             <span>Rename</span>
                           </ContextMenuItem>
                           <ContextMenuItem 
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.session)}
                             className="text-red-500"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -498,7 +506,7 @@ export function Sidebar() {
             <div className="flex-shrink-0 p-4 mt-auto">
               <div className="flex items-center gap-3 mb-4">
                 <Image
-                  src="/user.jpg"
+                  src={user?.photo_url || "/user.jpg"}
                   alt="User"
                   width={40}
                   height={40}
@@ -506,11 +514,11 @@ export function Sidebar() {
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <div className="font-medium text-sm">Pascal</div>
-                    <Badge variant="default" className="text-[0.6rem] h-3">Free</Badge>
+                    <div className="font-medium text-sm">{user?.first_name}</div>
+                    <Badge variant="default" className="text-[0.6rem] h-3">{plan || "Plan"}</Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    pascal@alle-ai.com
+                    {user?.email}
                   </div>
                 </div>
               </div>
