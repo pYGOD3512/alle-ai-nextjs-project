@@ -4,11 +4,12 @@ import { persist } from "zustand/middleware";
 import { authApi } from '@/lib/api/auth';
 import { User } from '@/lib/api/auth';
 
+import { HistoryItem } from '@/lib/api/history';
+
 import { driveService } from '@/lib/services/driveServices';
 
 import { CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS, chatHistory, imageHistory, audioHistory, videoHistory } from '@/lib/constants';
 import { useModelsStore } from "./models";
-import { HistoryItem } from '@/lib/api/history';
 
 type ContentKey = "input" | "voice" | "attachment";
 type ContentType = "chat" | "image" | "audio" | "video";
@@ -248,28 +249,18 @@ export const useGeneratedAudioStore = create<GeneratedAudioStore>()(
   )
 );
 
-// interface HistoryItem {
-//   created_at: string | number | Date;
-//   id: any;
-//   title: string;
-//   session: string;
-//   message?: string;
-//   type: 'chat' | 'image' | 'audio' | 'video';
-//   timestamp: Date;
-// }
-
 interface HistoryStore {
   history: HistoryItem[];
   isLoading: boolean;
   currentPage: number;
   hasMore: boolean;
   error: string | null;
-  setHistory: (history: HistoryItem[]) => void;
-  addHistory: (item: HistoryItem) => void;
+  setHistory: (items: HistoryItem[]) => void;
+  addHistory: (item: Omit<HistoryItem, 'id' | 'timestamp'>) => void;
   removeHistory: (id: string) => void;
   renameHistory: (id: string, newTitle: string) => void;
   updateHistoryTitle: (id: string, newTitle: string) => void;
-  getHistoryByType: (type: 'chat' | 'image' | 'audio' | 'video') => HistoryItem[];
+  getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
   setLoading: (status: boolean) => void;
   setError: (error: string | null) => void;
   setPage: (page: number) => void;
@@ -283,7 +274,7 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
   currentPage: 1,
   hasMore: true,
   error: null,
-  setHistory: (history) => set({ history }),
+  setHistory: (items) => set({ history: items }),
   addHistory: (item) => set((state) => ({
     history: [
       {
@@ -630,68 +621,48 @@ export interface ApiKey {
   name: string;
   key: string;
   workspace: string;
-  createdBy: string;
-  email: string;
+  createdBy: string | undefined;
+  email: string | undefined;
   createdAt: string;
   lastUsed: string;
-  cost: string;
+  cost?: string;
   isVisible?: boolean;
   isDisabled?: boolean;
 }
 
 interface ApiKeyStore {
   keys: ApiKey[];
-  addKey: (key: Omit<ApiKey, 'id' | 'key' | 'createdAt' | 'lastUsed' | 'cost'>) => void;
+  addKey: (key: ApiKey) => void;
   removeKey: (id: string) => void;
+  clearKeys: () => void;
   toggleKeyVisibility: (id: string) => void;
-  editKeyName: (id: string, newName: string) => void;
-  toggleKeyStatus: (id: string) => void;
+  toggleKeyStatus: (id: string, isDisabled: boolean) => void;
+  updateKeyName: (id: string, newName: string) => void;
 }
 
-export const useApiKeyStore = create<ApiKeyStore>()(
-  persist(
-    (set) => ({
-      keys: [],
-      addKey: (newKey) => set((state) => ({
-        keys: [...state.keys, {
-          ...newKey,
-          id: generateId(),
-          key: `sk-ant-${generateId()}`,
-          createdAt: new Date().toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
-          }),
-          lastUsed: 'Never',
-          cost: '—',
-          isVisible: false,
-          isDisabled: false
-        }]
-      })),
-      removeKey: (id) => set((state) => ({
-        keys: state.keys.filter(key => key.id !== id)
-      })),
-      toggleKeyVisibility: (id) => set((state) => ({
-        keys: state.keys.map(key => 
-          key.id === id ? { ...key, isVisible: !key.isVisible } : key
-        )
-      })),
-      editKeyName: (id, newName) => set((state) => ({
-        keys: state.keys.map(key => 
-          key.id === id ? { ...key, name: newName } : key
-        )
-      })),
-      toggleKeyStatus: (id) => set((state) => ({
-        keys: state.keys.map(key => 
-          key.id === id ? { ...key, isDisabled: !key.isDisabled } : key
-        )
-      })),
-    }),
-    {
-      name: 'api-keys-storage'
-    }
-  )
-);
+export const useApiKeyStore = create<ApiKeyStore>((set) => ({
+  keys: [],
+  addKey: (key) => set((state) => ({ keys: [...state.keys, key] })),
+  removeKey: (id) => set((state) => ({ 
+    keys: state.keys.filter(key => key.id !== id) 
+  })),
+  clearKeys: () => set({ keys: [] }),
+  toggleKeyVisibility: (id) => set((state) => ({
+    keys: state.keys.map(key => 
+      key.id === id ? { ...key, isVisible: !key.isVisible } : key
+    )
+  })),
+  toggleKeyStatus: (id: string, isDisabled: boolean) => set((state) => ({
+    keys: state.keys.map(key => 
+      key.id === id ? { ...key, isDisabled } : key
+    )
+  })),
+  updateKeyName: (id: string, newName: string) => set((state) => ({
+    keys: state.keys.map(key => 
+      key.id === id ? { ...key, name: newName } : key
+    )
+  })),
+}));
 
 export interface PaymentMethod {
   id: string;
@@ -747,7 +718,7 @@ interface AuthStore {
   isLoading: boolean;
   plan: string | null;
 
-  setAuth: (user: User, token: string, plan?: string | null) => void;
+  setAuth: (user: User, token?: string, plan?: string | null) => void;
   clearAuth: () => void;
   setLoading: (status: boolean) => void;
   setPlan: (plan: string | null) => void;

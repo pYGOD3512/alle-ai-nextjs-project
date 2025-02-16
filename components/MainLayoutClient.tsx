@@ -47,9 +47,9 @@ export function MainLayoutClient({
             {children}
           </div>
           <HelpButton />
-          {pathname === "/" && (
+          {pathname === "/chat" && (
             <FooterText 
-              className={`fixed bottom-0 ${isOpen ? "right-[39%]" : "right-[45%]"} h-6 transition-all duration-300`}
+              className={`fixed bottom-0 ${isOpen ? "right-[40%]" : "right-[45%]"} h-6 transition-all duration-300`}
             />
           )}
         </main>

@@ -70,6 +70,36 @@ export function Header() {
   const [loadingModels, setLoadingModels] = useState<string[]>([]);
   const conversationId = pathname.includes('/chat/res/') ? pathname.split('/').pop() : null;
 
+  const getCurrentType = (): 'chat' | 'image' | 'audio' | 'video' => {
+    if (pathname.startsWith('/image')) return 'image';
+    if (pathname.startsWith('/audio')) return 'audio';
+    if (pathname.startsWith('/video')) return 'video';
+    return 'chat';
+  };
+
+  const currentType = getCurrentType();
+
+  const getSectionStyles = (type: 'chat' | 'image' | 'audio' | 'video') => {
+    switch (type) {
+      case 'image':
+        return {
+          bgColor: 'bg-purple-500',
+        };
+      case 'audio':
+        return {
+          bgColor: 'bg-blue-500',
+        };
+      case 'video':
+        return {
+          bgColor: 'bg-yellow-500',
+        };
+      default:
+        return {
+          bgColor: 'bg-green-500',
+        };
+    }
+  };
+
   const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate } = useSelectedModelsStore(
     (state) => ({
       getSelectedModelNames: state.getSelectedModelNames,
@@ -469,6 +499,7 @@ export function Header() {
                                     checked={model.isActive}
                                     onCheckedChange={() => handleModelToggle(model)}
                                     disabled={loadingModels.includes(model.uid)}
+                                    className={`${model.isActive ? getSectionStyles(currentType).bgColor : ''}`}
                                   />
                                 )}
                               </div>
@@ -521,7 +552,7 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Image
-                  src="/user.jpg"
+                  src={user?.photo_url || "/user.jpg"}
                 alt="User Image"
                 width={35}
                 height={35}

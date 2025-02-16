@@ -7,6 +7,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ModelResponse, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
+import RetryResponse from "./RetryResponse"
 import {
   MODEL_RESPONSES,
   EXAMPLE_SOURCES,
@@ -60,6 +61,17 @@ export function ChatArea() {
   const { isWebSearch } = useWebSearchStore();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [activeSessionId, setActiveSessionId] = useState<string>();
+  const [responseFeedback, setResponseFeedback] = useState<Record<string, 'liked' | 'disliked' | null>>({});
+  const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
+  const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
+  const [activeContents, setActiveContents] = useState<Record<string, {
+    type: 'model' | 'summary';
+    id: string;
+  }>>({});
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
     if (!conversationId || !promptId) return [];
     const initialPrompt = content.chat.input;
@@ -84,6 +96,46 @@ export function ChatArea() {
     }];
   });
 
+
+  useEffect(() => {
+    chatSessions.forEach(session => {
+      // Check if responses exist and at least one is complete
+      const hasCompleteResponse = session.messages[0]?.responses?.some(
+        response => response.status === 'complete'
+      );
+
+      // If there's a complete response but no active content set for this session
+      if (hasCompleteResponse && !activeContents[session.id]) {
+        setActiveContents(prev => ({
+          ...prev,
+          [session.id]: { 
+            type: 'model', 
+            id: session.activeModel 
+          }
+        }));
+      }
+    });
+  }, [chatSessions, activeContents]);
+
+  useEffect(() => {
+    chatSessions.forEach(session => {
+      const allResponsesComplete = session.messages[0]?.responses?.every(
+        response => response.status === 'complete'
+      );
+
+      if (allResponsesComplete && !showSummary[session.id] && !generatingSummary[session.id]) {
+        setGeneratingSummary(prev => ({ ...prev, [session.id]: true }));
+        
+        // Simulate summary generation
+        setTimeout(() => {
+          setGeneratingSummary(prev => ({ ...prev, [session.id]: false }));
+          setShowSummary(prev => ({ ...prev, [session.id]: true }));
+        }, 4000); 
+      }
+    });
+  }, [chatSessions, showSummary, generatingSummary]);
+
+
   // Handle real-time response updates
   useEffect(() => {
     if (!conversationId || !promptId) return;
@@ -94,6 +146,19 @@ export function ChatArea() {
 
     activeModels.forEach(async (modelId) => {
       try {
+        if (isWebSearch) {
+          console.log('Web search is enabled - making web search API call');
+          const webSearchResponse = await chatApi.webSearch({
+            prompt_id: promptId,
+            conversation_id: conversationId,
+            follow_up: false,
+            messages: null
+          });
+          
+          console.log('Web search response received:', webSearchResponse);
+          return; 
+        }
+
         const response = await chatApi.generateResponse({
           conversation: conversationId,
           model: modelId,
@@ -133,7 +198,7 @@ export function ChatArea() {
           })));
         }
       } catch (error) {
-        console.error(`Error generating response for model ${modelId}:`, error);
+        console.error(`Error in ${isWebSearch ? 'web search' : 'regular'} response:`, error);
         // Update error state in UI
         setChatSessions(prev => prev.map(session => ({
           ...session,
@@ -150,7 +215,7 @@ export function ChatArea() {
         })));
       }
     });
-  }, [conversationId, promptId, selectedModels.chat, inactiveModels]);
+  }, [conversationId, promptId, selectedModels.chat, inactiveModels, isWebSearch]);
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -208,41 +273,12 @@ export function ChatArea() {
     }
   };
 
-  const [activeSessionId, setActiveSessionId] = useState<string>();
-  const [responseFeedback, setResponseFeedback] = useState<Record<string, 'liked' | 'disliked' | null>>({});
-  const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
-  const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
-  const [activeContents, setActiveContents] = useState<Record<string, {
-    type: 'model' | 'summary';
-    id: string;
-  }>>({});
-
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
   const handleFeedbackChange = (responseId: string, feedback: 'liked' | 'disliked' | null) => {
     setResponseFeedback(prev => ({
       ...prev,
       [responseId]: feedback
     }));
   };
-
-  useEffect(() => {
-    chatSessions.forEach(session => {
-      const allResponsesComplete = session.messages[0]?.responses?.every(
-        response => response.status === 'complete'
-      );
-
-      if (allResponsesComplete && !showSummary[session.id] && !generatingSummary[session.id]) {
-        setGeneratingSummary(prev => ({ ...prev, [session.id]: true }));
-        
-        // Simulate summary generation
-        setTimeout(() => {
-          setGeneratingSummary(prev => ({ ...prev, [session.id]: false }));
-          setShowSummary(prev => ({ ...prev, [session.id]: true }));
-        }, 4000); 
-      }
-    });
-  }, [chatSessions, showSummary, generatingSummary]);
 
   const handleModelSelect = (modelId: string, sessionId: string) => {
     setActiveContents(prev => ({
@@ -266,25 +302,80 @@ export function ChatArea() {
     })));
   };
 
-  useEffect(() => {
-    chatSessions.forEach(session => {
-      // Check if responses exist and at least one is complete
-      const hasCompleteResponse = session.messages[0]?.responses?.some(
-        response => response.status === 'complete'
-      );
+  const handleRetry = async (sessionId: string, modelId: string, promptId: string) => {
+    // Update the response status to loading
+    setChatSessions(prev => prev.map(session => ({
+      ...session,
+      messages: session.messages.map(msg => ({
+        ...msg,
+        responses: msg.responses.map(resp => 
+          resp.modelId === modelId ? {
+            ...resp,
+            status: 'loading'
+          } : resp
+        )
+      }))
+    })));
 
-      // If there's a complete response but no active content set for this session
-      if (hasCompleteResponse && !activeContents[session.id]) {
-        setActiveContents(prev => ({
-          ...prev,
-          [session.id]: { 
-            type: 'model', 
-            id: session.activeModel 
-          }
-        }));
+    try {
+      // Make the API call to regenerate response
+      const response = await chatApi.generateResponse({
+        conversation: sessionId,
+        model: modelId,
+        is_new: false, // This is a retry, not a new response
+        prompt: promptId
+      });
+
+      if (response.status && response.data) {
+        // Update the response with the new content
+        setChatSessions(prev => prev.map(session => ({
+          ...session,
+          messages: session.messages.map(msg => ({
+            ...msg,
+            responses: msg.responses.map(resp => 
+              resp.modelId === modelId ? {
+                ...resp,
+                id: String(response.data.id),
+                content: response.data.response,
+                status: 'complete'
+              } : resp
+            )
+          }))
+        })));
+      } else {
+        // Handle error state
+        setChatSessions(prev => prev.map(session => ({
+          ...session,
+          messages: session.messages.map(msg => ({
+            ...msg,
+            responses: msg.responses.map(resp => 
+              resp.modelId === modelId ? {
+                ...resp,
+                status: 'error',
+                error: response.message || 'Failed to generate response'
+              } : resp
+            )
+          }))
+        })));
       }
-    });
-  }, [chatSessions, activeContents]);
+    } catch (error) {
+      console.error('Error retrying response:', error);
+      // Update error state in UI
+      setChatSessions(prev => prev.map(session => ({
+        ...session,
+        messages: session.messages.map(msg => ({
+          ...msg,
+          responses: msg.responses.map(resp => 
+            resp.modelId === modelId ? {
+              ...resp,
+              status: 'error',
+              error: 'Failed to generate response'
+            } : resp
+          )
+        }))
+      })));
+    }
+  };
 
   return (
     <RenderPageContent>
@@ -315,6 +406,7 @@ export function ChatArea() {
 
                     const response = session.messages[0].responses?.[index];
                     const isLoading = response?.status === 'loading';
+                    const hasError = response?.status === 'error';
 
                     if (isLoading) {
                       return (
@@ -341,6 +433,16 @@ export function ChatArea() {
                             <Skeleton className="h-2 w-full" />
                           </div>
                         </div>
+                      );
+                    }
+
+                    if (hasError) {
+                      return (
+                        <RetryResponse
+                          key={modelId}
+                          model={model}
+                          onRetry={() => handleRetry(session.id, modelId, session.messages[0].id)}
+                        />
                       );
                     }
 

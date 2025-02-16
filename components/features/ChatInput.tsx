@@ -17,7 +17,7 @@ import { processFile } from '@/lib/fileProcessing';
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FooterText } from "../FooterText";
-import { useSelectedModelsStore } from "@/stores";
+import { useSelectedModelsStore, useWebSearchStore } from "@/stores";
 import { ModelSelectionModal, PromptModal } from "@/components/ui/modals";
 
 declare global {
@@ -55,7 +55,7 @@ export function ChatInput({
 }: ChatInputProps) {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
-  const [isWebSearch, setIsWebSearch] = useState(false);
+  const { isWebSearch, setIsWebSearch } = useWebSearchStore();
   const { selectedModels } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
@@ -369,6 +369,47 @@ export function ChatInput({
     });
   };
 
+    // Determine current content type based on pathname
+    const getCurrentType = (): 'chat' | 'image' | 'audio' | 'video' => {
+      if (pathname.startsWith('/image')) return 'image';
+      if (pathname.startsWith('/audio')) return 'audio';
+      if (pathname.startsWith('/video')) return 'video';
+      return 'chat';
+    };
+  
+    // Here we get the history of the various pages
+    const currentType = getCurrentType();
+  
+    // Add this helper function to get section-specific styles
+    const getSectionStyles = (type: 'chat' | 'image' | 'audio' | 'video') => {
+      switch (type) {
+        case 'image':
+          return {
+            bgColor: 'bg-purple-500/10',
+            hoverBg: 'hover:bg-purple-500/20',
+            iconColor: 'text-purple-500'
+          };
+        case 'audio':
+          return {
+            bgColor: 'bg-blue-500/10',
+            hoverBg: 'hover:bg-blue-500/20',
+            iconColor: 'text-blue-500'
+          };
+        case 'video':
+          return {
+            bgColor: 'bg-yellow-500/10',
+            hoverBg: 'hover:bg-yellow-500/20',
+            iconColor: 'text-yellow-500'
+          };
+        default:
+          return {
+            bgColor: 'bg-green-500/10',
+            hoverBg: 'hover:bg-green-500/20',
+            iconColor: 'text-green-500'
+          };
+      }
+    };
+
   return (
     <>
       <div className="p-2 bg-background/95 backdrop-blur transition-all duration-300">
@@ -423,7 +464,7 @@ export function ChatInput({
                           onClick={handleWebSearchToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.3rem] ${
                             isWebSearch 
-                              ? 'border border-green-500/10 bg-green-500/10 text-green-500 hover:bg-green-500/20' 
+                              ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
                               : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
                           }`}
                         >
@@ -476,7 +517,7 @@ export function ChatInput({
           </div>
         </div>
 
-        {pathname.startsWith("/chat") && (
+        {pathname.startsWith("/chat/res") && (
             <FooterText />
         )}
       </div>

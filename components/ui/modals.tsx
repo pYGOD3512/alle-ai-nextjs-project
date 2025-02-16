@@ -36,7 +36,7 @@ import {
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -122,6 +122,7 @@ import {
   LightbulbIcon,
   FileText, 
   Download,
+  Camera,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -169,6 +170,9 @@ import { useAuth } from "../providers/AuthProvider";
 
 import { authApi } from "@/lib/api/auth";
 import { modelsApi, Model } from '@/lib/api/models';
+import { feedbackApi } from '@/lib/api/feedback';
+import { profileApi } from '@/lib/api/profile';
+import { keysApi } from '@/lib/api/keys';
 
 import { useModelsStore } from '@/stores/models';
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, 
@@ -177,6 +181,7 @@ import { useSidebarStore, useSelectedModelsStore, useHistoryStore,
   useProjectStore, ProjectFile } from "@/stores";
 import { LogoLoader } from "../features/AlleAILoader";
 import { HistoryItem } from "@/lib/api/history";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
 interface ModalProps {
   isOpen: boolean;
@@ -373,11 +378,11 @@ interface PaymentOptionsModalProps {
 }
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
-  const [selectedRating, setSelectedRating] = React.useState<number | null>(
-    null
-  );
+  const [selectedRating, setSelectedRating] = React.useState<number | null>(null);
   const [feedback, setFeedback] = React.useState("");
   const [wantsFutureContact, setWantsFutureContact] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { toast } = useToast();
 
   const emojis = [
     { rating: 1, emoji: "😟" },
@@ -386,6 +391,46 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
     { rating: 4, emoji: "😊" },
     { rating: 5, emoji: "😄" },
   ];
+
+  const handleSubmit = async () => {
+    if (!selectedRating) {
+      toast({
+        title: "Rating Required",
+        description: "Please select a rating before submitting your feedback.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await feedbackApi.submitFeedback({
+        message: feedback,
+        rating: selectedRating,
+        anonymous: wantsFutureContact
+      });
+
+      toast({
+        title: "Thank you!",
+        description: "Your feedback has been submitted successfully.",
+      });
+
+      // Reset form
+      setSelectedRating(null);
+      setFeedback("");
+      setWantsFutureContact(false);
+      onClose();
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -459,12 +504,17 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                // Handle submission logic here
-                onClose();
-              }}
+              onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              Done
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Done'
+              )}
             </Button>
           </div>
         </div>
@@ -2202,18 +2252,102 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     </>
   );
 }
-
 export function UserProfileModal({ isOpen, onClose }: ModalProps) {
-  const { user, plan } = useAuthStore() ;
-  const [profilePhoto, setProfilePhoto] = React.useState("/user.jpg");
+  const { user, token, plan, setAuth } = useAuthStore();
   const [isEditing, setIsEditing] = React.useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstname: user?.first_name || '',
+    lastname: user?.last_name || '',
+    profilePhoto: null as File | null
+  });
 
+  // Update form data when user data changes
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        firstname: user.first_name || '',
+        lastname: user.last_name || ''
+      }));
+    }
+  }, [user]);
 
-  const handleEditToggle = () => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a valid image file (JPEG, PNG, JPG, WEBP, or GIF).",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload an image smaller than 2MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, profilePhoto: file }));
+    }
+  };
+
+  const handleEditToggle = async () => {
     if (isEditing) {
-      // Handle save changes here
-      setIsEditing(false);
+      setIsSubmitting(true);
+      try {
+        const response = await profileApi.updateProfile({
+          firstname: formData.firstname,
+          lastname: formData.lastname,
+          ...(formData.profilePhoto && { profile_photo: formData.profilePhoto })
+        });
+
+        console.log('Profile update response:', response);
+        
+        // Update the auth store with new user data
+        if (response.status && response.user) {
+          setAuth(
+            {
+              ...user!,  // Spread existing user data
+              first_name: response.user.first_name,
+              last_name: response.user.last_name,
+              photo_url: response.user.photo_url
+            },
+            token!,
+            plan
+          );
+        }
+        
+        toast({
+          title: "Success",
+          description: response.message || "Profile updated successfully",
+        });
+        
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Profile update error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update profile",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setIsEditing(true);
     }
@@ -2225,103 +2359,170 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
         <DialogContent className="max-w-sm sm:max-w-lg rounded-md">
           <DialogHeader className="flex flex-row items-center justify-between relative">
             <div className="flex flex-col items-center w-full gap-2">
-              <div className="relative">
-                <Image
-                  src={user?.photo_url || "/user.jpg"}
-                  alt="Profile"
-                  className="h-16 w-16 sm:w-20 sm:h-20 rounded-full"
-                  width={20}
-                  height={20}
-                />
-                <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                  <Badge variant="default">{plan}</Badge>
-                </div>
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  className="relative group"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Avatar className="h-20 w-20 border-2 border-primary/20">
+                    <AvatarImage
+                      src={formData.profilePhoto 
+                        ? URL.createObjectURL(formData.profilePhoto)
+                        : user?.photo_url || "/user.jpg"}
+                      alt="Profile"
+                    />
+                    <AvatarFallback>
+                      {user?.first_name?.[0]}{user?.last_name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isEditing && (
+                    <label 
+                      htmlFor="profile-photo" 
+                      className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      <Camera className="h-6 w-6 text-white" />
+                      <input
+                        id="profile-photo"
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileChange}
+                        accept="image/jpeg,image/png,image/jpg,image/webp,image/gif"
+                      />
+                    </label>
+                  )}
+                  {isEditing && formData.profilePhoto && (
+                    <button
+                      onClick={() => setFormData(prev => ({ ...prev, profilePhoto: null }))}
+                      className="absolute -top-1 -right-1 p-1 bg-destructive rounded-full hover:bg-destructive/90 transition-colors"
+                    >
+                      <X className="h-3 w-3 text-white" />
+                    </button>
+                  )}
+                </motion.div>
+              </AnimatePresence>
               <div className="text-center">
-                <DialogTitle className="text-md sm:text-xl">{user?.first_name} {user?.last_name}</DialogTitle>
+                <DialogTitle className="text-md sm:text-xl">
+                  {isEditing ? "Edit Profile" : `${user?.first_name} ${user?.last_name}`}
+                </DialogTitle>
                 <p className="text-xs sm:text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
             <div className="absolute right-4 top-4 flex gap-2">
               <Button 
-                variant="outline" 
-                className='px-2 sm:px-3 border-2 border-borderColorPrimary focus:outline-none' 
+                variant={isEditing ? "default" : "outline"}
+                className={`px-2 sm:px-3 transition-all duration-200 ${
+                  isEditing 
+                    ? 'bg-primary hover:bg-primary/90' 
+                    : 'border-2 border-borderColorPrimary hover:bg-accent'
+                }`}
                 size="sm"
                 onClick={handleEditToggle}
+                disabled={isSubmitting}
               >
-                {isEditing ? (
-                  <>
-                    <Save className="h-4 w-4 mr-0 sm:mr-2" /> 
-                    <span className='hidden sm:flex'>Save</span>
-                  </>
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className='hidden sm:inline'>Saving...</span>
+                  </div>
+                ) : isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <Save className="h-4 w-4" />
+                    <span className='hidden sm:inline'>Save Changes</span>
+                  </div>
                 ) : (
-                  <>
-                    <Pencil className="h-4 w-4 mr-0 sm:mr-2" /> 
-                    <span className='hidden sm:flex'>Edit Profile</span>
-                  </>
+                  <div className="flex items-center gap-2">
+                    <Pencil className="h-4 w-4" />
+                    <span className='hidden sm:inline'>Edit Profile</span>
+                  </div>
                 )}
               </Button>
             </div>
-            <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">esc</span>
-            </kbd>
           </DialogHeader>
 
-          <div className="space-y-6 pt-4">
+          <AnimatePresence mode="wait">
             {isEditing && (
-              <>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6 pt-4"
+              >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">First name</label>
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <User className="h-4 w-4 text-primary" />
+                      First name
+                    </label>
                     <Input
-                      value={user?.first_name}
-                      onChange={(e) => console.log(e.target.value)}
-                      placeholder="First name"
-                      disabled={!isEditing}
+                      value={formData.firstname}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        firstname: e.target.value 
+                      }))}
+                      placeholder="Enter your first name"
+                      className="bg-muted/50 border-primary/20 focus:border-primary transition-colors"
+                      maxLength={255}
+                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Last name</label>
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <User className="h-4 w-4 text-primary" />
+                      Last name
+                    </label>
                     <Input
-                      value={user?.last_name}
-                      onChange={(e) => console.log(e.target.value)}
-                      placeholder="Last name"
-                      disabled={!isEditing}
+                      value={formData.lastname}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        lastname: e.target.value 
+                      }))}
+                      placeholder="Enter your last name"
+                      className="bg-muted/50 border-primary/20 focus:border-primary transition-colors"
+                      maxLength={255}
+                      required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium">Profile photo</label>
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={profilePhoto}
-                      alt="Profile"
-                      width={16}
-                      height={16}
-                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
-                    />
-                    <Button variant="outline" size="sm" className='text-xs sm:text-sm p-2 sm:p-3'>
-                      change picture
-                    </Button>
+                <div className="rounded-lg border border-primary/20 p-4 bg-muted/30">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <Info className="h-4 w-4" />
+                    <span>Profile Photo Requirements</span>
                   </div>
+                  <ul className="text-xs space-y-1 text-muted-foreground">
+                    <li>• Accepted formats: JPEG, PNG, JPG, WEBP, GIF</li>
+                    <li>• Maximum file size: 2MB</li>
+                    <li>• Recommended size: 400x400 pixels</li>
+                  </ul>
                 </div>
-              </>
+              </motion.div>
             )}
+          </AnimatePresence>
 
-            <div className="flex justify-between gap-2 pt-4 border-t">
-              <Button className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' variant="outline" onClick={() => {
+          <div className="flex justify-between gap-2 pt-4 border-t">
+            <Button 
+              className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' 
+              variant="outline" 
+              onClick={() => {
                 setPlansModalOpen(true);
                 onClose();
-                }}>
-                <Gem className='w-4 h-4 mr-2'/>
-                <span>UPGRADE</span>
+              }}
+            >
+              <Gem className='w-4 h-4 mr-2'/>
+              <span>UPGRADE</span>
+            </Button>
+            <div className='flex gap-4'>
+              <Button 
+                className='p-2 sm:p-3 text-xs sm:text-sm' 
+                variant="outline" 
+                onClick={onClose}
+              >
+                Cancel
               </Button>
-              <div className='flex gap-4'>
-                <Button className='p-2 sm:p-3 text-xs sm:text-sm' variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-              </div>
             </div>
           </div>
         </DialogContent>
@@ -2339,6 +2540,9 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const { toast } = useToast();
 
+  const { user } = useAuthStore();
+
+
 
   useEffect(() => {
     if (!isOpen) {
@@ -2346,10 +2550,10 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
     }
   }, [isOpen]);
 
-  const referralLink = "https://alle.ai/ref=XXX_XXX";
+  const referralLink = "https://alle.ai/ref="+user?.referral_code?.toUpperCase();
   const stats = {
     friendsReferred: 125,
-    cashEarned: 50.00, 
+    cashEarned: 10.00, 
   };
 
   // Available plans based on earned amount
@@ -3142,9 +3346,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {/* {formatTimeDistance(item)} */}
+                        {formatTimeDistance(item)}
                         created at {item.created_at}
-                        updated at {item.updated_at}
+                        {/* updated at {item.updated_at} */}
                       </div>
                     </div>
                   </div>
@@ -4842,35 +5046,59 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
   const [keyName, setKeyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const addKey = useApiKeyStore((state) => state.addKey);
+  const { toast } = useToast();
+  const { user } = useAuthStore();
 
   const handleCreateKey = async () => {
     if (!keyName.trim()) return;
     
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    addKey({
-      name: keyName,
-      workspace: 'Default',
-      createdBy: 'Pascal',
-      email: 'rogerxt3512@gmail.com',
-    });
-    
-    setIsLoading(false);
-    onClose();
+    try {
+      const response = await keysApi.createApiKey({
+        name: keyName.trim()
+      });
+      
+      // Add the new key to the store
+      addKey({
+        id: response.id.toString(),
+        name: response.name,
+        key: response.key,
+        workspace: "default",
+        isVisible: false,
+        isDisabled: false,
+        createdAt: response.created_at,
+        lastUsed: response.last_used_at,
+        createdBy: user?.first_name,
+        email: user?.email,
+        cost: "$0.00"
+      });
+      
+      toast({
+        title: "API Key Created",
+        description: "Your new API key has been created successfully.",
+      });
+      
+      setKeyName('');
+      onClose();
+    } catch (error) {
+      console.error('Error creating API key:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create API key",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5 text-primary" />
-            Create API Key
-          </DialogTitle>
+          <DialogTitle>Create API Key</DialogTitle>
           <DialogDescription>
-            Create a new API key to use with the Alle-AI API. You can create up to 10 API keys.
+          Add a name to help you identify this API key. You can create up to 10 API keys.
           </DialogDescription>
         </DialogHeader>
 
@@ -4883,23 +5111,17 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
               onChange={(e) => setKeyName(e.target.value)}
               className="focus-visible:outline-none focus:border-borderColorPrimary"
             />
-            <p className="text-[0.8rem] text-muted-foreground">
-              Give your API key a memorable name to identify its use case
-            </p>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button 
-            onClick={handleCreateKey} 
-            disabled={!keyName.trim() || isLoading}
-            className="gap-2"
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button onClick={handleCreateKey} disabled={isLoading || !keyName.trim()}>
             {isLoading ? (
               <>
-                <Loader className="h-4 w-4 animate-spin" />
-                Creating...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               </>
             ) : (
               <>
@@ -4917,26 +5139,41 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
 export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalProps & { keyId: string; initialName: string }) {
   const [keyName, setKeyName] = useState(initialName);
   const [isLoading, setIsLoading] = useState(false);
-  const editKeyName = useApiKeyStore((state) => state.editKeyName);
   const { toast } = useToast();
+  const { keys, updateKeyName } = useApiKeyStore();
 
   const handleEditKey = async () => {
     if (!keyName.trim()) return;
     
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    editKeyName(keyId, keyName);
-    
-    toast({
-      title: "API key updated",
-      description: "The API key name has been updated successfully",
-      duration: 2000,
-    });
-    
-    setIsLoading(false);
-    onClose();
+    try {
+      const response = await keysApi.editApiKey({
+        id: parseInt(keyId),
+        name: keyName.trim()
+      });
+      
+      console.log('Edit API key response:', response);
+      
+      if (response.status) {
+        // Update the key name in the store
+        updateKeyName(keyId, response.api_key.name);
+        
+        toast({
+          title: "Success",
+          description: response.message || "API key name updated successfully",
+        });
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error editing API key:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update API key name",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -4956,9 +5193,10 @@ export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalPr
           <div className="space-y-2">
             <Input
               id="name"
-              placeholder="e.g. Research API Key"
+              placeholder="e.g. Production API Key"
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
+              maxLength={255}
             />
             <p className="text-[0.8rem] text-muted-foreground">
               Give your API key a memorable name to identify its use case
@@ -4975,8 +5213,7 @@ export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalPr
           >
             {isLoading ? (
               <>
-                <Loader className="h-4 w-4 animate-spin" />
-                Saving...
+                <Loader2 className="h-4 w-4 animate-spin" />
               </>
             ) : (
               <>

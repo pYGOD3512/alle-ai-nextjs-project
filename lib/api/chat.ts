@@ -56,6 +56,14 @@ interface LikeStateResponse {
   message: string;
 }
 
+// Add this interface for the web search parameters
+interface WebSearchParams {
+  prompt_id: string;
+  conversation_id: string;
+  follow_up: boolean;
+  messages?: null | [string, string][]; // Array of [prompt_id, response_id] pairs
+}
+
 export const chatApi = {
   createConversation: async (models: string[], type: 'chat' | 'image' | 'audio' | 'video'): Promise<CreateConversationResponse> => {
     try {
@@ -140,5 +148,21 @@ export const chatApi = {
       console.error('Error updating like state:', error);
       throw error;
     }
-  }
+  },
+
+  webSearch: async (params: WebSearchParams): Promise<any> => {
+    try {
+      const response = await api.post('/web-search', {
+        prompt_id: params.prompt_id,
+        conversation_id: params.conversation_id,
+        follow_up: params.follow_up,
+        messages: params.follow_up ? params.messages : null
+      });
+      console.log('Web search response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in web search:', error);
+      throw error;
+    }
+  },
 };

@@ -66,7 +66,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       // Add all required properties when adding to history
       addHistory({
-        id: conversationId,
+        // id: conversationId,
         session: conversationId,
         title: conversationResponse.title,
         type: 'chat',
