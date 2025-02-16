@@ -62,5 +62,20 @@ export default function ChatPage() {
     loadHistory();
   }, [setHistory, setHistoryLoading, setHistoryError]);
 
+  // Load previously selected models
+  useEffect(() => {
+    const loadLatestSelectedModels = async () => {
+      try {
+        const latestModels = await modelsApi.getLatestSelectedModels();
+        console.log('Latest models loaded:', latestModels);
+        // We'll handle the response once you show me the structure
+      } catch (err) {
+        console.error('Error loading latest selected models:', err);
+      }
+    };
+
+    loadLatestSelectedModels();
+  }, []);
+
   return null;
 }

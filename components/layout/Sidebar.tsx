@@ -477,7 +477,7 @@ export function Sidebar() {
               </ScrollArea>
 
               {/* More section */}
-              <div className="flex-shrink-0 px-4 mt-4">
+              <div className="flex-shrink-0 px-4 my-8">
                 <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
                   <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md bg-backgroundSecondary text-xs font-medium text-muted-foreground hover:text-primary">
                     MORE

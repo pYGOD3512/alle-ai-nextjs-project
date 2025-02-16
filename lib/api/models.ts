@@ -67,4 +67,15 @@ export const modelsApi = {
       throw error;
     }
   },
+
+  getLatestSelectedModels: async (): Promise<Model[]> => {
+    try {
+      const response = await api.get('/models/chat/latest');
+      console.log('Latest selected models response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching latest selected models:', error);
+      throw error;
+    }
+  },
 };

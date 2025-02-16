@@ -24,7 +24,9 @@ import {
   Pencil,
   Power,
   PowerOff,
-  Ban
+  Ban,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import {
   Table,
@@ -40,7 +42,7 @@ import {
   TooltipTrigger,
   TooltipProvider 
 } from "@/components/ui/tooltip";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApiKeyStore, ApiKey } from "@/stores";
 import { CreateApiKeyModal, EditApiKeyModal, PromptModalProps } from "@/components/ui/modals";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +55,9 @@ import {
 import { PromptModal } from "@/components/ui/modals";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { ApiKeyData, keysApi } from "@/lib/api/keys";
+import { useAuthStore } from "@/stores";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const settingsSections = [
   {
@@ -87,8 +92,57 @@ export function CreateApiKeys() {
   const [editingKey, setEditingKey] = useState<{ id: string; name: string } | null>(null);
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [promptConfig, setPromptConfig] = useState<PromptModalProps | null>(null);
-  const { keys, removeKey, toggleKeyVisibility, toggleKeyStatus } = useApiKeyStore();
+  const { keys, addKey, removeKey, toggleKeyStatus, clearKeys, toggleKeyVisibility } = useApiKeyStore();
   const { toast } = useToast();
+  const { user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [togglingKeys, setTogglingKeys] = useState<Set<string>>(new Set());
+  const [deletingKeys, setDeletingKeys] = useState<Set<string>>(new Set());
+
+  const fetchApiKeys = async () => {
+    setIsLoading(true);
+    try {
+      const response = await keysApi.getAllApiKeys();
+      console.log('Fetched API keys:', response);
+
+      // Clear all existing keys first
+      clearKeys();
+
+      // Add new keys
+      response.forEach((apiKey: ApiKeyData) => {
+        addKey({
+          id: apiKey.id.toString(),
+          name: apiKey.name,
+          key: apiKey.key,
+          workspace: "default",
+          isVisible: false,
+          isDisabled: apiKey.active === 0,
+          createdAt: apiKey.created_at,
+          lastUsed: apiKey.last_used_at,
+          createdBy: user?.first_name ? `${user.first_name}` : "You",
+          email: user?.email || "your@email.com",
+          cost: "$0.00"
+        });
+      });
+
+    } catch (error) {
+      console.error('Error fetching API keys:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load API keys",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Only fetch on mount if there are no keys
+  useEffect(() => {
+    if (keys.length === 0) {
+      fetchApiKeys();
+    }
+  }, []); // Empty dependency array for mount only
 
   const copyToClipboard = async (text: string, keyName: string) => {
     try {
@@ -107,48 +161,175 @@ export function CreateApiKeys() {
     }
   };
 
-  const handleDeleteKey = (id: string, name: string) => {
-    removeKey(id);
-    toast({
-      title: "API key deleted",
-      description: `'${name}' has been deleted`,
-      variant: "default",
-    });
+  const handleDeleteKey = async (key: ApiKey) => {
+    setDeletingKeys(prev => new Set(prev).add(key.id));
+    try {
+      const response = await keysApi.deleteApiKey(key.id);
+      console.log('Delete response:', response);
+      
+      if (response.deleted_at) {
+        removeKey(key.id);
+        
+        toast({
+          title: "Success",
+          description: response.message,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete API key",
+          variant: "destructive",
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete API key",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(key.id);
+        return newSet;
+      });
+    }
   };
 
-  const handleToggleStatus = (key: ApiKey) => {
-    const action = key.isDisabled ? 'enable' : 'disable';
-    const newPromptConfig: PromptModalProps = {
+  const handleToggleStatus = async (key: ApiKey) => {
+    setTogglingKeys(prev => new Set(prev).add(key.id));
+    try {
+      const response = key.isDisabled 
+        ? await keysApi.enableApiKey(key.id)
+        : await keysApi.disableApiKey(key.id);
+
+      // Pass both id and the isDisabled state based on !response.active
+      toggleKeyStatus(key.id, !response.active);
+      
+      toast({
+        title: "Success",
+        description: response.message,
+      });
+    } catch (error) {
+      console.error('Error toggling API key status:', error);
+      toast({
+        title: "Error",
+        description: `Failed to ${key.isDisabled ? 'enable' : 'disable'} API key`,
+        variant: "destructive",
+      });
+    } finally {
+      setTogglingKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(key.id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleShowTogglePrompt = (key: ApiKey) => {
+    setPromptConfig({
       isOpen: true,
-      onClose: () => setShowPromptModal(false),
-      title: `${action.charAt(0).toUpperCase() + action.slice(1)} API Key`,
-      message: `Are you sure you want to ${action} the API key "${key.name}"? ${!key.isDisabled ? 'This will prevent the key from being used for any API calls.' : ''}`,
-      type: key.isDisabled ? 'info' : 'warning',
+      title: `${key.isDisabled ? 'Enable' : 'Disable'} API Key`,
+      message: `Are you sure you want to ${key.isDisabled ? 'enable' : 'disable'} this API key?`,
+      type: "warning",
+      onClose: () => setPromptConfig(null),
       actions: [
         {
           label: "Cancel",
-          onClick: () => setShowPromptModal(false),
+          onClick: () => setPromptConfig(null),
           variant: "outline"
         },
         {
-          label: action.charAt(0).toUpperCase() + action.slice(1),
+          label: key.isDisabled ? "Enable" : "Disable",
           onClick: () => {
-            toggleKeyStatus(key.id);
-            toast({
-              title: `API key ${action}d`,
-              description: `"${key.name}" has been ${action}d`,
-              duration: 2000,
-            });
-            setShowPromptModal(false);
+            handleToggleStatus(key);
+            setPromptConfig(null);
           },
           variant: key.isDisabled ? "default" : "destructive"
         }
       ]
-    };
-    
-    setPromptConfig(newPromptConfig);
+    });
     setShowPromptModal(true);
   };
+
+  const handleShowDeletePrompt = (key: ApiKey) => {
+    setPromptConfig({
+      isOpen: true,
+      title: "Delete API Key",
+      message: `Are you sure you want to delete the API key "${key.name}"? This action cannot be undone.`,
+      type: "warning",
+      onClose: () => setPromptConfig(null),
+      actions: [
+        {
+          label: "Cancel",
+          onClick: () => setPromptConfig(null),
+          variant: "outline"
+        },
+        {
+          label: "Delete",
+          onClick: () => {
+            handleDeleteKey(key);
+            setPromptConfig(null);
+          },
+          variant: "destructive"
+        }
+      ]
+    });
+    setShowPromptModal(true);
+  };
+
+  // Add loading skeleton component
+  const LoadingSkeleton = () => (
+    <Card className="border-borderColorPrimary bg-backgroundSecondary">
+      <div className="p-1">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-borderColorPrimary">
+              <TableHead className="text-muted-foreground">NAME</TableHead>
+              <TableHead className="text-muted-foreground">API KEY</TableHead>
+              <TableHead className="text-muted-foreground">CREATED BY</TableHead>
+              <TableHead className="text-muted-foreground">CREATED AT</TableHead>
+              <TableHead className="text-muted-foreground">LAST USED</TableHead>
+              <TableHead className="text-muted-foreground">COST</TableHead>
+              <TableHead className="text-muted-foreground w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(3)].map((_, index) => (
+              <TableRow key={index} className="hover:bg-hoverColorPrimary border-borderColorPrimary">
+                <TableCell>
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[200px]" />
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[80px]" />
+                    <Skeleton className="h-3 w-[120px]" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[80px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[60px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Card>
+  );
 
   return (
     <TooltipProvider>
@@ -168,15 +349,29 @@ export function CreateApiKeys() {
           <div className="max-w-2xl">
             <h1 className="text-2xl font-semibold text-foreground mb-2">API keys</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Keep your API keys secure - don't commit them to version control or share them in public places.
+              Keep your API keys secure - don&apos;t commit them to version control or share them in public places.
             </p>
           </div>
-          {keys.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={fetchApiKeys}
+              disabled={isLoading}
+              className="gap-2"
             >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh
+                </>
+              )}
+            </Button>
+            {keys.length > 0 && (
               <Button 
                 className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                 onClick={() => setIsCreateModalOpen(true)}
@@ -184,8 +379,8 @@ export function CreateApiKeys() {
                 <Key className="h-4 w-4" />
                 Create Key
               </Button>
-            </motion.div>
-          )}
+            )}
+          </div>
         </motion.div>
 
         {/* Main Content */}
@@ -194,7 +389,9 @@ export function CreateApiKeys() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          {keys.length === 0 ? (
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : keys.length === 0 ? (
             <Card className="border-borderColorPrimary bg-backgroundSecondary p-12 text-center">
               <div className="mx-auto w-fit p-4 rounded-full bg-primary/10 mb-4">
                 <Key className="h-6 w-6 text-primary" />
@@ -240,6 +437,9 @@ export function CreateApiKeys() {
                             </span>
                             {key.isDisabled && (
                               <Ban className="w-4 h-4 text-red-500"/>
+                            )}
+                            {deletingKeys.has(key.id) && (
+                              <Loader2 className="h-4 w-4 animate-spin text-primary"/>
                             )}
                           </div>
                         </TableCell>
@@ -301,7 +501,12 @@ export function CreateApiKeys() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="hover:bg-background/50">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="hover:bg-background/50"
+                                disabled={deletingKeys.has(key.id)}
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -313,9 +518,15 @@ export function CreateApiKeys() {
                                 Edit Name
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleToggleStatus(key)}
+                                onClick={() => handleShowTogglePrompt(key)}
+                                disabled={deletingKeys.has(key.id)}
                               >
-                                {key.isDisabled ? (
+                                {deletingKeys.has(key.id) ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    {key.isDisabled ? "Enabling..." : "Disabling..."}
+                                  </>
+                                ) : key.isDisabled ? (
                                   <>
                                     <Power className="h-4 w-4 mr-2" />
                                     Enable Key
@@ -329,10 +540,20 @@ export function CreateApiKeys() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
-                                onClick={() => handleDeleteKey(key.id, key.name)}
+                                onClick={() => handleShowDeletePrompt(key)}
+                                disabled={deletingKeys.has(key.id)}
                               >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Key
+                                {deletingKeys.has(key.id) ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete Key
+                                  </>
+                                )}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -355,7 +576,7 @@ export function CreateApiKeys() {
         >
           <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
           <p className="leading-relaxed">
-            Your API keys carry many privileges. Keep them secure! Don't share your API key in publicly accessible areas such as GitHub, 
+            Your API keys carry many privileges. Keep them secure! Don&apos;t share your API key in publicly accessible areas such as GitHub, 
             client-side code, and so forth.
           </p>
         </motion.div>
