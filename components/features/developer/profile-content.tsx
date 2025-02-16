@@ -8,12 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X, Mail, User, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuthStore } from "@/stores";
 
 export function DeveloperProfile() {
-  const [name, setName] = useState("Pascal");
+  const { user } = useAuthStore();
+  const [name, setName] = useState(user?.first_name);
   const [editedName, setEditedName] = useState(name);
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+
 
   // Check if name has been modified
   useEffect(() => {
@@ -21,7 +24,7 @@ export function DeveloperProfile() {
   }, [editedName, name]);
 
   const handleSave = () => {
-    if (!editedName.trim()) return;
+    if (!editedName?.trim()) return;
     setName(editedName);
     setIsEditing(false);
     toast({

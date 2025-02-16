@@ -58,6 +58,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ApiKeyData, keysApi } from "@/lib/api/keys";
 import { useAuthStore } from "@/stores";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 const settingsSections = [
   {
@@ -495,7 +496,7 @@ export function CreateApiKeys() {
                             <span className="text-sm text-muted-foreground">{key.email}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{key.createdAt}</TableCell>
+                        <TableCell title={`${format(new Date(key.createdAt), "MMMM d, yyyy h:mm a")}`}>{format(new Date(key.createdAt), "dd'/'MM'/'yy h:mm a")}</TableCell>
                         <TableCell>{key.lastUsed}</TableCell>
                         <TableCell>{key.cost}</TableCell>
                         <TableCell>
