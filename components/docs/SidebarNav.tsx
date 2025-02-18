@@ -59,7 +59,8 @@ export const SidebarNav = () => {
     subId?: string
   ) => {
     const isIntroduction = pathname === "/docs/api-reference/introduction";
-    const isSubsectionFirst = ``;
+    const isChat = pathname === "/docs/api-reference/chat";
+
     if (!id) {
       return pathname === path;
     }
@@ -73,19 +74,17 @@ export const SidebarNav = () => {
       }
       return id === hash;
     }
+
+    if (isChat) {
+      const hash = window.location.hash.substring(1); // Remove # prefix
+      console.log(hash);
+      if (id === "chat" && !hash) {
+        return true;
+      }
+      return id === hash;
+    }
     //  for subsectioned items
 
-    if (
-      id === "chat" ||
-      id === "image-generation" ||
-      id === "video-generation" ||
-      id === "audio-generation"
-    ) {
-      const hash = window.location.hash.substring(1);
-      
-      if (subId === id && !hash) return true;
-      return subId === hash;
-    }
     // For sections without subsections (like introduction)
     return pathname === path;
   };
@@ -96,15 +95,12 @@ export const SidebarNav = () => {
     id?: string,
     isFirstItem?: number
   ) => {
-    if (
-      isFirstItem == 0 &&
-      (id === "introduction" ||
-        id === "chat" ||
-        id === "image-generation" ||
-        id === "video-generation" ||
-        id === "audio-generation")
-    ) {
-      router.push(url);
+    if (sectionId === "introduction") {
+      router.replace("/docs/api-reference/introduction#introduction");
+      return;
+    }
+    if (sectionId === "chat") {
+      router.push("/docs/api-reference/chat");
       return;
     }
 
@@ -137,35 +133,34 @@ export const SidebarNav = () => {
                     </button>
                     {expandedSections[section.id] && section.sections && (
                       <div className="ml-6 space-y-1">
-                        {section.sections.map((subsection, index) => (
-                          <button
-                            key={subsection.id}
-                            onClick={() =>
-                              handleReferenceClick(
-                                subsection.id,
-                                section.href,
-                                section.id,
-                                index
-                              )
-                            }
-                            className={cn(
-                              "group flex items-center w-3/4 rounded-md p-2 text-sm transition-all duration-200",
-                              "relative overflow-hidden",
-                              isActive(
-                                section.href,
-                                section.id,
-                                index,
-                                subsection.id
-                              )
-                                ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
-                                : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
-                            )}
-                          >
-                            <span className="relative z-10">
-                              {subsection.title}
-                            </span>
-                          </button>
-                        ))}
+                        {section.id === "chat" ? (
+                          <div>
+                            {section.sections.map((subsection, id) => (
+                              <button
+                                key={subsection.id}
+                                onClick={() =>
+                                  handleReferenceClick(
+                                    subsection.id,
+                                    section.href
+                                  )
+                                }
+                                className={cn(
+                                  "group flex items-center w-3/4 rounded-md p-2 text-sm transition-all duration-200",
+                                  "relative overflow-hidden",
+                                  isActive(section.href, subsection.id)
+                                    ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                                    : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                                )}
+                              >
+                                <span className="relative z-10">
+                                  {subsection.title}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          ""
+                        )}
                       </div>
                     )}
                   </div>

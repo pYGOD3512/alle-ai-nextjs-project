@@ -1,5 +1,5 @@
 import React from "react";
-
+import NavigationContainer from "@/components/NavigationContainer";
 // Data Objects
 const usageTiersData = [
   {
@@ -290,8 +290,7 @@ const ListSection = ({ items }) => (
   <ul className="text-muted-foreground mb-8 space-y-4">
     {items.map((item, index) => (
       <li key={index}>
-        <strong className="">{item.title}:</strong>{" "}
-        {item.description}
+        <strong className="">{item.title}:</strong> {item.description}
       </li>
     ))}
   </ul>
@@ -388,6 +387,14 @@ const RateLimits = () => {
         support team at <strong>[support email]</strong> or visit our{" "}
         <strong>[Help Center]</strong>.
       </p>
+      <NavigationContainer
+        previousTitle="Prompt Examples"
+        previousDescription="Learn about fine-tunning inputs"
+        preUrl="/docs/user-guides/prompts"
+        nextTitle="Error Codes"
+        nextDesciption="Learn about error handlings"
+        nextUrl="/docs/user-guides/error-codes"
+      />
     </div>
   );
 };

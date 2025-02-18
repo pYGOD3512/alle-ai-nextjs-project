@@ -1,13 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import Prism from "prismjs";
-import "prismjs/themes/prism-tomorrow.css";
-import "prismjs/components/prism-python";
-import "prismjs/plugins/line-numbers/prism-line-numbers.css";
-import "prismjs/plugins/line-numbers/prism-line-numbers";
-
+import RenderCode from "@/components/RenderCode";
+import NavigationContainer from "@/components/NavigationContainer";
 
 const errorData = {
   apiErrors: {
@@ -72,9 +68,10 @@ const errorData = {
       },
     ],
   },
-  errorHandling: {
-    title: "Handling Errors",
-    code: `import alleAI
+  errorExamples: [
+    {
+      language: "python",
+      code: `import alleAI
 from alleAI import alleAI
 client = alleAI()
 
@@ -95,8 +92,41 @@ except alleAI.APIConnectionError as e:
 except alleAI.RateLimitError as e:
     # Handle rate limit error (we recommend using exponential backoff)
     print(f"alleAI API request exceeded rate limit: {e}")
-    pass`,
-  },
+    pass`
+    },
+    {
+      language: "javascript",
+      code: `const alleAI = require('alleai');
+const client = new alleAI();
+
+async function handleRequest() {
+  try {
+    // Make your alleAI API request here
+    const response = await client.chat.completions.create({
+      prompt: "Hello world",
+      model: "alle-ai-mini"
+    });
+    return response;
+  } catch (error) {
+    if (error instanceof alleAI.APIError) {
+      // Handle API error here, e.g. retry or log
+      console.error(\`alleAI API returned an API Error: \${error}\`);
+    } else if (error instanceof alleAI.APIConnectionError) {
+      // Handle connection error here
+      console.error(\`Failed to connect to alleAI API: \${error}\`);
+    } else if (error instanceof alleAI.RateLimitError) {
+      // Handle rate limit error (we recommend using exponential backoff)
+      console.error(\`alleAI API request exceeded rate limit: \${error}\`);
+    } else {
+      // Handle unexpected errors
+      console.error(\`Unexpected error: \${error}\`);
+    }
+  }
+}
+
+handleRequest();`
+    }
+  ]
 };
 
 interface ExpProps {
@@ -110,122 +140,99 @@ const ExpandableSection = ({ title, children }: ExpProps) => {
   return (
     <div className="border rounded-lg mb-4">
       <button
-        className="w-full p-4 flex items-center justify-between text-left hover:bg-accent rounded-lg"
+        className="w-full px-4 py-2 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className="font-semibold">{title}</span>
-        {isExpanded ? (
-          <ChevronDown className="h-5 w-5" />
-        ) : (
-          <ChevronRight className="h-5 w-5" />
-        )}
+        <span className="font-medium">{title}</span>
+        {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
       </button>
-      {isExpanded && <div className="p-4 border-t">{children}</div>}
-    </div>
-  );
-};
-
-const CodeBlock = ({ code }: { code: string }) => {
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [code]);
-
-  const copyCode = () => {
-    navigator.clipboard.writeText(code);
-    const button = document.querySelector(".copy-button") as HTMLButtonElement;
-    if (button) {
-      button.textContent = "Copied!";
-      setTimeout(() => {
-        button.textContent = "Copy";
-      }, 2000);
-    }
-  };
-
-  return (
-    <div className="code-block">
-      <pre className="line-numbers">
-        <code className="language-python">{code}</code>
-      </pre>
-      <button className="copy-button" onClick={copyCode}>
-        Copy
-      </button>
+      {isExpanded && <div className="px-4 py-2">{children}</div>}
     </div>
   );
 };
 
 const ErrorDocs = () => {
-  useEffect(() => {
-    
-
-    Prism.highlightAll();
-
-   
-  }, []);
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <p className="text-muted-foreground mb-8">
-        Explore Alle-AI API error codes and solutions. This guide includes an
-        overview of error codes you might see from both the API and our official
-        Python and Javascript library.
-      </p>
+    <div className="pb-16 w-full max-w-[100%] pr-4">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Error Handling</h1>
+          <p className="text-muted-foreground">
+            Learn how to handle errors in your API requests and understand common error scenarios.
+          </p>
+        </div>
 
-      {/* API Errors Table */}
-      <h2 className="text-2xl font-bold mb-4">{errorData.apiErrors.title}</h2>
-      <div className="overflow-x-auto mb-8">
-        <table className="min-w-full border-collapse border">
-          <thead>
-            <tr>
-              <th className="border p-4 text-left">Code</th>
-              <th className="border p-4 text-left">Overview</th>
-            </tr>
-          </thead>
-          <tbody>
-            {errorData.apiErrors.errors.map((error, index) => (
-              <tr key={index} className="hover:bg-accent">
-                <td className="border p-4 font-mono">
-                  {error.code} - {error.name}
-                </td>
-                <td className="border p-4">
-                  <div className="mb-2">
-                    <span className="font-semibold">Cause:</span> {error.cause}
-                  </div>
-                  <div>
-                    <span className="font-semibold">Solution:</span>{" "}
-                    {error.solution}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Library Errors Expandable Sections */}
-      <h2 className="text-2xl font-bold mb-4">
-        {errorData.libraryErrors.title}
-      </h2>
-      <div className="mb-8">
-        {errorData.libraryErrors.errors.map((error, index) => (
-          <ExpandableSection key={index} title={error.type}>
-            <div className="space-y-2">
-              <div>
-                <span className="font-semibold">Cause:</span> {error.cause}
+        {/* API Errors Section */}
+        <section>
+          <h2 className="text-2xl font-bold mb-2">{errorData.apiErrors.title}</h2>
+          <p className="text-muted-foreground mb-4">
+            Common API errors you might encounter and how to resolve them.
+          </p>
+          {errorData.apiErrors.errors.map((error, index) => (
+            <ExpandableSection
+              key={index}
+              title={`${error.code}: ${error.name}`}
+            >
+              <div className="space-y-2 text-muted-foreground">
+                <p>
+                  <strong className="text-foreground">Cause:</strong> {error.cause}
+                </p>
+                <p>
+                  <strong className="text-foreground">Solution:</strong> {error.solution}
+                </p>
               </div>
-              <div>
-                <span className="font-semibold">Solution:</span>{" "}
-                {error.solution}
-              </div>
-            </div>
-          </ExpandableSection>
-        ))}
-      </div>
+            </ExpandableSection>
+          ))}
+        </section>
 
-      {/* Error Handling Code Example */}
-      <h2 className="text-2xl font-bold mb-4">
-        {errorData.errorHandling.title}
-      </h2>
-      <CodeBlock code={errorData.errorHandling.code} />
+        {/* Library Errors Section */}
+        <section>
+          <h2 className="text-2xl font-bold mb-2">
+            {errorData.libraryErrors.title}
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            Specific errors that can occur when using our client libraries.
+          </p>
+          {errorData.libraryErrors.errors.map((error, index) => (
+            <ExpandableSection key={index} title={error.type}>
+              <div className="space-y-2 text-muted-foreground">
+                <p>
+                  <strong className="text-foreground">Cause:</strong> {error.cause}
+                </p>
+                <p>
+                  <strong className="text-foreground">Solution:</strong> {error.solution}
+                </p>
+              </div>
+            </ExpandableSection>
+          ))}
+        </section>
+
+        {/* Error Handling Examples */}
+        <section>
+          <h2 className="text-2xl font-bold mb-2">Error Handling Examples</h2>
+          <p className="text-muted-foreground mb-4">
+            Here are examples of how to properly handle errors in your code using our client libraries.
+          </p>
+          <div className="space-y-4">
+            <RenderCode
+              languages={errorData.errorExamples}
+              toggle={true}
+              maxHeight={400}
+              className="w-full"
+            />
+          </div>
+        </section>
+
+        {/* Navigation */}
+        <NavigationContainer
+          previousTitle="Rate Limits"
+          previousDescription="Understanding API rate limits"
+          preUrl="/docs/user-guides/limits"
+          nextTitle="Updates"
+          nextDesciption="Learn about API updates"
+          nextUrl="/docs/user-guides/updates"
+        />
+      </div>
     </div>
   );
 };

@@ -4,13 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Copy, Info, CheckCircle2 } from "lucide-react";
 import { models } from "@/lib/models";
 import type { ModelDetails } from "@/lib/types";
-import Prism from "prismjs";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-tomorrow.css";
 import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
 import Link from "next/link";
-
+import RenderCode from "@/components/RenderCode";
+import NavigationContainer from "@/components/NavigationContainer";
 // Static data
 const suggestions = [
   { title: "Text Generation", href: "/text-generation" },
@@ -44,14 +41,13 @@ export default function VideoGenerationDocs() {
   const [selectedModels, setSelectedModels] = useState([
     videoModels[0]?.name.toLowerCase().replace(/ /g, "_") || "",
   ]);
-  const [activeTab, setActiveTab] = useState("python");
   const [expanded, setExpanded] = useState<number | null>(null);
 
-  // Example code for Python
-  const exampleCodePython = (modelNames: string[]) => (
-    <pre className="language-python bg-gray-900 text-white p-4 rounded-md">
-      <code>
-        {`import alleai
+  // Code examples for both languages
+  const getCodeExamples = (modelNames: string[]) => [
+    {
+      language: "python",
+      code: `import alleai
 
 client = alleai.Client(api_key="[YOUR API KEY HERE]")
 
@@ -90,16 +86,11 @@ with open("input.mp4", "rb") as file:
 
 # Save the interpolated video
 with open("interpolated_output.mp4", "wb") as f:
-    f.write(response.video_data)`}
-      </code>
-    </pre>
-  );
-
-  // Example code for JavaScript
-  const exampleCodeJS = (modelNames: string[]) => (
-    <pre className="language-javascript bg-gray-900 text-white p-4 rounded-md">
-      <code>
-        {`const alleai = require('alleai');
+    f.write(response.video_data)`
+    },
+    {
+      language: "javascript",
+      code: `const alleai = require('alleai');
 const fs = require('fs');
 
 const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
@@ -114,40 +105,43 @@ async function generateVideo() {
       resolution: '1080p'
     });
 
+    // Save the generated video
     fs.writeFileSync('output.mp4', response.videoData);
 
     // Example 2: Apply style transfer to a video
-    const videoFile = fs.readFileSync('input.mp4');
-    const styleResponse = await client.processVideo({
-      file: videoFile,
+    const inputVideo = fs.readFileSync('input.mp4');
+    const styledResponse = await client.processVideo({
+      file: inputVideo,
       task: 'style_transfer',
       style: 'van_gogh',  // Artistic style
       models: ${JSON.stringify(modelNames)}
     });
 
-    fs.writeFileSync('styled_output.mp4', styleResponse.videoData);
+    // Save the styled video
+    fs.writeFileSync('styled_output.mp4', styledResponse.videoData);
 
     // Example 3: Interpolate frames for smoother video
-    const interpolationResponse = await client.processVideo({
-      file: videoFile,
+    const interpolateResponse = await client.processVideo({
+      file: inputVideo,
       task: 'frame_interpolation',
       models: ${JSON.stringify(modelNames)}
     });
 
-    fs.writeFileSync('interpolated_output.mp4', interpolationResponse.videoData);
+    // Save the interpolated video
+    fs.writeFileSync('interpolated_output.mp4', interpolateResponse.videoData);
+
+    // Access response metadata
+    console.log(\`Generation time: \${response.metadata.generationTime}s\`);
+    console.log(\`Models used: \${response.metadata.models}\`);
+    console.log(\`Total cost: \${response.metadata.cost} credits\`);
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error generating or processing video:', error);
   }
 }
 
-generateVideo();`}
-      </code>
-    </pre>
-  );
-
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [activeTab]);
+generateVideo();`
+    }
+  ];
 
   return (
     <div className="pb-16 w-full max-w-[100%] pr-4">
@@ -198,19 +192,19 @@ generateVideo();`}
         {/* Installation Section */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">Installation</h2>
-          <Tabs defaultValue="python" onValueChange={setActiveTab}>
+          <Tabs defaultValue="python">
             <TabsList>
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
             </TabsList>
             <TabsContent value="python">
               <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <pre className="text-sm">pip install alleai</pre>
+                <RenderCode language="bash" code={`pip install alleai`} />
               </div>
             </TabsContent>
             <TabsContent value="javascript">
               <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <pre className="text-sm">npm install alleai</pre>
+                <RenderCode language="bash" code={`npm install alleai`} />
               </div>
             </TabsContent>
           </Tabs>
@@ -262,56 +256,14 @@ generateVideo();`}
         </div>
 
         {/* Code Examples Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Code Examples</h2>
-          <p className="text-muted-foreground mb-4">
-            Below are comprehensive examples showing both basic and advanced
-            usage of the API, including multi-model generation:
-          </p>
-          <Tabs defaultValue="python" onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="python">Python</TabsTrigger>
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-            </TabsList>
-            <TabsContent value="python">
-              <div className="relative rounded-md">
-                {exampleCodePython(selectedModels)}
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    const codeElement = document.querySelector(
-                      "pre.language-python code"
-                    );
-                    if (codeElement?.textContent) {
-                      navigator.clipboard.writeText(codeElement.textContent);
-                    }
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
-              </div>
-            </TabsContent>
-            <TabsContent value="javascript">
-              <div className="relative rounded-md">
-                {exampleCodeJS(selectedModels)}
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    const codeElement = document.querySelector(
-                      "pre.language-javascript code"
-                    );
-                    if (codeElement?.textContent) {
-                      navigator.clipboard.writeText(codeElement.textContent);
-                    }
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+        <div className="space-y-4 mt-8">
+          <h2 className="text-2xl font-bold">Code Examples</h2>
+          <RenderCode
+            languages={getCodeExamples(selectedModels)}
+            toggle={true}
+            maxHeight={400}
+            className="w-full"
+          />
         </div>
 
         {/* Response Format Section */}
@@ -399,22 +351,15 @@ generateVideo();`}
           </div>
         </div>
 
-        {/* What to Read Next Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">What to Read Next</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {suggestions.map((suggestion, index) => (
-              <Link key={index} href={suggestion.href}>
-                <div className="block p-4 bg-black text-white rounded-lg shadow-md dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-zinc-300 transition duration-200">
-                  <div className="flex items-center justify-between">
-                    <span>{suggestion.title}</span>
-                    <ChevronRight className="text-current" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Next Steps Section */}
+        <NavigationContainer
+          previousTitle="Video Generation"
+          previousDescription="Interacting with video models"
+          preUrl="/docs/user-guides/video-generation"
+          nextTitle="File uploads"
+          nextDesciption="Attaching files to request "
+          nextUrl="/docs/user-guides/file-uploads"
+        />
       </div>
     </div>
   );

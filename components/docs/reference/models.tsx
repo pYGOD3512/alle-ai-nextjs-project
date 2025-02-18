@@ -1,10 +1,7 @@
-
-
-import RenderCode from '@/components/RenderCode';
-import {ChevronRight, ChevronLeft} from "lucide-react"  
+import RenderCode from "@/components/RenderCode";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import NavigationContainer from "@/components/NavigationContainer";
 const ModelDocumentation = () => {
-
-
   const models = [
     { name: "SummaFlow-Pro", context: "200k", type: "Text Summarization" },
     { name: "SummaFlow-Lite", context: "127k", type: "Text Comparison" },
@@ -178,52 +175,15 @@ else:
           <RenderCode language="bash" code={curlCode} />
         </div>
       </div>
-       {/* Navigation container aligned with content */}
-       <div className="flex justify-center w-full">
-          <div className="w-full max-w-[700px]">
-            <div className="mt-16 mb-8 flex justify-center items-center gap-4">
-              <button
-                onClick={() => {
-                  /* Logic will be added later */
-                }}
-                className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px]"
-              >
-                <ChevronLeft className="h-5 w-5 mt-0.5" />
-                <div className="flex flex-col items-start">
-                  <span className="text-sm text-muted-foreground mb-1">
-                    Previous
-                  </span>
-                  <span className="font-medium group-hover:text-foreground">
-                    Introduction to API
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Learn about authentication and basic concepts
-                  </span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  /* Logic will be added later */
-                }}
-                className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px] text-right"
-              >
-                <div className="flex flex-col items-end">
-                  <span className="text-sm text-muted-foreground mb-1">
-                    Next
-                  </span>
-                  <span className="font-medium group-hover:text-foreground">
-                    Search Endpoints
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Explore search and filtering capabilities
-                  </span>
-                </div>
-                <ChevronRight className="h-5 w-5 mt-0.5" />
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Navigation container aligned with content */}
+      <NavigationContainer
+        previousTitle="Pricing"
+        previousDescription="Learn about model pricing"
+        preUrl=""
+        nextTitle="Platform capabilities"
+        nextDesciption="Learn about platform capabilities "
+        nextUrl="/docs/user-guides/text-generation"
+      />
     </div>
   );
 };

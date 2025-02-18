@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Copy, Info, CheckCircle2, AlertCircle } from "lucide-react";
 import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
+import RenderCode from "@/components/RenderCode";
+import NavigationContainer from "@/components/NavigationContainer";
 import Link from "next/link";
 
 // Extended suggestions
@@ -37,8 +38,11 @@ const faqs = [
   },
 ];
 
-// Example code for Python
-const exampleCodePython = `import alleai
+// Code examples for both languages
+const getCodeExamples = () => [
+  {
+    language: "python",
+    code: `import alleai
 import time
 
 client = alleai.Client(api_key="[YOUR API KEY HERE]")
@@ -79,10 +83,11 @@ def process_batch(files, max_concurrent=5):
             results.append(result)
         except Exception as e:
             results.append({"error": str(e), "file": file})
-    return results`;
-
-// Example code for JavaScript
-const exampleCodeJS = `const alleai = require('alleai');
+    return results`
+  },
+  {
+    language: "javascript",
+    code: `const alleai = require('alleai');
 const fs = require('fs');
 
 const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
@@ -99,56 +104,64 @@ async function processFile() {
     });
     return response;
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error processing file:', error);
   }
 }
 
 // Example 2: Chunked upload for large files
 async function uploadLargeFile(filePath, chunkSize = 1024 * 1024) {
-  const fileStream = fs.createReadStream(filePath, { highWaterMark: chunkSize });
-  const uploadId = await client.startUpload(filePath);
-
-  for await (const chunk of fileStream) {
-    await client.uploadChunk(uploadId, chunk);
+  try {
+    const fileStream = fs.createReadStream(filePath, { highWaterMark: chunkSize });
+    const uploadId = await client.startUpload(filePath);
+    
+    for await (const chunk of fileStream) {
+      await client.uploadChunk(uploadId, chunk);
+    }
+    
+    return await client.completeUpload(uploadId);
+  } catch (error) {
+    console.error('Error uploading file:', error);
   }
-
-  return client.completeUpload(uploadId);
 }
 
 // Example 3: Batch processing with progress tracking
 async function processBatch(files, maxConcurrent = 5) {
   const results = [];
   const queue = [...files];
+  const inProgress = new Set();
 
-  while (queue.length) {
-    const batch = queue.splice(0, maxConcurrent);
-    const batchResults = await Promise.all(
-      batch.map(file => 
-        client.processFile({
-          file,
-          task: 'auto_detect',
-          onProgress: progress => console.log(\`Progress: \${progress}%\`)
-        }).catch(error => ({ error: error.message, file }))
-      )
-    );
-    results.push(...batchResults);
+  while (queue.length > 0 || inProgress.size > 0) {
+    while (queue.length > 0 && inProgress.size < maxConcurrent) {
+      const file = queue.shift();
+      const processPromise = client.processFile({
+        file,
+        task: 'auto_detect',
+        onProgress: (progress) => console.log(\`Progress: \${progress}%\`)
+      })
+      .then(result => {
+        inProgress.delete(processPromise);
+        results.push(result);
+      })
+      .catch(error => {
+        inProgress.delete(processPromise);
+        results.push({ error: error.message, file });
+      });
+      
+      inProgress.add(processPromise);
+    }
+    
+    if (inProgress.size >= maxConcurrent) {
+      await Promise.race(inProgress);
+    }
   }
-
+  
   return results;
-}`;
+}`
+  }
+];
 
 export default function WorkingWithFilesDocs() {
-  const [activeTab, setActiveTab] = useState("python");
   const [expanded, setExpanded] = useState<number | null>(null);
-
-  useEffect(() => {
-    // Import Prism dynamically to avoid SSR issues
-    import("prismjs").then((Prism) => {
-      import("prismjs/components/prism-python");
-      import("prismjs/components/prism-javascript");
-      Prism.highlightAll();
-    });
-  }, [activeTab]);
 
   return (
     <div className="pb-16 w-full max-w-[100%] pr-4">
@@ -197,53 +210,36 @@ export default function WorkingWithFilesDocs() {
           </div>
         </div>
 
-        {/* File Upload Section */}
+        {/* Installation Section */}
         <div>
-          <h2 className="text-2xl font-semibold mb-4">
-            Advanced File Operations
-          </h2>
-          <p className="text-muted-foreground mb-4">
-            Learn how to handle various file operations including chunked
-            uploads, batch processing, and progress tracking:
-          </p>
-          <Tabs defaultValue="python" onValueChange={setActiveTab}>
+          <h2 className="text-2xl font-semibold mb-4">Installation</h2>
+          <Tabs defaultValue="python">
             <TabsList>
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
             </TabsList>
             <TabsContent value="python">
-              <div className="relative">
-                <pre className="language-python bg-gray-900 text-white p-4 rounded-md">
-                  <code>{exampleCodePython}</code>
-                </pre>
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    navigator.clipboard.writeText(exampleCodePython);
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
+              <div className="bg-zinc-800 text-white p-4 rounded-md">
+                <RenderCode language="bash" code={`pip install alleai`} />
               </div>
             </TabsContent>
             <TabsContent value="javascript">
-              <div className="relative">
-                <pre className="language-javascript bg-gray-900 text-white p-4 rounded-md">
-                  <code>{exampleCodeJS}</code>
-                </pre>
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    navigator.clipboard.writeText(exampleCodeJS);
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
+              <div className="bg-zinc-800 text-white p-4 rounded-md">
+                <RenderCode language="bash" code={`npm install alleai`} />
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+
+        {/* Code Examples Section */}
+        <div className="space-y-4 mt-8">
+          <h2 className="text-2xl font-bold">Code Examples</h2>
+          <RenderCode
+            languages={getCodeExamples()}
+            toggle={true}
+            maxHeight={400}
+            className="w-full"
+          />
         </div>
 
         {/* FAQs Section */}
@@ -277,22 +273,15 @@ export default function WorkingWithFilesDocs() {
           </div>
         </div>
 
-        {/* What to Read Next Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">What to Read Next</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {suggestions.map((suggestion, index) => (
-              <Link key={index} href={suggestion.href}>
-                <div className="block p-4 bg-black text-white rounded-lg shadow-md dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-zinc-300 transition duration-200">
-                  <div className="flex items-center justify-between">
-                    <span>{suggestion.title}</span>
-                    <ChevronRight className="text-current" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Navigation Section */}
+        <NavigationContainer
+          previousTitle="Video Generation"
+          previousDescription="Interacting with video models"
+          preUrl="/docs/user-guides/video-generation"
+          nextTitle="Libraries"
+          nextDesciption="Learn how to use libraries with the API"
+          nextUrl="/docs/user-guides/libraries"
+        />
       </div>
     </div>
   );

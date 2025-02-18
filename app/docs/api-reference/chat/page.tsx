@@ -110,7 +110,9 @@ export default function Page() {
 
         <section data-section className="mb-5">
           <Card className="p-6 bg-background">
-            <h2 className="text-3xl font-bold mb-4">Chat Completion</h2>
+            <h2 id="completion" className="text-3xl font-bold mb-4">
+              Chat Completion
+            </h2>
 
             <div className="space-y-6">
               {/* Introduction Section */}
@@ -749,9 +751,6 @@ export default function Page() {
             </a>
             &nbsp; section for more information.
           </p>
-
-
-          
         </div>
         {/* Navigation container aligned with content */}
         <div className="flex justify-center w-full">

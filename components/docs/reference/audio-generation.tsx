@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Copy, Info, CheckCircle2 } from "lucide-react";
 import { models } from "@/lib/models";
 import type { ModelDetails } from "@/lib/types";
-import Prism from "prismjs";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-tomorrow.css";
 import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import RenderCode from "@/components/RenderCode";
+import NavigationContainer from "@/components/NavigationContainer";
 
 // Static data
 const suggestions = [
@@ -44,14 +42,13 @@ export default function AudioGenerationDocs() {
   const [selectedModels, setSelectedModels] = useState([
     audioModels[0]?.name.toLowerCase().replace(/ /g, "_") || "",
   ]);
-  const [activeTab, setActiveTab] = useState("python");
   const [expanded, setExpanded] = useState<number | null>(null);
 
-  // Example code for Python
-  const exampleCodePython = (modelNames: string[]) => (
-    <pre className="language-python bg-gray-900 text-white p-4 rounded-md">
-      <code>
-        {`import alleai
+  // Code examples for both languages
+  const getCodeExamples = (modelNames: string[]) => [
+    {
+      language: "python",
+      code: `import alleai
 
 client = alleai.Client(api_key="[YOUR API KEY HERE]")
 
@@ -80,16 +77,11 @@ response = client.generate_audio(
 # Access response metadata
 print(f"Generation time: {response.metadata.generation_time}s")
 print(f"Models used: {response.metadata.models}")
-print(f"Total cost: {response.metadata.cost} credits")`}
-      </code>
-    </pre>
-  );
-
-  // Example code for JavaScript
-  const exampleCodeJS = (modelNames: string[]) => (
-    <pre className="language-javascript bg-gray-900 text-white p-4 rounded-md">
-      <code>
-        {`const alleai = require('alleai');
+print(f"Total cost: {response.metadata.cost} credits")`,
+    },
+    {
+      language: "javascript",
+      code: `const alleai = require('alleai');
 
 const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
 
@@ -102,8 +94,10 @@ async function generateAudio() {
       format: 'mp3',
       duration: 30  // Duration in seconds
     });
-    
-    console.log('Audio URL:', response.audioUrl);
+
+    // Save the generated audio
+    const fs = require('fs');
+    fs.writeFileSync('output.mp3', response.audioData);
 
     // Example 2: Advanced options
     const advancedResponse = await client.generateAudio({
@@ -116,22 +110,17 @@ async function generateAudio() {
     });
 
     // Access response metadata
-    console.log('Generation time:', advancedResponse.metadata.generationTime);
-    console.log('Models used:', advancedResponse.metadata.models);
-    console.log('Total cost:', advancedResponse.metadata.cost, 'credits');
+    console.log(\`Generation time: \${response.metadata.generationTime}s\`);
+    console.log(\`Models used: \${response.metadata.models}\`);
+    console.log(\`Total cost: \${response.metadata.cost} credits\`);
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error generating audio:', error);
   }
 }
 
-generateAudio();`}
-      </code>
-    </pre>
-  );
-
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [activeTab]);
+generateAudio();`,
+    },
+  ];
 
   return (
     <div className="pb-16 w-full max-w-[100%] pr-4">
@@ -185,19 +174,19 @@ generateAudio();`}
         {/* Installation Section */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">Installation</h2>
-          <Tabs defaultValue="python" onValueChange={setActiveTab}>
+          <Tabs defaultValue="python" /* onValueChange={setActiveTab} */>
             <TabsList>
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
             </TabsList>
             <TabsContent value="python">
               <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <pre className="text-sm">pip install alleai</pre>
+                <RenderCode language="bash" code={`pip install alleai`} />
               </div>
             </TabsContent>
             <TabsContent value="javascript">
               <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <pre className="text-sm">npm install alleai</pre>
+                <RenderCode language="bash" code={`npm install alleai`} />
               </div>
             </TabsContent>
           </Tabs>
@@ -249,56 +238,14 @@ generateAudio();`}
         </div>
 
         {/* Code Examples Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Code Examples</h2>
-          <p className="text-muted-foreground mb-4">
-            Below are comprehensive examples showing both basic and advanced
-            usage of the API, including multi-model generation:
-          </p>
-          <Tabs defaultValue="python" onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="python">Python</TabsTrigger>
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-            </TabsList>
-            <TabsContent value="python">
-              <div className="relative rounded-md">
-                {exampleCodePython(selectedModels)}
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    const codeElement = document.querySelector(
-                      "pre.language-python code"
-                    );
-                    if (codeElement?.textContent) {
-                      navigator.clipboard.writeText(codeElement.textContent);
-                    }
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
-              </div>
-            </TabsContent>
-            <TabsContent value="javascript">
-              <div className="relative rounded-md">
-                {exampleCodeJS(selectedModels)}
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    const codeElement = document.querySelector(
-                      "pre.language-javascript code"
-                    );
-                    if (codeElement?.textContent) {
-                      navigator.clipboard.writeText(codeElement.textContent);
-                    }
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+        <div className="space-y-4 mt-8">
+          <h2 className="text-2xl font-bold">Code Examples</h2>
+          <RenderCode
+            languages={getCodeExamples(selectedModels)}
+            toggle={true}
+            maxHeight={400}
+            className="w-full"
+          />
         </div>
 
         {/* Response Format Section */}
@@ -393,21 +340,14 @@ generateAudio();`}
         </div>
 
         {/* What to Read Next Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">What to Read Next</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {suggestions.map((suggestion, index) => (
-              <Link key={index} href={suggestion.href}>
-                <div className="block p-4 bg-black text-white rounded-lg shadow-md dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-zinc-300 transition duration-200">
-                  <div className="flex items-center justify-between">
-                    <span>{suggestion.title}</span>
-                    <ChevronRight className="text-current" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <NavigationContainer
+          previousTitle="Text Generation"
+          previousDescription="Interacting with chat models"
+          preUrl=""
+          nextTitle="Audio Generation"
+          nextDesciption="Learn interacting with audio models "
+          nextUrl="/docs/user-guides/audio-generation"
+        />
       </div>
     </div>
   );

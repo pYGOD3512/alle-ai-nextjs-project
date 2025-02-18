@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { useState } from "react";
 import { models } from "@/lib/models";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
+import NavigationContainer from "@/components/NavigationContainer";
 const PricingPage = () => {
   // Group models by type
   const modelsByType = models.reduce((acc, model) => {
@@ -12,11 +13,9 @@ const PricingPage = () => {
     return acc;
   }, {});
 
-
   const [expandedTypes, setExpandedTypes] = useState<Record<string, boolean>>(
     {}
   );
-
 
   const handleExpand = (type: string) => {
     setExpandedTypes((prev) => ({
@@ -24,7 +23,6 @@ const PricingPage = () => {
       [type]: !prev[type],
     }));
   };
-
 
   const renderModelTable = (type: string) => {
     const modelsForType = modelsByType[type] || [];
@@ -92,16 +90,16 @@ const PricingPage = () => {
   return (
     <div className=" max-w-7xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-12">
-     
-      </div>
+      <div className="text-center mb-12"></div>
 
       {/* Pricing Tiers */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         <div className="border p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4">Free</h2>
-          <p className="text-muted-foreground mb-4">Get started with basic access.</p>
-          <ul className="mb-6">
+          <p className="text-muted-foreground mb-4">
+            Get started with basic access.
+          </p>
+          <ul className="mb-6 text-muted-foreground">
             <li className="mb-2">100 Free Requests/Month</li>
             <li className="mb-2">Limited Model Access</li>
           </ul>
@@ -114,7 +112,7 @@ const PricingPage = () => {
           <p className="text-muted-foreground mb-4">
             For serious developers and businesses.
           </p>
-          <ul className="mb-6">
+          <ul className="mb-6 text-muted-foreground">
             <li className="mb-2">10,000 Requests/Month</li>
             <li className="mb-2">Access to All Models</li>
             <li className="mb-2">Priority Support</li>
@@ -146,7 +144,7 @@ const PricingPage = () => {
               <th className="p-3 text-left">Pro</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-muted-foreground">
             <tr className="border-b">
               <td className="p-3">Requests/Month</td>
               <td className="p-3">100</td>
@@ -180,16 +178,26 @@ const PricingPage = () => {
             <h3 className="text-lg font-semibold">
               What payment methods are accepted?
             </h3>
-            <p className="text-muted-foreground">We accept all major credit cards.</p>
+            <p className="text-muted-foreground">
+              We accept all major credit cards.
+            </p>
           </div>
           {/* Add more FAQs */}
         </div>
       </div>
 
       {/* Footer */}
-      <p className="text-center text-muted-foreground">
+      <p className="text-center mb-5 text-muted-foreground">
         Contact us for custom pricing or enterprise solutions.
       </p>
+      <NavigationContainer
+        nextDesciption="Explore Alle-AI models"
+        nextUrl="/docs/user-guides/models"
+        nextTitle="Models"
+        preUrl="/"
+        previousDescription="Overview of our platform"
+        previousTitle="Quickstart"
+      />
     </div>
   );
 };

@@ -7,28 +7,9 @@ import type { ModelDetails } from "@/lib/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import RenderCode from "@/components/RenderCode";
+import NavigationContainer from "@/components/NavigationContainer";
 
-// Static data
-const suggestions = [
-  {
-    title: "Image Generation",
-    href: "/image-generation",
-    description:
-      "Generate images from text prompts or other input using our powerful API.  Create stunning visuals for your applications, marketing materials, or creative projects by making simple API calls.",
-  },
-  {
-    title: "Audio Generation",
-    href: "/audio-generation",
-    description:
-      "Create realistic or stylized audio using our API.  Generate speech, music, sound effects, and more programmatically. Integrate audio creation seamlessly into your workflows with easy-to-use API calls.",
-  },
-  {
-    title: "Video Generation",
-    href: "/video-generation",
-    description:
-      "Generate videos from text, images, or other media with our API.  Automate video production, create dynamic content, and personalize video experiences by leveraging our API's video generation capabilities through simple API calls.",
-  },
-];
+
 
 const faqs = [
   {
@@ -185,12 +166,12 @@ generateText();
             </TabsList>
             <TabsContent value="python">
               <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <pre className="text-sm">pip install alleai</pre>
+                <RenderCode language="bash" code={`pip install alleai`} />
               </div>
             </TabsContent>
             <TabsContent value="javascript">
               <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <pre className="text-sm">npm install alleai</pre>
+                <RenderCode language="bash" code={`npm install alleai`} />
               </div>
             </TabsContent>
           </Tabs>
@@ -259,17 +240,6 @@ generateText();
                   code={exampleCodePython(selectedModels)}
                   language="python"
                 />
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      exampleCodePython(selectedModels)
-                    );
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
               </div>
             </TabsContent>
             <TabsContent value="javascript">
@@ -278,17 +248,6 @@ generateText();
                   code={exampleCodeJS(selectedModels)}
                   language="javascript"
                 />
-                <Button
-                  className="absolute top-2 right-2"
-                  variant="ghost"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      exampleCodeJS(selectedModels)
-                    );
-                  }}
-                >
-                  <Copy size={16} />
-                </Button>
               </div>
             </TabsContent>
           </Tabs>
@@ -348,23 +307,14 @@ generateText();
         </div>
 
         {/* What to Read Next Section */}
-        <section className="bg-background">
-          <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {suggestions.map((item, index) => (
-              <Link
-                key={index}
-                href={item.href}
-                className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <h3 className="font-medium">{item.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {item.description}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <NavigationContainer
+          previousTitle="Text Generation"
+          previousDescription="Interacting with chat models"
+          preUrl=""
+          nextTitle="Audio Generation"
+          nextDesciption="Learn interacting with audio models "
+          nextUrl="/docs/user-guides/audio-generation"
+        />
       </div>
     </div>
   );
