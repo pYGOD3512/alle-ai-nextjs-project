@@ -549,9 +549,19 @@ interface WebSearchState {
   setIsWebSearch: (enabled: boolean) => void;
 }
 
+interface CombinedModeState {
+  isCombinedMode: boolean;
+  setIsCombinedMode: (enabled: boolean) => void;
+}
+
 export const useWebSearchStore = create<WebSearchState>((set) => ({
   isWebSearch: false,
   setIsWebSearch: (enabled) => set({ isWebSearch: enabled }),
+}));
+
+export const useCombinedModeStore = create<CombinedModeState>((set) => ({
+  isCombinedMode: false,
+  setIsCombinedMode: (enabled) => set({ isCombinedMode: enabled }),
 }));
 
 interface CodeThemeStore {

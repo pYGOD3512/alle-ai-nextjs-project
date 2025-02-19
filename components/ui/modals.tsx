@@ -123,6 +123,9 @@ import {
   FileText, 
   Download,
   Camera,
+  Users,
+  Building2,
+  InfoIcon,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -164,7 +167,7 @@ import {
   Cell,
 } from 'recharts';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Label as UILabel } from "@/components/ui/label";
+import { Label, Label as UILabel } from "@/components/ui/label";
 import { useAuth } from "../providers/AuthProvider";
 
 
@@ -179,7 +182,7 @@ import { useSidebarStore, useSelectedModelsStore, useHistoryStore,
   useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, 
   useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, 
   useProjectStore, ProjectFile } from "@/stores";
-import { LogoLoader } from "../features/AlleAILoader";
+import { AlleAILoader } from "../features/AlleAILoader";
 import { HistoryItem } from "@/lib/api/history";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
@@ -994,7 +997,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
           {/* Model Grid */}
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              <LogoLoader size="sm" />
+              <AlleAILoader size="sm" />
             </div>
           ) : error ? (
             <div className="text-center text-red-500 p-4">
@@ -2850,6 +2853,8 @@ export function SubscriptionConfirmModal({
 export function PlansModal({ isOpen, onClose }: ModalProps) {
   const [isYearly, setIsYearly] = useState(false);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  const [showOrgPlans, setShowOrgPlans] = useState(false);
+  const [teamSize, setTeamSize] = useState(50);
   const { toast } = useToast();
   const router = useRouter();
   const userPlan = useAuthStore((state) => state.plan);
@@ -2860,6 +2865,20 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
       description: "This plan is coming soon!",
       variant: "default",
     });
+  };
+
+  const handleContactSales = () => {
+    toast({
+      title: "Contact Sales",
+      description: "Our team will reach out to you shortly!",
+      variant: "default",
+    });
+  };
+
+  const calculatePrice = (basePrice: number) => {
+    const pricePerUser = basePrice;
+    const total = Math.round((teamSize * pricePerUser) / 10) * 10;
+    return isYearly ? total * 10 : total;
   };
 
   const handleCheckout = async (planName: string) => {
@@ -2981,144 +3000,309 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
     },
   ];
 
+  const orgPlans = [
+    {
+      name: "Business",
+      basePrice: 20,
+      description: "Perfect for growing organizations that need powerful AI capabilities.",
+      features: [
+        "Unlimited AI conversations",
+        `Up to ${teamSize} team members`,
+        "Advanced analytics dashboard",
+        "Priority support",
+        "Custom AI model integration",
+        "Team collaboration features",
+      ],
+      icon: <Building2 className="w-5 h-5 text-primary" />,
+      highlighted: false,
+    },
+    {
+      name: "Enterprise",
+      description: "Fully customizable solution with advanced security and control.",
+      features: [
+        "Everything in Business",
+        "Unlimited team members",
+        "Custom AI model training",
+        "24/7 dedicated support",
+        "SSO & advanced security",
+        "API access",
+      ],
+      icon: <Shield className="w-5 h-5 text-primary" />,
+      highlighted: true,
+      custom: true,
+    }
+  ];
+
   return (
     <div className="overflow-auto">
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[70rem]">
-          <DialogHeader className="text-center space-y-4 relative">
-            <DialogTitle className="text-xl">Upgrade your plan</DialogTitle>
+          {showOrgPlans ? (
+            <>
+              <DialogHeader className="text-center space-y-4 relative">
+                <Button
+                  variant="ghost"
+                  className="absolute left-0 top-0 text-sm"
+                  onClick={() => setShowOrgPlans(false)}
+                >
+                  ← Back
+                </Button>
+                <DialogTitle className="text-xl pt-6 text-center">Organization Plans</DialogTitle>
 
-            {/* Billing Toggle */}
-            <div className="flex items-center justify-center gap-4">
-              <span className={cn("text-sm", !isYearly && "text-primary")}>
-                Monthly
-              </span>
-              <Switch
-                checked={isYearly}
-                onCheckedChange={setIsYearly}
-                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
-              />
-              <div className="flex items-center gap-2">
-                <span className={cn("text-sm", isYearly && "text-primary")}>
-                  Yearly
-                </span>
-                <Badge variant="secondary" className="bg-primary/20 text-primary">
-                  17% discount
-                </Badge>
-              </div>
-            </div>
-            <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">esc</span>
-            </kbd>
-          </DialogHeader>
-
-          {/* Plans Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-4">
-            {plans.map((plan) => (
-              <motion.div
-                key={plan.name}
-                layout
-                className={cn(
-                  "relative p-6 rounded-lg border",
-                  plan.highlighted
-                    ? "bg-[#130f0f] text-white"
-                    : "border-borderColorPrimary"
-                )}
-              >
-                <div className="relative space-y-4 min-h-[25rem]">
-                  <div>
-                    <h3 className="font-medium text-md">{plan.name}</h3>
-                    <motion.div
-                      key={`${plan.name}-${isYearly ? "yearly" : "monthly"}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="flex items-end gap-1"
-                    >
-                      <span className="text-3xl font-bold">
-                        £
-                        {typeof plan.price === "number" ? plan.price : plan.price}
-                      </span>
-                      {plan.price !== "X" && (
-                        <span className="text-muted-foreground mb-1">
-                          /{isYearly ? "year" : "month"}
-                        </span>
-                      )}
-                    </motion.div>
+                <div className="flex items-center justify-center gap-4">
+                  <span className={cn("text-sm", !isYearly && "text-primary")}>
+                    Monthly
+                  </span>
+                  <Switch
+                    checked={isYearly}
+                    onCheckedChange={setIsYearly}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-sm", isYearly && "text-primary")}>
+                      Yearly
+                    </span>
+                    <Badge variant="secondary" className="bg-primary/20 text-primary">
+                      17% discount
+                    </Badge>
                   </div>
-
-                  <div
-                    className={`text-sm text-muted-foreground pb-4 flex flex-col`}
-                  >
-                    {plan.description}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info
-                            className={`h-3 w-3 cursor-pointer right-0 ${
-                              plan.highlighted
-                                ? "text-[#fafafa]"
-                                : "text-bodyColor"
-                            }`}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
-                          {plan.about}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-
-                  <ul className="space-y-4">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-start gap-2 text-[0.8rem]"
-                      >
-                        <Check
-                          className={`h-4 w-4 text-primary ${
-                            plan.highlighted ? "text-[#fafafa]" : ""
-                          }`}
-                        />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    className={`w-full absolute bottom-0 ${
-                      plan.highlighted
-                        ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
-                        : ""
-                    }`}
-                    variant={plan.highlighted ? "default" : "outline"}
-                    onClick={() => 
-                      plan.name.toLowerCase() === 'custom' 
-                        ? handleCustomPlan() 
-                        : handleCheckout(plan.name)
-                    }
-                    disabled={processingPlan !== null || isCurrentPlan(plan.name)}
-                  >
-                    {processingPlan === plan.name ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Processing...</span>
-                      </div>
-                    ) : (
-                      getButtonText(plan.name)
-                    )}
-                  </Button>
                 </div>
-              </motion.div>
-            ))}
-          </div>
 
-          <div className="text-center mt-6 text-sm text-muted-foreground">
-            Need more Capabilities?{" "}
-            <a href="#" className="text-primary hover:underline">
-              See Alle-AI Team & Enterprise plans
-            </a>
-          </div>
+                <div className="max-w-md mx-auto space-y-4 bg-secondary/20 p-4 rounded-lg mt-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm font-medium">Team Size</span>
+                    </div>
+                    <span className="text-sm font-bold">{teamSize} users</span>
+                  </div>
+                  <Slider
+                    value={[teamSize]}
+                    onValueChange={(value) => setTeamSize(value[0])}
+                    min={10}
+                    max={1000}
+                    step={10}
+                    className="w-full"
+                  />
+                </div>
+              </DialogHeader>
+
+              <div className="grid grid-cols-1 mx-auto sm:grid-cols-2 gap-4 mt-6">
+                {orgPlans.map((plan) => (
+                  <motion.div
+                    key={plan.name}
+                    layout
+                    className={cn(
+                      "relative p-6 rounded-lg border max-w-md",
+                      plan.highlighted
+                        ? "bg-[#130f0f] text-white"
+                        : "border-borderColorPrimary"
+                    )}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        {plan.icon}
+                        <h3 className="font-medium">{plan.name}</h3>
+                      </div>
+
+                      {!plan.custom && plan.basePrice !== undefined && (
+                        <motion.div
+                          key={`${plan.name}-${isYearly ? "yearly" : "monthly"}-${teamSize}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-end gap-1"
+                        >
+                          <span className="text-2xl font-bold">
+                            £{calculatePrice(plan.basePrice)}
+                          </span>
+                          <span className="text-muted-foreground mb-1 text-sm">
+                            /{isYearly ? "year" : "month"}
+                          </span>
+                        </motion.div>
+                      )}
+
+                      <p className="text-sm text-muted-foreground">
+                        {plan.description}
+                      </p>
+
+                      <ul className="space-y-2">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2 text-sm">
+                            <Check className={cn(
+                              "h-4 w-4",
+                              plan.highlighted ? "text-primary" : "text-primary"
+                            )} />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <Button
+                        className={cn(
+                          "w-full",
+                          plan.highlighted
+                            ? "bg-primary hover:bg-primary/90"
+                            : ""
+                        )}
+                        variant={plan.highlighted ? "default" : "outline"}
+                        onClick={plan.custom ? handleContactSales : undefined}
+                      >
+                        {plan.custom ? "Contact Sales" : "Get Started"}
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="text-center mt-6 space-y-2">
+                <div className="inline-flex items-center gap-2 bg-secondary/20 px-3 py-1.5 rounded-full">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium">Need a custom solution?</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Contact our sales team for custom pricing and requirements.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogHeader className="text-center space-y-4 relative">
+                <DialogTitle className="text-xl text-center">Upgrade your plan</DialogTitle>
+
+                <div className="flex items-center justify-center gap-4">
+                  <span className={cn("text-sm", !isYearly && "text-primary")}>
+                    Monthly
+                  </span>
+                  <Switch
+                    checked={isYearly}
+                    onCheckedChange={setIsYearly}
+                    className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-borderColorPrimary"
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-sm", isYearly && "text-primary")}>
+                      Yearly
+                    </span>
+                    <Badge variant="secondary" className="bg-primary/20 text-primary">
+                      17% discount
+                    </Badge>
+                  </div>
+                </div>
+                <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                  <span className="text-xs">esc</span>
+                </kbd>
+              </DialogHeader>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-4">
+                {plans.map((plan) => (
+                  <motion.div
+                    key={plan.name}
+                    layout
+                    className={cn(
+                      "relative p-6 rounded-lg border",
+                      plan.highlighted
+                        ? "bg-[#130f0f] text-white"
+                        : "border-borderColorPrimary"
+                    )}
+                  >
+                    <div className="relative space-y-4 min-h-[25rem]">
+                      <div>
+                        <h3 className="font-medium text-md">{plan.name}</h3>
+                        <motion.div
+                          key={`${plan.name}-${isYearly ? "yearly" : "monthly"}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className="flex items-end gap-1"
+                        >
+                          <span className="text-3xl font-bold">
+                            £
+                            {typeof plan.price === "number" ? plan.price : plan.price}
+                          </span>
+                          {plan.price !== "X" && (
+                            <span className="text-muted-foreground mb-1">
+                              /{isYearly ? "year" : "month"}
+                            </span>
+                          )}
+                        </motion.div>
+                      </div>
+
+                      <div
+                        className={`text-sm text-muted-foreground pb-4 flex flex-col`}
+                      >
+                        {plan.description}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info
+                                className={`h-3 w-3 cursor-pointer right-0 ${
+                                  plan.highlighted
+                                    ? "text-[#fafafa]"
+                                    : "text-bodyColor"
+                                }`}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs text-sm bg-backgroundSecondary">
+                              {plan.about}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+
+                      <ul className="space-y-4">
+                        {plan.features.map((feature) => (
+                          <li
+                            key={feature}
+                            className="flex items-start gap-2 text-[0.8rem]"
+                          >
+                            <Check
+                              className={`h-4 w-4 text-primary ${
+                                plan.highlighted ? "text-[#fafafa]" : ""
+                              }`}
+                            />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <Button
+                        className={`w-full absolute bottom-0 ${
+                          plan.highlighted
+                            ? "bg-[#fafafa] text-[#171717] hover:bg-[#F8F8F8]"
+                            : ""
+                        }`}
+                        variant={plan.highlighted ? "default" : "outline"}
+                        onClick={() => 
+                          plan.name.toLowerCase() === 'custom' 
+                            ? handleCustomPlan() 
+                            : handleCheckout(plan.name)
+                        }
+                        disabled={processingPlan !== null || isCurrentPlan(plan.name)}
+                      >
+                        {processingPlan === plan.name ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Processing...</span>
+                          </div>
+                        ) : (
+                          getButtonText(plan.name)
+                        )}
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="text-center mt-6 text-sm text-muted-foreground">
+                Need more Capabilities?{" "}
+                <button 
+                  onClick={() => setShowOrgPlans(true)}
+                  className="text-primary hover:underline"
+                >
+                  See Alle-AI Team & Enterprise plans
+                </button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
@@ -3346,9 +3530,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {formatTimeDistance(item)}
-                        created at {item.created_at}
-                        {/* updated at {item.updated_at} */}
+                        {/* {formatTimeDistance(item)} */}
+                        created at {format(new Date(item.created_at), "dd'/'MM'/'yy h:mm a")}{" "}
+                        updated at {format(new Date(item.updated_at), "dd'/'MM'/'yy h:mm a")}
                       </div>
                     </div>
                   </div>
@@ -6202,6 +6386,228 @@ export function ProjectInstructionsModal({ isOpen, onClose, projectName }: Proje
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function OrganizationModal({ isOpen, onClose }: ModalProps) {
+  const [view, setView] = useState<'list' | 'create'>('list');
+  const [orgName, setOrgName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  // Mock data - Replace with your actual data fetching
+  const organizations = [
+    {
+      id: 'org1-a1b2c3',
+      name: 'KNUST',
+      role: 'Admin',
+      members: 450,
+      image: '/icons/knust.png'
+    },
+    {
+      id: 'org2-d4e5f6',
+      name: 'University of Ghana',
+      role: 'Admin',
+      members: 300,
+      image: '/icons/legon.png'
+    }
+  ];
+
+  const generateOrgId = (orgName: string) => {
+    const prefix = 'org';
+    const counter = organizations.length + 1;
+    const uniqueId = crypto.randomUUID().split('-')[0];
+    return `${prefix}${counter}-${uniqueId}`;
+  };
+
+
+  const handleCreateOrg = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const newOrgId = generateOrgId(orgName);
+      // Add your organization creation logic here
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Organization Created",
+        description: "Your organization has been created successfully.",
+        variant: "default",
+      });
+      
+      // Open the new organization page in a new tab
+      router.push(`/organization/${newOrgId}`);
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create organization. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSelectOrg = async (orgId: string) => {
+    try {
+      // Add your organization selection logic here
+      await new Promise(resolve => setTimeout(resolve, 500)); // Mock API call
+      router.push(`/organization/${orgId}`);
+      toast({
+        title: "Organization Selected",
+        description: "Switched to selected organization.",
+        variant: "default",
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to switch organization. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {view === 'list' ? (
+              <>
+                <Building2 className="h-5 w-5" />
+                Organizations
+              </>
+            ) : (
+              <>
+                <Plus className="h-5 w-5" />
+                Create Organization
+              </>
+            )}
+          </DialogTitle>
+          {view === 'list' && (
+            <DialogDescription>
+              Select an organization to switch context or create a new one
+            </DialogDescription>
+          )}
+        </DialogHeader>
+
+        {view === 'list' ? (
+          <>
+            {/* Organizations List */}
+            <div className="space-y-4">
+              {organizations.map((org) => (
+                <motion.div
+                  key={org.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={cn(
+                    "p-4 rounded-lg border border-border hover:border-primary/50 transition-colors",
+                    "cursor-pointer group relative"
+                  )}
+                  onClick={() => handleSelectOrg(org.id)}
+                >
+                  <div className="flex items-center gap-4">
+                    {org.image ? (
+                      <Image
+                        src={org.image}
+                        alt={org.name}
+                        width={30}
+                        height={30}
+                        className="rounded-md"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-medium group-hover:text-primary transition-colors">
+                        {org.name}
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Shield className="w-3 h-3" />
+                          {org.role}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {org.members} members
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Create New Organization Button */}
+            <Button
+              className="w-full mt-4"
+              variant="outline"
+              onClick={() => setView('create')}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Organization
+            </Button>
+          </>
+        ) : (
+          <>
+            {/* Create Organization Form */}
+            <form onSubmit={handleCreateOrg} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="orgName">Organization Name</Label>
+                <Input
+                  id="orgName"
+                  placeholder="Enter organization name"
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="bg-secondary/20 p-4 rounded-lg space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <InfoIcon className="w-4 h-4 text-primary" />
+                  Important Note
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Creating an organization requires an organization plan. You&apos;ll be prompted to select a plan after creation.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setView('list')}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!orgName.trim() || isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Organization'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

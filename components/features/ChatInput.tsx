@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { ArrowUp, Paperclip, Globe , X } from "lucide-react";
+import { ArrowUp, Paperclip, Globe , X, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ import { processFile } from '@/lib/fileProcessing';
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FooterText } from "../FooterText";
-import { useSelectedModelsStore, useWebSearchStore } from "@/stores";
+import { useSelectedModelsStore, useWebSearchStore, useCombinedModeStore } from "@/stores";
 import { ModelSelectionModal, PromptModal } from "@/components/ui/modals";
 
 declare global {
@@ -41,7 +41,9 @@ interface ChatInputProps {
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   isLoading: boolean;
   isWeb?: boolean;
+  isCombined?: boolean;
   onWebSearchToggle?: (enabled: boolean) => void;
+  onCombinedToggle?: (enabled: boolean) => void;
 }
 
 export function ChatInput({
@@ -51,11 +53,14 @@ export function ChatInput({
   inputRef,
   isLoading,
   isWeb,
-  onWebSearchToggle
+  isCombined,
+  onWebSearchToggle,
+  onCombinedToggle
 }: ChatInputProps) {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
   const { isWebSearch, setIsWebSearch } = useWebSearchStore();
+  const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
   const { selectedModels } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
@@ -348,6 +353,18 @@ export function ChatInput({
     });
   };
 
+  const handleCombinedToggle = () => {
+    const newValue = !isCombinedMode;
+    setIsCombinedMode(newValue);
+    onCombinedToggle?.(newValue);
+    toast({
+      title: newValue ? "Combined Mode Enabled" : "Combined Mode Disabled",
+      description: newValue 
+        ? "Your messages will now be processed in combined mode"
+        : "Messages will be processed normally",
+    });
+  };
+
   const handleSendClick = () => {
     if ((pathname === "/chat" && selectedModels.chat.length < 2) || (pathname === "/image" && selectedModels.image.length < 2) ) {
       setShowModelPrompt(true);
@@ -477,6 +494,29 @@ export function ChatInput({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+                )}
+
+                {isCombined && (
+                  <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleCombinedToggle}
+                        className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.3rem] ${
+                          isCombinedMode 
+                            ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
+                            : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <Layers size={14} />
+                        <span className="text-[12px]">Combine</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isCombinedMode ? "Combined mode enabled" : "Enable combined mode"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 )}
               </div>
 
