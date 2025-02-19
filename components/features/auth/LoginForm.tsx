@@ -40,9 +40,10 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       }
       // Login function will handle other redirects
     } catch (error: any) {
+      setPassword("");
       toast({
         title: "Login failed",
-        description: error.response?.data?.message || "Please check your credentials and try again",
+        description: "Please check your credentials and try again",
         variant: "destructive",
       });
     } finally {
@@ -97,6 +98,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
 
         <div className="flex justify-end">
           <Button
+            type="button"
             variant="link"
             className="text-sm text-muted-foreground hover:underline"
             onClick={onForgotPassword}
@@ -124,7 +126,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
 
       {/* Register Link */}
       <div className="text-center text-sm">
-        <span className="text-muted-foreground">Don't have an account yet? </span>
+        <span className="text-muted-foreground">Don&apos;t have an account yet? </span>
         <Button
           variant="link"
           onClick={onSwitchMode}
@@ -136,7 +138,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
 
       {/* Terms */}
       <div className="text-center text-xs text-muted-foreground">
-        By continuing, you agree to Alle-AI's{" "}
+        By continuing, you agree to Alle-AI&apos;s{" "}
         <Link href="/terms-of-service" target="_blank" className="underline">
           Terms of Service 
         </Link>{" "}

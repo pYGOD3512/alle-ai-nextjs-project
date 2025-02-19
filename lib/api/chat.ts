@@ -19,7 +19,7 @@ interface GenerateResponseParams {
   model: string;        // model uid
   is_new: boolean;      // true for new generation
   prompt: string;       // prompt id
-  prompt_response?: [string, string][]; // Optional [prompt_id, response_id] pairs for continuations
+  prev?: [string, string][] | null; // Optional [prompt_id, response_id] pairs for continuations
 }
 
 interface GenerateResponseResult {
@@ -36,9 +36,9 @@ interface GenerateResponseResult {
 }
 
 interface CreatePromptParams {
-  conversation: string;
-  prompt: string;
-  position: [number, number];
+  // conversation: string;
+  // prompt: string;
+  // position?: [number, number];
   input_content?: {
     uploaded_files: Array<{
       file_name: string;
@@ -64,6 +64,49 @@ interface WebSearchParams {
   messages?: null | [string, string][]; // Array of [prompt_id, response_id] pairs
 }
 
+export interface Message {
+  id: string;
+  content: string;
+  position: [number, number];
+  sender: 'user' | 'ai';
+  timestamp: Date;
+  parentId?: string;
+  responses?: Array<{
+    id: string;
+    modelId: string;
+    content: string;
+    status: 'loading' | 'complete' | 'error';
+    error?: string;
+  }>;
+}
+
+export interface ModelResponse {
+  id: string; // response ID
+  modelId: string; // model_uid
+  content: string;
+  status: 'loading' | 'complete' | 'error';
+  error?: string;
+}
+
+export interface Branch {
+  id: string;
+  messages: Message[];
+  startPosition: [number, number];
+  parentBranchId?: string;
+}
+
+export interface ChatMessageProps {
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+  position: [number, number];
+  onEditMessage: (content: string, position: [number, number]) => void;
+  totalBranches: number;
+  currentBranch: number;
+  onBranchChange: (index: number) => void;
+  branches: Branch[];
+}
+
 export const chatApi = {
   createConversation: async (models: string[], type: 'chat' | 'image' | 'audio' | 'video'): Promise<CreateConversationResponse> => {
     try {
@@ -82,13 +125,14 @@ export const chatApi = {
   createPrompt: async (
     conversation: string, 
     prompt: string,
+    position?: [number, number],
     options?: { input_content?: CreatePromptParams['input_content'] }
   ): Promise<CreatePromptResponse> => {
     try {
       const response = await api.post<CreatePromptResponse>('/create/prompt', {
         conversation,
         prompt,
-        position: [0, 0],
+        position,
         ...(options?.input_content && { input_content: options.input_content })
       });
       console.log('Response from createPrompt:', response.data);
@@ -119,13 +163,14 @@ export const chatApi = {
   },
 
   generateResponse: async (params: GenerateResponseParams): Promise<GenerateResponseResult> => {
+    console.log('Generating response with params:', params);
     try {
       const response = await api.post('/ai-response', {
         conversation: params.conversation,
         model: params.model,
         is_new: params.is_new,
         prompt: params.prompt,
-        prompt_response: params.prompt_response
+        prev: params.prev
       });
       console.log('Response from generateResponse:', response.data);
       return response.data;

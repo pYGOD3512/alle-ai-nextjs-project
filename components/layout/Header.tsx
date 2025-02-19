@@ -298,7 +298,7 @@ export function Header() {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
           setReferModalOpen(true);
-        } else if (item.label === 'Album') {
+        } else if (item.label === 'Favorites') {
           setAlbumModalOpen(true);
         }
         break;
@@ -576,7 +576,7 @@ export function Header() {
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>
                 {userMenuItems.filter(item => 
                   !pathname.includes('/plans') || 
-                  !(item.label === 'Profile' || item.label === 'Developer' || item.label === 'Refer' || item.label === 'Album' || item.label === 'Settings')
+                  !(item.label === 'Profile' || item.label === 'Developer' || item.label === 'Refer' || item.label === 'Favorites' || item.label === 'Settings')
                 ).map((item, index) => (
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />

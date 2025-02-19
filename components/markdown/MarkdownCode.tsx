@@ -39,6 +39,30 @@ export function MarkdownCode({ children, className, inline }: MarkdownCodeProps)
   const { theme: appTheme, systemTheme } = useTheme();
   const { theme: selectedTheme, setTheme: setCodeTheme } = useCodeThemeStore();
 
+  // Handle inline code
+  if (inline) {
+    return (
+      <code className="px-1.5 py-0.5 rounded-md bg-secondary/30 text-xs font-mono">
+        {children}
+      </code>
+    );
+  }
+
+  const language = className?.split('-')[1] || 'plaintext';
+  const code = children as string;
+
+  // Handle plaintext differently - render without code container
+  if (language === 'plaintext') {
+    return (
+      <div className="whitespace-pre-wrap my-2 prose prose-sm dark:prose-invert max-w-none
+        [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:my-2
+        [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:my-2
+        [&>li]:my-0.5">
+        {children}
+      </div>
+    );
+  }
+
   // Determine the effective theme
   const getTheme = () => {
     if (selectedTheme === 'System Default') {
@@ -49,17 +73,7 @@ export function MarkdownCode({ children, className, inline }: MarkdownCodeProps)
     return themes[themeValue as keyof typeof themes];
   };
 
-  if (inline) {
-    return (
-      <code className="px-1.5 py-0.5 rounded-md bg-secondary/30 text-xs font-mono">
-        {children}
-      </code>
-    );
-  }
-
-  const language = className?.split('-')[1] || 'plaintext';
   const formattedLanguage = language.charAt(0).toUpperCase() + language.slice(1);
-  const code = children as string;
 
   const handleCopy = async () => {
     if (typeof children === 'string') {

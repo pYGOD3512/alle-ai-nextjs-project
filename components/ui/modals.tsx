@@ -3346,9 +3346,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                     <div>
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {formatTimeDistance(item)}
-                        created at {item.created_at}
-                        {/* updated at {item.updated_at} */}
+                        {/* {formatTimeDistance(item)} */}
+                        created at {format(new Date(item.created_at), "dd'/'MM'/'yy h:mm a")}{" "}
+                        updated at {format(new Date(item.updated_at), "dd'/'MM'/'yy h:mm a")}
                       </div>
                     </div>
                   </div>

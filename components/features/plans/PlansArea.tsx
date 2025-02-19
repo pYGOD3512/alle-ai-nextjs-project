@@ -10,10 +10,12 @@ import { Check, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import OrganizationPlansArea from "./OrganizationPlansArea";
 
 const PlansArea = () => {
   const [isYearly, setIsYearly] = useState(false);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  const [showOrgPlans, setShowOrgPlans] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -123,6 +125,21 @@ const PlansArea = () => {
       highlighted: false,
     },
   ];
+
+  if (showOrgPlans) {
+    return (
+      <div className="relative">
+        <Button
+          variant="ghost"
+          className="absolute left-4 top-4 text-sm"
+          onClick={() => setShowOrgPlans(false)}
+        >
+          ← Back to Plans
+        </Button>
+        <OrganizationPlansArea />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl overflow-auto">
@@ -243,11 +260,14 @@ const PlansArea = () => {
         ))}
       </div>
 
-      <div className="text-center mt-8 sm:mt-12  text-sm text-muted-foreground">
+      <div className="text-center mt-8 sm:mt-12 text-sm text-muted-foreground">
         Need more Capabilities?{" "}
-        <a href="#" className="text-primary hover:underline">
+        <button 
+          onClick={() => setShowOrgPlans(true)} 
+          className="text-primary hover:underline"
+        >
           See Alle-AI Team & Enterprise plans
-        </a>
+        </button>
       </div>
     </div>
   );
