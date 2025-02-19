@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSelector } from "./ModelSelector";
 import { ChatMessage } from "./ChatMessage";
@@ -50,6 +50,20 @@ interface ModelResponse {
   error?: string;
 }
 
+interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+  position: [number, number];
+  responses: ModelResponse[];
+}
+
+interface Branch {
+  messages: Message[];
+  startPosition: [number, number];
+}
+
 export function ChatArea() {
   const { toast } = useToast();
   const { content } = useContentStore();
@@ -96,26 +110,57 @@ export function ChatArea() {
     }];
   });
 
+  const [branches, setBranches] = useState<Branch[]>(() => {
+    if (!conversationId || !promptId) return [{ messages: [], startPosition: [0, 0] }];
+    const initialPrompt = content.chat.input;
+    
+    return [{
+      messages: [{
+        id: promptId,
+        content: initialPrompt,
+        sender: 'user',
+        timestamp: new Date(),
+        position: [0, 0],
+        responses: selectedModels.chat.map(modelId => ({
+          id: `temp-${modelId}`,
+          modelId,
+          content: '',
+          status: 'loading'
+        }))
+      }],
+      startPosition: [0, 0]
+    }];
+  });
 
+  const [currentBranch, setCurrentBranch] = useState(0);
+
+  // Memoize the auto-activation logic
+  const handleAutoActivation = useCallback((message: ChatMessage) => {
+    if (activeContents[message.id]) return;
+
+    const firstCompleteResponse = message.responses?.find(
+      response => response.status === 'complete'
+    );
+
+    if (firstCompleteResponse) {
+      setActiveContents(prev => ({
+        ...prev,
+        [message.id]: {
+          type: 'model',
+          id: firstCompleteResponse.modelId
+        }
+      }));
+    }
+  }, [activeContents]);
+
+  // Update the effect to use stable dependencies
   useEffect(() => {
     chatSessions.forEach(session => {
-      // Check if responses exist and at least one is complete
-      const hasCompleteResponse = session.messages[0]?.responses?.some(
-        response => response.status === 'complete'
-      );
-
-      // If there's a complete response but no active content set for this session
-      if (hasCompleteResponse && !activeContents[session.id]) {
-        setActiveContents(prev => ({
-          ...prev,
-          [session.id]: { 
-            type: 'model', 
-            id: session.activeModel 
-          }
-        }));
-      }
+      session.messages.forEach(message => {
+        handleAutoActivation(message);
+      });
     });
-  }, [chatSessions, activeContents]);
+  }, [chatSessions, handleAutoActivation]);
 
   useEffect(() => {
     chatSessions.forEach(session => {
@@ -135,8 +180,7 @@ export function ChatArea() {
     });
   }, [chatSessions, showSummary, generatingSummary]);
 
-
-  // Handle real-time response updates
+  // Update the effect to handle initial responses
   useEffect(() => {
     if (!conversationId || !promptId) return;
 
@@ -144,21 +188,27 @@ export function ChatArea() {
       modelId => !inactiveModels.includes(modelId)
     );
 
+    // Handle web search separately and first
+    if (isWebSearch) {
+      console.log('Web search is enabled - making web search API call');
+      chatApi.webSearch({
+        prompt_id: promptId,
+        conversation_id: conversationId,
+        follow_up: false,
+        prev: null
+      })
+      .then(webSearchResponse => {
+        console.log('Web search response received:', webSearchResponse);
+      })
+      .catch(error => {
+        console.error('Error in web search:', error);
+      });
+      return; // Exit early since we're using web search
+    }
+
+    // Handle model responses only if not using web search
     activeModels.forEach(async (modelId) => {
       try {
-        if (isWebSearch) {
-          console.log('Web search is enabled - making web search API call');
-          const webSearchResponse = await chatApi.webSearch({
-            prompt_id: promptId,
-            conversation_id: conversationId,
-            follow_up: false,
-            messages: null
-          });
-          
-          console.log('Web search response received:', webSearchResponse);
-          return; 
-        }
-
         const response = await chatApi.generateResponse({
           conversation: conversationId,
           model: modelId,
@@ -167,51 +217,57 @@ export function ChatArea() {
         });
 
         if (response.status && response.data) {
-          setChatSessions(prev => prev.map(session => ({
-            ...session,
-            messages: session.messages.map(msg => ({
-              ...msg,
-              responses: msg.responses.map(resp => 
-                resp.modelId === modelId ? {
-                  ...resp,
-                  id: String(response.data.id),
-                  content: response.data.response,
-                  status: 'complete'
-                } : resp
-              )
-            }))
+          setBranches(prev => prev.map(branch => ({
+            ...branch,
+            messages: branch.messages.map(msg => 
+              msg.id === promptId ? {
+                ...msg,
+                responses: msg.responses.map(resp => 
+                  resp.modelId === modelId ? {
+                    ...resp,
+                    id: String(response.data.id),
+                    content: response.data.response,
+                    status: 'complete'
+                  } : resp
+                )
+              } : msg
+            )
           })));
         } else {
           // Handle error state
-          setChatSessions(prev => prev.map(session => ({
-            ...session,
-            messages: session.messages.map(msg => ({
+          setBranches(prev => prev.map(branch => ({
+            ...branch,
+            messages: branch.messages.map(msg => 
+              msg.id === promptId ? {
+                ...msg,
+                responses: msg.responses.map(resp => 
+                  resp.modelId === modelId ? {
+                    ...resp,
+                    status: 'error',
+                    error: response.message || 'Failed to generate response'
+                  } : resp
+                )
+              } : msg
+            )
+          })));
+        }
+      } catch (error) {
+        console.error(`Error in response:`, error);
+        // Update error state in UI
+        setBranches(prev => prev.map(branch => ({
+          ...branch,
+          messages: branch.messages.map(msg => 
+            msg.id === promptId ? {
               ...msg,
               responses: msg.responses.map(resp => 
                 resp.modelId === modelId ? {
                   ...resp,
                   status: 'error',
-                  error: response.message || 'Failed to generate response'
+                  error: 'Failed to generate response'
                 } : resp
               )
-            }))
-          })));
-        }
-      } catch (error) {
-        console.error(`Error in ${isWebSearch ? 'web search' : 'regular'} response:`, error);
-        // Update error state in UI
-        setChatSessions(prev => prev.map(session => ({
-          ...session,
-          messages: session.messages.map(msg => ({
-            ...msg,
-            responses: msg.responses.map(resp => 
-              resp.modelId === modelId ? {
-                ...resp,
-                status: 'error',
-                error: 'Failed to generate response'
-              } : resp
-            )
-          }))
+            } : msg
+          )
         })));
       }
     });
@@ -221,46 +277,235 @@ export function ChatArea() {
     setInput(value);
   };
 
-  const handleSendMessage = async (fileContent?: {
-    uploaded_files: Array<{
-      file_name: string;
-      file_size: string;
-      file_type: string;
-      file_content: string;
-    }>;
-  }) => {
+  const handleEditMessage = async (newContent: string, position: [number, number]) => {
+    setIsLoading(true);
+    try {
+      const [_, y] = position;
+      
+      // Find all messages at EXACTLY this Y level in the current branch
+      const messagesAtThisLevel = branches[currentBranch].messages.filter(
+        m => m.position[1] === y
+      );
+      
+      // Get the next X coordinate for this specific Y level only
+      const newX = Math.max(...messagesAtThisLevel.map(m => m.position[0])) + 1;
+      const newPosition: [number, number] = [newX, y];
+
+      const promptResponse = await chatApi.createPrompt(
+        conversationId!,
+        newContent,
+        newPosition,
+        undefined
+      );
+
+      // Create new branch that preserves ALL messages from previous levels exactly as they are
+      const newBranch: Branch = {
+        messages: [
+          // Keep ALL messages from previous levels unchanged
+          ...branches[currentBranch].messages.filter(m => m.position[1] < y),
+          // Add the edited message at this level
+          {
+            id: promptResponse.id,
+            content: newContent,
+            sender: 'user',
+            timestamp: new Date(),
+            position: newPosition,
+            responses: selectedModels.chat.map(modelId => ({
+              id: `temp-${modelId}`,
+              modelId,
+              content: '',
+              status: 'loading'
+            }))
+          }
+        ],
+        startPosition: [newX, y]
+      };
+
+      // Add the new branch without affecting existing ones
+      setBranches(prev => [...prev, newBranch]);
+      setCurrentBranch(branches.length);
+
+      // Handle model responses...
+      const activeModels = selectedModels.chat.filter(
+        modelId => !inactiveModels.includes(modelId)
+      );
+
+      activeModels.forEach(async (modelId) => {
+        try {
+          const response = await chatApi.generateResponse({
+            conversation: conversationId!,
+            model: modelId,
+            is_new: false,
+            prompt: promptResponse.id
+          });
+
+          if (response.status && response.data) {
+            setBranches(prev => prev.map((branch, idx) => 
+              idx === branches.length ? {
+                ...branch,
+                messages: branch.messages.map(msg => 
+                  msg.id === promptResponse.id ? {
+                    ...msg,
+                    responses: msg.responses.map(resp => 
+                      resp.modelId === modelId ? {
+                        ...resp,
+                        id: String(response.data.id),
+                        content: response.data.response,
+                        status: 'complete'
+                      } : resp
+                    )
+                  } : msg
+                )
+              } : branch
+            ));
+          }
+        } catch (error) {
+          console.error('Error generating response:', error);
+          // Handle error state...
+        }
+      });
+
+    } catch (error) {
+      console.error('Error creating new branch:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendMessage = async (fileContent?: any) => {
     if (!input.trim() || !conversationId) return;
     
     setIsLoading(true);
     try {
-      // Create new prompt with file content if available
-      const promptResponse = await chatApi.createPrompt(
-        conversationId, 
-        input,
-        fileContent ? {
-          input_content: fileContent
-        } : undefined
-      );
-      const promptContent = input; // Store input before clearing
+      const currentBranchMessages = branches[currentBranch].messages;
+      const lastMessage = currentBranchMessages[currentBranchMessages.length - 1];
       
-      // Update UI with new message
-      setChatSessions(prev => prev.map(session => ({
-        ...session,
-        messages: [...session.messages, {
-          id: String(promptResponse.id),
-          content: promptContent, // Use stored input content
-          sender: 'user',
-          timestamp: new Date(),
-          responses: selectedModels.chat.map(modelId => ({
-            id: `temp-${modelId}`,
-            modelId,
-            content: '',
-            status: 'loading'
-          }))
-        }]
-      })));
+      // For follow-ups, keep the same x coordinate but increment y
+      const nextPosition: [number, number] = lastMessage 
+        ? [lastMessage.position[0], lastMessage.position[1] + 1]
+        : [0, 0];
 
-      setInput(""); // Clear input after updating UI
+      const promptResponse = await chatApi.createPrompt(
+        conversationId,
+        input,
+        nextPosition,
+        fileContent
+      );
+
+      // Update current branch with new message
+      setBranches(prev => prev.map((branch, index) => 
+        index === currentBranch
+          ? {
+              ...branch,
+              messages: [...branch.messages, {
+                id: promptResponse.id,
+                content: input,
+                sender: 'user',
+                timestamp: new Date(),
+                position: nextPosition,
+                responses: selectedModels.chat.map(modelId => ({
+                  id: `temp-${modelId}`,
+                  modelId,
+                  content: '',
+                  status: 'loading'
+                }))
+              }]
+            }
+          : branch
+      ));
+
+      // Handle web search separately from model responses
+      if (isWebSearch) {
+        console.log('Web search is enabled - making web search API call');
+        const webSearchResponse = await chatApi.webSearch({
+          prompt_id: promptResponse.id,
+          conversation_id: conversationId,
+          follow_up: true,
+          prev: null
+        });
+        
+        console.log('Web search response received:', webSearchResponse);
+        return; // Exit early since we're using web search
+      }
+
+      // Generate responses for each active model
+      const activeModels = selectedModels.chat.filter(
+        modelId => !inactiveModels.includes(modelId)
+      );
+
+      activeModels.forEach(async (modelId) => {
+        try {
+          const response = await chatApi.generateResponse({
+            conversation: conversationId,
+            model: modelId,
+            is_new: false,
+            prompt: promptResponse.id,
+            prev: getPreviousPromptResponsePairs(branches[currentBranch], nextPosition[1], modelId)
+          });
+
+          if (response.status && response.data) {
+            setBranches(prev => prev.map((branch, idx) => 
+              idx === currentBranch ? {
+                ...branch,
+                messages: branch.messages.map(msg => 
+                  msg.id === promptResponse.id ? {
+                    ...msg,
+                    responses: msg.responses.map(resp => 
+                      resp.modelId === modelId ? {
+                        ...resp,
+                        id: String(response.data.id),
+                        content: response.data.response,
+                        status: 'complete'
+                      } : resp
+                    )
+                  } : msg
+                )
+              } : branch
+            ));
+          } else {
+            // Handle error state
+            setBranches(prev => prev.map((branch, idx) => 
+              idx === currentBranch ? {
+                ...branch,
+                messages: branch.messages.map(msg => 
+                  msg.id === promptResponse.id ? {
+                    ...msg,
+                    responses: msg.responses.map(resp => 
+                      resp.modelId === modelId ? {
+                        ...resp,
+                        status: 'error',
+                        error: response.message || 'Failed to generate response'
+                      } : resp
+                    )
+                  } : msg
+                )
+              } : branch
+            ));
+          }
+        } catch (error) {
+          console.error('Error in model response:', error);
+          // Update error state in UI
+          setBranches(prev => prev.map((branch, idx) => 
+            idx === currentBranch ? {
+              ...branch,
+              messages: branch.messages.map(msg => 
+                msg.id === promptResponse.id ? {
+                  ...msg,
+                  responses: msg.responses.map(resp => 
+                    resp.modelId === modelId ? {
+                      ...resp,
+                      status: 'error',
+                      error: 'Failed to generate response'
+                    } : resp
+                  )
+                } : msg
+              )
+            } : branch
+          ));
+        }
+      });
+
+      setInput(""); // Clear input after sending
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -280,27 +525,25 @@ export function ChatArea() {
     }));
   };
 
-  const handleModelSelect = (modelId: string, sessionId: string) => {
+  const handleModelSelect = useCallback((modelId: string, sessionId: string, messageId: string) => {
     setActiveContents(prev => ({
       ...prev,
-      [sessionId]: { type: 'model', id: modelId }
+      [messageId]: { 
+        type: 'model',
+        id: modelId 
+      }
     }));
-    setChatSessions(prev => prev.map(s => ({
-      ...s,
-      activeModel: s.id === sessionId ? modelId : s.activeModel
-    })));
-  };
+  }, []);
 
-  const handleSummarySelect = (sessionId: string) => {
+  const handleSummarySelect = useCallback((sessionId: string, messageId: string) => {
     setActiveContents(prev => ({
       ...prev,
-      [sessionId]: { type: 'summary', id: 'default' }
+      [messageId]: {
+        type: 'summary',
+        id: 'default'
+      }
     }));
-    setChatSessions(prev => prev.map(s => ({
-      ...s,
-      activeModel: s.id === sessionId ? '' : s.activeModel
-    })));
-  };
+  }, []);
 
   const handleRetry = async (sessionId: string, modelId: string, promptId: string) => {
     // Update the response status to loading
@@ -377,34 +620,56 @@ export function ChatArea() {
     }
   };
 
+  // When generating a follow-up response, get previous prompt-response pairs for specific model
+  const getPreviousPromptResponsePairs = (branch: Branch, currentY: number, modelId: string): [string, string][] => {
+    const pairs: [string, string][] = [];
+    
+    // Get all messages up to the current Y position
+    const previousMessages = branch.messages
+      .filter(msg => msg.position[1] < currentY)
+      .sort((a, b) => a.position[1] - b.position[1]);
+
+    // For each message, get its prompt ID and the response ID for the specific model
+    previousMessages.forEach(msg => {
+      const modelResponse = msg.responses.find(r => 
+        r.modelId === modelId && 
+        r.status === 'complete'
+      );
+      
+      if (modelResponse) {
+        pairs.push([msg.id, modelResponse.id]);
+        console.log(`Found pair for model ${modelId}:`, [msg.id, modelResponse.id]);
+      }
+    });
+
+    console.log(`Previous prompt-response pairs for model ${modelId}:`, pairs);
+    return pairs;
+  };
+
   return (
     <RenderPageContent>
-      <ScrollArea 
-        ref={scrollAreaRef} 
-        className="flex-1"
-      >
+      <ScrollArea ref={scrollAreaRef} className="flex-1">
         <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
-          {chatSessions.map((session) => (
-            <div key={session.id} className="mb-8">
+          {branches[currentBranch]?.messages?.map((message, index) => (
+            <div key={`${message.position[0]}-${message.position[1]}`} className="mb-8">
               <ChatMessage
-                content={session.messages[0].content}
-                sender={session.messages[0].sender}
-                timestamp={session.messages[0].timestamp}
+                content={message.content}
+                sender={message.sender}
+                timestamp={message.timestamp}
+                position={message.position}
+                onEditMessage={handleEditMessage}
+                totalBranches={branches.length}
+                currentBranch={currentBranch}
+                onBranchChange={setCurrentBranch}
+                branches={branches}
               />
               <div className="mt-4">
-                {(showSummary[session.id] || generatingSummary[session.id]) && (
-                  <Summary 
-                    isGenerating={generatingSummary[session.id]}
-                    isActive={activeContents[session.id]?.type === 'summary'}
-                    onClick={() => handleSummarySelect(session.id)}
-                  />
-                )}
                 <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
                   {selectedModels.chat.map((modelId, index) => {
                     const model = chatModels.find(m => m.model_uid === modelId);
                     if (!model) return null;
 
-                    const response = session.messages[0].responses?.[index];
+                    const response = message.responses?.[index];
                     const isLoading = response?.status === 'loading';
                     const hasError = response?.status === 'error';
 
@@ -441,7 +706,7 @@ export function ChatArea() {
                         <RetryResponse
                           key={modelId}
                           model={model}
-                          onRetry={() => handleRetry(session.id, modelId, session.messages[0].id)}
+                          onRetry={() => handleRetry(conversationId!, modelId, message.id)}
                         />
                       );
                     }
@@ -453,86 +718,45 @@ export function ChatArea() {
                           ...model,
                           response: response?.content
                         } as Model]}
-                        activeModel={activeContents[session.id]?.type === 'model' ? session.activeModel : ''}
-                        onSelect={(modelId) => handleModelSelect(modelId, session.id)}
+                        activeModel={activeContents[message.id]?.id === modelId ? modelId : ''}
+                        onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
                       />
                     );
                   })}
                 </div>
 
-                {session.messages[0].responses && session.messages[0].responses.length > 0 && (
+                {message.responses && message.responses.length > 0 && (
                   <div className="mt-4">
-                    {activeContents[session.id]?.type === 'model' && (
-                      <>
-                        {session.messages[0].responses.find(r => 
-                          r.modelId === session.activeModel
-                        )?.status === 'loading' ? (
-                          // Loading skeleton
-                          <Card className="bg-transparent border-none shadow-none p-4">
-                            <div className="flex items-start gap-4">
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                              </div>
-                              <div className="flex-1 space-y-3">
-                                <Skeleton className="h-4 w-full" />
-                              </div>
-                            </div>
-                          </Card>
-                        ) : (
-                          <ModelResponse
-                            key={`${session.id}-${session.activeModel}`}
-                            model={chatModels.find(m => m.model_uid === session.activeModel)?.model_name || ""}
-                            content={session.messages[0].responses.find(r => 
-                              r.modelId === session.activeModel
-                            )?.content || ""}
-                            model_img={chatModels.find(m => m.model_uid === session.activeModel)?.model_image || ""}
-                            responseId={session.messages[0].responses.find(r => 
-                              r.modelId === session.activeModel
-                            )?.id || ""}
-                            sessionId={session.id}
-                            feedback={responseFeedback[session.messages[0].responses.find(r => 
-                              r.modelId === session.activeModel
-                            )?.id || ""]}
-                            onFeedbackChange={handleFeedbackChange}
-                            onRegenerate={(responseId) => {
-                              toast({
-                                title: "Regenerating response",
-                                description: "Please wait while we generate a new response.",
-                              });
-                            }}
-                            webSearchEnabled={isWebSearch}
-                            // sources={session.messages[0].responses.find(r => 
-                            //   r.modelId === session.activeModel && r.status === 'complete'
-                            // )?.sources}
-                            // settings={session.messages[0].responses.find(r => 
-                            //   r.modelId === session.activeModel
-                            // )?.settings || { personalizedAds: true }}
-                          />
-                        )}
-                      </>
-                    )}
-                    {activeContents[session.id]?.type === 'summary' && (
+                    {activeContents[message.id]?.type === 'model' && (
                       <ModelResponse
-                        model="AI Summary"
-                        content={SUMMARY_DATA.summary}
-                        model_img="/svgs/logo-desktop-mini.png"
-                        responseId={`summary-${session.id}`}
-                        sessionId={session.id}
-                        feedback={responseFeedback[`summary-${session.id}`]}
+                        key={`${conversationId}-${activeContents[message.id].id}`}
+                        model={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
+                        content={message.responses.find(r => 
+                          r.modelId === activeContents[message.id].id
+                        )?.content || ""}
+                        model_img={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
+                        responseId={message.responses.find(r => 
+                          r.modelId === activeContents[message.id].id
+                        )?.id || ""}
+                        sessionId={conversationId!}
+                        feedback={responseFeedback[message.responses.find(r => 
+                          r.modelId === activeContents[message.id].id
+                        )?.id || ""]}
                         onFeedbackChange={handleFeedbackChange}
-                        settings={{ personalizedAds: false }}
+                        webSearchEnabled={isWebSearch}
                       />
                     )}
                   </div>
                 )}
               </div>
             </div>
-          ))}
+          )) || null}
         </div>
       </ScrollArea>
       <ScrollToBottom 
         scrollAreaRef={scrollAreaRef}
         className="z-50 w-8 h-8"
-        content={chatSessions}
+        content={branches[currentBranch]?.messages || []}
       />
       <ChatInput
         value={input}
@@ -541,17 +765,17 @@ export function ChatArea() {
         inputRef={useRef<HTMLTextAreaElement>(null)}
         isLoading={isLoading}
         isWeb={true}
+        isCombined={true}
         onWebSearchToggle={() => {}}
+        onCombinedToggle={() => {}}
       />
-      <SourcesWindow
+      {/* <SourcesWindow
         sources={sources}
         isOpen={isOpen}
         onClose={close}
         responseId={activeResponseId || ''}
-        userPrompt={chatSessions.find(session => 
-          session.messages[0].responses.some(r => r.id === activeResponseId)
-        )?.messages[0].content || ''}
-      />
+        userPrompt={branches[currentBranch].messages[0].content || ''}
+      /> */}
     </RenderPageContent>
   );
 }

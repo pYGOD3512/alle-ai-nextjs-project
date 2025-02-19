@@ -3,20 +3,112 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Image from 'next/image';
-import { Edit, Check, X } from "lucide-react";
+import { Pencil, Check, X } from "lucide-react";
+import { useAuthStore } from "@/stores";
 
 interface ChatMessageProps {
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
-  onEditMessage?: (newContent: string) => void;
+  position: [number, number];
+  onEditMessage?: (newContent: string, position: [number, number]) => void;
+  totalBranches?: number;
+  currentBranch?: number;
+  onBranchChange?: (branchIndex: number) => void;
+  branches?: any[]; // Add this prop
 }
 
-export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatMessageProps) {
+interface MessageTree {
+  messageId: string;  // Unique ID for this message version
+  parentId: string | null;  // ID of the parent message version (null for root)
+  position: [number, number];
+  branchId: string;  // Unique ID for this branch
+}
 
+export function ChatMessage({ 
+  content, 
+  sender, 
+  timestamp, 
+  position,
+  onEditMessage,
+  totalBranches = 1,
+  currentBranch = 0,
+  onBranchChange,
+  branches = []
+}: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { user } = useAuthStore();
+
+  const [x, y] = position;
+  
+  // Generate a unique ID for this message if it doesn't exist
+  const messageId = `msg-${y}-${x}`;
+  const branchId = `branch-${y}-${x}`;
+
+  // Find all versions in this message's branch chain
+  const versionsOfThisMessage = branches
+    .flatMap(branch => branch.messages)
+    .filter(msg => {
+      // For all messages at this Y level
+      if (msg.position[1] !== y || msg.sender !== sender) return false;
+      
+      // Include the original message
+      if (msg.position[0] === 0) return true;
+      
+      // Find the branch path from root to current message
+      const branchPath = findBranchPath(branches, position);
+      
+      // Include messages only if they're in the same branch path
+      return branchPath.some(pathBranch => 
+        pathBranch.messages.some((m: any) => 
+          m.position[0] === msg.position[0] && 
+          m.position[1] === msg.position[1]
+        )
+      );
+    })
+    .sort((a, b) => a.position[0] - b.position[0]);
+
+  // Helper function to find the branch path from root to current message
+  const findBranchPath = (branches: any[], pos: [number, number]): any[] => {
+    const [x, y] = pos;
+    const path: any[] = [];
+    
+    let currentPos: [number, number] = [x, y];
+    while (currentPos[0] >= 0) {
+      const branch = branches.find(b => 
+        b.messages.some((m: any) => 
+          m.position[0] === currentPos[0] && 
+          m.position[1] === currentPos[1]
+        )
+      );
+      
+      if (branch) {
+        path.unshift(branch);
+        // Move to parent branch
+        currentPos = branch.startPosition;
+      } else {
+        break;
+      }
+    }
+    
+    return path;
+  };
+
+  // Only show versioning if there are actual edits
+  const shouldShowVersioning = versionsOfThisMessage.length > 1;
+
+  // Current version is based on x position + 1
+  const currentVersion = x + 1;
+  
+  // Total versions is the highest x value across ALL branches for this message + 1
+  const totalVersions = shouldShowVersioning ? 
+    Math.max(...branches
+      .flatMap(b => b.messages)
+      .filter(m => m.position[1] === y && m.sender === sender)
+      .map(m => m.position[0])) + 1 : 
+    1;
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -34,7 +126,7 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
 
   const handleSaveEdit = () => {
     if (onEditMessage) {
-      onEditMessage(editedContent);
+      onEditMessage(editedContent, position);
     }
     setIsEditing(false);
   };
@@ -43,16 +135,38 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
     setEditedContent(content);
     setIsEditing(false);
   };
-  
+
+  const handleVersionChange = (direction: 'prev' | 'next') => {
+    if (!shouldShowVersioning) return;
+
+    const currentIndex = currentVersion - 1;
+    const targetIndex = direction === 'next' 
+      ? currentIndex + 1 
+      : currentIndex - 1;
+
+    if (targetIndex >= 0 && targetIndex < totalVersions) {
+      // Find the branch path for the target version
+      const targetMessage = versionsOfThisMessage[targetIndex];
+      const branchPath = findBranchPath(branches, [targetIndex, y]);
+      
+      // Find the branch that contains this version and its sub-branches
+      const targetBranch = branches.findIndex(branch => 
+        branchPath.includes(branch)
+      );
+
+      if (targetBranch !== -1) {
+        onBranchChange?.(targetBranch);
+      }
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
         <Card className="flex items-start gap-3 p-3 rounded-2xl bg-backgroundSecondary">
           <div className="hidden sm:flex w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <Image
-              src={sender === 'user' 
-            ? "/user.jpg"
-            : "https://avatars.githubusercontent.com/u/2?v=4"}
+              src={user?.photo_url || '/user.jpg'}
               alt={sender}
               width={32}
               height={32}
@@ -81,7 +195,7 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
                   onClick={handleSaveEdit}
                   className="px-3 py-1 text-sm rounded-full bg-white text-black dark:bg-black dark:text-white hover:bg-gray-700 transition-colors"
                 >
-                  Save
+                  Send
                 </button>
               </div>
             </div>
@@ -92,14 +206,36 @@ export function ChatMessage({ content, sender, timestamp, onEditMessage }: ChatM
               </div>
               <button
                 onClick={handleEditClick}
-                className="text-gray-500 hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"
+                className="text-muted-foreground hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"
                 aria-label="Edit message"
               >
-                <Edit size={16} />
+                <Pencil size={16} />
               </button>
             </div>
           )}
         </Card>
+
+        {shouldShowVersioning && (
+          <div className="mt-2 flex justify-end items-center gap-1 text-xs text-muted-foreground">
+            <button
+              onClick={() => handleVersionChange('prev')}
+              disabled={currentVersion <= 1}
+              className="px-2 py-1 rounded-md hover:bg-backgroundSecondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {"<"}
+            </button>
+            <span className="px-1">
+              {`${currentVersion}/${totalVersions}`}
+            </span>
+            <button
+              onClick={() => handleVersionChange('next')}
+              disabled={currentVersion >= totalVersions}
+              className="px-2 py-1 rounded-md hover:bg-backgroundSecondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {">"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

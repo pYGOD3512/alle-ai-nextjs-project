@@ -39,7 +39,7 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
     } catch (error: any) {
       toast({
         title: "Failed to reset password",
-        description: error.response?.data?.message || "Please check your email and try again",
+        description: "Please check your email and try again",
         variant: "destructive",
       });
     } finally {

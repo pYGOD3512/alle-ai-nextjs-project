@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { ChatInput } from "@/components/features/ChatInput";
-import { useSidebarStore, useContentStore, useWebSearchStore, useHistoryStore } from "@/stores";
+import { useSidebarStore, useContentStore, useWebSearchStore, useHistoryStore, useCombinedModeStore } from "@/stores";
 import { useRouter, usePathname } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import { SquareTerminal, Lightbulb, Code, Bug, Wrench, Sparkles, NotebookPen, Brain  } from "lucide-react";
@@ -10,6 +10,7 @@ import { chatApi } from '@/lib/api/chat';
 import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
+import { useToast } from "@/hooks/use-toast";
 
 const options = [
   {
@@ -42,10 +43,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { setIsWebSearch } = useWebSearchStore();
+  const { setIsCombinedMode } = useCombinedModeStore();
   const { isOpen } = useSidebarStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const { setConversationId, setPromptId } = useConversationStore();
   const { addHistory, updateHistoryTitle } = useHistoryStore();
+  const { toast } = useToast();
 
   const handleSend = async (fileContent?: {
     uploaded_files: Array<{
@@ -77,6 +80,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const promptResponse = await chatApi.createPrompt(
         conversationId, 
         input,
+        [0, 0],
         fileContent ? {
           input_content: fileContent
         } : undefined
@@ -110,9 +114,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleWebSearchToggle = (enabled: boolean) => {
-    setIsWebSearch(enabled);
-  };
+    const handleWebSearchToggle = (enabled: boolean) => {
+      setIsWebSearch(enabled);
+    };
+
+    const handleCombinedToggle = (enabled: boolean) => {
+      setIsCombinedMode(enabled);
+    };
+
 
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
@@ -131,7 +140,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 inputRef={inputRef}
                 isLoading={isLoading}
                 isWeb={true}
+                isCombined={true}
                 onWebSearchToggle={handleWebSearchToggle}
+                onCombinedToggle={handleCombinedToggle}
               />
             </div>
           </div>

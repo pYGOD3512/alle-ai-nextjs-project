@@ -10,8 +10,8 @@ interface RouteGuardProps {
   children: ReactNode;
 }
 
-const authRoutes = ['/', '/auth', '/plans'];
-const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes'];
+const authRoutes = ['/auth', '/plans'];
+const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes', '/reset-password'];
 
 // Create a separate component for the route guard logic
 function RouteGuardInner({ children }: RouteGuardProps) {
@@ -54,7 +54,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           if (response.data.to === 'verify-email') {
             router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
             return;
-          } else if (response.data.to === 'chat' && response.plan) {
+          } else if (response.data.to === 'chat' && response.plan ) {
             router.replace('/chat');
             return;
           } else if (!response.plan) {
