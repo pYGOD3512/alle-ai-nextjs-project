@@ -11,6 +11,7 @@ import { useTheme } from "next-themes";
 
 interface CodeProps {
   showLanguage?: boolean;
+  title?: string;
   style?: React.CSSProperties;
   className?: string;
   toggle?: boolean;
@@ -23,6 +24,7 @@ interface CodeProps {
 
 const RenderCode = ({
   showLanguage = true,
+  title,
   style,
   className,
   toggle = false,
@@ -80,13 +82,13 @@ const RenderCode = ({
         </div>
       )}
 
-      {showLanguage && (
+      {(showLanguage || title) && (
         <div
           className="flex justify-between items-center px-4 py-2 text-muted-foreground border-b border-gray-200 dark:border-gray-700"
           style={{ width: "100%" }}
         >
           <span className="text-sm font-medium text-muted-foreground">
-            {currentLanguage.toUpperCase()}
+            {showLanguage ? currentLanguage.toUpperCase() : title}
           </span>
         </div>
       )}
@@ -107,7 +109,7 @@ const RenderCode = ({
       <div style={{ maxHeight, maxWidth, overflow: "auto" }}>
         <SyntaxHighlighter
           language={currentLanguage}
-          style={resolvedTheme === "dark" ? darcula : github} // Rely on the theme for colors
+          style={resolvedTheme === "dark" ? darcula : github}
           customStyle={{
             margin: 0,
             padding: "1rem",

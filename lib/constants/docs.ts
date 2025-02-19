@@ -368,8 +368,14 @@ export const apiReference: apiREfprops[] = [
             href: "./comparison",
           },
           {
-            id: "summary&compare",
-            title: "Summary and Combination",
+            id: "summary",
+            title: "Summary",
+            keywords: [],
+            href: "./summary",
+          },
+           {
+            id: "compare",
+            title: "Combination",
             keywords: [],
             href: "./summary",
           },
@@ -378,103 +384,63 @@ export const apiReference: apiREfprops[] = [
       {
         id: "image-generation",
         title: "Image Generation",
-        href: "/docs/api-reference/image-generation",
+        href: "/docs/api-reference/image",
         sections: [
           {
             id: "image-generation",
-            title: "Single Image Generation",
+            title: "Text-to-Image",
             keywords: [],
             href: "/docs/api-reference/image-generation",
           },
           {
-            id: "batch-processing",
-            title: "Batch Processing",
+            id: "image-editing",
+            title: "Image Editing",
             keywords: [],
             href: "./batch-processing",
           },
-          {
-            id: "inpainting",
-            title: "Inpainting & Editing",
-            keywords: [],
-            href: "./inpainting",
-          },
+          
         ],
       },
-      {
-        id: "video-generation",
-        title: "Video Generation",
-        href: "/docs/api-reference/video-generation",
-        sections: [
-          {
-            id: "video-generation",
-            title: "Short Videos",
-            keywords: [],
-            href: "/docs/api-reference/video-generation",
-          },
-          {
-            id: "high-resolution",
-            title: "High-Resolution Generation",
-            keywords: [],
-            href: "./high-resolution",
-          },
-        ],
-      },
+      
       {
         id: "audio-generation",
         title: "Audio Generation",
         href: "/docs/api-reference/audio-generation",
         sections: [
           {
-            id: "audio-generation",
+            id: "text-to-speech",
             title: "Text-to-Speech",
             keywords: [],
             href: "/docs/api-reference/audio-generation",
           },
           {
-            id: "music-generation",
-            title: "Music Generation",
+            id: "speech-to-text",
+            title: "Speech-to-Text ",
             keywords: [],
             href: "./music-generation",
           },
-          {
-            id: "voice-cloning",
-            title: "Voice Cloning",
-            keywords: [],
-            href: "./voice-cloning",
-          },
+         
         ],
-      },
-      {
-        id: "multi-modal",
-        title: "Multi-Modal Processing",
-        href: "/docs/api-reference/multi-modal",
+      },{
+        id: "video-generation",
+        title: "Video Generation",
+        href: "/docs/api-reference/video-generation",
         sections: [
           {
-            id: "multi-modal",
-            title: "Text to Image",
+            id: "text-video",
+            title: "Text-to-Video",
             keywords: [],
-            href: "/docs/api-reference/multi-modal",
-          },
-          {
-            id: "text-to-video",
-            title: "Text to Video",
+            href: "/docs/api-reference/video-generation",
+          },{
+            id: "video-edit",
+            title: "Video Editing",
             keywords: [],
-            href: "./text-to-video",
+            href: "/docs/api-reference/video-generation",
           },
-          {
-            id: "image-to-text",
-            title: "Image to Text",
-            keywords: [],
-            href: "./image-to-text",
-          },
-          {
-            id: "speech-to-text",
-            title: "Speech to Text",
-            keywords: [],
-            href: "./speech-to-text",
-          },
+          
         ],
       },
+      
     ],
   },
   {
@@ -529,7 +495,10 @@ export const apiEndPoints = [
   "combination",
 ];
 
-// codes
+
+
+
+// chat completion endpoints 
 export const basicRequest = `
 {
     "models": ["gpt-4o", "claude-3.5-sonnet"],
@@ -1257,3 +1226,10 @@ export const apiReferenceFields = [
     ],
   },
 ];
+
+
+//  image generation api 
+
+export const imageHeaders = [
+  
+]

@@ -103,7 +103,11 @@ export const SidebarNav = () => {
       router.push("/docs/api-reference/chat");
       return;
     }
-
+    if(
+      sectionId === "image-generation"
+    ){
+      router.push(url)
+    }
     router.push(`${url}#${sectionId}`);
   };
 
@@ -133,7 +137,6 @@ export const SidebarNav = () => {
                     </button>
                     {expandedSections[section.id] && section.sections && (
                       <div className="ml-6 space-y-1">
-                        {section.id === "chat" ? (
                           <div>
                             {section.sections.map((subsection, id) => (
                               <button
@@ -158,9 +161,8 @@ export const SidebarNav = () => {
                               </button>
                             ))}
                           </div>
-                        ) : (
-                          ""
-                        )}
+                        
+                       
                       </div>
                     )}
                   </div>
