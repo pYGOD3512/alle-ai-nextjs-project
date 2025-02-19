@@ -28,7 +28,7 @@ import { NotificationItem } from "@/lib/types";
 import { useSidebarStore, useSelectedModelsStore, useAuthStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from "../ui/dropdown-menu";
-import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal, LogoutModal } from "../ui/modals";
+import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal, LogoutModal, OrganizationModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
 
@@ -67,6 +67,7 @@ export function Header() {
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [organizationModalOpen, setOrganizationModalOpen] = useState(false);
   const [loadingModels, setLoadingModels] = useState<string[]>([]);
   const conversationId = pathname.includes('/chat/res/') ? pathname.split('/').pop() : null;
 
@@ -294,6 +295,8 @@ export function Header() {
       case 'modal':
         if (item.label === 'Profile') {
           setUserProfileModalOpen(true);
+        } else if (item.label === 'Organization') {
+          setOrganizationModalOpen(true);
         } else if (item.label === 'Settings') {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
@@ -387,6 +390,8 @@ export function Header() {
     }
   };
 
+  const specialRoutes = ['/organization', '/plans'];
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
@@ -394,7 +399,7 @@ export function Header() {
         <div className={`absolute left-0 h-14 flex items-center justify-center transition-all duration-6300 z-10
           ${isOpen ? 'w-60' : 'w-16'} 
           ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
-          border-r px-4  bg-sideBarBackground`}
+          px-4  ${pathname.includes('/organization') ? 'bg-background/95' : 'bg-sideBarBackground border-r'}`}
         >
           {isOpen ? (
             mounted && (
@@ -417,8 +422,8 @@ export function Header() {
               />
             )
           )}
-          
-          <Button 
+          {!pathname.includes('/organization') && (
+            <Button 
             variant="secondary" 
             size="icon" 
             onClick={toggle}
@@ -431,15 +436,17 @@ export function Header() {
               <ChevronRight className="h-5 w-5" />
             )}
           </Button>
+          )}
+          
         </div>
         ) : (
           ''
         )}
 
         <div className={`flex h-14 items-center transition-all duration-300 
-        ${!pathname.includes('/plans') ? (isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')) : 'justify-around'}`}
+        ${!specialRoutes.includes(pathname) ? (isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')) : 'justify-around'}`}
         >
-          {!isChangelogPage && mounted && !pathname.includes('/plans') ? (
+          {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
             selectedModelNames.length > 0 ? (
               <TooltipProvider>
                 <Tooltip>
@@ -519,7 +526,7 @@ export function Header() {
               </div>
             )
           ) : (
-            pathname.includes('/plans') && mounted && (
+            specialRoutes.includes(pathname) && mounted && (
               <Image
               src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
                 alt="Logo"
@@ -531,7 +538,7 @@ export function Header() {
           )}
           
 
-          <div className={`flex items-center gap-2 ${!pathname.includes('/plans') ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
+          <div className={`flex items-center gap-2 ${!specialRoutes.includes(pathname) ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
             {/* {pathname.includes("/chat") && (
               <Button
               variant={'outline'}
@@ -576,7 +583,7 @@ export function Header() {
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>
                 {userMenuItems.filter(item => 
                   !pathname.includes('/plans') || 
-                  !(item.label === 'Profile' || item.label === 'Developer' || item.label === 'Refer' || item.label === 'Favorites' || item.label === 'Settings')
+                  !(item.label === 'Profile' || item.label === 'Organization' || item.label === 'Developer' || item.label === 'Refer' || item.label === 'Favorites' || item.label === 'Settings')
                 ).map((item, index) => (
                   <DropdownMenuItem key={index} onClick={() => handleUserMenuItemClick(item)} className="gap-4 cursor-pointer hover:bg-hoverColorPrimary">
                     <item.icon className="h-4 w-4" />
@@ -603,6 +610,10 @@ export function Header() {
       <UserProfileModal 
         isOpen={userProfileModalOpen} 
         onClose={() => setUserProfileModalOpen(false)} 
+      />
+      <OrganizationModal 
+        isOpen={organizationModalOpen} 
+        onClose={() => setOrganizationModalOpen(false)} 
       />
       <ReferModal 
         isOpen={referModalOpen} 

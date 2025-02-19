@@ -188,21 +188,27 @@ export function ChatArea() {
       modelId => !inactiveModels.includes(modelId)
     );
 
+    // Handle web search separately and first
+    if (isWebSearch) {
+      console.log('Web search is enabled - making web search API call');
+      chatApi.webSearch({
+        prompt_id: promptId,
+        conversation_id: conversationId,
+        follow_up: false,
+        prev: null
+      })
+      .then(webSearchResponse => {
+        console.log('Web search response received:', webSearchResponse);
+      })
+      .catch(error => {
+        console.error('Error in web search:', error);
+      });
+      return; // Exit early since we're using web search
+    }
+
+    // Handle model responses only if not using web search
     activeModels.forEach(async (modelId) => {
       try {
-        if (isWebSearch) {
-          console.log('Web search is enabled - making web search API call');
-          const webSearchResponse = await chatApi.webSearch({
-            prompt_id: promptId,
-            conversation_id: conversationId,
-            follow_up: false,
-            messages: null
-          });
-          
-          console.log('Web search response received:', webSearchResponse);
-          return; 
-        }
-
         const response = await chatApi.generateResponse({
           conversation: conversationId,
           model: modelId,
@@ -246,7 +252,7 @@ export function ChatArea() {
           })));
         }
       } catch (error) {
-        console.error(`Error in ${isWebSearch ? 'web search' : 'regular'} response:`, error);
+        console.error(`Error in response:`, error);
         // Update error state in UI
         setBranches(prev => prev.map(branch => ({
           ...branch,
@@ -408,6 +414,20 @@ export function ChatArea() {
           : branch
       ));
 
+      // Handle web search separately from model responses
+      if (isWebSearch) {
+        console.log('Web search is enabled - making web search API call');
+        const webSearchResponse = await chatApi.webSearch({
+          prompt_id: promptResponse.id,
+          conversation_id: conversationId,
+          follow_up: true,
+          prev: null
+        });
+        
+        console.log('Web search response received:', webSearchResponse);
+        return; // Exit early since we're using web search
+      }
+
       // Generate responses for each active model
       const activeModels = selectedModels.chat.filter(
         modelId => !inactiveModels.includes(modelId)
@@ -415,19 +435,6 @@ export function ChatArea() {
 
       activeModels.forEach(async (modelId) => {
         try {
-          if (isWebSearch) {
-            console.log('Web search is enabled - making web search API call');
-            const webSearchResponse = await chatApi.webSearch({
-              prompt_id: promptResponse.id,
-              conversation_id: conversationId,
-              follow_up: true,
-              messages: null
-            });
-            
-            console.log('Web search response received:', webSearchResponse);
-            return; 
-          }
-
           const response = await chatApi.generateResponse({
             conversation: conversationId,
             model: modelId,
@@ -476,7 +483,7 @@ export function ChatArea() {
             ));
           }
         } catch (error) {
-          console.error('Error in follow-up response:', error);
+          console.error('Error in model response:', error);
           // Update error state in UI
           setBranches(prev => prev.map((branch, idx) => 
             idx === currentBranch ? {

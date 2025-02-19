@@ -37,7 +37,7 @@ const getFixedPositions = (distance: number) => [
   { x: -distance * 0.7, y: -distance * 0.7 },
 ];
 
-export function LogoLoader({ size = 'md', showText = false, className = '' }: LogoLoaderProps) {
+export function AlleAILoader({ size = 'md', showText = false, className = '' }: LogoLoaderProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [logoSrc, setLogoSrc] = useState("/svgs/logo-desktop-mini.png");

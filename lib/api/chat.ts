@@ -61,7 +61,7 @@ interface WebSearchParams {
   prompt_id: string;
   conversation_id: string;
   follow_up: boolean;
-  messages?: null | [string, string][]; // Array of [prompt_id, response_id] pairs
+  prev?: null | [string, string][]; // Array of [prompt_id, response_id] pairs
 }
 
 export interface Message {
@@ -201,7 +201,7 @@ export const chatApi = {
         prompt_id: params.prompt_id,
         conversation_id: params.conversation_id,
         follow_up: params.follow_up,
-        messages: params.follow_up ? params.messages : null
+        prev: params.prev
       });
       console.log('Web search response:', response.data);
       return response.data;

@@ -14,6 +14,7 @@ import {
   Braces,
   Heart,
   Share,
+  Users,
 } from "lucide-react";
 
 import { Transaction, Source, NotificationItem } from "@/lib/types";
@@ -269,7 +270,14 @@ export const userMenuItems = [
     icon: User,
     interactionType: "modal",
     onClick: () => {
-      // console.log('Opening Profile Modal');
+    },
+  },
+  {
+    label: "Organization",
+    icon: Users,
+    interactionType: "modal",
+    shortcut: "O",
+    onClick: () => {
     },
   },
   {
@@ -283,7 +291,6 @@ export const userMenuItems = [
     icon: Handshake,
     interactionType: "modal",
     onClick: () => {
-      // console.log('Opening Refer Modal');
     },
   },
   {
