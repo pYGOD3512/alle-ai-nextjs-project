@@ -1,6 +1,6 @@
 import { AudioPlayer } from "@/components/features/audio/audioPlayer";
 import Link from "next/link";
-import Image from "next/image";
+import NavigationContainer from "@/components/NavigationContainer";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 
@@ -33,26 +33,26 @@ export default function AudioGeneration() {
   ];
 
   // What to Read Next data
- const readNextData = [
-   {
-     title: "Image Generation Guide",
-     href: "/docs/user-guides/image",
-     description:
-       "A comprehensive guide to generating images using our AI tools.",
-   },
-   {
-     title: "Video Generation Guide",
-     href: "/docs/user-guides/video",
-     description:
-       "Learn how to create and edit videos with our platform's AI assistance.",
-   },
-   {
-     title: "Manage Your History",
-     href: "/docs/user-guides/history",
-     description:
-       "Instructions on viewing, organizing, and deleting your past creations and activity.",
-   },
- ];
+  const readNextData = [
+    {
+      title: "Image Generation Guide",
+      href: "/docs/user-guides/image",
+      description:
+        "A comprehensive guide to generating images using our AI tools.",
+    },
+    {
+      title: "Video Generation Guide",
+      href: "/docs/user-guides/video",
+      description:
+        "Learn how to create and edit videos with our platform's AI assistance.",
+    },
+    {
+      title: "Manage Your History",
+      href: "/docs/user-guides/history",
+      description:
+        "Instructions on viewing, organizing, and deleting your past creations and activity.",
+    },
+  ];
   const toggleQuestion = (index: number) => {
     setExpandedQuestion(expandedQuestion === index ? null : index);
   };
@@ -219,24 +219,14 @@ export default function AudioGeneration() {
         </div>
       </section>
 
-      {/* What to Read Next Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {readNextData.map((item, index) => (
-            <Link
-              key={index}
-              href={item.href}
-              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-            >
-              <h3 className="font-medium">{item.title}</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-              {item.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <NavigationContainer
+        previousTitle="Image Generation"
+        previousDescription="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
+        preUrl="/docs/tutorials/image-ai"
+        nextDesciption="Utilize AI for video creation, editing, and automated scene generation."
+        nextTitle="Video Generation"
+        nextUrl="/docs/tutorials/video-ai"
+      />
     </div>
   );
 }

@@ -608,22 +608,29 @@ export default function Page() {
                       combination &nbsp;
                     </span>
                     of models to be used in the comparison. Models within each
-                    string are joined together with plus signs (<code>+</code>).
-                    This indicates that the models will be used in a combined or
-                    ensemble manner for that specific comparison. For example:
+                    string are joined together with plus signs (
+                    <code>
+                      <span className="text-red-600">+</span>
+                    </code>
+                    ). This indicates that the models will be used in a combined
+                    or ensemble manner for that specific comparison. For
+                    example:
                   </p>
 
-                  <ul className="list-disc ml-6 mt-2 text-gray-700 dark:text-gray-300">
+                  <ul className="list-disc ml-6 mt-2 text-muted-foreground">
                     <li>
-                      <code className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-2 py-1 rounded font-mono">
-                        "gpt-4o+deepseek-r1+claude-3.5-sonnet"
+                      <code className="bg-gray-200 dark:bg-gray-700  px-2 py-1 rounded font-mono">
+                        "gpt-4o<span className="text-red-600">+</span>deepseek-r1
+                        <span className="text-red-600">+</span>claude-3.5-sonnet"
                       </code>
                       : This specifies a comparison involving GPT-4, Deepseek,
                       and Claude.
                     </li>
                     <li>
-                      <code className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-2 py-1 rounded font-mono">
-                        "another-audio-model+yet-another-model"
+                      <code className="bg-gray-100 dark:bg-gray-700  px-2 py-1 rounded font-mono">
+                        "selected_model_one
+                        <span className="text-red-600">+</span>
+                        yet-another-model"
                       </code>
                       : Another example with audio models.
                     </li>

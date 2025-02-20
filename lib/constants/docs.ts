@@ -373,7 +373,7 @@ export const apiReference: apiREfprops[] = [
             keywords: [],
             href: "./summary",
           },
-           {
+          {
             id: "compare",
             title: "Combination",
             keywords: [],
@@ -398,14 +398,13 @@ export const apiReference: apiREfprops[] = [
             keywords: [],
             href: "./batch-processing",
           },
-          
         ],
       },
-      
+
       {
         id: "audio-generation",
         title: "Audio Generation",
-        href: "/docs/api-reference/audio-generation",
+        href: "/docs/api-reference/audio",
         sections: [
           {
             id: "text-to-speech",
@@ -419,48 +418,32 @@ export const apiReference: apiREfprops[] = [
             keywords: [],
             href: "./music-generation",
           },
-         
+          {
+            id: "audio-gen",
+            title: "create audio ",
+            keywords: [],
+            href: "./music-generation",
+          },
         ],
-      },{
+      },
+      {
         id: "video-generation",
         title: "Video Generation",
-        href: "/docs/api-reference/video-generation",
+        href: "/docs/api-reference/video-generate",
         sections: [
           {
             id: "text-video",
             title: "Text-to-Video",
             keywords: [],
-            href: "/docs/api-reference/video-generation",
-          },{
+            href: "/docs/api-reference/video-generate",
+          },
+          {
             id: "video-edit",
             title: "Video Editing",
             keywords: [],
-            href: "/docs/api-reference/video-generation",
+            href: "/docs/api-reference/video-generate",
           },
-          
         ],
-      },
-      
-    ],
-  },
-  {
-    id: "files",
-    title: "Files",
-    sections: [
-      {
-        id: "upload",
-        title: "Upload",
-        href: "/docs/api-reference/files/upload",
-      },
-      {
-        id: "management",
-        title: "File Management",
-        href: "/docs/api-reference/files/management",
-      },
-      {
-        id: "storage",
-        title: "Storage & Retrieval",
-        href: "/docs/api-reference/files/storage",
       },
     ],
   },
@@ -487,6 +470,59 @@ export const apiReference: apiREfprops[] = [
   },
 ];
 
+//  tutorial nav items
+export const tutorial = [
+  {
+    id: "tutorials",
+    title: "Tutorials",
+    href: "/docs/tutorials",
+    sections: [
+      {
+        id: "using-platform",
+        title: "Overview",
+        description:
+          "An introduction to the platform, its features, and how to navigate through its functionalities.",
+      },
+
+      {
+        id: "text-ai",
+        title: "Text generation",
+        description:
+          "Explore AI-powered text generation, including creative writing, summarization, and automated content creation.",
+      },
+      {
+        id: "image-ai",
+        title: "Image generation",
+        description:
+          "Generate high-quality images using AI, from artistic illustrations to realistic visuals.",
+      },
+      {
+        id: "audio-ai",
+        title: "Audio generation",
+        description:
+          "Create AI-generated audio, including speech synthesis, music, and sound effects.",
+      },
+      {
+        id: "video-ai",
+        title: "Video generation",
+        description:
+          "Utilize AI for video creation, editing, and automated scene generation.",
+      },
+      {
+        id: "prompts",
+        title: "Prompts",
+        description:
+          "Learn how to craft effective prompts to get the best results from AI models.",
+      },
+      {
+        id: "history",
+        title: "Managing Your History",
+        description:
+          "View, manage, and delete past interactions with AI to keep track of your generated content.",
+      },
+    ],
+  },
+];
 export const apiEndPoints = [
   "chat",
   "search",
@@ -495,10 +531,7 @@ export const apiEndPoints = [
   "combination",
 ];
 
-
-
-
-// chat completion endpoints 
+// chat completion endpoints
 export const basicRequest = `
 {
     "models": ["gpt-4o", "claude-3.5-sonnet"],
@@ -1227,9 +1260,6 @@ export const apiReferenceFields = [
   },
 ];
 
+//  image generation api
 
-//  image generation api 
-
-export const imageHeaders = [
-  
-]
+export const imageHeaders = [];

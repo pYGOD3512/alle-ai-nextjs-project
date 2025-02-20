@@ -36,8 +36,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const isLinkActive = (href: string) => pathname === href;
 
-  // Check for three-column layout (user guides)
-  const isThreeColumnLayout = pathname.startsWith("/docs/user-guides/");
+  // Check for three-column layout (user guides and tutorials)
+  const isThreeColumnLayout = pathname.startsWith("/docs/user-guides/") || pathname.startsWith("/docs/tutorials/");
 
   // Check for two-column layout (API reference)
   const isTwoColumnLayout = pathname.startsWith("/docs/api-reference/");

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react"; // Import Lucide icons
-
+import NavigationContainer from "@/components/NavigationContainer";
 const faqData = [
   {
     question: "AI response delay",
@@ -474,24 +474,6 @@ const TextGenerationPlatform = () => {
         </div>
       </section>
 
-      {/* What to Read Next Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {readNextData.map((item, index) => (
-            <Link
-              key={index}
-              href={item.href}
-              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-            >
-              <h3 className="font-medium">{item.title}</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-               {item.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
       {/* Contact Support */}
       <div>
         <h3 className="text-xl font-semibold mb-2"> Contact Support</h3>
@@ -513,6 +495,14 @@ const TextGenerationPlatform = () => {
           </span>
         </p>
       </div>
+      <NavigationContainer
+        previousTitle="Overview"
+        previousDescription="An introduction to the platform, its features, and how to navigate through its functionalities."
+        preUrl="/docs/tutorials/using-platform"
+        nextDesciption="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
+        nextTitle="Image Generation"
+        nextUrl="/docs/tutorials/image-ai"
+      />
     </div>
   );
 };

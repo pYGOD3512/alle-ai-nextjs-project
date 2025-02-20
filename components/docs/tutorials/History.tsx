@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ArrowDown } from "lucide-react";
-
+import NavigationContainer from "@/components/NavigationContainer";
 const ManagingChatHistory = () => {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
@@ -44,7 +44,8 @@ const ManagingChatHistory = () => {
           dashboard.
         </li>
         <li>
-          Click on <strong>Chat History</strong> or a similar option{` (e.g.,
+          Click on <strong>Chat History</strong> or a similar option
+          {` (e.g.,
           "Past Conversations").`}
         </li>
         <li>
@@ -233,12 +234,20 @@ const ManagingChatHistory = () => {
       </div>
 
       <h2 className="text-3xl mb-4">9. Need Help?</h2>
-      <p className="text-muted-foreground mb-8">
+      <p className="text-muted-foreground mb-4">
         If you have any questions or need further assistance with managing your
         chat history, please contact our support team at{" "}
         <strong>[support email]</strong> or visit our{" "}
         <strong>[Help Center]</strong>.
       </p>
+      <NavigationContainer
+        previousTitle="Prompts Engineering"
+        previousDescription="Learn how to craft effective prompts to get the best results from AI models"
+        preUrl="/docs/tutorials/prompts"
+        nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
+        nextTitle="Ready to Get Started? 🚀 "
+        nextUrl="/"
+      />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import ImageGenerationShowcase from "@/components/ImageGenerationShowcase";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-
+import NavigationContainer from "@/components/NavigationContainer";
 export default function ImageGeneration() {
   const showcaseRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
@@ -35,26 +35,26 @@ export default function ImageGeneration() {
   ];
 
   // What to Read Next data
- const readNextData = [
-   {
-     title: "Audio Generation Guide",
-     href: "/docs/user-guides/audio",
-     description:
-       "Learn how to create and manipulate audio using our platform.",
-   },
-   {
-     title: "Video Generation Guide",
-     href: "/docs/user-guides/video",
-     description:
-       "Step-by-step instructions for generating videos with our AI.",
-   },
-   {
-     title: "Manage Your History",
-     href: "/docs/user-guides/history",
-     description:
-       "Learn how to access, organize, and manage your past creations and activity.",
-   },
- ];
+  const readNextData = [
+    {
+      title: "Audio Generation Guide",
+      href: "/docs/user-guides/audio",
+      description:
+        "Learn how to create and manipulate audio using our platform.",
+    },
+    {
+      title: "Video Generation Guide",
+      href: "/docs/user-guides/video",
+      description:
+        "Step-by-step instructions for generating videos with our AI.",
+    },
+    {
+      title: "Manage Your History",
+      href: "/docs/user-guides/history",
+      description:
+        "Learn how to access, organize, and manage your past creations and activity.",
+    },
+  ];
   const toggleQuestion = (index: number) => {
     setExpandedQuestion(expandedQuestion === index ? null : index);
   };
@@ -366,24 +366,14 @@ export default function ImageGeneration() {
         </div>
       </section>
 
-      {/* What to Read Next Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {readNextData.map((item, index) => (
-            <Link
-              key={index}
-              href={item.href}
-              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-            >
-              <h3 className="font-medium">{item.title}</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-              {item.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <NavigationContainer
+        previousTitle="Text Generation"
+        previousDescription="Explore AI-powered text generation, including creative writing, summarization, and automated content creation."
+        preUrl="/docs/tutorials/image-ai"
+        nextDesciption="Create AI-generated audio, including speech synthesis, music, and sound effects."
+        nextTitle="Audio Generation"
+        nextUrl="/docs/tutorials/audio-ai"
+      />
     </div>
   );
 }

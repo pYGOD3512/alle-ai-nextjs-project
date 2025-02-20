@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
-import { userGuides, apiReference, guides } from "@/lib/constants/docs";
+import { tutorial, apiReference, guides } from "@/lib/constants/docs";
 import { useState, useEffect } from "react";
 import { useActiveSectionStore } from "@/stores/ui";
 import { useRouter } from "next/navigation";
@@ -17,23 +17,6 @@ export const SidebarNav = () => {
   >({});
   const { activeSection } = useActiveSectionStore();
   const router = useRouter();
-
-  // Get the base path for relative URLs
-  const getBasePath = () => {
-    const pathParts = pathname.split("/");
-    return pathParts.slice(0, -1).join("/");
-  };
-
-  // Convert relative path to absolute only for non-first items
-  const getAbsolutePath = (href: string, isFirstItem: boolean) => {
-    if (isFirstItem) {
-      return href; // Return as is for first item (already full path)
-    }
-    if (href.startsWith("./")) {
-      return `${getBasePath()}/${href.slice(2)}`;
-    }
-    return href;
-  };
 
   useEffect(() => {
     // Keep the chat section expanded when in any of its subsections
@@ -103,10 +86,14 @@ export const SidebarNav = () => {
       router.push("/docs/api-reference/chat");
       return;
     }
-    if(
-      sectionId === "image-generation"
-    ){
-      router.push(url)
+    if (sectionId === "image-generation") {
+      router.push(url);
+    }
+    if (sectionId === "text-to-speech") {
+      router.push("/docs/api-reference/audio");
+    }
+    if (sectionId === "text-video" || "video-generation") {
+      router.replace("/docs/api-reference/video");
     }
     router.push(`${url}#${sectionId}`);
   };
@@ -137,32 +124,30 @@ export const SidebarNav = () => {
                     </button>
                     {expandedSections[section.id] && section.sections && (
                       <div className="ml-6 space-y-1">
-                          <div>
-                            {section.sections.map((subsection, id) => (
-                              <button
-                                key={subsection.id}
-                                onClick={() =>
-                                  handleReferenceClick(
-                                    subsection.id,
-                                    section.href
-                                  )
-                                }
-                                className={cn(
-                                  "group flex items-center w-3/4 rounded-md p-2 text-sm transition-all duration-200",
-                                  "relative overflow-hidden",
-                                  isActive(section.href, subsection.id)
-                                    ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
-                                    : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
-                                )}
-                              >
-                                <span className="relative z-10">
-                                  {subsection.title}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        
-                       
+                        <div>
+                          {section.sections.map((subsection, id) => (
+                            <button
+                              key={subsection.id}
+                              onClick={() =>
+                                handleReferenceClick(
+                                  subsection.id,
+                                  section.href
+                                )
+                              }
+                              className={cn(
+                                "group flex items-center w-3/4 rounded-md p-2 text-sm transition-all duration-200",
+                                "relative overflow-hidden",
+                                isActive(section.href, subsection.id)
+                                  ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                                  : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                              )}
+                            >
+                              <span className="relative z-10">
+                                {subsection.title}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -255,13 +240,44 @@ export const SidebarNav = () => {
       ))}
     </div>
   );
-
+  const renderTutorials = () => (
+    <div>
+      {tutorial.map((item) => (
+        <div key={item.id}>
+          <span className="font-bold px-2 mb-5 ">
+            {`${item.title.toUpperCase()}`}
+          </span>
+          {item.sections.map((section) => (
+            <div className="mb-2 mt-3" key={section.id}>
+              <Link
+                scroll={false}
+                href={`${item.href}/${section.id}`}
+                className={cn(
+                  "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                  "relative overflow-hidden",
+                  isActive(`${item.href}/${section.id}`)
+                    ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                    : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                )}
+              >
+                <span className="px-2 text-sm">{section.title}</span>
+              </Link>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
   return (
     <ScrollArea className="h-full py-6 pl-4 pr-2">
       <div className="space-y-6">
         {pathname.startsWith("/docs/api")
           ? renderApiReference()
-          : renderUserGuides()}
+          : pathname.startsWith("/docs/user-guides")
+          ? renderUserGuides()
+          : pathname.startsWith("/docs/tutorials")
+          ? renderTutorials()
+          : ""}
       </div>
     </ScrollArea>
   );

@@ -17,7 +17,8 @@ export function DocsHeader() {
       href: "/docs/api-reference",
       pageOne: "introduction",
     },
-    { name: "Discussions", href: "/discussions" },
+    { name: "Tutorials", href: "/docs/tutorials", pageOne: "using-platform" },
+    { name: "Community", href: "/discord" },
   ];
 
   return (

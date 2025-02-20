@@ -84,42 +84,15 @@ const Overview = () => {
       {/* Popular */}
       <div className="max-w-6xl mx-auto ">
         <div className="flex items-center gap-2 mb-6">
-          <Link className="w-5 h-5" />
-          <h2 id="most-popular" className="text-2xl font-bold">
-            Most popular
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          {quickLinks.map((section, index) => (
-            <Card
-              key={index}
-              className={`${section.span} dark:bg-zinc-800 hover:border-blue-600 cursor-pointer transition-all duration-200`}
-            >
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <h4 className="text-lg font-semibold">{section.title}</h4>
-                    <p className="text-gray-500">{section.description}</p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </div>
 
       {/*  Overview */}
       <div className="max-w-6xl mx-auto p-8">
         <div className="space-y-8">
-          
           <div className="text-center space-y-4 mt-12">
             <Sparkles className="w-12 h-12 mx-auto text-black dark:text-white" />
-            <h2
-              id="platform-capabilities"
-              className="text-4xl font-bold "
-            >
+            <h2 id="platform-capabilities" className="text-4xl font-bold ">
               Your All-in-One AI Platform
             </h2>
             <p className="text-xl text-muted-foreground mb-5 max-w-3xl mx-auto">

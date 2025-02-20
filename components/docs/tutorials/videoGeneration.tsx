@@ -4,7 +4,7 @@ import VideoPlayer from "@/components/features/video/videoPlayer";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-
+import NavigationContainer from "@/components/NavigationContainer";
 export default function VideoGeneration() {
   const { resolvedTheme } = useTheme();
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
@@ -271,25 +271,14 @@ export default function VideoGeneration() {
       </section>
 
       {/* Related Guides */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">What to Read Next</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {readNextData.map((item, index) => (
-            <Link
-              key={index}
-              href={item.href}
-              className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-            >
-              <h3 className="font-medium">{item.title}</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                {index === 0 && "Learn image creation techniques"}
-                {index === 1 && "Explore audio generation features"}
-                {index === 2 && "Master video editing tools"}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <NavigationContainer
+        previousTitle="Audio Generation"
+        previousDescription="Create AI-generated audio, including speech synthesis, music, and sound effects."
+        preUrl="/docs/tutorials/audio-ai"
+        nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
+        nextTitle="Prompt Engineering"
+        nextUrl="/docs/tutorials/prompts"
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
+import NavigationContainer from "@/components/NavigationContainer";
 const UsingPromptsEffectively = () => {
   return (
     <div className="documentation-container">
@@ -287,12 +287,20 @@ const UsingPromptsEffectively = () => {
       </ul>
 
       <h2 className="text-3xl mb-4">Need Help?</h2>
-      <p className="text-muted-foreground mb-8">
+      <p className="text-muted-foreground mb-4">
         If you have any questions or need further assistance with crafting
         effective prompts, please contact our support team at{" "}
         <strong>[support email]</strong> or visit our{" "}
         <strong>[Help Center]</strong>.
       </p>
+      <NavigationContainer
+        previousTitle="Video Generation"
+        previousDescription="Utilize AI for video creation, editing, and automated scene generation"
+        preUrl="/docs/tutorials/video-ai"
+        nextDesciption="View, manage, and delete past interactions with AI to keep track of your generated content."
+        nextTitle="Managing history"
+        nextUrl="/docs/tutorials/history"
+      />
     </div>
   );
 };

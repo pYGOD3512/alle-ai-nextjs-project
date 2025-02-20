@@ -1,6 +1,5 @@
 import dynamic from "next/dynamic";
 import { FC } from "react";
-import Introduction from "../docs/api-reference/introduction";
 
 // available faq pages
 const faqComponents = {
@@ -39,15 +38,8 @@ const faqComponents = {
   "models-selection": dynamic(
     () => import("@/components/faq/others/models-selection")
   ),
-  chat: dynamic(() => import("@/components/docs/user-guides/text-generation")),
-  audio: dynamic(() => import("@/components/docs/user-guides/audioGeneration")),
-  video: dynamic(() => import("@/components/docs/user-guides/videoGeneration")),
-  image: dynamic(
-    () => import("@/components/docs/user-guides/image-generation")
-  ),
-  history: dynamic(() => import("@/components/docs/user-guides/History")),
+
   //api reference  pages
-  overview: dynamic(() => import("@/components/docs/user-guides/Overview")),
   quickstart: dynamic(
     () => import("@/components/docs/reference/initial-setup")
   ),
@@ -67,17 +59,31 @@ const faqComponents = {
   "video-generation": dynamic(
     () => import("@/components/docs/reference/video-generation")
   ),
-  prompts: dynamic(() => import("@/components/docs/user-guides/prompts")),
   pricing: dynamic(() => import("@/components/docs/reference/pricing")),
   "error-codes": dynamic(() => import("@/components/docs/reference/Errors")),
   "prompts-inputs": dynamic(
     () => import("@/components/docs/reference/fine-tuning-inputs")
   ),
 
-  // user guides pages
+  // tutorials pages
   "using-platform": dynamic(
-    () => import("@/components/docs/user-guides/use-platform")
+    () => import("@/components/docs/tutorials/Overview")
   ),
+  "text-ai": dynamic(
+    () => import("@/components/docs/tutorials/text-generation")
+  ),
+  "audio-ai": dynamic(
+    () => import("@/components/docs/tutorials/audioGeneration")
+  ),
+  "video-ai": dynamic(
+    () => import("@/components/docs/tutorials/videoGeneration")
+  ),
+  "image-ai": dynamic(
+    () => import("@/components/docs/tutorials/image-generation")
+  ),
+  prompts: dynamic(() => import("@/components/docs/tutorials/prompts")),
+  history: dynamic(() => import("@/components/docs/tutorials/History")),
+
   models: dynamic(() => import("@/components/docs/reference/models")),
 
   // main api reference
