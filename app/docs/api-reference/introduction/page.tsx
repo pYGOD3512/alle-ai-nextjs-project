@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import RenderCode from "@/components/RenderCode";
 import { useActiveSectionStore } from "@/stores/ui";
-import { OnThisPage } from "../OnThisPage";
-import {ChevronRight, ChevronLeft} from "lucide-react"
+import { OnThisPage } from "@/components/docs/OnThisPage";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 const hheading = [
   {
@@ -23,7 +23,7 @@ const hheading = [
   },
 ];
 
-export default function Introduction() {
+export default function Page() {
   const router = useRouter();
   const pathname = usePathname();
   const { setActiveSection } = useActiveSectionStore();
@@ -587,7 +587,7 @@ print(response.choices[0].message.content)`}
                     Next
                   </span>
                   <span className="font-medium group-hover:text-foreground">
-                    Endpoints 
+                    Endpoints
                   </span>
                   <span className="text-xs text-muted-foreground mt-1">
                     Explore search and filtering capabilities
