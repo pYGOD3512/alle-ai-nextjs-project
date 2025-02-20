@@ -429,19 +429,19 @@ export const apiReference: apiREfprops[] = [
       {
         id: "video-generation",
         title: "Video Generation",
-        href: "/docs/api-reference/video-generate",
+        href: "/docs/api-reference/video",
         sections: [
           {
             id: "text-video",
             title: "Text-to-Video",
             keywords: [],
-            href: "/docs/api-reference/video-generate",
+            href: "/docs/api-reference/video",
           },
           {
             id: "video-edit",
             title: "Video Editing",
             keywords: [],
-            href: "/docs/api-reference/video-generate",
+            href: "/docs/api-reference/video",
           },
         ],
       },
