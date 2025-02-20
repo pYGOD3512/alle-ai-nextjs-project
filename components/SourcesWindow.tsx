@@ -14,24 +14,6 @@ interface SourcesWindowProps {
   userPrompt: string;
 }
 
-// Helper function to get icon by source type
-const getSourceIcon = (type: Source['type']) => {
-  switch (type) {
-    case 'wikipedia':
-      return <Globe className="h-4 w-4" />;
-    case 'encyclopedia':
-      return <BookOpen className="h-4 w-4" />;
-    case 'nba':
-      return <Trophy className="h-4 w-4" />;
-    case 'espn':
-      return <Tv className="h-4 w-4" />;
-    case 'biography':
-      return <FileText className="h-4 w-4" />;
-    default:
-      return <ExternalLink className="h-4 w-4" />;
-  }
-};
-
 // Create a singleton pattern for the window position
 const windowPosition = {
   current: { x: window.innerWidth - 400, y: 100 }
@@ -57,7 +39,7 @@ export function SourcesWindow({ sources, isOpen, onClose, responseId, userPrompt
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-backgroundSecondary/95 backdrop-blur-sm">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm">
+              <h3 className="font-semibold text-sm" title={userPrompt}>
                 {userPrompt.length > 20 ? userPrompt.substring(0, 17) + '...' : userPrompt}
               </h3>
               <div className="text-xs text-muted-foreground px-2 py-0.5 bg-secondary/50 rounded-full">
@@ -110,30 +92,35 @@ export function SourcesWindow({ sources, isOpen, onClose, responseId, userPrompt
                                       flex items-center justify-center
                                       group-hover:bg-secondary/20 
                                       transition-colors duration-200">
-                          {source.img ? <Image 
-                          src={source.img} 
+                          <Image 
+                          src={source.favicon ? source.favicon : '/icons/default.png'} 
                           alt={source.title} 
                           width={32}
                           height={32}
-                          className="w-4 h-4 object-cover rounded-full" /> : null}
+                          className="w-4 h-4 object-cover rounded-full" />
                         </div>
-                        <span className="text-xs font-medium text-muted-foreground/80
-                                       group-hover:text-primary/80 transition-colors">
-                          {source.type}
-                        </span>
-                      </div>
-                      
-                      {/* Title and Description */}
-                      <div className="space-y-2">
                         <h4 className="text-xs font-semibold leading-snug 
                                      text-foreground/90 group-hover:text-primary 
                                      transition-colors duration-200">
                           {source.title}
                         </h4>
+                      </div>
+                      
+                      {/* Title and Description */}
+                      <div className="space-y-2">
+                        {/* <h4 className="text-xs font-semibold leading-snug 
+                                     text-foreground/90 group-hover:text-primary 
+                                     transition-colors duration-200">
+                          {source.title}
+                        </h4> */}
                         <p className="text-xs text-muted-foreground/70 
                                    group-hover:text-muted-foreground/90
                                    line-clamp-2 leading-relaxed">
-                          {source.description.length > 100 ? source.description.substring(0, 97) + '...' : source.description}
+                          {source.summary ? (
+                            source.summary.length > 200 
+                              ? source.summary.substring(0, 200) + '...' 
+                              : source.summary
+                          ) : null}
                         </p>
                       </div>
                     </a>

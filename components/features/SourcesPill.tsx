@@ -9,6 +9,7 @@ import Image from 'next/image';
   export function SourcesPill({ onClick, sources }: SourcesPillProps){
     // Limit to showing max 4 source images
     const displaySources = sources.slice(0, 3);
+    console.log(sources);
     // const remainingCount = Math.max(0, sources.length - 4);
   
     return (
@@ -39,8 +40,8 @@ import Image from 'next/image';
               }}
             >
               <Image
-                src={source.img || '/icons/wikipedia.png'}
-                alt={source.type}
+                src={source.favicon || '/icons/default-favicon.png'}
+                alt={source.title}
                 width={16}
                 height={16}
                 className="rounded-full object-cover"

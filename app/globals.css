@@ -169,6 +169,18 @@
   100% { background-position: 0% 50%; }
 }
 
+
+li {
+  display: list-item;
+  list-style-position: inside; /* Ensures the marker is inside the list item */
+  padding-left: 0.5em; /* Adds space between the marker and the text */
+}
+
+li > p {
+  display: inline; /* Makes the paragraph behave like an inline element */
+  margin: 0; /* Removes default margin to align with the list marker */
+}
+
 /* .animate-gradient {
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;

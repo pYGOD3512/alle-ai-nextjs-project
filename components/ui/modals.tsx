@@ -6404,7 +6404,7 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       id: 'org1-a1b2c3',
       name: 'KNUST',
       role: 'Admin',
-      members: 450,
+      members: 300,
       image: '/icons/knust.png'
     },
     {

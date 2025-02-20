@@ -50,6 +50,7 @@ interface ModelResponseProps {
   onRegenerate?: (responseId: string) => void;
   webSearchEnabled?: boolean;
   sources?: Source[];
+  onSourcesClick: (responseId: string, sources: Source[]) => void;
   settings?: {
     personalizedAds: boolean;
   };
@@ -132,6 +133,7 @@ export function ModelResponse({
   onRegenerate,
   webSearchEnabled = false,
   sources = [],
+  onSourcesClick,
   settings
 }: ModelResponseProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -254,7 +256,7 @@ export function ModelResponse({
         );
       }
 
-      return <p {...props}>{children}</p>;
+      return <p className="my-4 leading-relaxed text-base" {...props}>{children}</p>;
     },
     
     img: ({ src, alt, ...props }: ImgHTMLAttributes<HTMLImageElement> & { node?: any }) => {
@@ -298,6 +300,25 @@ export function ModelResponse({
     td: ({ children, ...props }: MarkdownComponentProps) => (
       <MarkdownTd {...props}>{children}</MarkdownTd>
     ),
+
+    ul: ({ children, ...props }: MarkdownComponentProps) => (
+      <ul className="list-disc list-inside my-4 space-y-2" {...props}>
+        {children}
+      </ul>
+    ),
+
+    ol: ({ children, ...props }: MarkdownComponentProps) => (
+      <ol className="list-decimal list-inside my-4 space-y-2" {...props}>
+        {children}
+      </ol>
+    ),
+
+    li: ({ children, ...props }: MarkdownComponentProps) => (
+      <li className="leading-relaxed text-base marker:text-foreground marker:mr-2" {...props}>
+        {children}
+      </li>
+    ),
+
   }), []);
 
   // Get display limit based on screen size
@@ -372,7 +393,7 @@ export function ModelResponse({
               finalAnswer={SUMMARY_DATA.finalAnswer}
             />
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none relative">
+            <div className="prose prose-sm dark:prose-invert max-w-none relative space-y-4">
               <ReactMarkdown
                 key={`${responseId}-${content}`}
                 remarkPlugins={[remarkGfm]}
@@ -380,7 +401,10 @@ export function ModelResponse({
                 components={components}
                 className="text-base text-accent-foreground 
                           [&>*:first-child]:mt-0 [&>*:last-child]:mb-0
-                          [&_a]:no-underline [&_p>a]:before:content-[''] [&_p>a]:after:content-['']"
+                          [&_a]:no-underline [&_p>a]:before:content-[''] [&_p>a]:after:content-['']
+                          [&_pre]:my-4
+                          [&_code]:text-sm
+                          space-y-4"
               >
                 {textContent}
               </ReactMarkdown>
@@ -455,7 +479,7 @@ export function ModelResponse({
             {sources && sources.length > 0 && (
             <div className="">
               <SourcesPill 
-                onClick={() => setSources(responseId, sources)} 
+                onClick={() => onSourcesClick(responseId, sources)} 
                 sources={sources}
               />
             </div>
