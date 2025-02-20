@@ -10,8 +10,6 @@ import RenderPageContent from "../RenderPageContent";
 import RetryResponse from "./RetryResponse"
 import {
   MODEL_RESPONSES,
-  EXAMPLE_SOURCES,
-  EXAMPLE_SOURCES_SIMPLE,
   SUMMARY_DATA
 } from "@/lib/constants";
 import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore } from "@/stores";
@@ -25,6 +23,7 @@ import { SourcesWindow } from "../SourcesWindow";
 import { Summary } from "./Summary";
 import { Card } from "@/components/ui/card";
 import { Model } from "@/lib/api/models";
+import { Source } from '@/lib/types';
 
 interface ChatSession {
   id: string; // conversation UUID
@@ -48,6 +47,7 @@ interface ModelResponse {
   content: string;
   status: 'loading' | 'complete' | 'error';
   error?: string;
+  sources?: Source[];
 }
 
 interface Message {
@@ -134,6 +134,21 @@ export function ChatArea() {
 
   const [currentBranch, setCurrentBranch] = useState(0);
 
+  // Add new state for web search loading
+  const [webSearchLoading, setWebSearchLoading] = useState<Record<string, boolean>>({});
+
+  const [sourcesWindowState, setSourcesWindowState] = useState<{
+    isOpen: boolean;
+    activeResponseId: string | null;
+    sources: Source[];
+    userPrompt: string;
+  }>({
+    isOpen: false,
+    activeResponseId: null,
+    sources: [],
+    userPrompt: ''
+  });
+
   // Memoize the auto-activation logic
   const handleAutoActivation = useCallback((message: ChatMessage) => {
     if (activeContents[message.id]) return;
@@ -188,9 +203,11 @@ export function ChatArea() {
       modelId => !inactiveModels.includes(modelId)
     );
 
-    // Handle web search separately and first
+    // Handle web search first if enabled
     if (isWebSearch) {
       console.log('Web search is enabled - making web search API call');
+      setWebSearchLoading(prev => ({ ...prev, [promptId]: true }));
+
       chatApi.webSearch({
         prompt_id: promptId,
         conversation_id: conversationId,
@@ -199,14 +216,33 @@ export function ChatArea() {
       })
       .then(webSearchResponse => {
         console.log('Web search response received:', webSearchResponse);
+        setBranches(prev => prev.map(branch => ({
+          ...branch,
+          messages: branch.messages.map(msg => 
+            msg.id === promptId ? {
+              ...msg,
+              responses: msg.responses.map(resp => ({
+                ...resp,
+                sources: webSearchResponse.results
+              }))
+            } : msg
+          )
+        })));
       })
       .catch(error => {
         console.error('Error in web search:', error);
+        toast({
+          title: "Web Search Error",
+          description: "Failed to complete web search, falling back to model responses.",
+          variant: "destructive"
+        });
+      })
+      .finally(() => {
+        setWebSearchLoading(prev => ({ ...prev, [promptId]: false }));
       });
-      return; // Exit early since we're using web search
     }
 
-    // Handle model responses only if not using web search
+    // Handle model responses (now runs alongside web search)
     activeModels.forEach(async (modelId) => {
       try {
         const response = await chatApi.generateResponse({
@@ -271,7 +307,7 @@ export function ChatArea() {
         })));
       }
     });
-  }, [conversationId, promptId, selectedModels.chat, inactiveModels, isWebSearch]);
+  }, []);
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -414,21 +450,51 @@ export function ChatArea() {
           : branch
       ));
 
-      // Handle web search separately from model responses
+      // Handle web search first if enabled
       if (isWebSearch) {
         console.log('Web search is enabled - making web search API call');
-        const webSearchResponse = await chatApi.webSearch({
-          prompt_id: promptResponse.id,
-          conversation_id: conversationId,
-          follow_up: true,
-          prev: null
-        });
-        
-        console.log('Web search response received:', webSearchResponse);
-        return; // Exit early since we're using web search
+        setWebSearchLoading(prev => ({ ...prev, [promptResponse.id]: true }));
+
+        try {
+          const webSearchResponse = await chatApi.webSearch({
+            prompt_id: promptResponse.id,
+            conversation_id: conversationId,
+            follow_up: true,
+            prev: getPreviousPromptResponsePairs(branches[currentBranch], nextPosition[1], 'websearch')
+          });
+          
+          console.log('Web search response received:', webSearchResponse);
+          
+          // Store the web search results in the state
+          setBranches(prev => prev.map((branch, index) => 
+            index === currentBranch
+              ? {
+                  ...branch,
+                  messages: branch.messages.map(msg => 
+                    msg.id === promptResponse.id ? {
+                      ...msg,
+                      responses: msg.responses.map(resp => ({
+                        ...resp,
+                        sources: webSearchResponse.results // Store the web search results
+                      }))
+                    } : msg
+                  )
+                }
+              : branch
+          ));
+        } catch (error) {
+          console.error('Error in web search:', error);
+          toast({
+            title: "Web Search Error",
+            description: "Failed to complete web search, falling back to model responses.",
+            variant: "destructive"
+          });
+        } finally {
+          setWebSearchLoading(prev => ({ ...prev, [promptResponse.id]: false }));
+        }
       }
 
-      // Generate responses for each active model
+      // Generate responses for each active model (now runs after web search)
       const activeModels = selectedModels.chat.filter(
         modelId => !inactiveModels.includes(modelId)
       );
@@ -638,12 +704,22 @@ export function ChatArea() {
       
       if (modelResponse) {
         pairs.push([msg.id, modelResponse.id]);
-        console.log(`Found pair for model ${modelId}:`, [msg.id, modelResponse.id]);
+        console.log(`Found pair for model ${modelId}:`, msg.id);
+        console.log(`Found pair for model ${modelId}:`, modelResponse.id);
       }
     });
 
     console.log(`Previous prompt-response pairs for model ${modelId}:`, pairs);
     return pairs;
+  };
+
+  const handleSourcesClick = (responseId: string, sources: Source[], userPrompt: string) => {
+    setSourcesWindowState({
+      isOpen: true,
+      activeResponseId: responseId,
+      sources: sources,
+      userPrompt: userPrompt
+    });
   };
 
   return (
@@ -664,6 +740,13 @@ export function ChatArea() {
                 branches={branches}
               />
               <div className="mt-4">
+                {webSearchLoading[message.id] && (
+                  <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
+                    <p className="text-md text-muted-foreground animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
+                      Searching the web...
+                    </p>
+                  </div>
+                )}
                 <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
                   {selectedModels.chat.map((modelId, index) => {
                     const model = chatModels.find(m => m.model_uid === modelId);
@@ -725,29 +808,31 @@ export function ChatArea() {
                   })}
                 </div>
 
-                {message.responses && message.responses.length > 0 && (
-                  <div className="mt-4">
-                    {activeContents[message.id]?.type === 'model' && (
-                      <ModelResponse
-                        key={`${conversationId}-${activeContents[message.id].id}`}
-                        model={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
-                        content={message.responses.find(r => 
-                          r.modelId === activeContents[message.id].id
-                        )?.content || ""}
-                        model_img={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
-                        responseId={message.responses.find(r => 
-                          r.modelId === activeContents[message.id].id
-                        )?.id || ""}
-                        sessionId={conversationId!}
-                        feedback={responseFeedback[message.responses.find(r => 
-                          r.modelId === activeContents[message.id].id
-                        )?.id || ""]}
-                        onFeedbackChange={handleFeedbackChange}
-                        webSearchEnabled={isWebSearch}
-                      />
-                    )}
-                  </div>
-                )}
+                <div className="mt-4">
+                  {activeContents[message.id]?.type === 'model' && (
+                    <ModelResponse
+                      key={`${conversationId}-${activeContents[message.id].id}`}
+                      model={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
+                      content={message.responses.find(r => 
+                        r.modelId === activeContents[message.id].id
+                      )?.content || ""}
+                      model_img={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
+                      responseId={message.responses.find(r => 
+                        r.modelId === activeContents[message.id].id
+                      )?.id || ""}
+                      sessionId={conversationId!}
+                      feedback={responseFeedback[message.responses.find(r => 
+                        r.modelId === activeContents[message.id].id
+                      )?.id || ""]}
+                      onFeedbackChange={handleFeedbackChange}
+                      webSearchEnabled={isWebSearch}
+                      sources={message.responses.find(r => 
+                        r.modelId === activeContents[message.id].id
+                      )?.sources || []}
+                      onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           )) || null}
@@ -769,13 +854,18 @@ export function ChatArea() {
         onWebSearchToggle={() => {}}
         onCombinedToggle={() => {}}
       />
-      {/* <SourcesWindow
-        sources={sources}
-        isOpen={isOpen}
-        onClose={close}
-        responseId={activeResponseId || ''}
-        userPrompt={branches[currentBranch].messages[0].content || ''}
-      /> */}
+      <SourcesWindow
+        sources={sourcesWindowState.sources}
+        isOpen={sourcesWindowState.isOpen}
+        onClose={() => setSourcesWindowState({
+          isOpen: false,
+          activeResponseId: null,
+          sources: [],
+          userPrompt: ''
+        })}
+        responseId={sourcesWindowState.activeResponseId || ''}
+        userPrompt={sourcesWindowState.userPrompt}
+      />
     </RenderPageContent>
   );
 }

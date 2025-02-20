@@ -63,12 +63,12 @@ export interface ChatMessage {
 }
 
 export interface ModelResponse {
-  id: string;
-  modelId: string;
+  id: string; // response ID
+  modelId: string; // model_uid
   content: string;
-  status: "loading" | "complete" | "error";
-  parentMessageId: string;
-  timestamp: Date;
+  status: 'loading' | 'complete' | 'error';
+  error?: string;
+  sources?: Source[];
 }
 
 export interface Article {
@@ -136,11 +136,14 @@ export interface Transaction {
 }
 
 export interface Source {
-  url: string;
+  id: string;
   title: string;
-  type: string;
-  description: string;
-  img?: string;
+  url: string;
+  publishedDate?: string;
+  author?: string;
+  summary?: string;
+  favicon?: string;
+  image?: string; 
 }
 
 export type NotificationItem = {
@@ -160,3 +163,17 @@ export type NotificationItem = {
     relatedFeature?: string;
   };
 };
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+  position: [number, number];
+  responses: ModelResponse[];
+}
+
+export interface Branch {
+  messages: Message[];
+  startPosition: [number, number];
+}

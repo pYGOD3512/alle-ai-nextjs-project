@@ -41,23 +41,22 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
       
       // Detect if scroll was initiated by user
-      if (Math.abs(scrollTop - lastScrollTopRef.current) > 50) {
+      if (Math.abs(scrollTop - lastScrollTopRef.current) > 0) {
         userScrolledRef.current = true;
+        setShowButton(true); // Show button when user starts scrolling
         // Reset after 2 seconds of no scrolling
         setTimeout(() => {
           userScrolledRef.current = false;
+          setShowButton(false); // Hide button after scrolling stops
         }, 2000);
       }
       
       lastScrollTopRef.current = scrollTop;
-      setShowButton(!isNearBottom);
+      setShowButton(!isNearBottom && userScrolledRef.current);
     };
 
     scrollViewport.addEventListener('scroll', handleScroll);
     
-    // Initial check
-    handleScroll();
-
     return () => scrollViewport.removeEventListener('scroll', handleScroll);
   }, [scrollAreaRef]);
 

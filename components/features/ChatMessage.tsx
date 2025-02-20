@@ -5,6 +5,22 @@ import { Card } from "@/components/ui/card";
 import Image from 'next/image';
 import { Pencil, Check, X } from "lucide-react";
 import { useAuthStore } from "@/stores";
+import { ModelResponse } from "@/lib/types";
+
+
+interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+  position: [number, number];
+  responses: ModelResponse[];
+}
+
+interface Branch {
+  messages: Message[];
+  startPosition: [number, number];
+}
 
 interface ChatMessageProps {
   content: string;
@@ -15,7 +31,7 @@ interface ChatMessageProps {
   totalBranches?: number;
   currentBranch?: number;
   onBranchChange?: (branchIndex: number) => void;
-  branches?: any[]; // Add this prop
+  branches?: Branch[]; // Add this prop
 }
 
 interface MessageTree {
@@ -62,7 +78,7 @@ export function ChatMessage({
       
       // Include messages only if they're in the same branch path
       return branchPath.some(pathBranch => 
-        pathBranch.messages.some((m: any) => 
+        pathBranch.messages.some(m => 
           m.position[0] === msg.position[0] && 
           m.position[1] === msg.position[1]
         )
@@ -71,14 +87,14 @@ export function ChatMessage({
     .sort((a, b) => a.position[0] - b.position[0]);
 
   // Helper function to find the branch path from root to current message
-  const findBranchPath = (branches: any[], pos: [number, number]): any[] => {
+  const findBranchPath = (branches: Branch[], pos: [number, number]): Branch[] => {
     const [x, y] = pos;
-    const path: any[] = [];
+    const path: Branch[] = [];
     
     let currentPos: [number, number] = [x, y];
     while (currentPos[0] >= 0) {
       const branch = branches.find(b => 
-        b.messages.some((m: any) => 
+        b.messages.some(m => 
           m.position[0] === currentPos[0] && 
           m.position[1] === currentPos[1]
         )

@@ -293,9 +293,7 @@ export function Header() {
   const handleUserMenuItemClick = (item: any) => {
     switch (item.interactionType) {
       case 'modal':
-        if (item.label === 'Profile') {
-          setUserProfileModalOpen(true);
-        } else if (item.label === 'Organization') {
+        if (item.label === 'Organization') {
           setOrganizationModalOpen(true);
         } else if (item.label === 'Settings') {
           setSettingsModalOpen(true);
@@ -567,7 +565,25 @@ export function Header() {
               />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-backgroundSecondary">
-                <DropdownMenuItem className="flex items-start p-2 gap-4 cursor-pointer">
+              {pathname.includes('/plans') ? (
+                <DropdownMenuItem
+                className="flex items-start p-2 gap-4 cursor-pointer">
+                <Image
+                  src={user?.photo_url || "/user.jpg"}
+                  alt="User Image"
+                  width={35}
+                  height={35}
+                  className="rounded-full mx-auto cursor-pointer"
+                />
+                <div className="flex flex-col mr-4">
+                  <Text className="text-sm">{user?.first_name} {user?.last_name}</Text>
+                  <Text className="text-xs">{user?.email}</Text>
+                </div>
+              </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => setUserProfileModalOpen(true)}
+                  className="flex items-start p-2 gap-4 cursor-pointer">
                   <Image
                     src={user?.photo_url || "/user.jpg"}
                     alt="User Image"
@@ -580,6 +596,7 @@ export function Header() {
                     <Text className="text-xs">{user?.email}</Text>
                   </div>
                 </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator className="my-2 bg-foreground/20"/>
                 {userMenuItems.filter(item => 
                   !pathname.includes('/plans') || 

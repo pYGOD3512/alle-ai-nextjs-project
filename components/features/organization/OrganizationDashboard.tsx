@@ -60,10 +60,10 @@ export function OrganizationDashboard() {
         await new Promise(resolve => setTimeout(resolve, 1500));
         setOrgDetails({
           id: params.id as string,
-          name: 'Acme Corp',
+          name: 'KNUST',
           plan: 'Business',
-          seats: 50,
-          usedSeats: 12,
+          seats: 450,
+          usedSeats: 300,
           members: [
             {
               id: '1',
@@ -79,7 +79,7 @@ export function OrganizationDashboard() {
               email: 'jane@acme.com',
               role: 'member',
               joinedAt: '2024-02-01',
-              status: 'active'
+              status: 'suspended'
             },
           ]
         });

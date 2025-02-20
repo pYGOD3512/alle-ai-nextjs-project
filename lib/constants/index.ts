@@ -266,13 +266,6 @@ export const videoHistory = [
 
 export const userMenuItems = [
   {
-    label: "Profile",
-    icon: User,
-    interactionType: "modal",
-    onClick: () => {
-    },
-  },
-  {
     label: "Organization",
     icon: Users,
     interactionType: "modal",
@@ -1647,60 +1640,60 @@ export const timeSeriesData: TimeSeriesData[] = [
   { date: '2024-05', 'GPT-4': 56, 'DALL-E': 45, 'Claude': 47, 'Gemini': 35 },
 ];
 
-export const EXAMPLE_SOURCES: Source [] = [
-  {
-    type: "podcast",
-    title: "How to Make $1 Million Online - Lewis Howes",
-    description: "Lewis Howes discusses strategies for building wealth online, emphasizing the importance of passion and self-investment.",
-    url: "https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com",
-    img: "/images/stable-diffusion.jpg"
-  },
-  {
-    type: "article",
-    title: "Lazy Millionaire: 8 Ways to Make a Million Dollars on 4 Hours a Day - Nasdaq",
-    description: "This article explores various methods to achieve millionaire status with minimal daily work hours, highlighting the power of compounding and multiple income streams.",
-    url: "https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com",
-    img: "/images/titan-image-generator.jpg"
-  },
-  {
-    type: "article",
-    title: "The Millionaire Mindset: How to Think, Act, and Grow Rich - Investopedia",
-    description: "Investopedia delves into the mindset required for financial success, including the importance of financial discipline and goal setting.",
-    url: "https://www.investopedia.com/articles/younginvestors/08/millionaire-mindset.asp?utm_source=chatgpt.com",
-    img: "/images/midjourney.jpg"
-  },
-  {
-    type: "article",
-    title: "How to Make a Million Dollars - Synchrony",
-    description: "Synchrony provides insights into setting clear financial goals and the steps necessary to achieve millionaire status.",
-    url: "https://www.synchrony.com/blog/banking/how-to-make-million-dollars?utm_source=chatgpt.com",
-    img: "/images/dall-e-3.jpg"
-  },
-  {
-    type: "video",
-    title: "How To Make A Million Dollars Step By Step",
-    description: "A comprehensive guide on the steps to becoming a millionaire, presented in an easy-to-follow video format.",
-    url: "https://www.youtube.com/watch?v=-q8E1tcK9rU&utm_source=chatgpt.com",
-    img: "/images/titan-image-generator.jpg"
-  }
-];
+// export const EXAMPLE_SOURCES: Source [] = [
+//   {
+//     type: "podcast",
+//     title: "How to Make $1 Million Online - Lewis Howes",
+//     description: "Lewis Howes discusses strategies for building wealth online, emphasizing the importance of passion and self-investment.",
+//     url: "https://lewishowes.com/podcast/how-to-make-1-million-online/?utm_source=chatgpt.com",
+//     img: "/images/stable-diffusion.jpg"
+//   },
+//   {
+//     type: "article",
+//     title: "Lazy Millionaire: 8 Ways to Make a Million Dollars on 4 Hours a Day - Nasdaq",
+//     description: "This article explores various methods to achieve millionaire status with minimal daily work hours, highlighting the power of compounding and multiple income streams.",
+//     url: "https://www.nasdaq.com/articles/lazy-millionaire-8-ways-to-make-a-million-dollars-on-4-hours-a-day?utm_source=chatgpt.com",
+//     img: "/images/titan-image-generator.jpg"
+//   },
+//   {
+//     type: "article",
+//     title: "The Millionaire Mindset: How to Think, Act, and Grow Rich - Investopedia",
+//     description: "Investopedia delves into the mindset required for financial success, including the importance of financial discipline and goal setting.",
+//     url: "https://www.investopedia.com/articles/younginvestors/08/millionaire-mindset.asp?utm_source=chatgpt.com",
+//     img: "/images/midjourney.jpg"
+//   },
+//   {
+//     type: "article",
+//     title: "How to Make a Million Dollars - Synchrony",
+//     description: "Synchrony provides insights into setting clear financial goals and the steps necessary to achieve millionaire status.",
+//     url: "https://www.synchrony.com/blog/banking/how-to-make-million-dollars?utm_source=chatgpt.com",
+//     img: "/images/dall-e-3.jpg"
+//   },
+//   {
+//     type: "video",
+//     title: "How To Make A Million Dollars Step By Step",
+//     description: "A comprehensive guide on the steps to becoming a millionaire, presented in an easy-to-follow video format.",
+//     url: "https://www.youtube.com/watch?v=-q8E1tcK9rU&utm_source=chatgpt.com",
+//     img: "/images/titan-image-generator.jpg"
+//   }
+// ];
 
-export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
-  {
-    type: 'wikipedia',
-    title: 'Example Source 1',
-    description: 'Example description 1...',
-    url: 'https://example.com/1',
-    img: '/images/midjourney.jpg',
-  },
-  {
-    type: 'encyclopedia',
-    title: 'Example Source 2',
-    description: 'Example description 2...',
-    url: 'https://example.com/2',
-    img: '/images/stable-diffusion.jpg',
-  }
-];
+// export const EXAMPLE_SOURCES_SIMPLE: Source[] = [
+//   {
+//     type: 'wikipedia',
+//     title: 'Example Source 1',
+//     description: 'Example description 1...',
+//     url: 'https://example.com/1',
+//     img: '/images/midjourney.jpg',
+//   },
+//   {
+//     type: 'encyclopedia',
+//     title: 'Example Source 2',
+//     description: 'Example description 2...',
+//     url: 'https://example.com/2',
+//     img: '/images/stable-diffusion.jpg',
+//   }
+// ];
 
 export const SUMMARY_RESPONSES: Record<string, string> = {
   "default": `# Summary of Model Responses
