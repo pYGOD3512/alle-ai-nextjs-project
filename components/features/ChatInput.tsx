@@ -490,7 +490,7 @@ export function ChatInput({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{isWebSearch ? "Web search enabled" : "Enable web search"}</p>
+                        <p>{isWebSearch ? "Search the web" : "Search the web"}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -513,7 +513,7 @@ export function ChatInput({
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{isCombinedMode ? "Combined mode enabled" : "Enable combined mode"}</p>
+                      <p>{isCombinedMode ? "Combine selected models" : "Combine selected models"}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
