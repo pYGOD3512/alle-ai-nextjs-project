@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,7 @@ import { tutorial, apiReference, guides } from "@/lib/constants/docs";
 import { useState, useEffect } from "react";
 import { useActiveSectionStore } from "@/stores/ui";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 export const SidebarNav = () => {
   const pathname = usePathname();
   const [expandedSections, setExpandedSections] = useState<
@@ -35,67 +34,16 @@ export const SidebarNav = () => {
     }));
   };
 
-  const isActive = (
-    path: string,
-    id?: string,
-    isFirstItem?: number,
-    subId?: string
-  ) => {
-    const isIntroduction = pathname === "/docs/api-reference/introduction";
-    const isChat = pathname === "/docs/api-reference/chat";
-
-    if (!id) {
-      return pathname === path;
-    }
-
-    //   for id reference
-    if (isIntroduction) {
-      const hash = window.location.hash.substring(1); // Remove # prefix
-
-      if (id === "introduction" && !hash) {
-        return true;
-      }
-      return id === hash;
-    }
-
-    if (isChat) {
-      const hash = window.location.hash.substring(1); // Remove # prefix
-      console.log(hash);
-      if (id === "chat" && !hash) {
-        return true;
-      }
-      return id === hash;
-    }
-    //  for subsectioned items
-
-    // For sections without subsections (like introduction)
+  const isActive = (path: string) => {
     return pathname === path;
   };
 
   const handleReferenceClick = (
-    sectionId: string,
-    url: string,
-    id?: string,
-    isFirstItem?: number
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    sectionHref?: string
   ) => {
-    if (sectionId === "introduction") {
-      router.replace("/docs/api-reference/introduction#introduction");
-      return;
-    }
-    if (sectionId === "chat") {
-      router.push("/docs/api-reference/chat");
-      return;
-    }
-    if (sectionId === "image-generation") {
-      router.push(url);
-    }
-    if (sectionId === "text-to-speech") {
-      router.push("/docs/api-reference/audio");
-    }
-    if (sectionId === "text-video" || "video-generation") {
-      router.replace("/docs/api-reference/video");
-    }
-    router.push(`${url}#${sectionId}`);
+    e.preventDefault();
+    router.push(`/docs/api-reference/${sectionHref}`, { scroll: false });
   };
 
   const renderApiReference = () => (
@@ -126,18 +74,18 @@ export const SidebarNav = () => {
                       <div className="ml-6 space-y-1">
                         <div>
                           {section.sections.map((subsection, id) => (
-                            <button
+                            <Link
+                              href={`docs/api-reference/${subsection.href}`}
                               key={subsection.id}
-                              onClick={() =>
-                                handleReferenceClick(
-                                  subsection.id,
-                                  section.href
-                                )
+                              onClick={(e) =>
+                                handleReferenceClick(e, subsection.href)
                               }
                               className={cn(
                                 "group flex items-center w-3/4 rounded-md p-2 text-sm transition-all duration-200",
                                 "relative overflow-hidden",
-                                isActive(section.href, subsection.id)
+                                isActive(
+                                  `/docs/api-reference/${subsection.href}`
+                                )
                                   ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
                                   : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
                               )}
@@ -145,30 +93,26 @@ export const SidebarNav = () => {
                               <span className="relative z-10">
                                 {subsection.title}
                               </span>
-                            </button>
+                            </Link>
                           ))}
                         </div>
                       </div>
                     )}
                   </div>
                 ) : item.id === "reference" ? (
-                  <button
-                    onClick={() =>
-                      handleReferenceClick(
-                        section.id,
-                        "/docs/api-reference/introduction"
-                      )
-                    }
+                  <Link
+                    href={`/docs/api-reference/${section.id}`}
+                    onClick={(e) => handleReferenceClick(e, section.id)}
                     className={cn(
                       "group flex items-center w-3/4 rounded-md p-2 text-sm transition-all duration-200 ml-2",
                       "relative overflow-hidden",
-                      isActive("/docs/api-reference/introduction", section.id)
+                      isActive(`/docs/api-reference/${section.id}`)
                         ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
                         : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
                     )}
                   >
                     <span className="relative z-10">{section.title}</span>
-                  </button>
+                  </Link>
                 ) : (
                   <Link
                     scroll={false}

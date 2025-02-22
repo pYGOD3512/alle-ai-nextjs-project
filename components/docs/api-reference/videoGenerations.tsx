@@ -243,7 +243,7 @@ main();
 
 `;
 
-export default function Page() {
+export default function ApiVideoGenerationDocs() {
   return (
     <div className=" ml-10">
       <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
@@ -253,32 +253,30 @@ export default function Page() {
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-4">Audio</h2>
+              <h2
+                data-section="video-generation"
+                className="text-3xl font-bold mb-4"
+              >
+                Video
+              </h2>
               <div className="text-muted-foreground">
                 <p className="text-muted-foreground">
-                  Learn how to turn audio into text or text into audio by
+                  Learn how to generate videos from text or edit video by text
                   combining multiple audio models.
                 </p>
                 <h3>The API supports three primary operations:</h3>
                 <ul>
                   <li className="text-muted-foreground">
                     <strong className="text-black dark:text-white">
-                      Create speech : &nbsp;
+                      Create video : &nbsp;
                     </strong>
-                    Generates audio from the input text.
+                    Generates video from the input text.
                   </li>
                   <li>
                     <strong className="text-black dark:text-white">
-                      Create transcription :&nbsp;
+                      Edit video :&nbsp;
                     </strong>
-                    Transcribes audio into the input language.
-                  </li>
-                  <li>
-                    <strong className="text-black dark:text-white">
-                      Create audio :&nbsp;
-                    </strong>
-                    Generate sounds, music, and other audio formats from text by
-                    combining power of multiple audio models
+                    Edits a given video content base on text description.
                   </li>
                 </ul>
               </div>
@@ -328,10 +326,10 @@ export default function Page() {
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-4">Text-to-Speech API</h2>
+              <h2 className="text-3xl font-bold mb-4">Text-to-Video API</h2>
               <div className="mb-4 text-muted-foreground">
                 <p>
-                  Generates audio from the input text with multiple audio
+                  Generates videos from the input text with multiple video
                   models.
                 </p>
               </div>
@@ -426,9 +424,14 @@ export default function Page() {
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-3">Create transcription</h2>
+              <h2
+                data-section="video-edits"
+                className="text-3xl font-bold mb-3"
+              >
+                Edit Video
+              </h2>
               <p className="text-muted-foreground mb-5">
-                Transcribes audio into the input language.
+                Edit a video content base on description prompt.
               </p>
 
               <h2 className="text-xl font-semibold mb-4">Request body</h2>
@@ -509,105 +512,8 @@ export default function Page() {
             </Card>
           }
         />
-        <section>
-          <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
-
-          <ApiDocLayout
-            leftContent={
-              <div>
-                <h2 className="text-3xl font-bold mb-4">Create audio</h2>
-                <p className="text-muted-foreground mb-5">
-                  Generate all kinds of sound from supported AI modes
-                </p>
-                <h3 className="text-xl font-semibold mb-5">Request body</h3>
-                {musicRequest.map((field, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono">{field.name}</span>
-                      <span className="text-muted-foreground font-mono">
-                        {field.type}
-                      </span>
-                      <span
-                        className={
-                          field.required
-                            ? "text-red-500"
-                            : "text-muted-foreground"
-                        }
-                      >
-                        {field.required ? "Required" : "Optional"}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground">{field.description}</p>
-                    <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
-                  </div>
-                ))}
-              </div>
-            }
-            rightContent={
-              <Card className="bg-background p-4 mb-10">
-                <div className="mb-8">
-                  <RenderCode
-                    showLanguage={false}
-                    title="Example request body"
-                    code={requestEdit}
-                    language="json"
-                  />
-                </div>
-                <div className="mb-5">
-                  <Tabs defaultValue="javascript">
-                    <TabsList>
-                      <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                      <TabsTrigger value="curl">cURL</TabsTrigger>
-                      <TabsTrigger value="python">Python</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="javascript">
-                      <RenderCode
-                        showLanguage={false}
-                        title="Example request"
-                        language="javascript"
-                        code={editRequestJavascript}
-                      />
-                    </TabsContent>
-                    <TabsContent value="curl">
-                      <RenderCode
-                        showLanguage={false}
-                        title="Example request"
-                        language="bash"
-                        code={editRequestCurl}
-                      />
-                    </TabsContent>
-                    <TabsContent value="python">
-                      <RenderCode
-                        showLanguage={false}
-                        title="Example request"
-                        language="python"
-                        code={editRequestPython}
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-                {/* response */}
-                <div className="mt-5">
-                  <RenderCode
-                    code={response}
-                    showLanguage={false}
-                    title="Response"
-                  />
-                </div>
-              </Card>
-            }
-          />
-        </section>
-        <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
+        <section></section>
       </section>
-      <NavigationContainer
-        previousTitle="chat"
-        preUrl="/"
-        previousDescription="Interacting with chat models through our API"
-        nextTitle="Audio Generation"
-        nextDesciption="Explore TTS and STT models through our API"
-        nextUrl="/"
-      />
     </div>
   );
 }

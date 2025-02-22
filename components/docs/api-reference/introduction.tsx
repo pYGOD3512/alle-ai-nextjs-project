@@ -23,69 +23,9 @@ const hheading = [
   },
 ];
 
-export default function Page() {
+export default function ApiIntroduction() {
   const router = useRouter();
   const pathname = usePathname();
-  const { setActiveSection } = useActiveSectionStore();
-
-  useEffect(() => {
-    const sections = document.querySelectorAll("section[id], h2[id]");
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let closestSection = null;
-        let closestDistance = Infinity;
-
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute("id");
-            if (id) {
-              const rect = entry.target.getBoundingClientRect();
-              const distance = Math.abs(rect.top);
-
-              if (distance < closestDistance) {
-                closestDistance = distance;
-                closestSection = id;
-              }
-            }
-          }
-        });
-
-        if (closestSection) {
-          setActiveSection(closestSection); // Update Zustand store
-
-          // Only update the URL if the pathname doesn't already match the section
-          if (closestSection === "introduction") {
-            window.history.replaceState(
-              null,
-              "",
-              "/docs/api-reference/introduction"
-            );
-          } else {
-            if (!pathname.endsWith(closestSection)) {
-              const newPath = `/docs/api-reference/introduction#${closestSection}`;
-              // Use `history.replaceState` to update the URL without triggering navigation
-              window.history.replaceState(null, "", newPath);
-            }
-          }
-        }
-      },
-      {
-        threshold: 0.5,
-        rootMargin: "-10% 0px -80% 0px",
-      }
-    );
-
-    sections.forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    return () => {
-      sections.forEach((section) => {
-        if (section) observer.unobserve(section);
-      });
-    };
-  }, [router, pathname, setActiveSection]);
 
   return (
     <main className="flex gap-6">
@@ -93,9 +33,13 @@ export default function Page() {
 
       <div className="w-3/4">
         <div className="text-muted-foreground mb-10">
-          <h2 className="text-muted-foreground mb-4" id="introduction">
-            Welcome to Alle-AI api reference
-          </h2>
+          <h2 className="text-3xl text-white mb-3 font-bold">Alle-AI</h2>
+          <h3
+            className="text-muted-foreground mb-4 font-semibold"
+            data-section="introduction"
+          >
+           Api reference
+          </h3>
           <p className="mb-5">
             You can interact with the API through HTTP or Websocket requests
             from any language, via our official Python bindings or our official
@@ -118,7 +62,7 @@ export default function Page() {
 
         {/*page 2  authentication */}
         <section className="mb-7 mt-20">
-          <h2 className="text-3xl mb-4" id="authentication">
+          <h2 className="text-3xl mb-4" data-section="authentication">
             Authentication
           </h2>
           <h3 className="text-2xl mb-4">API keys</h3>
@@ -231,7 +175,7 @@ const client = new alleaiClient({
 
         {/* Streaming */}
         <section className="mb-20">
-          <h2 className="text-3xl mb-4" id="streaming">
+          <h2 className="text-3xl mb-4" data-section="streaming" >
             Streaming
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -412,7 +356,7 @@ makeStreamingRequest();`}
 
         {/* SDKs and Libraries */}
         <section className="mb-20">
-          <h2 className="text-3xl mb-4" id="sdk">
+          <h2 className="text-3xl mb-4" data-section="sdk"  >
             SDKs and Libraries
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -550,54 +494,6 @@ print(response.choices[0].message.content)`}
             />
           </div>
         </section>
-
-        <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
-        {/* Navigation container aligned with content */}
-        <div className="flex justify-center w-full">
-          <div className="w-full max-w-[700px]">
-            <div className="mt-16 mb-8 flex justify-center items-center gap-4">
-              <button
-                onClick={() => {
-                  /* Logic will be added later */
-                }}
-                className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px]"
-              >
-                <ChevronLeft className="h-5 w-5 mt-0.5" />
-                <div className="flex flex-col items-start">
-                  <span className="text-sm text-muted-foreground mb-1">
-                    Previous
-                  </span>
-                  <span className="font-medium group-hover:text-foreground">
-                    Introduction to API
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Learn about authentication and basic concepts
-                  </span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  /* Logic will be added later */
-                }}
-                className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px] text-right"
-              >
-                <div className="flex flex-col items-end">
-                  <span className="text-sm text-muted-foreground mb-1">
-                    Next
-                  </span>
-                  <span className="font-medium group-hover:text-foreground">
-                    Endpoints
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Explore search and filtering capabilities
-                  </span>
-                </div>
-                <ChevronRight className="h-5 w-5 mt-0.5" />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
       {/* Right Side - On This Page */}
       <aside className="w-1/4 sticky ">

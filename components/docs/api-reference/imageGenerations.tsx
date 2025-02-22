@@ -6,13 +6,20 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import NavigationContainer from "@/components/NavigationContainer";
 const requestbody = `{
-  type: "text-to-speech",
+  type: "text-to-image",
   prompt:
-    "Rich men do what it takes to double money",
-  models: ["elevenlabs", "Gemini", "gpt-4o"],
-  voice: "alloy",
-  response_format: "mp3",
-  speed:0.25
+    "a serene mountain landscape with a lake reflecting the sunset, photorealistic style",
+  models: ["stable-diffusion-xl", "midjourney-v5", "dalle-3"],
+  options: {
+    width: 1024,
+    height: 768,
+    num_outputs_per_model: 1,
+    guidance_scale: 7.5,
+    seed: 42,
+    safety_check: true,
+  },
+  quality: "hd",
+  response_format: "url",
 };`;
 
 const curl = `
@@ -27,50 +34,38 @@ curl https://alleai.com/v1/images/generations \
   }'
 `;
 const python = `
-from pathlib import Path
-import alleai
+from alleai import alleImage
+client = alleImage()
 
-speech_file_path = Path(__file__).parent / "speech.mp3"
-response = alleai.audio.speech.create(
-  models: ["elevenlabs", "Gemini", "gpt-4o"],
-  voice="alloy",
-  input="The quick brown fox jumped over the lazy dog."
+client.images.generate(
+  models=["dall-e-3","midjourney"],
+  prompt="A cute baby sea otter",
+  n=1,
+  size="1024x1024"
 )
-response.stream_to_file(speech_file_path)
-
 
 `;
 
 const node = `
-import fs from "fs";
-import path from "path";
-import alleai from "alleai";
+import alleai from "alleImage";
 
-const alleai = new alleAI();
-
-const speechFile = path.resolve("./speech.mp3");
+const image = new alleai();
 
 async function main() {
-  const mp3 = await openai.audio.speech.create({
-    model: ["tts-1",,"Gemini"]
-    voice: "alloy",
-    input: "Today is a wonderful day to build something people love!",
-  });
-  console.log(speechFile);
-  const buffer = Buffer.from(await mp3.arrayBuffer());
-  await fs.promises.writeFile(speechFile, buffer);
+  const image = await openai.images.generate({ model: "dall-e-3", prompt: "A cute baby sea otter" });
+
+  console.log(image.data);
 }
 main();
-
 `;
 const response = `
 {
   "created": 1589478378,
   "data": [
-    { "model": "tts-1"
+    { "model": "dall-e-3"
       "url": "https://..."
     },
-    { "model":"gemini"
+    { "model":"midjourney"
       "url": "https://..."
     }
   ]
@@ -83,35 +78,35 @@ const requestBodyFields = [
     type: "string",
     required: true,
     description:
-      "indicate the type of request [text-to-speech], [transcription] audio generation ",
+      "indicate the type of request [text-to-image] or [image-editing] ",
   },
   {
     name: "prompt",
     type: "string",
     required: true,
     description:
-      "The text to generate audio for. The maximum length is 4096 characters.",
+      "A text description of the desired image(s). The maximum length is 1000 characters for dall-e-2 and 4000 characters for dall-e-3.",
   },
   {
     name: "models",
     type: "array",
     required: true,
-    description: "Array of selected audio models for API call",
+    description: "Array of selected images models for API call",
   },
 
   {
-    name: "voice",
+    name: "quality",
     type: "string",
-    required: true,
+    required: false,
     description:
-      "The voice to use when generating the audio. Supported voices are alloy, ash, coral, echo, fable, onyx, nova, sage and shimmer. Previews of the voices are available in the Text t",
+      "The quality of the image that will be generated. hd creates images with finer details and greater consistency across the image. This param is only supported for dall-e-3. Defaults to standard.",
   },
   {
     name: "response_format",
     type: "string or null",
     required: false,
     description:
-      "The format to audio in. Supported formats are mp3, opus, aac, flac, wav,",
+      "The format in which the generated images are returned. Must be one of url or b64_json. URLs are only valid for 60 minutes after the image has been generated. Defaults to url.",
   },
   {
     name: "size",
@@ -119,42 +114,6 @@ const requestBodyFields = [
     required: false,
     description:
       "The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of  1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models. Defaults to 1024x1024.",
-  },
-  {
-    name: "speed",
-    type: "number",
-    required: false,
-    description:
-      "The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.",
-  },
-];
-const musicRequest = [
-  {
-    name: "type",
-    type: "string",
-    required: true,
-    description:
-      "indicate the type of request [text-to-speech], [transcription] audio generation, In this case will be audio-generation ",
-  },
-  {
-    name: "prompt",
-    type: "string",
-    required: true,
-    description:
-      "The text to generate audio for. The maximum length is 4096 characters.",
-  },
-  {
-    name: "models",
-    type: "array",
-    required: true,
-    description: "Array of selected audio models for API call",
-  },
-  {
-    name: "response_format",
-    type: "string or null",
-    required: false,
-    description:
-      "The format to audio in. Supported formats are mp3, opus, aac, flac, wav,",
   },
 ];
 const requestEdit = `
@@ -168,33 +127,39 @@ options:[
 `;
 const EditRequestBody = [
   {
-    name: "file",
+    name: "type",
+    type: "string",
+    required: true,
+    description:
+      "image-edit, this is required to get and edited edition of original images",
+  },
+  {
+    name: "images",
     type: "file",
     required: true,
     description:
-      "The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.",
-  },
-  {
-    name: "models",
-    type: "array",
-    required: true,
-    description: "selected models for audio transcription",
+      "The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.",
   },
   {
     name: "prompt",
     type: "string",
-    required: false,
-    description:
-      "An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language.",
-  },
-  {
-    name: "language",
-    type: "string",
-    required: false,
+    required: true,
     description:
       "A text description of the desired image(s). The maximum length is 1000 characters.",
   },
-
+  {
+    name: "prompt",
+    type: "string",
+    required: true,
+    description:
+      "A text description of the desired image(s). The maximum length is 1000 characters.",
+  },
+  {
+    name: "models",
+    type: "string",
+    required: true,
+    description: "The models to be use for image generation.",
+  },
   {
     name: "response_format",
     type: "string or null",
@@ -243,7 +208,7 @@ main();
 
 `;
 
-export default function Page() {
+export default function ApiImageGenerationDocs() {
   return (
     <div className=" ml-10">
       <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
@@ -253,27 +218,43 @@ export default function Page() {
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-4">Video</h2>
+              <h2
+                data-section="image-generation"
+                className="text-3xl font-bold mb-4"
+              >
+                Multi-Model Image Generation API
+              </h2>
               <div className="text-muted-foreground">
                 <p className="text-muted-foreground">
-                  Learn how to generate videos from text or edit video by text
-                  combining multiple audio models.
+                  Our Multi-Model Image Generation API allows developers to
+                  leverage multiple AI models simultaneously for image
+                  generation and editing tasks. This unique approach enables you
+                  to compare outputs across different models, provide users with
+                  diverse creative options, and select the best result for your
+                  specific use case.
                 </p>
-                <h3>The API supports three primary operations:</h3>
+                <h3>The API supports two primary operations:</h3>
                 <ul>
                   <li className="text-muted-foreground">
                     <strong className="text-black dark:text-white">
-                      Create video : &nbsp;
+                      Text-to-Image Generation : &nbsp;
                     </strong>
-                    Generates video from the input text.
+                    Create images from text prompts across multiple models.
                   </li>
                   <li>
                     <strong className="text-black dark:text-white">
-                      Edit video :&nbsp;
+                      Image Editing :&nbsp;
                     </strong>
-                    Edits a given video content base on text description.
+                    Modify existing images using text instructions across
+                    multiple models.
                   </li>
                 </ul>
+                <p>
+                  This documentation provides detailed information about
+                  endpoints, request formats, response structures, and code
+                  examples to help you integrate these capabilities into your
+                  applications.
+                </p>
               </div>
             </Card>
           }
@@ -321,12 +302,24 @@ export default function Page() {
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-4">Text-to-Video API</h2>
+              <h2 className="text-3xl font-bold mb-4">Text-to-Image API</h2>
               <div className="mb-4 text-muted-foreground">
                 <p>
-                  Generates videos from the input text with multiple video
-                  models.
+                  The Text-to-Image API transforms text descriptions into visual
+                  imagery using multiple AI models simultaneously. This parallel
+                  approach allows you to:
                 </p>
+                <ul>
+                  <li>Compare stylistic differences between models</li>
+                  <li>Offer diverse creative options to your users</li>
+                  <li>
+                    Experiment with prompt engineering across different model
+                    architectures
+                  </li>
+                  <li>
+                    Select the most suitable output for your specific needs
+                  </li>
+                </ul>
               </div>
               <section className="mt-6">
                 <h3 className="text-xl font-semibold mb-4">Request Body</h3>
@@ -419,9 +412,15 @@ export default function Page() {
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-3">Edit Video</h2>
+              <h2
+                data-section="image-generation-edits"
+                className="text-3xl font-bold mb-3"
+              >
+                Create image edit
+              </h2>
               <p className="text-muted-foreground mb-5">
-                Edit a video content base on description prompt.
+                Creates, edits or extended image given an original image and a
+                prompt.
               </p>
 
               <h2 className="text-xl font-semibold mb-4">Request body</h2>
@@ -502,18 +501,7 @@ export default function Page() {
             </Card>
           }
         />
-        <section>
-          <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
-        </section>
       </section>
-      <NavigationContainer
-        previousTitle="chat"
-        preUrl="/"
-        previousDescription="Interacting with chat models through our API"
-        nextTitle="Audio Generation"
-        nextDesciption="Explore TTS and STT models through our API"
-        nextUrl="/"
-      />
     </div>
   );
 }

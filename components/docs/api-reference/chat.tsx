@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from "next/navigation";
 import RenderCode from "@/components/RenderCode";
 import ApiDocLayout from "@/components/TwoLayout";
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -25,92 +24,22 @@ import {
   basicRequest,
   basicResponse,
 } from "@/lib/constants/docs";
-import { models } from "@/lib/models";
 
-export default function Page() {
+export default function ApiTextGenerationDocs() {
   const router = useRouter();
   const pathname = usePathname();
-
-  const currentSection = apiReference
-    .find((category) =>
-      category.sections.some((section) => section.id === "chat")
-    )
-    ?.sections.find((section) => section.id === "chat");
-
-  useEffect(() => {
-    const sections = document.querySelectorAll("section[id], h2[id]");
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let closestSection = null;
-        let closestDistance = Infinity;
-
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute("id");
-            if (id) {
-              const rect = entry.target.getBoundingClientRect();
-              const distance = Math.abs(rect.top);
-
-              if (distance < closestDistance) {
-                closestDistance = distance;
-                closestSection = id;
-              }
-            }
-          }
-        });
-
-        if (closestSection) {
-          console.log(closestSection); // Update Zustand store
-
-          // Only update the URL if the pathname doesn't already match the section
-          if (closestSection === "chat-completion") {
-            window.history.replaceState(null, "", "/docs/api-reference/chat");
-          } else {
-            if (!pathname.endsWith(closestSection)) {
-              const newPath = `/docs/api-reference/chat#${closestSection}`;
-              // Use `history.replaceState` to update the URL without triggering navigation
-              window.history.replaceState(null, "", newPath);
-            }
-          }
-        }
-      },
-      {
-        threshold: 0.5,
-        rootMargin: "-10% 0px -80% 0px",
-      }
-    );
-
-    sections.forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    return () => {
-      sections.forEach((section) => {
-        if (section) observer.unobserve(section);
-      });
-    };
-  }, [router, pathname]);
-
-  const [selectedType, setSelectedType] = useState<string>("chat");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredModels = models.filter((model) => {
-    const matchesType = model.type === selectedType;
-    const matchesSearch =
-      model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      model.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  });
 
   return (
     <div>
       <div className="ml-10">
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
 
-        <section data-section className="mb-5">
+        <section className="mb-5">
           <Card className="p-6 bg-background">
-            <h2 id="completion" className="text-3xl font-bold mb-4">
+            <h2
+              data-section="endpoints-chat"
+              className="text-3xl font-bold mb-4"
+            >
               Chat Completion
             </h2>
 
@@ -194,7 +123,6 @@ export default function Page() {
                   </div>
                 }
               />
-              <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
 
               {/* Request Parameters Section */}
               <div className="">
@@ -294,7 +222,7 @@ export default function Page() {
             rightContent={
               <div>
                 <Card className="p-6 bg-background">
-                  <div className="mt-7">
+                  <div className="mt-3">
                     <h3 className="font-semibold mb-4 mt-5">
                       Request to the API
                     </h3>
@@ -398,7 +326,7 @@ export default function Page() {
         {/* Api search : enabling web search  */}
         <div className="mt-10 ">
           <h2
-            id="web-search"
+            data-section="chat-search"
             className="text-3xl mb-4 font-semibold text-gray-800 dark:text-gray-200"
           >
             <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
@@ -545,7 +473,7 @@ export default function Page() {
         {/*model  comparison  */}
 
         <div className="mt-10 ">
-          <h2 id="comparison" className="text-3xl font-bold mb-3">
+          <h2 data-section="chat-comparison" className="text-3xl font-bold mb-3">
             Model Output
             <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
               Comparison
@@ -620,8 +548,10 @@ export default function Page() {
                   <ul className="list-disc ml-6 mt-2 text-muted-foreground">
                     <li>
                       <code className="bg-gray-200 dark:bg-gray-700  px-2 py-1 rounded font-mono">
-                        "gpt-4o<span className="text-red-600">+</span>deepseek-r1
-                        <span className="text-red-600">+</span>claude-3.5-sonnet"
+                        "gpt-4o<span className="text-red-600">+</span>
+                        deepseek-r1
+                        <span className="text-red-600">+</span>
+                        claude-3.5-sonnet"
                       </code>
                       : This specifies a comparison involving GPT-4, Deepseek,
                       and Claude.
@@ -720,7 +650,7 @@ export default function Page() {
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
 
         <div className="mt-10">
-          <h2 id="summary&compare" className="text-3xl font-bold ">
+          <h2 data-section="chat-summary" className="text-3xl font-bold ">
             <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
               Summary
             </span>
@@ -758,52 +688,6 @@ export default function Page() {
             </a>
             &nbsp; section for more information.
           </p>
-        </div>
-        {/* Navigation container aligned with content */}
-        <div className="flex justify-center w-full">
-          <div className="w-full max-w-[700px]">
-            <div className="mt-16 mb-8 flex justify-center items-center gap-4">
-              <button
-                onClick={() => {
-                  /* Logic will be added later */
-                }}
-                className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px]"
-              >
-                <ChevronLeft className="h-5 w-5 mt-0.5" />
-                <div className="flex flex-col items-start">
-                  <span className="text-sm text-muted-foreground mb-1">
-                    Previous
-                  </span>
-                  <span className="font-medium group-hover:text-foreground">
-                    Introduction to API
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Learn about authentication and basic concepts
-                  </span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  /* Logic will be added later */
-                }}
-                className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px] text-right"
-              >
-                <div className="flex flex-col items-end">
-                  <span className="text-sm text-muted-foreground mb-1">
-                    Next
-                  </span>
-                  <span className="font-medium group-hover:text-foreground">
-                    Image Endpoints
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    Explore search and filtering capabilities
-                  </span>
-                </div>
-                <ChevronRight className="h-5 w-5 mt-0.5" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

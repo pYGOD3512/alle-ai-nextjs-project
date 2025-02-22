@@ -86,11 +86,7 @@ const faqComponents = {
 
   models: dynamic(() => import("@/components/docs/reference/models")),
 
-  // main api reference
-  introduction: dynamic(
-    () => import("@/components/docs/api-reference/introduction")
-  ),
-  endpoints: dynamic(() => import("@/components/docs/api-reference/endpoints")),
+ 
 };
 
 type FaqName = keyof typeof faqComponents;
