@@ -174,16 +174,28 @@ pre.tomorrow {
 }
 
 /* Custom Modal Styles */
+.ant-modal-wrap {
+  backdrop-filter: blur(8px) !important;
+}
+
 .ant-modal .ant-modal-content {
   background-color: var(--backgroundSecondary) !important;
+  backdrop-filter: blur(12px) !important;
+  background: rgba(var(--background-start-rgb), 0.7) !important;
 }
 
 .ant-modal .ant-modal-header {
-  background-color: var(--backgroundSecondary) !important;
+  background: transparent !important;
 }
 
 .ant-modal .ant-modal-title {
   color: var(--bodyColor) !important;
+}
+
+/* Make sure the modal mask (overlay) is slightly transparent */
+.ant-modal-mask {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 /* Modal Input and Text Styles */
