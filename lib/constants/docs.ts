@@ -393,7 +393,7 @@ export const apiReference: apiREfprops[] = [
             href: "image-generation",
           },
           {
-            id: "image-generation",
+            id: "image-generation-edits",
             title: "Image Editing",
             keywords: [],
             href: "image-generation-edits",
