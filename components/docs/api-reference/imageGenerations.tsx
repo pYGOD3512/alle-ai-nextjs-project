@@ -215,6 +215,9 @@ export default function ApiImageGenerationDocs() {
 
       {/* intro */}
       <section className="mb-10">
+        <div className="mb-4">
+          <h2 className="font-bold text-3xl">Image Generation API</h2>
+        </div>
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
@@ -416,7 +419,7 @@ export default function ApiImageGenerationDocs() {
                 data-section="image-generation-edits"
                 className="text-3xl font-bold mb-3"
               >
-                Create image edit
+                Create image edits
               </h2>
               <p className="text-muted-foreground mb-5">
                 Creates, edits or extended image given an original image and a

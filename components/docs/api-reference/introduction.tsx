@@ -28,12 +28,12 @@ export default function ApiIntroduction() {
   const pathname = usePathname();
 
   return (
-    <main className="flex gap-6">
+    <main className="flex gap-2">
       {/* Main content */}
       <div className="w-3/4">
         {/* Introduction Section */}
         <section
-          className="min-h-[80vh] py-5 space-y-8"
+          className="min-h-[80vh]  space-y-8"
           data-section="introduction"
         >
           <div className="space-y-6">
@@ -69,7 +69,7 @@ export default function ApiIntroduction() {
 
         {/* Authentication Section */}
         <section
-          className="min-h-[80vh] py-16 space-y-8"
+          className="min-h-[80vh] py-5 space-y-8"
           data-section="authentication"
         >
           <div className="space-y-6">
@@ -499,7 +499,7 @@ main();`}
             Here’s an example of how to securely use environment variables with
             the Python SDK:
           </p>
-          <div className="mb-5">
+          <div className="">
             <RenderCode
               showLanguage={true}
               language="python"

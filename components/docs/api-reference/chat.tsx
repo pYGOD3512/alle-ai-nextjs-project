@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Divide } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 
 import {
@@ -30,35 +30,32 @@ export default function ApiTextGenerationDocs() {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-[80vh] py-16">
-      <div className="ml-10 space-y-16">
+    <div className="min-h-[80vh] py-4">
+      <div className=" space-y-16">
         {/* Chat Completion Section */}
-        <section 
-          className="min-h-[80vh]"
-          data-section="endpoints-chat"
-        >
+        <section className="min-h-[80vh]">
+          <h2 data-section="chat-endpoints" className="text-4xl font-bold mb-6">
+            Chat Completion
+          </h2>
+
           <Card className="p-8 bg-background">
             <div className="space-y-12">
-              {/* Header */}
-              <div>
-                <h2 className="text-4xl font-bold mb-6">
-                  Chat Completion
-                </h2>
-                <div className="text-muted-foreground space-y-4">
-                  <p>
-                    The Chat Completion endpoint is our unified gateway to
-                    multiple AI models including ChatGPT, Claude, Gemini,
-                    and more. This endpoint allows you to generate
-                    human-like text responses using state-of-the-art
-                    language models.
-                  </p>
-                </div>
-              </div>
-
               {/* Main Content */}
               <ApiDocLayout
                 leftContent={
                   <div className="space-y-8">
+                    {/* Header */}
+                    <div>
+                      <div className="text-muted-foreground space-y-4">
+                        <p>
+                          The Chat Completion endpoint is our unified gateway to
+                          multiple AI models including ChatGPT, Claude, Gemini,
+                          and more. This endpoint allows you to generate
+                          human-like text responses using state-of-the-art
+                          language models.
+                        </p>
+                      </div>
+                    </div>
                     {/* Overview */}
                     <div className="space-y-4">
                       <h3 className="text-2xl font-semibold">Overview</h3>
@@ -96,7 +93,6 @@ export default function ApiTextGenerationDocs() {
                   <div className="space-y-8">
                     <Card className="p-6 bg-background">
                       <div className="space-y-6">
-                        <h3 className="text-2xl font-semibold">Example Request</h3>
                         <Tabs defaultValue="curl" className="w-full">
                           <TabsList>
                             <TabsTrigger value="curl">cURL</TabsTrigger>
@@ -107,6 +103,8 @@ export default function ApiTextGenerationDocs() {
                             <RenderCode
                               code={requestCodes.curl}
                               language="bash"
+                              showLanguage={false}
+                              title="Example Request"
                             />
                           </TabsContent>
                           <TabsContent value="python">
@@ -131,51 +129,48 @@ export default function ApiTextGenerationDocs() {
           </Card>
         </section>
 
-        <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
-
         {/* Request Parameters Section */}
         <div className="">
           <ApiDocLayout
             leftContent={
-              <Card className=" bg-background">
-                <h3 className="text-2l font-semibold text-muted-foreground mb-3">
-                  Request Parameters
-                </h3>
-                <div className="space-y-6">
-                  {basicParameter.map((param) => (
-                    <div key={param.name} className="mb-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <code className="bg-gray-800 px-2 py-1 rounded text-sm">
-                          {param.name}
-                        </code>
-                        <code className="text-muted-foreground px-2 py-1 rounded text-sm">
-                          {param.type}
-                        </code>
-                        {param.required && (
-                          <span className="text-red-500 text-sm">
-                            required
-                          </span>
-                        )}
+              <div>
+                <h3 className="text-3xl font-bold  mb-3">Request Parameters</h3>
+                <Card className="p-8 bg-background">
+                  <div className="space-y-6">
+                    {basicParameter.map((param) => (
+                      <div key={param.name} className="mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <code className="bg-gray-800 px-2 py-1 rounded text-sm">
+                            {param.name}
+                          </code>
+                          <code className="text-muted-foreground px-2 py-1 rounded text-sm">
+                            {param.type}
+                          </code>
+                          {param.required && (
+                            <span className="text-red-500 text-sm">
+                              required
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-muted-foreground text-sm">
+                          {param.description}
+                        </p>
+                        <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
                       </div>
-                      <p className="text-muted-foreground text-sm">
-                        {param.description}
-                      </p>
-                      <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
-                    </div>
-                  ))}
-                </div>
-              </Card>
+                    ))}
+                  </div>
+                </Card>
+              </div>
             }
             rightContent={
               <Card className="p-6 bg-background">
-                <h3 className="font-semibold mb-3">
-                  API Request Example: Simplified JSON Format
-                </h3>
                 <RenderCode
                   language="json"
                   maxHeight="400px"
                   maxWidth
                   code={basicRequest}
+                  showLanguage={false}
+                  title="API Request Example: Simplified JSON Format"
                 />
               </Card>
             }
@@ -191,9 +186,10 @@ export default function ApiTextGenerationDocs() {
               <div>
                 <section className="mb-5">
                   <hr className="border-t-1  dark:border-zinc-700 border-gray-200 my-10 mt-5" />
-                  <Card className="p-6 bg-background">
+                  <h3 className="mb-4 text-sm">Request Headers</h3>
+
+                  <Card className="p-8 bg-background">
                     <div className="w-full">
-                      <h3 className="mb-4 text-sm">Request Headers</h3>
                       <div className="overflow-x-auto text-muted-foreground">
                         <Table>
                           <TableHeader>
@@ -229,9 +225,6 @@ export default function ApiTextGenerationDocs() {
               <div>
                 <Card className="p-6 bg-background">
                   <div className="mt-3">
-                    <h3 className="font-semibold mb-4 mt-5">
-                      Request to the API
-                    </h3>
                     <Tabs defaultValue="javascript">
                       <TabsList>
                         <TabsTrigger value="javascript">JavaScript</TabsTrigger>
@@ -242,15 +235,24 @@ export default function ApiTextGenerationDocs() {
                         <RenderCode
                           language="javascript"
                           code={requestCodes.javascript}
+                          showLanguage={false}
+                          title="Request to the API"
                         />
                       </TabsContent>
                       <TabsContent value="curl">
-                        <RenderCode language="bash" code={requestCodes.curl} />
+                        <RenderCode
+                          language="bash"
+                          showLanguage={false}
+                          title="Request to the API"
+                          code={requestCodes.curl}
+                        />
                       </TabsContent>
                       <TabsContent value="python">
                         <RenderCode
                           language="python"
                           code={requestCodes.python}
+                          showLanguage={false}
+                          title="Request to the API"
                         />
                       </TabsContent>
                     </Tabs>
@@ -267,8 +269,9 @@ export default function ApiTextGenerationDocs() {
         <ApiDocLayout
           leftContent={
             <div className="mb-5">
-              <Card className="p-6 bg-background">
-                <h3 className="font-semibold mb-4">Response Fields</h3>
+              <h3 className="font-semibold mb-4">Response Fields</h3>
+
+              <Card className="p-8 bg-background">
                 <div className="space-y-6">
                   {apiReferenceFields.map((field) => (
                     <div key={field.name}>
@@ -317,12 +320,13 @@ export default function ApiTextGenerationDocs() {
           rightContent={
             <div>
               <Card className="p-6 bg-background">
-                <h3 className="font-semibold mb-4 mt-5">Response format</h3>
                 <RenderCode
                   maxHeight="400px"
                   maxWidth="700px"
                   language="json"
                   code={basicResponse}
+                  showLanguage={false}
+                  title="Respons format"
                 />
               </Card>
             </div>
@@ -331,11 +335,11 @@ export default function ApiTextGenerationDocs() {
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
         {/* Api search : enabling web search  */}
         <div className="mt-10 ">
-          <h2
-            data-section="chat-search"
-            className="text-3xl mb-4 font-semibold text-gray-800 dark:text-gray-200"
-          >
-            <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
+          <h2 className="text-3xl mb-4 font-semibold text-gray-800 dark:text-gray-200">
+            <span
+              data-section="chat-search"
+              className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2"
+            >
               web_search
             </span>
             Parameter
@@ -425,18 +429,16 @@ export default function ApiTextGenerationDocs() {
               }
               rightContent={
                 <Card className="bg-background p-4">
-                  <p className="mt-4 mb-5 text-sm text-muted-foreground text-center">
-                    For example, to enable web search, your request body should
-                    include:
-                  </p>
                   <RenderCode
                     language="json"
+                    showLanguage={false}
+                    title="Example request with web-search"
                     code={`{
     "web_search": true,
     "other_field": "some_value"  // Other fields in your request
   }`}
                   />
-                  <div className="mt-5">
+                  <div className="mt-10">
                     <h3 className="text-2xl font-bold  mt-4">
                       Web Search Results
                     </h3>
@@ -479,7 +481,10 @@ export default function ApiTextGenerationDocs() {
         {/*model  comparison  */}
 
         <div className="mt-10 ">
-          <h2 data-section="chat-comparison" className="text-3xl font-bold mb-3">
+          <h2
+            data-section="chat-comparison"
+            className="text-3xl font-bold mb-3"
+          >
             Model Output
             <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
               Comparison
@@ -617,6 +622,8 @@ export default function ApiTextGenerationDocs() {
                 </div>
                 <RenderCode
                   language="json"
+                  showLanguage={false}
+                  title="Response format"
                   code={`{
     // ... other fields in the response ...
     "comparison": {

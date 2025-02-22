@@ -250,15 +250,15 @@ export default function ApiAudioGenerationDocs() {
 
       {/* intro */}
       <section className="mb-10">
+        <h2
+          data-section="audio-text-to-speech"
+          className="text-3xl font-bold mb-4"
+        >
+          Audio Generation API
+        </h2>
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2
-                data-section="audio-text-to-speech"
-                className="text-3xl font-bold mb-4"
-              >
-                Audio
-              </h2>
               <div className="text-muted-foreground">
                 <p className="text-muted-foreground">
                   Learn how to turn audio into text or text into audio by
@@ -329,11 +329,12 @@ export default function ApiAudioGenerationDocs() {
       </section>
       <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
       {/* text to image */}
-      <section className="mt-5 mb-10">
+      <section className="mt-5 mb-8">
+        <h2 className="text-3xl font-bold mb-4">Text-to-Speech</h2>
+
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2 className="text-3xl font-bold mb-4">Text-to-Speech API</h2>
               <div className="mb-4 text-muted-foreground">
                 <p>
                   Generates audio from the input text with multiple audio
@@ -426,17 +427,17 @@ export default function ApiAudioGenerationDocs() {
         />
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
       </section>
-      {/* C */}
+      {/* speech to text */}
       <section className="">
+        <h2
+          data-section="audio-speech-to-text"
+          className="text-3xl font-bold mb-3"
+        >
+          Create transcription
+        </h2>
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2
-                data-section="audio-speech-to-text"
-                className="text-3xl font-bold mb-3"
-              >
-                Create transcription
-              </h2>
               <p className="text-muted-foreground mb-5">
                 Transcribes audio into the input language.
               </p>
@@ -519,100 +520,97 @@ export default function ApiAudioGenerationDocs() {
             </Card>
           }
         />
-        <section>
-          <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
+      </section>
+      <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
 
-          <ApiDocLayout
-            leftContent={
-              <div>
-                <h2
-                  data-section="audio-generation"
-                  className="text-3xl font-bold mb-4"
-                >
-                  Create audio
-                </h2>
-                <p className="text-muted-foreground mb-5">
-                  Generate all kinds of sound from supported AI modes
-                </p>
-                <h3 className="text-xl font-semibold mb-5">Request body</h3>
-                {musicRequest.map((field, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono">{field.name}</span>
-                      <span className="text-muted-foreground font-mono">
-                        {field.type}
-                      </span>
-                      <span
-                        className={
-                          field.required
-                            ? "text-red-500"
-                            : "text-muted-foreground"
-                        }
-                      >
-                        {field.required ? "Required" : "Optional"}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground">{field.description}</p>
-                    <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
+      {/* Generate audio */}
+      <section>
+        <h2 data-section="audio-generate" className="text-3xl font-bold mb-4">
+          Create audio
+        </h2>
+        <ApiDocLayout
+          leftContent={
+            <div>
+              <p className="text-muted-foreground mb-5">
+                Generate all kinds of sound from supported AI modes
+              </p>
+              <h3 className="text-xl font-semibold mb-5">Request body</h3>
+              {musicRequest.map((field, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono">{field.name}</span>
+                    <span className="text-muted-foreground font-mono">
+                      {field.type}
+                    </span>
+                    <span
+                      className={
+                        field.required
+                          ? "text-red-500"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {field.required ? "Required" : "Optional"}
+                    </span>
                   </div>
-                ))}
+                  <p className="text-muted-foreground">{field.description}</p>
+                  <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
+                </div>
+              ))}
+              <div className="mt-5">
+                <RenderCode
+                  code={response}
+                  showLanguage={false}
+                  title="Response"
+                />
               </div>
-            }
-            rightContent={
-              <Card className="bg-background p-4 mb-10">
-                <div className="mb-8">
-                  <RenderCode
-                    showLanguage={false}
-                    title="Example request body"
-                    code={requestEdit}
-                    language="json"
-                  />
-                </div>
-                <div className="mb-5">
-                  <Tabs defaultValue="javascript">
-                    <TabsList>
-                      <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                      <TabsTrigger value="curl">cURL</TabsTrigger>
-                      <TabsTrigger value="python">Python</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="javascript">
-                      <RenderCode
-                        showLanguage={false}
-                        title="Example request"
-                        language="javascript"
-                        code={editRequestJavascript}
-                      />
-                    </TabsContent>
-                    <TabsContent value="curl">
-                      <RenderCode
-                        showLanguage={false}
-                        title="Example request"
-                        language="bash"
-                        code={editRequestCurl}
-                      />
-                    </TabsContent>
-                    <TabsContent value="python">
-                      <RenderCode
-                        showLanguage={false}
-                        title="Example request"
-                        language="python"
-                        code={editRequestPython}
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-                {/* response */}
-                <div className="mt-5">
-                  <RenderCode
-                    code={response}
-                    showLanguage={false}
-                    title="Response"
-                  />
-                </div>
-              </Card>
-            }
-          />
-        </section>
+            </div>
+          }
+          rightContent={
+            <Card className="bg-background p-4 mb-10">
+              <div className="mb-8">
+                <RenderCode
+                  showLanguage={false}
+                  title="Example request body"
+                  code={requestEdit}
+                  language="json"
+                />
+              </div>
+              <div className="mb-5">
+                <Tabs defaultValue="javascript">
+                  <TabsList>
+                    <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+                    <TabsTrigger value="curl">cURL</TabsTrigger>
+                    <TabsTrigger value="python">Python</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="javascript">
+                    <RenderCode
+                      showLanguage={false}
+                      title="Example request"
+                      language="javascript"
+                      code={editRequestJavascript}
+                    />
+                  </TabsContent>
+                  <TabsContent value="curl">
+                    <RenderCode
+                      showLanguage={false}
+                      title="Example request"
+                      language="bash"
+                      code={editRequestCurl}
+                    />
+                  </TabsContent>
+                  <TabsContent value="python">
+                    <RenderCode
+                      showLanguage={false}
+                      title="Example request"
+                      language="python"
+                      code={editRequestPython}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </Card>
+          }
+        />
       </section>
     </div>
   );

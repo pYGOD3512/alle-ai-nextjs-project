@@ -246,19 +246,14 @@ main();
 export default function ApiVideoGenerationDocs() {
   return (
     <div className=" ml-10">
-      <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
-
       {/* intro */}
       <section className="mb-10">
+        <h2 data-section="video-generation" className="text-3xl font-bold mb-4">
+          Video Generation API
+        </h2>
         <ApiDocLayout
           leftContent={
             <Card className="bg-background p-4">
-              <h2
-                data-section="video-generation"
-                className="text-3xl font-bold mb-4"
-              >
-                Video
-              </h2>
               <div className="text-muted-foreground">
                 <p className="text-muted-foreground">
                   Learn how to generate videos from text or edit video by text
@@ -425,7 +420,7 @@ export default function ApiVideoGenerationDocs() {
           leftContent={
             <Card className="bg-background p-4">
               <h2
-                data-section="video-edits"
+                data-section="video-generation-edits"
                 className="text-3xl font-bold mb-3"
               >
                 Edit Video
@@ -514,6 +509,14 @@ export default function ApiVideoGenerationDocs() {
         />
         <section></section>
       </section>
+      <NavigationContainer
+        preUrl="/docs/api-reference/introduction"
+        previousTitle="Getting Started"
+        previousDescription="Return to the introduction or main guide"
+        nextTitle=" Analytics & Monitoring"
+        nextDesciption=" Gain insights into system performance, user behavior, and API interactions through comprehensive analytics and monitoring tools."
+        nextUrl=""
+      />
     </div>
   );
 }
