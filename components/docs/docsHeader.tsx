@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+import { useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SearchCommand } from "@/components/features/developer/search-command";
 import { usePathname } from "next/navigation";
-
+import SearchModal from "../docSearchModal";
 export function DocsHeader() {
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
@@ -20,9 +21,13 @@ export function DocsHeader() {
     { name: "Tutorials", href: "/docs/tutorials", pageOne: "using-platform" },
     { name: "Community", href: "/discord" },
   ];
-
+  const [isOpen, SetModalOpen] = useState(false);
+  const toggleModal = () => {
+    SetModalOpen((prev) => !prev);
+  };
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-sideBarBackground backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <SearchModal isOpen={isOpen} onClose={toggleModal} />
       <div className="container flex h-14 items-center justify-between px-8 max-w-[1400px] mx-auto">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
@@ -58,7 +63,7 @@ export function DocsHeader() {
 
         {/* Right side items */}
         <div className="flex items-center space-x-4">
-          <SearchCommand />
+          <SearchCommand toggleModal={toggleModal} />
           <ThemeToggle />
           <Link
             href="/playground"

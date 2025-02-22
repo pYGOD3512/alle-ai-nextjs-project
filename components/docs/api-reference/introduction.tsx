@@ -29,68 +29,94 @@ export default function ApiIntroduction() {
 
   return (
     <main className="flex gap-6">
-      {/* main content  */}
-
+      {/* Main content */}
       <div className="w-3/4">
-        <div className="text-muted-foreground mb-10">
-          <h2 className="text-3xl text-white mb-3 font-bold">Alle-AI</h2>
-          <h3
-            className="text-muted-foreground mb-4 font-semibold"
-            data-section="introduction"
-          >
-           Api reference
-          </h3>
-          <p className="mb-5">
-            You can interact with the API through HTTP or Websocket requests
-            from any language, via our official Python bindings or our official
-            Node.js libraries.
-          </p>
-          <p className="mb-4">
-            To install the official Python bindings, run the following command:
-          </p>
-          <div className="mb-5">
-            <RenderCode language="bash" code="$ pip install alleai" />
+        {/* Introduction Section */}
+        <section
+          className="min-h-[80vh] py-5 space-y-8"
+          data-section="introduction"
+        >
+          <div className="space-y-6">
+            <h2 className="text-4xl text-white font-bold">Alle-AI</h2>
+            <h3 className="text-2xl text-muted-foreground font-semibold">
+              API Reference
+            </h3>
+            <div className="space-y-4 text-muted-foreground">
+              <p>
+                You can interact with the API through HTTP or Websocket requests
+                from any language, via our official Python bindings or our
+                official Node.js libraries.
+              </p>
+              <div className="space-y-6">
+                <div>
+                  <p className="mb-4">
+                    To install the official Python bindings, run the following
+                    command:
+                  </p>
+                  <RenderCode language="bash" code="$ pip install alleai" />
+                </div>
+                <div>
+                  <p className="mb-4">
+                    To install the official Node.js library, run the following
+                    command in your Node.js project directory:
+                  </p>
+                  <RenderCode language="bash" code="$ npm install alleai" />
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="mb-5">
-            To install the official Node.js library, run the following command
-            in your Node.js project directory:
-          </p>
-          <RenderCode language="bash" code="$ npm install alleai" />
-        </div>
+        </section>
 
-        <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
+        {/* Authentication Section */}
+        <section
+          className="min-h-[80vh] py-16 space-y-8"
+          data-section="authentication"
+        >
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold">Authentication</h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl mb-4">API Keys</h3>
+                <p className="text-muted-foreground mb-4">
+                  Authenticate using API keys scoped to projects (recommended)
+                  or legacy user keys.
+                </p>
+                <ul className="list-disc text-muted-foreground pl-6 space-y-2">
+                  <li>
+                    <strong className="font-medium">Project keys:</strong>{" "}
+                    Restricted to a single project (secure by default).
+                  </li>
+                  <li>
+                    <strong className="font-medium">User keys:</strong> Access
+                    all projects/organizations (deprecated; migrate to project
+                    keys).
+                  </li>
+                </ul>
+              </div>
 
-        {/*page 2  authentication */}
-        <section className="mb-7 mt-20">
-          <h2 className="text-3xl mb-4" data-section="authentication">
-            Authentication
-          </h2>
-          <h3 className="text-2xl mb-4">API keys</h3>
-          <div className="">
-            <h2 className="text-2xl font-bold mb-4">Authentication</h2>
-            <p className="mb-2 text-muted-foreground">
-              Authenticate using API keys scoped to projects (recommended) or
-              legacy user keys.
-            </p>
-            <ul className="list-disc text-muted-foreground pl-6 mb-4">
-              <li>
-                <strong className="font-medium">Project keys:</strong>{" "}
-                Restricted to a single project (secure by default).
-              </li>
-              <li>
-                <strong className="font-medium">User keys:</strong> Access all
-                projects/organizations (deprecated; migrate to project keys).
-              </li>
-            </ul>
-            <div
-              className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <strong className="font-bold">Security Note:</strong>{" "}
-              <span className="block sm:inline">
-                🔒 Never expose API keys client-side. Use backend environment
-                variables or secret managers in production.
-              </span>
+              <div className="bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200 px-6 py-4 rounded-lg">
+                <strong className="font-bold block mb-1">Security Note:</strong>
+                <span>
+                  🔒 Never expose API keys client-side. Use backend environment
+                  variables or secret managers in production.
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl">Making authenticated requests</h3>
+                <p className="text-muted-foreground">
+                  Authentication to the API is performed via HTTP Bearer
+                  authentication. Provide your API key as the Bearer token value
+                  in the Authorization header.
+                </p>
+                <RenderCode
+                  language="bash"
+                  code="curl --request POST \
+  --url https://api.alleai.com/v1/chat/completions \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json'"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -175,7 +201,7 @@ const client = new alleaiClient({
 
         {/* Streaming */}
         <section className="mb-20">
-          <h2 className="text-3xl mb-4" data-section="streaming" >
+          <h2 className="text-3xl mb-4" data-section="streaming">
             Streaming
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -356,7 +382,7 @@ makeStreamingRequest();`}
 
         {/* SDKs and Libraries */}
         <section className="mb-20">
-          <h2 className="text-3xl mb-4" data-section="sdk"  >
+          <h2 className="text-3xl mb-4" data-section="sdk">
             SDKs and Libraries
           </h2>
           <p className="text-muted-foreground mb-4">
