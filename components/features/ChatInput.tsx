@@ -479,7 +479,7 @@ export function ChatInput({
                       <TooltipTrigger asChild>
                         <button
                           onClick={handleWebSearchToggle}
-                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.3rem] ${
+                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                             isWebSearch 
                               ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
                               : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
@@ -502,7 +502,7 @@ export function ChatInput({
                     <TooltipTrigger asChild>
                       <button
                         onClick={handleCombinedToggle}
-                        className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.3rem] ${
+                        className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                           isCombinedMode 
                             ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
                             : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
