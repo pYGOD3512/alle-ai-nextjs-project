@@ -55,7 +55,7 @@ export default function Page() {
   }, [activeSection, router]);
 
   return (
-    <div className="space-y-32"> {/* Added more vertical spacing between sections */}
+    <div className="space-y-32 ml-10"> {/* Added more vertical spacing between sections */}
       {/* stacking up pages here  */}
       <section data-section="introduction" className="min-h-[80vh]"> {/* Increased minimum height */}
         <ApiIntroduction />

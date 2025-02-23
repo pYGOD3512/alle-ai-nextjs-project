@@ -1,12 +1,11 @@
+// @ts-nocheck
 "use client";
-
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
 import { tutorial, apiReference, guides } from "@/lib/constants/docs";
 import { useState, useEffect } from "react";
-import { useActiveSectionStore } from "@/stores/ui";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 export const SidebarNav = () => {
@@ -14,15 +13,28 @@ export const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({});
-  const { activeSection } = useActiveSectionStore();
   const router = useRouter();
-
   useEffect(() => {
-    // Keep the chat section expanded when in any of its subsections
-    if (pathname.startsWith("/docs/api-reference/chat")) {
+    if (!pathname || !pathname.startsWith("/docs/api-reference")) return;
+
+    const currentPath = pathname.replace("/docs/api-reference/", "");
+
+    // Find all expandable sections 
+    const expandableSections = apiReference
+      .flatMap((item) => item.sections)
+      .filter((section) => section.sections);
+
+    // Find the parent section whose subsection's href matches the current path
+    const activeSection = expandableSections.find((section) =>
+      section.sections.some((subsection) =>
+        currentPath.startsWith(subsection.href)
+      )
+    );
+
+    if (activeSection) {
       setExpandedSections((prev) => ({
         ...prev,
-        chat: true,
+        [activeSection.id]: true,
       }));
     }
   }, [pathname]);

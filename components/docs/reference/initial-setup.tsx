@@ -59,7 +59,6 @@ export default function Quickstart() {
   const [installToggle, setInstallToggle] = useState("python");
   const [apiToggle, setApiToggle] = useState("python");
 
-  
   const CodeToggle = ({ value, onChange }) => {
     return (
       <ToggleGroup
@@ -125,7 +124,7 @@ client.generateText({ prompt: 'Hello, world!' })
       </section>
 
       <section className="mb-6">
-        <h2 id="create_key" className="font-bold text-3xl mb-3">
+        <h2 className="font-bold text-3xl mb-3">
           Create and export an API key
         </h2>
         <p className="leading-8">
@@ -153,7 +152,9 @@ client.generateText({ prompt: 'Hello, world!' })
       </section>
 
       <section className="mb-6">
-        <h2 className="text-3xl font-bold mb-3">Make your first API request</h2>
+        <h2 id="make_a_request" className="text-3xl font-bold mb-3">
+          Make your first API request
+        </h2>
         <p className="mb-6">
           With your Alle-AI API key set as an environment variable, you're ready
           to start using our platform. For now, we only support access through{" "}
@@ -167,7 +168,9 @@ client.generateText({ prompt: 'Hello, world!' })
       </section>
 
       <section className="mb-6">
-        <h2 className="text-3xl font-bold mb-3">Next Steps</h2>
+        <h2 id="next_steps" className="text-3xl font-bold mb-3">
+          Next Steps
+        </h2>
         <p className="text-muted-foreground text-lg mb-6">
           Now that you've made your first Alle-AI API request, you can explore
           the following resources:

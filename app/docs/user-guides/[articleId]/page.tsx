@@ -35,14 +35,16 @@ export default function Page() {
     };
   };
 
-  const { title,  param } = getTitle();
+  const { title, param } = getTitle();
 
   return (
     <div className="flex-1 w-full flex-col ml-8">
       {title === "Platform overview" ? (
         <div className="mb-5 py-4 ">
-          <h1 id="get_started" className="text-xl  text-muted-foreground mb-3 ">Get started</h1>
-          <h2 className="font-bold text-4xl mb-3">Alle-AI</h2>
+          <h1 className="text-xl  text-muted-foreground mb-3 ">Get started</h1>
+          <h2 id="get_started" className="font-bold text-4xl mb-3">
+            Alle-AI
+          </h2>
           <section className="text-muted-foreground">
             <p>
               Alle-AI is the ultimate AI integration platform, seamlessly
@@ -58,7 +60,9 @@ export default function Page() {
           <h1 className="font-semibold text-xl mb-3 text-muted-foreground">
             Guides
           </h1>
-          <div className="text-2xl font-bold mb-5">{title}</div>
+          <div className="text-2xl font-bold mb-5">
+            <h2 id={`${title}`}>{title}</h2>
+          </div>
         </div>
       )}
 

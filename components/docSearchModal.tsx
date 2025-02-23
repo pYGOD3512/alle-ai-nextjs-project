@@ -1,6 +1,5 @@
-// components/SearchModal.tsx
 import { useState, useEffect, useRef } from "react";
-import { Modal, Input, Spin } from "antd";
+import { Modal, Input, Spin, InputRef } from "antd";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -11,11 +10,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<string[]>([]);
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<InputRef>(null);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      // Small delay to ensure modal is rendered
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
@@ -23,21 +21,26 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setIsLoading(false);
-      setSearchResults([]);
-      return;
+    const trimmedQuery = searchQuery.trim();
+
+    // Set loading immediately when query changes
+    if (trimmedQuery !== "") {
+      setIsLoading(true);
     }
 
-    setIsLoading(true);
     const timeout = setTimeout(() => {
-      const mockResults: string[] = [
-        `Result 1 for "${searchQuery}"`,
-        `Result 2 for "${searchQuery}"`,
-        `Result 3 for "${searchQuery}"`,
-      ];
-      setSearchResults(mockResults);
-      setIsLoading(false);
+      if (trimmedQuery === "") {
+        setIsLoading((prev) => (prev !== false ? false : prev));
+        setSearchResults((prev) => (prev.length > 0 ? [] : prev));
+      } else {
+        const mockResults: string[] = [
+          `Result 1 for "${searchQuery}"`,
+          `Result 2 for "${searchQuery}"`,
+          `Result 3 for "${searchQuery}"`,
+        ];
+        setSearchResults(mockResults);
+        setIsLoading(false);
+      }
     }, 1000);
 
     return () => clearTimeout(timeout);
@@ -50,7 +53,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       title="Search Documentation"
       footer={null}
       width={640}
-      style={{ top: '80px' }}
+      style={{ top: "80px" }}
     >
       <div className="relative p-4 rounded-lg">
         <div className="relative">

@@ -2,136 +2,114 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { List } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface TableOfContentsProps {
-  sections: Array<{ id: string; title: string; level: number }>;
-  pathname: string;
-}
-
-export function OnThisPage({ sections, pathname }: TableOfContentsProps) {
+export function OnThisPage() {
+  const [sections, setSections] = useState<Array<{ id: string; title: string }>>([]);
   const [activeSection, setActiveSection] = useState("");
   const currentPathname = usePathname();
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const headingsRef = useRef<{ [key: string]: DOMRect }>({});
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // // Reset state on route change
-  // useEffect(() => {
-  //   setActiveSection("");
-  //   return () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //   };
-  // }, [currentPathname]);
-
-  // Calculate heading positions
-  const updateHeadingPositions = useCallback(() => {
-    const positions: { [key: string]: DOMRect } = {};
-    sections.forEach(({ id }) => {
-      const element = document.getElementById(id);
-      if (element) {
-        positions[id] = element.getBoundingClientRect();
-      }
-    });
-    headingsRef.current = positions;
-  }, [sections]);
-
-  // Determine active section based on scroll position
-  const determineActiveSection = useCallback(() => {
-    const scrollY = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const positions = headingsRef.current;
-
-    // Find the section closest to the top of the viewport
-    let closestSection = "";
-    let closestDistance = Infinity;
-
-    Object.entries(positions).forEach(([id, rect]) => {
-      const element = document.getElementById(id);
-      if (element) {
-        const distance = Math.abs(element.getBoundingClientRect().top);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestSection = id;
-        }
-      }
-    });
-
-    if (closestSection && closestSection !== activeSection) {
-      setActiveSection(closestSection);
-    }
-  }, [activeSection]);
-
-  // Handle scroll events with debouncing
+  // Extract h2 elements when pathname changes
   useEffect(() => {
-    const handleScroll = () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        determineActiveSection();
-      }, 100);
+    const fetchHeadings = () => {
+      const h2Elements = document.querySelectorAll("h2");
+      const newSections = Array.from(h2Elements)
+        .filter((h2) => h2.id)
+        .map((h2) => ({
+          id: h2.id,
+          title: h2.id.replace(/_/g, " "),
+        }));
+
+      h2Elements.forEach((h2) => {
+        if (!h2.id) {
+          console.warn("h2 element found without an ID:", h2.textContent);
+        }
+      });
+
+      setSections(newSections);
+      setActiveSection("");
     };
 
-    // Initial positioning
-    timeoutRef.current = setTimeout(() => {
-      updateHeadingPositions();
-      determineActiveSection();
-    }, 100);
+    fetchHeadings();
 
-    // Update positions on scroll
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    const observer = new MutationObserver(fetchHeadings);
+    observer.observe(document.body, { childList: true, subtree: true });
 
-    // Update positions on resize
-    window.addEventListener("resize", updateHeadingPositions);
+    return () => observer.disconnect();
+  }, [currentPathname]);
+
+  // Set up Intersection Observer for active section tracking
+  useEffect(() => {
+    if (!sections.length) return;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    const options = {
+      root: null,
+      rootMargin: "-100px 0px 0px 0px",
+      threshold: 0,
+    };
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, options);
+
+    sections.forEach((section) => {
+      const element = document.getElementById(section.id);
+      if (element && observerRef.current) {
+        observerRef.current.observe(element);
+      }
+    });
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateHeadingPositions);
     };
-  }, [determineActiveSection, updateHeadingPositions]);
+  }, [sections]);
 
-  const handleLinkClick = useCallback(
-    (e: React.MouseEvent, sectionId: string) => {
-      e.preventDefault();
-      const element = document.getElementById(sectionId);
-      if (element) {
-        window.history.pushState({}, "", `#${sectionId}`);
-        const offset =
-          element.getBoundingClientRect().top + window.scrollY - 100;
-        window.scrollTo({
-          top: offset,
-          behavior: "smooth",
-        });
-        setActiveSection(sectionId);
-      }
-    },
-    []
-  );
+  // Simplified scroll handler
+  const handleButtonClick = useCallback((sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (!element) {
+      console.warn(`Element with ID ${sectionId} not found`);
+      return;
+    }
 
-  // Handle initial hash in URL
+    // Get the header height - adjust this value based on your layout
+    const headerHeight = 100; // 100px offset
+
+    // Calculate the element's position relative to the viewport
+    const elementPosition = element.getBoundingClientRect().top;
+    
+    // Add current scroll position to get absolute position
+    const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+
+    // Perform the scroll
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth"
+    });
+
+    // Update active section and URL
+    setActiveSection(sectionId);
+    window.history.pushState({}, "", `#${sectionId}`);
+  }, []); 
+
+  // Handle initial hash
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
-    if (hash) {
-      timeoutRef.current = setTimeout(() => {
-        const element = document.getElementById(hash);
-        if (element) {
-          const offset =
-            element.getBoundingClientRect().top + window.scrollY - 100;
-          window.scrollTo({
-            top: offset,
-            behavior: "smooth",
-          });
-          setActiveSection(hash);
-        }
-      }, 100);
+    if (hash && sections.length > 0) {
+      handleButtonClick(hash);
     }
-  }, [currentPathname]);
+  }, [sections, handleButtonClick]);
 
   return (
     <aside className="hidden xl:sticky xl:top-14 xl:block xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto bg-background/90 p-4 rounded-lg">
@@ -146,20 +124,18 @@ export function OnThisPage({ sections, pathname }: TableOfContentsProps) {
         <nav className="text-sm">
           <div className="space-y-1">
             {sections.map((section) => (
-              <Link
+              <button
                 key={`${currentPathname}-${section.id}`}
-                href={`#${section.id}`}
+                onClick={() => handleButtonClick(section.id)}
                 className={cn(
-                  "block py-1.5 px-3 rounded-md transition-all",
-                  "pl-" + (section.level - 1) * 4,
+                  "block w-full text-left py-1.5 px-3 rounded-md transition-all",
                   activeSection === section.id
-                    ? "dark:bg-muted-foreground rounded-md text-black dark:text-white"
-                    : "text-foreground/80"
+                    ? "bg-muted-foreground text-white"
+                    : "text-foreground/80 hover:bg-muted"
                 )}
-                onClick={(e) => handleLinkClick(e, section.id)}
               >
                 {section.title}
-              </Link>
+              </button>
             ))}
           </div>
         </nav>

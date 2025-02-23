@@ -28,11 +28,12 @@ interface userGuides {
   section: GuideSection[];
 }
 
+
 const href = "/docs/api";
 
-// api reference base url
 const hrefApi = "/docs/api-reference";
-// api reference guides
+// user guides guides
+
 export const guides: Guide[] = [
   {
     id: "get-started",
