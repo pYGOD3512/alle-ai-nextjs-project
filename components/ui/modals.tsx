@@ -669,7 +669,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
-  const userPlan = useAuthStore((state) => state.plan);
+  const userPlan = useAuthStore((state) => state.plan) as UserPlan;
 
   const { 
     chatModels, 
@@ -685,7 +685,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   } = useModelsStore();
 
   // Plan limits
-  const MODEL_LIMITS = {
+  const MODEL_LIMITS: Record<UserPlan, number> = {
     free: 2,
     standard: 3,
     plus: 5

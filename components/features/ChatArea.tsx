@@ -305,16 +305,16 @@ export function ChatArea() {
             })));
 
             // Set as active content if it's the first response
-            if (isFirstResponse) {
-              setActiveContents(prev => ({
-                ...prev,
-                [promptId]: {
-                  type: 'model',
-                  id: modelId
-                }
-              }));
-              isFirstResponse = false;
-            }
+              if (isFirstResponse && !isCombinedMode) {
+                setActiveContents(prev => ({
+                  ...prev,
+                  [promptId]: {
+                    type: 'model',
+                    id: modelId
+                  }
+                }));
+                isFirstResponse = false;
+              }
           } else {
             // Handle error state
             setBranches(prev => prev.map(branch => ({
