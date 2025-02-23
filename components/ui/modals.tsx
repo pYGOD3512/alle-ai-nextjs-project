@@ -182,7 +182,7 @@ import { useModelsStore } from '@/stores/models';
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, 
   useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, 
   useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, 
-  useProjectStore, ProjectFile } from "@/stores";
+  useProjectStore, ProjectFile, useTextSizeStore } from "@/stores";
 import { AlleAILoader } from "../features/AlleAILoader";
 import { HistoryItem } from "@/lib/api/history";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
@@ -530,7 +530,12 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
 }
 
 export function TextSizeModal({ isOpen, onClose }: ModalProps) {
+  const { size, setSize } = useTextSizeStore();
   const fontSizes = [10, 12, 14, 16, 18, 20, 22, 24, 26];
+
+  const handleSizeChange = (newSize: string) => {
+    setSize(Number(newSize));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -546,7 +551,7 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs">Font Size</label>
-            <Select defaultValue="16">
+            <Select value={size.toString()} onValueChange={handleSizeChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select size" />
               </SelectTrigger>
@@ -567,7 +572,7 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
             className="w-full p-2 text-sm text-center rounded-md bg-primary/10 hover:bg-primary/20 text-primary"
             onClick={onClose}
           >
-            APPLY
+            OK
           </button>
         </div>
       </DialogContent>
@@ -664,8 +669,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
-
-  const [userPlan, setUserPlan] = useState<UserPlan>('plus');
+  const userPlan = useAuthStore((state) => state.plan);
 
   const { 
     chatModels, 
@@ -728,9 +732,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     const model = getModelsForPage().find(m => m.model_uid === modelId);
     
     // Check for premium model restriction
-    if (model?.model_plan === 'plus' && userPlan === 'free') {
+    if (model?.model_plan === 'standard' && userPlan === 'free') {
       setPromptConfig({
-        title: "Premium Model",
+        title: "Standard Model",
         message: "Upgrade Plan to use this model",
         type: "upgrade",
         metadata: {
@@ -750,7 +754,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
               setShowPromptModal(false);
             },
             variant: "premium",
-            icon: <Zap className="h-4 w-4" />
+            icon: <Gem className="h-4 w-4" />
           }
         ]
       });
@@ -902,26 +906,26 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     setTempSelectedModels([]);
   };
 
-  const PlanSwitcher = () => (
-    <div className="flex items-center gap-2 p-2 bg-backgroundSecondary rounded-lg">
-      <span className="text-sm font-medium">Test as:</span>
-      <Select value={userPlan} onValueChange={(value: UserPlan) => {setUserPlan(value); setTempSelectedModels([]) }}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select plan" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="free">Free Plan</SelectItem>
-            <SelectItem value="standard">Standard Plan</SelectItem>
-            <SelectItem value="plus">Plus Plan</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      <Badge variant="outline" className="ml-auto">
-        {MODEL_LIMITS[userPlan]} models max
-      </Badge>
-    </div>
-  );
+  // const PlanSwitcher = () => (
+  //   <div className="flex items-center gap-2 p-2 bg-backgroundSecondary rounded-lg">
+  //     <span className="text-sm font-medium">Test as:</span>
+  //     <Select value={userPlan} onValueChange={(value: UserPlan) => {setUserPlan(value); setTempSelectedModels([]) }}>
+  //       <SelectTrigger className="w-[180px]">
+  //         <SelectValue placeholder="Select plan" />
+  //       </SelectTrigger>
+  //       <SelectContent>
+  //         <SelectGroup>
+  //           <SelectItem value="free">Free Plan</SelectItem>
+  //           <SelectItem value="standard">Standard Plan</SelectItem>
+  //           <SelectItem value="plus">Plus Plan</SelectItem>
+  //         </SelectGroup>
+  //       </SelectContent>
+  //     </Select>
+  //     <Badge variant="outline" className="ml-auto">
+  //       {MODEL_LIMITS[userPlan]} models max
+  //     </Badge>
+  //   </div>
+  // );
 
   return (
     <>
@@ -2384,6 +2388,12 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                       {user?.first_name?.[0]}{user?.last_name?.[0]}
                     </AvatarFallback>
                   </Avatar>
+                  {!isEditing && (
+                  <div className="absolute -bottom-1 -right-2 text-white rounded-full">
+                    <Badge variant="default">{plan}</Badge>
+                  </div>
+                  )}
+                  
                   {isEditing && (
                     <label 
                       htmlFor="profile-photo" 

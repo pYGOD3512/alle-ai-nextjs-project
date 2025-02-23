@@ -614,6 +614,23 @@ export const useSettingsStore = create<SettingsState>()(
   )
 );
 
+interface TextSizeStore {
+  size: number;
+  setSize: (size: number) => void;
+}
+
+export const useTextSizeStore = create<TextSizeStore>()(
+  persist(
+    (set) => ({
+      size: 16, // default size
+      setSize: (size) => set({ size }),
+    }),
+    {
+      name: 'text-size-storage',
+    }
+  )
+);
+
 const generateId = () => {
   return 'key_' + Math.random().toString(36).substring(2, 15);
 };

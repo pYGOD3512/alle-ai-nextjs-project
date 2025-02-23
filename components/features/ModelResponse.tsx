@@ -34,10 +34,12 @@ import {
 } from '@/components/markdown/MarkdownTable';
 import { MarkdownCode } from '@/components/markdown/MarkdownCode';
 
+
 import { SummaryContent } from "./SummaryContent";
 import { SUMMARY_DATA } from "@/lib/constants";
 import { useSettingsStore } from "@/stores";
 import { chatApi, LikeState } from "@/lib/api/chat";
+import { useTextSizeStore } from "@/stores/index";
 
 interface ModelResponseProps {
   model: string;
@@ -144,6 +146,7 @@ export function ModelResponse({
   const { setSources, close } = useSourcesWindowStore();
   const [showAllImages, setShowAllImages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textSize = useTextSizeStore((state) => state.size);
 
   useEffect(() => {
     // Initialize voices when component mounts
@@ -256,7 +259,7 @@ export function ModelResponse({
         );
       }
 
-      return <p className="my-4 leading-relaxed text-base" {...props}>{children}</p>;
+      return <p className="my-4 leading-relaxed" style={{ fontSize: `${textSize}px` }} {...props}>{children}</p>;
     },
     
     img: ({ src, alt, ...props }: ImgHTMLAttributes<HTMLImageElement> & { node?: any }) => {
@@ -265,6 +268,9 @@ export function ModelResponse({
     },
     
     code: ({ inline, className, children, ...props }: CodeProps) => {
+
+      
+      // Default code handling
       return (
         <MarkdownCode inline={inline} className={className} {...props}>
           {children}
@@ -314,12 +320,16 @@ export function ModelResponse({
     ),
 
     li: ({ children, ...props }: MarkdownComponentProps) => (
-      <li className="leading-relaxed text-base marker:text-foreground marker:mr-2" {...props}>
+      <li 
+        className="leading-relaxed marker:text-foreground marker:mr-2" 
+        style={{ fontSize: `${textSize}px` }}
+        {...props}
+      >
         {children}
       </li>
     ),
 
-  }), []);
+  }), [textSize]);
 
   // Get display limit based on screen size
   const getDisplayLimit = () => {
