@@ -107,6 +107,17 @@ export interface ChatMessageProps {
   branches: Branch[];
 }
 
+interface CombinationResponse {
+  status: boolean;
+  message: string;
+  combination: string;
+}
+
+interface GetCombinationParams {
+  promptId: string;
+  modelResponsePairs: [string, number][];
+}
+
 export const chatApi = {
   createConversation: async (models: string[], type: 'chat' | 'image' | 'audio' | 'video'): Promise<CreateConversationResponse> => {
     try {
@@ -207,6 +218,21 @@ export const chatApi = {
       return response.data;
     } catch (error) {
       console.error('Error in web search:', error);
+      throw error;
+    }
+  },
+
+  getCombination: async ({ promptId, modelResponsePairs }: GetCombinationParams): Promise<CombinationResponse> => {
+    console.log('Getting combination with params:', promptId, modelResponsePairs);
+    try {
+      const response = await api.post('/combine', {
+        prompt: promptId,
+        responses: modelResponsePairs
+      });
+      console.log('Combination response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in combination response:', error);
       throw error;
     }
   },

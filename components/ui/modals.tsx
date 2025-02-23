@@ -47,6 +47,7 @@ import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  UploadCloud,
   Settings,
   ExternalLink,
   User,
@@ -185,6 +186,8 @@ import { useSidebarStore, useSelectedModelsStore, useHistoryStore,
 import { AlleAILoader } from "../features/AlleAILoader";
 import { HistoryItem } from "@/lib/api/history";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+
+import Papa from "papaparse";
 
 interface ModalProps {
   isOpen: boolean;
@@ -6608,6 +6611,139 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
             </form>
           </>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function AddMembersModal({ isOpen, onClose }: ModalProps) {
+  const [email, setEmail] = useState('');
+  const [emailList, setEmailList] = useState<string[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [selectedColumn, setSelectedColumn] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFile = e.target.files?.[0];
+    if (uploadedFile) {
+      setFile(uploadedFile);
+      Papa.parse(uploadedFile, {
+        header: true,
+        complete: (results) => {
+          const columnNames = results.meta.fields || [];
+          setColumns(columnNames.filter(name => name.trim() !== '')); // Filter out empty strings
+        },
+        error: (error) => {
+          console.error("Error parsing file:", error);
+        }
+      });
+    }
+  };
+
+  const handleAddEmail = () => {
+    if (email && !emailList.includes(email)) {
+      setEmailList([...emailList, email]);
+      setEmail('');
+    }
+  };
+
+  const handleRemoveEmail = (emailToRemove: string) => {
+    setEmailList(emailList.filter(e => e !== emailToRemove));
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // Add your submission logic here
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      onClose();
+    } catch (error) {
+      console.error("Failed to add members", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    setEmail('');
+    setEmailList([]);
+    setFile(null);
+    setColumns([]);
+    setSelectedColumn('');
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[500px] p-6 bg-background rounded-lg shadow-lg">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-primary">Add Members</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3">
+            <Input
+              placeholder="Enter member email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 border border-borderColorPrimary rounded-md p-2 focus:border-primary focus:ring-2 focus:ring-primary"
+            />
+            <Button 
+              size="icon"
+              variant="outline"
+              onClick={handleAddEmail} 
+              className="rounded-md transition">
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+          {emailList.length > 0 && (
+            <ul className="list-decimal list-inside border border-borderColorPrimary rounded-md p-2 max-h-40 overflow-y-auto">
+              {emailList.map((email, index) => (
+                <li
+                  key={index}
+                  className="flex justify-between items-center py-1 px-2 hover:bg-muted/50 transition-colors"
+                >
+                  <span className="text-sm">{index + 1}. {email}</span>
+                  <button
+                    onClick={() => handleRemoveEmail(email)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex items-center space-x-3">
+            <label className="flex items-center justify-center w-1/3 h-10 border border-dashed border-borderColorPrimary rounded-md cursor-pointer hover:bg-muted/50 transition-colors">
+              <input type="file" accept=".csv, .xlsx" onChange={handleFileUpload} className="hidden" />
+              <span className="text-sm text-muted-foreground">{file ? file.name : 'Select File'}</span>
+            </label>
+            {columns.length > 0 && (
+              <Select onValueChange={setSelectedColumn}>
+                <SelectTrigger className="w-full border border-borderColorPrimary rounded-md p-2 focus:border-primary focus:ring-2 focus:ring-primary">
+                  <SelectValue placeholder="Select email column" />
+                </SelectTrigger>
+                <SelectContent>
+                  {columns.map((col) => (
+                    <SelectItem key={col} value={col}>
+                      {col}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground border border-borderColorPrimary p-2 rounded-md">You can upload a CSV or Excel file to add multiple emails at once.</p>
+          <Button
+
+            onClick={handleSubmit}
+            disabled={isSubmitting || (emailList.length === 0 && (!file || !selectedColumn))}
+            className="w-full py-2 rounded-md hover:bg-primary-dark transition"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

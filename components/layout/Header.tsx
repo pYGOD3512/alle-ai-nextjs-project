@@ -537,7 +537,7 @@ export function Header() {
           
 
           <div className={`flex items-center gap-2 ${!specialRoutes.includes(pathname) ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            {/* {pathname.includes("/chat") && (
+            {pathname.includes("/chat/res/") && (
               <Button
               variant={'outline'}
               className="h-8 rounded-full gap-1 p-2 text-muted-foreground"
@@ -546,7 +546,7 @@ export function Header() {
                 <Share className="w-4 h-4"/>
                 Share
               </Button>
-            )} */}
+            )}
             
 
             <ThemeToggle />

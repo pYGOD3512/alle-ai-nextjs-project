@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MembersTable } from "./MembersTable";
+import { AddMembersModal } from "@/components/ui/modals";
 
 interface OrganizationMember {
   id: string;
@@ -51,6 +52,7 @@ export function OrganizationDashboard() {
   const { toast } = useToast();
   const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
 
   useEffect(() => {
     // Replace with your actual API call
@@ -160,7 +162,7 @@ export function OrganizationDashboard() {
             </motion.p>
           </div>
         </div>
-        <Button>
+        <Button onClick={() => setIsAddMembersModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Members
         </Button>
@@ -196,6 +198,11 @@ export function OrganizationDashboard() {
           {/* Add your billing content here */}
         </TabsContent>
       </Tabs>
+
+      <AddMembersModal
+        isOpen={isAddMembersModalOpen}
+        onClose={() => setIsAddMembersModalOpen(false)}
+      />
     </motion.div>
   );
 }
