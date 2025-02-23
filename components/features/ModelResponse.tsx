@@ -42,7 +42,7 @@ import { chatApi, LikeState } from "@/lib/api/chat";
 interface ModelResponseProps {
   model: string;
   content: string;
-  model_img: string;
+  model_img: string | string[];
   responseId: string;
   sessionId: string;
   feedback?: 'liked' | 'disliked' | null;
@@ -344,12 +344,41 @@ export function ModelResponse({
 
   return (
     <Card className="bg-transparent border-none shadow-none p-4">
-      <div className="flex items-start gap-4 mb-3">
+      <div className="flex items-start gap-6 mb-3">
         <div className="w-8 h-8 rounded-full flex items-center justify-center">
-          <Image className="rounded-full hidden sm:flex" src={model_img} alt={model} width={32} height={32} />
+          {Array.isArray(model_img) ? (
+            <div className="flex -space-x-6">
+              {model_img
+                .filter((img): img is string => Boolean(img) && img !== '')
+                .map((img, index) => (
+                  <Image 
+                    key={index}
+                    className="rounded-full hidden sm:flex ring-1 ring-background"
+                    src={img} 
+                    alt={`${model} model ${index + 1}`}
+                    width={32} 
+                    height={32}
+                    style={{
+                      zIndex: model_img.length - index,
+                      transform: `translateX(${index * 2}px)`
+                    }}
+                  />
+                ))}
+            </div>
+          ) : (
+            model_img && model_img !== '' ? (
+              <Image 
+                className="rounded-full hidden sm:flex" 
+                src={model_img} 
+                alt={model} 
+                width={32} 
+                height={32} 
+              />
+            ) : null
+          )}
         </div>
         <div className="flex flex-col flex-1">
-          <span className="font-medium text-sm mb-3">{model}</span>
+          <span className={`font-medium text-sm text-semibold mb-4 ${Array.isArray(model_img) ? model_img.length > 3 ? "ml-4 mt-1" : "" : ""}`}>{model}</span>
           
           {/* Render images grid if there are images */}
           {images.length > 0 && (

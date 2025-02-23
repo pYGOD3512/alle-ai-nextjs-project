@@ -12,7 +12,7 @@ import {
   MODEL_RESPONSES,
   SUMMARY_DATA
 } from "@/lib/constants";
-import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore } from "@/stores";
+import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore } from "@/stores";
 import { useModelsStore, useConversationStore } from "@/stores/models";
 import { chatApi } from '@/lib/api/chat';
 import Image from "next/image";
@@ -24,6 +24,13 @@ import { Summary } from "./Summary";
 import { Card } from "@/components/ui/card";
 import { Model } from "@/lib/api/models";
 import { Source } from '@/lib/types';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { CombinedLoader } from "@/components/features/CombinedLoader";
 
 interface ChatSession {
   id: string; // conversation UUID
@@ -34,11 +41,12 @@ interface ChatSession {
 }
 
 interface ChatMessage {
-  id: string; // prompt ID
+  id: string;
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
   responses: ModelResponse[];
+  createdInCombinedMode: boolean;
 }
 
 interface ModelResponse {
@@ -57,6 +65,7 @@ interface Message {
   timestamp: Date;
   position: [number, number];
   responses: ModelResponse[];
+  createdInCombinedMode: boolean;
 }
 
 interface Branch {
@@ -73,8 +82,11 @@ export function ChatArea() {
   const { personalization } = useSettingsStore();
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
+  const { isCombinedMode } = useCombinedModeStore();
+  const [combinedLoading, setCombinedLoading] = useState<{ [key: string]: boolean }>({});
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   const [activeSessionId, setActiveSessionId] = useState<string>();
   const [responseFeedback, setResponseFeedback] = useState<Record<string, 'liked' | 'disliked' | null>>({});
@@ -97,9 +109,10 @@ export function ChatArea() {
       status: 'active',
       messages: [{
         id: promptId,
-        content: initialPrompt, // Use the stored input content
+        content: initialPrompt,
         sender: 'user',
         timestamp: new Date(),
+        createdInCombinedMode: isCombinedMode,
         responses: selectedModels.chat.map(modelId => ({
           id: `temp-${modelId}`,
           modelId,
@@ -121,6 +134,7 @@ export function ChatArea() {
         sender: 'user',
         timestamp: new Date(),
         position: [0, 0],
+        createdInCombinedMode: isCombinedMode,
         responses: selectedModels.chat.map(modelId => ({
           id: `temp-${modelId}`,
           modelId,
@@ -148,6 +162,18 @@ export function ChatArea() {
     sources: [],
     userPrompt: ''
   });
+
+  // Initialize expandedResponses with true for all messages by default
+  const [expandedResponses, setExpandedResponses] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    branches[currentBranch]?.messages.forEach(message => {
+      setExpandedResponses(prev => ({
+        ...prev,
+        [message.id]: true
+      }));
+    });
+  }, [branches, currentBranch]);
 
   // Memoize the auto-activation logic
   const handleAutoActivation = useCallback((message: ChatMessage) => {
@@ -197,80 +223,106 @@ export function ChatArea() {
 
   // Update the effect to handle initial responses
   useEffect(() => {
-    if (!conversationId || !promptId) return;
+    const handleInitialResponse = async () => {
+      if (!conversationId || !promptId) return;
 
-    const activeModels = selectedModels.chat.filter(
-      modelId => !inactiveModels.includes(modelId)
-    );
+      const activeModels = selectedModels.chat.filter(
+        modelId => !inactiveModels.includes(modelId)
+      );
 
-    // Handle web search first if enabled
-    if (isWebSearch) {
-      console.log('Web search is enabled - making web search API call');
-      setWebSearchLoading(prev => ({ ...prev, [promptId]: true }));
+      // Handle web search first if enabled
+      if (isWebSearch) {
+        console.log('Web search is enabled - making web search API call');
+        setWebSearchLoading(prev => ({ ...prev, [promptId]: true }));
 
-      chatApi.webSearch({
-        prompt_id: promptId,
-        conversation_id: conversationId,
-        follow_up: false,
-        prev: null
-      })
-      .then(webSearchResponse => {
-        console.log('Web search response received:', webSearchResponse);
-        setBranches(prev => prev.map(branch => ({
-          ...branch,
-          messages: branch.messages.map(msg => 
-            msg.id === promptId ? {
-              ...msg,
-              responses: msg.responses.map(resp => ({
-                ...resp,
-                sources: webSearchResponse.results
-              }))
-            } : msg
-          )
-        })));
-      })
-      .catch(error => {
-        console.error('Error in web search:', error);
-        toast({
-          title: "Web Search Error",
-          description: "Failed to complete web search, falling back to model responses.",
-          variant: "destructive"
-        });
-      })
-      .finally(() => {
-        setWebSearchLoading(prev => ({ ...prev, [promptId]: false }));
-      });
-    }
-
-    // Handle model responses (now runs alongside web search)
-    activeModels.forEach(async (modelId) => {
-      try {
-        const response = await chatApi.generateResponse({
-          conversation: conversationId,
-          model: modelId,
-          is_new: true,
-          prompt: promptId
-        });
-
-        if (response.status && response.data) {
+        chatApi.webSearch({
+          prompt_id: promptId,
+          conversation_id: conversationId,
+          follow_up: false,
+          prev: null
+        })
+        .then(webSearchResponse => {
+          console.log('Web search response received:', webSearchResponse);
           setBranches(prev => prev.map(branch => ({
             ...branch,
             messages: branch.messages.map(msg => 
               msg.id === promptId ? {
                 ...msg,
-                responses: msg.responses.map(resp => 
-                  resp.modelId === modelId ? {
-                    ...resp,
-                    id: String(response.data.id),
-                    content: response.data.response,
-                    status: 'complete'
-                  } : resp
-                )
+                responses: msg.responses.map(resp => ({
+                  ...resp,
+                  sources: webSearchResponse.results
+                }))
               } : msg
             )
           })));
-        } else {
-          // Handle error state
+        })
+        .catch(error => {
+          console.error('Error in web search:', error);
+          toast({
+            title: "Web Search Error",
+            description: "Failed to complete web search, falling back to model responses.",
+            variant: "destructive"
+          });
+        })
+        .finally(() => {
+          setWebSearchLoading(prev => ({ ...prev, [promptId]: false }));
+        });
+      }
+
+      // Handle model responses
+      const modelResponsePairs: [string, number][] = [];
+
+      await Promise.all(activeModels.map(async (modelId) => {
+        try {
+          if (isCombinedMode) { 
+            setCombinedLoading(prev => ({ ...prev, [promptId]: true }));
+          }
+          const response = await chatApi.generateResponse({
+            conversation: conversationId,
+            model: modelId,
+            is_new: true,
+            prompt: promptId
+          });
+
+          if (response.status && response.data) {
+            modelResponsePairs.push([modelId, response.data.id]);
+            setBranches(prev => prev.map(branch => ({
+              ...branch,
+              messages: branch.messages.map(msg => 
+                msg.id === promptId ? {
+                  ...msg,
+                  responses: msg.responses.map(resp => 
+                    resp.modelId === modelId ? {
+                      ...resp,
+                      id: String(response.data.id),
+                      content: response.data.response,
+                      status: 'complete'
+                    } : resp
+                  )
+                } : msg
+              )
+            })));
+          } else {
+            // Handle error state
+            setBranches(prev => prev.map(branch => ({
+              ...branch,
+              messages: branch.messages.map(msg => 
+                msg.id === promptId ? {
+                  ...msg,
+                  responses: msg.responses.map(resp => 
+                    resp.modelId === modelId ? {
+                      ...resp,
+                      status: 'error',
+                      error: response.message || 'Failed to generate response'
+                    } : resp
+                  )
+                } : msg
+              )
+            })));
+          }
+        } catch (error) {
+          console.error('Error in model response:', error);
+          // Update error state in UI
           setBranches(prev => prev.map(branch => ({
             ...branch,
             messages: branch.messages.map(msg => 
@@ -280,34 +332,72 @@ export function ChatArea() {
                   resp.modelId === modelId ? {
                     ...resp,
                     status: 'error',
-                    error: response.message || 'Failed to generate response'
+                    error: 'Failed to generate response'
                   } : resp
                 )
               } : msg
             )
           })));
         }
-      } catch (error) {
-        console.error(`Error in response:`, error);
-        // Update error state in UI
-        setBranches(prev => prev.map(branch => ({
-          ...branch,
-          messages: branch.messages.map(msg => 
-            msg.id === promptId ? {
-              ...msg,
-              responses: msg.responses.map(resp => 
-                resp.modelId === modelId ? {
-                  ...resp,
-                  status: 'error',
-                  error: 'Failed to generate response'
-                } : resp
-              )
-            } : msg
-          )
-        })));
+      }));
+
+      // Handle combined mode response
+      if (isCombinedMode) {
+        try {
+          const combinationResponse = await chatApi.getCombination({
+            promptId,
+            modelResponsePairs
+          });
+          console.log('Combination response received:', combinationResponse);
+
+          const modelImages = selectedModels.chat
+            .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_image || null;
+            })
+            .filter((img): img is string => Boolean(img) && img !== '');
+
+          console.log(modelImages,'this is a model image')
+          // Only proceed if we have valid images
+          if (modelImages.length > 0) {
+            // Update the branch with the combined response
+            setBranches(prev => prev.map((branch, idx) => 
+              idx === currentBranch ? {
+                ...branch,
+                messages: branch.messages.map(msg => 
+                  msg.id === promptId ? {
+                    ...msg,
+                    responses: [{
+                      id: 'combined',
+                      modelId: 'combined',
+                      content: combinationResponse.combination,
+                      status: 'complete',
+                      model_images: modelImages
+                    }]
+                  } : msg
+                )
+              } : branch
+            ));
+
+            // Automatically set as active content
+            setActiveContents(prev => ({
+              ...prev,
+              [promptId]: {
+                type: 'model',
+                id: 'combined'
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error in combination response:', error);
+        } finally {
+          setCombinedLoading(prev => ({ ...prev, [promptId]: false }));
+        }
       }
-    });
-  }, []);
+    };
+
+    handleInitialResponse();
+  }, [conversationId, promptId, isCombinedMode]);
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -346,6 +436,7 @@ export function ChatArea() {
             sender: 'user',
             timestamp: new Date(),
             position: newPosition,
+            createdInCombinedMode: isCombinedMode,
             responses: selectedModels.chat.map(modelId => ({
               id: `temp-${modelId}`,
               modelId,
@@ -405,13 +496,15 @@ export function ChatArea() {
       console.error('Error creating new branch:', error);
     } finally {
       setIsLoading(false);
+      setCompleted(true);
     }
   };
 
   const handleSendMessage = async (fileContent?: any) => {
     if (!input.trim() || !conversationId) return;
+
     
-    setIsLoading(true);
+    
     try {
       const currentBranchMessages = branches[currentBranch].messages;
       const lastMessage = currentBranchMessages[currentBranchMessages.length - 1];
@@ -427,8 +520,9 @@ export function ChatArea() {
         nextPosition,
         fileContent
       );
+      setInput("");
 
-      // Update current branch with new message
+      // Store the current combined mode state with the message
       setBranches(prev => prev.map((branch, index) => 
         index === currentBranch
           ? {
@@ -439,6 +533,7 @@ export function ChatArea() {
                 sender: 'user',
                 timestamp: new Date(),
                 position: nextPosition,
+                createdInCombinedMode: isCombinedMode,
                 responses: selectedModels.chat.map(modelId => ({
                   id: `temp-${modelId}`,
                   modelId,
@@ -494,13 +589,19 @@ export function ChatArea() {
         }
       }
 
-      // Generate responses for each active model (now runs after web search)
+      // Generate responses for each active model
       const activeModels = selectedModels.chat.filter(
         modelId => !inactiveModels.includes(modelId)
       );
 
-      activeModels.forEach(async (modelId) => {
+      const modelResponsePairs: [string, number][] = [];
+
+      await Promise.all(activeModels.map(async (modelId) => {
         try {
+          if (isCombinedMode) { 
+            setCombinedLoading(prev => ({ ...prev, [promptResponse.id]: true }));
+          }
+          setIsLoading(true);
           const response = await chatApi.generateResponse({
             conversation: conversationId,
             model: modelId,
@@ -510,6 +611,8 @@ export function ChatArea() {
           });
 
           if (response.status && response.data) {
+            // Collect model_uid and response_id
+            modelResponsePairs.push([response.data.model_uid, response.data.id]);
             setBranches(prev => prev.map((branch, idx) => 
               idx === currentBranch ? {
                 ...branch,
@@ -569,9 +672,64 @@ export function ChatArea() {
             } : branch
           ));
         }
-      });
+      }));
 
-      setInput(""); // Clear input after sending
+      
+      if (isCombinedMode) {
+        try {
+          const combinationResponse = await chatApi.getCombination({
+            promptId: promptResponse.id,
+            modelResponsePairs: modelResponsePairs
+          });
+          console.log('Combination response received:', combinationResponse);
+
+          // Add null check and filter out any undefined or empty strings
+          const modelImages = selectedModels.chat
+            .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_image || null;
+            })
+            .filter((img): img is string => Boolean(img) && img !== '');
+
+            console.log(modelImages,'this is a model image')
+          // Only proceed if we have valid images
+          if (modelImages.length > 0) {
+            // Update the branch with the combined response
+            setBranches(prev => prev.map((branch, idx) => 
+              idx === currentBranch ? {
+                ...branch,
+                messages: branch.messages.map(msg => 
+                  msg.id === promptResponse.id ? {
+                    ...msg,
+                    responses: [{
+                      id: 'combined',
+                      modelId: 'combined',
+                      content: combinationResponse.combination,
+                      status: 'complete',
+                      model_images: modelImages
+                    }]
+                  } : msg
+                )
+              } : branch
+            ));
+
+            // Automatically set as active content
+            setActiveContents(prev => ({
+              ...prev,
+              [promptResponse.id]: {
+                type: 'model',
+                id: 'combined'
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error in combination response:', error);
+        } finally {
+          setCombinedLoading(prev => ({ ...prev, [promptResponse.id]: false }));
+        }
+      }
+
+      // setInput("");
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -581,6 +739,7 @@ export function ChatArea() {
       });
     } finally {
       setIsLoading(false);
+      setCompleted(true);
     }
   };
 
@@ -739,84 +898,133 @@ export function ChatArea() {
                 onBranchChange={setCurrentBranch}
                 branches={branches}
               />
-              <div className="mt-4">
+              <div className="mt-2">
                 {webSearchLoading[message.id] && (
                   <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
-                    <p className="text-md text-muted-foreground animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
+                    <p className="text-sm animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
                       Searching the web...
                     </p>
                   </div>
                 )}
-                <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
-                  {selectedModels.chat.map((modelId, index) => {
-                    const model = chatModels.find(m => m.model_uid === modelId);
-                    if (!model) return null;
+                {combinedLoading[message.id] && (
+                  <CombinedLoader 
+                    modelNames={selectedModels.chat
+                      .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
+                      .filter(Boolean) as string[]
+                    }
+                  />
+                )}
+                <div>
+                {!message.createdInCombinedMode && !combinedLoading[message.id] && (
+                    <Collapsible
+                      open={expandedResponses[message.id]}
+                      onOpenChange={(isOpen) => 
+                        setExpandedResponses(prev => ({ ...prev, [message.id]: isOpen }))
+                      }
+                    >
+                      
+                        <CollapsibleTrigger className="ml-10">
+                        {(!webSearchLoading[message.id] && 
+                          !message.responses.some(r => r.status === 'loading')) && (
+                          <div className="flex items-center justify-start w-full space-x-2">
+                            <span></span>
+                            {expandedResponses[message.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </div>
+                        )}
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto mt-2">
+                          {selectedModels.chat.map((modelId, index) => {
+                            const model = chatModels.find(m => m.model_uid === modelId);
+                            if (!model) return null;
 
-                    const response = message.responses?.[index];
-                    const isLoading = response?.status === 'loading';
-                    const hasError = response?.status === 'error';
+                            const response = message.responses?.[index];
+                            const isLoading = response?.status === 'loading';
+                            const hasError = response?.status === 'error';
 
-                    if (isLoading) {
-                      return (
-                        <div 
-                          key={modelId}
-                          className="flex flex-col items-start p-4 rounded-md border border-borderColorPrimary bg-background"
-                        >
-                          <div className="flex items-center justify-center w-full space-x-2">
-                            <div className="relative">
-                              <Image
-                                src={model.model_image}
-                                alt={model.model_name}
-                                width={24}
-                                height={24}
-                                className="rounded-full animate-pulse"
+                            // Skip rendering if in combined mode and still loading
+                            if (message.createdInCombinedMode && isLoading) {
+                              return null;
+                            }
+
+                            if (isLoading && !message.createdInCombinedMode) {
+                              return (
+                                <div 
+                                  key={modelId}
+                                  className="flex flex-col items-start p-4 rounded-md border border-borderColorPrimary bg-background"
+                                >
+                                  <div className="flex items-center justify-center w-full space-x-2">
+                                    <div className="relative">
+                                      <Image
+                                        src={model.model_image}
+                                        alt={model.model_name}
+                                        width={24}
+                                        height={24}
+                                        className="rounded-full animate-pulse"
+                                      />
+                                      <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                                    </div>
+                                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-auto scrollbar-none">
+                                      {model.model_name}
+                                    </span>
+                                  </div>
+                                  <div className="w-full mt-3 space-y-2">
+                                    <Skeleton className="h-2 w-full" />
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            if (hasError) {
+                              return (
+                                <RetryResponse
+                                  key={modelId}
+                                  model={model}
+                                  onRetry={() => handleRetry(conversationId!, modelId, message.id)}
+                                />
+                              );
+                            }
+
+                            
+                            if (message.createdInCombinedMode) {
+                              return null;
+                            }
+
+                            return (
+                              <ModelSelector
+                                key={modelId}
+                                models={[{
+                                  ...model,
+                                  response: response?.content
+                                } as Model]}
+                                activeModel={activeContents[message.id]?.id === modelId ? modelId : ''}
+                                onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
                               />
-                              <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                            </div>
-                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-auto scrollbar-none">
-                              {model.model_name}
-                            </span>
-                          </div>
-                          <div className="w-full mt-3 space-y-2">
-                            <Skeleton className="h-2 w-full" />
-                          </div>
+                            );
+                          })}
                         </div>
-                      );
-                    }
-
-                    if (hasError) {
-                      return (
-                        <RetryResponse
-                          key={modelId}
-                          model={model}
-                          onRetry={() => handleRetry(conversationId!, modelId, message.id)}
-                        />
-                      );
-                    }
-
-                    return (
-                      <ModelSelector
-                        key={modelId}
-                        models={[{
-                          ...model,
-                          response: response?.content
-                        } as Model]}
-                        activeModel={activeContents[message.id]?.id === modelId ? modelId : ''}
-                        onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
-                      />
-                    );
-                  })}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
                 </div>
-
                 <div className="mt-4">
                   {activeContents[message.id]?.type === 'model' && (
                     <ModelResponse
                       key={`${conversationId}-${activeContents[message.id].id}`}
-                      model={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
+                      model={activeContents[message.id].id === 'combined' 
+                        ? selectedModels.chat
+                            .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
+                            .filter(Boolean)
+                            .join(' + ')
+                        : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
                       content={message.responses.find(r => 
                         r.modelId === activeContents[message.id].id
                       )?.content || ""}
-                      model_img={chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
+                      model_img={activeContents[message.id].id === 'combined'
+                        ? selectedModels.chat
+                            .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_image)
+                            .filter((img): img is string => Boolean(img) && img !== '')
+                        : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
                       responseId={message.responses.find(r => 
                         r.modelId === activeContents[message.id].id
                       )?.id || ""}
@@ -857,12 +1065,7 @@ export function ChatArea() {
       <SourcesWindow
         sources={sourcesWindowState.sources}
         isOpen={sourcesWindowState.isOpen}
-        onClose={() => setSourcesWindowState({
-          isOpen: false,
-          activeResponseId: null,
-          sources: [],
-          userPrompt: ''
-        })}
+        onClose={() => setSourcesWindowState(prev => ({ ...prev, isOpen: false }))}
         responseId={sourcesWindowState.activeResponseId || ''}
         userPrompt={sourcesWindowState.userPrompt}
       />

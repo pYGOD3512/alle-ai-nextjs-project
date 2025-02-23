@@ -67,6 +67,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
       
+      setContent("chat", "input", input);
+      router.push(`/chat/res/${conversationId}`);
+      
       // Add all required properties when adding to history
       addHistory({
         // id: conversationId,
@@ -76,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
-
+      
       const promptResponse = await chatApi.createPrompt(
         conversationId, 
         input,
@@ -85,6 +88,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           input_content: fileContent
         } : undefined
       );
+
+      setInput("");
 
       // Get actual title based on prompt
       historyApi.getConversationTitle(conversationId, input)
@@ -95,12 +100,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           console.error('Error getting conversation title:', error);
         });
 
-      // Continue with the rest of your logic
       setConversationId(conversationId);
       setPromptId(promptResponse.id);
-      setContent("chat", "input", input);
-      router.push(`/chat/res/${conversationId}`);
-      setInput("");
+      // setContent("chat", "input", input);
+      // router.push(`/chat/res/${conversationId}`);
+      // setInput("");
 
     } catch (error) {
       console.error('Error in chat flow:', error);
