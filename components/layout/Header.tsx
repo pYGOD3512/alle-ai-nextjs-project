@@ -49,7 +49,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { user, plan } = useAuthStore();
+  const { user } = useAuthStore();
 
 
 

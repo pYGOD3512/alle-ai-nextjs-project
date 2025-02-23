@@ -271,6 +271,7 @@ export function ChatArea() {
 
       // Handle model responses
       const modelResponsePairs: [string, number][] = [];
+      let isFirstResponse = true; // Flag to track first response
 
       await Promise.all(activeModels.map(async (modelId) => {
         try {
@@ -302,6 +303,18 @@ export function ChatArea() {
                 } : msg
               )
             })));
+
+            // Set as active content if it's the first response
+              if (isFirstResponse && !isCombinedMode) {
+                setActiveContents(prev => ({
+                  ...prev,
+                  [promptId]: {
+                    type: 'model',
+                    id: modelId
+                  }
+                }));
+                isFirstResponse = false;
+              }
           } else {
             // Handle error state
             setBranches(prev => prev.map(branch => ({
@@ -595,6 +608,7 @@ export function ChatArea() {
       );
 
       const modelResponsePairs: [string, number][] = [];
+      let isFirstResponse = true; // Flag to track first response
 
       await Promise.all(activeModels.map(async (modelId) => {
         try {
@@ -631,6 +645,18 @@ export function ChatArea() {
                 )
               } : branch
             ));
+
+            // Set as active content if it's the first response
+            if (isFirstResponse && !isCombinedMode) {
+              setActiveContents(prev => ({
+                ...prev,
+                [promptResponse.id]: {
+                  type: 'model',
+                  id: modelId
+                }
+              }));
+              isFirstResponse = false;
+            }
           } else {
             // Handle error state
             setBranches(prev => prev.map((branch, idx) => 
@@ -770,77 +796,92 @@ export function ChatArea() {
     }));
   }, []);
 
-  const handleRetry = async (sessionId: string, modelId: string, promptId: string) => {
-    // Update the response status to loading
-    setChatSessions(prev => prev.map(session => ({
-      ...session,
-      messages: session.messages.map(msg => ({
-        ...msg,
-        responses: msg.responses.map(resp => 
-          resp.modelId === modelId ? {
-            ...resp,
-            status: 'loading'
-          } : resp
-        )
-      }))
+  const handleRetry = async (modelId: string, promptId: string) => {
+    // Find the message to get its position
+    const message = branches[currentBranch].messages.find(msg => msg.id === promptId);
+    if (!message) return;
+
+    // Update the specific model's response status to loading
+    setBranches(prev => prev.map(branch => ({
+      ...branch,
+      messages: branch.messages.map(msg => 
+        msg.id === promptId ? {
+          ...msg,
+          responses: msg.responses.map(resp => 
+            resp.modelId === modelId ? {
+              ...resp,
+              status: 'loading',
+              content: '', // Clear the error content
+              error: undefined // Clear any error message
+            } : resp
+          )
+        } : msg
+      )
     })));
 
     try {
-      // Make the API call to regenerate response
+      // Make the API call to regenerate response with previous context
       const response = await chatApi.generateResponse({
-        conversation: sessionId,
+        conversation: conversationId!,
         model: modelId,
-        is_new: false, // This is a retry, not a new response
-        prompt: promptId
+        is_new: false,
+        prompt: promptId,
+        prev: getPreviousPromptResponsePairs(branches[currentBranch], message.position[1], modelId)
       });
 
       if (response.status && response.data) {
         // Update the response with the new content
-        setChatSessions(prev => prev.map(session => ({
-          ...session,
-          messages: session.messages.map(msg => ({
-            ...msg,
-            responses: msg.responses.map(resp => 
-              resp.modelId === modelId ? {
-                ...resp,
-                id: String(response.data.id),
-                content: response.data.response,
-                status: 'complete'
-              } : resp
-            )
-          }))
+        setBranches(prev => prev.map(branch => ({
+          ...branch,
+          messages: branch.messages.map(msg => 
+            msg.id === promptId ? {
+              ...msg,
+              responses: msg.responses.map(resp => 
+                resp.modelId === modelId ? {
+                  ...resp,
+                  id: String(response.data.id),
+                  content: response.data.response,
+                  status: 'complete'
+                } : resp
+              )
+            } : msg
+          )
         })));
       } else {
         // Handle error state
-        setChatSessions(prev => prev.map(session => ({
-          ...session,
-          messages: session.messages.map(msg => ({
-            ...msg,
-            responses: msg.responses.map(resp => 
-              resp.modelId === modelId ? {
-                ...resp,
-                status: 'error',
-                error: response.message || 'Failed to generate response'
-              } : resp
-            )
-          }))
+        setBranches(prev => prev.map(branch => ({
+          ...branch,
+          messages: branch.messages.map(msg => 
+            msg.id === promptId ? {
+              ...msg,
+              responses: msg.responses.map(resp => 
+                resp.modelId === modelId ? {
+                  ...resp,
+                  status: 'error',
+                  error: response.message || 'Failed to generate response'
+                } : resp
+              )
+            } : msg
+          )
         })));
       }
     } catch (error) {
       console.error('Error retrying response:', error);
       // Update error state in UI
-      setChatSessions(prev => prev.map(session => ({
-        ...session,
-        messages: session.messages.map(msg => ({
-          ...msg,
-          responses: msg.responses.map(resp => 
-            resp.modelId === modelId ? {
-              ...resp,
-              status: 'error',
-              error: 'Failed to generate response'
-            } : resp
-          )
-        }))
+      setBranches(prev => prev.map(branch => ({
+        ...branch,
+        messages: branch.messages.map(msg => 
+          msg.id === promptId ? {
+            ...msg,
+            responses: msg.responses.map(resp => 
+              resp.modelId === modelId ? {
+                ...resp,
+                status: 'error',
+                error: 'Failed to generate response',
+              } : resp
+            )
+          } : msg
+        )
       })));
     }
   };
@@ -898,7 +939,7 @@ export function ChatArea() {
                 onBranchChange={setCurrentBranch}
                 branches={branches}
               />
-              <div className="mt-2">
+              <div className="">
                 {webSearchLoading[message.id] && (
                   <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
                     <p className="text-sm animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
@@ -980,7 +1021,7 @@ export function ChatArea() {
                                 <RetryResponse
                                   key={modelId}
                                   model={model}
-                                  onRetry={() => handleRetry(conversationId!, modelId, message.id)}
+                                  onRetry={() => handleRetry(modelId, message.id)}
                                 />
                               );
                             }
@@ -1038,6 +1079,7 @@ export function ChatArea() {
                         r.modelId === activeContents[message.id].id
                       )?.sources || []}
                       onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
+                      onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)} // Reuse handleRetry
                     />
                   )}
                 </div>
