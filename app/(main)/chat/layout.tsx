@@ -68,7 +68,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const conversationId = conversationResponse.session;
       
       setContent("chat", "input", input);
-      router.push(`/chat/res/${conversationId}`);
       
       // Add all required properties when adding to history
       addHistory({
@@ -88,7 +87,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           input_content: fileContent
         } : undefined
       );
-
+      
+      router.push(`/chat/res/${conversationId}`);
       setInput("");
 
       // Get actual title based on prompt

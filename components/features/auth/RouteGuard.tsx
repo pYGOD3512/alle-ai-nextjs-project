@@ -10,7 +10,7 @@ interface RouteGuardProps {
   children: ReactNode;
 }
 
-const authRoutes = ['/auth', '/plans'];
+const authRoutes = ['/', '/auth', '/plans'];
 const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes', '/reset-password'];
 
 // Create a separate component for the route guard logic

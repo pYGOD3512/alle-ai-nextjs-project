@@ -340,7 +340,7 @@ export function Sidebar() {
                           </ContextMenu>
                         ))
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center py-2 text-muted-foreground">
                           <span className="text-xs">No projects</span>
                         </div>
                       )}
