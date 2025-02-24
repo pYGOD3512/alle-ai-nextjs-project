@@ -125,6 +125,8 @@ interface SelectedModelsStore {
   toggleModelActive: (modelId: string) => void;
   getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => any[];
   lastUpdate: number;
+  isLoadingLatest: boolean;
+  setLoadingLatest: (loading: boolean) => void;
 }
 
 export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => ({
@@ -137,6 +139,7 @@ export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => 
   inactiveModels: [],
   tempSelectedModels: [],
   lastUpdate: Date.now(),
+  isLoadingLatest: false,
   setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
   saveSelectedModels: (type) => {
     set((state) => ({
@@ -175,7 +178,8 @@ export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => 
         } : null;
       })
       .filter((item): item is { name: string; uid: string; type: string; isActive: boolean } => item !== null);
-  }
+  },
+  setLoadingLatest: (loading) => set({ isLoadingLatest: loading }),
 }));
 
 interface ImageResponse {

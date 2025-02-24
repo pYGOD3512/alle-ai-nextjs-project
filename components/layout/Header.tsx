@@ -101,12 +101,13 @@ export function Header() {
     }
   };
 
-  const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate } = useSelectedModelsStore(
+  const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate, isLoadingLatest } = useSelectedModelsStore(
     (state) => ({
       getSelectedModelNames: state.getSelectedModelNames,
       toggleModelActive: state.toggleModelActive,
       inactiveModels: state.inactiveModels,
-      lastUpdate: state.lastUpdate
+      lastUpdate: state.lastUpdate,
+      isLoadingLatest: state.isLoadingLatest
     })
   );
 
@@ -445,6 +446,12 @@ export function Header() {
         ${!specialRoutes.includes(pathname) ? (isMobile ? 'ml-4' : (isOpen ? 'ml-60' : 'ml-16')) : 'justify-around'}`}
         >
           {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
+            isLoadingLatest ? (
+              <div className="flex items-center ml-8 border border-muted-foreground rounded-md py-1 px-3">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent mr-2" />
+                <span className="text-xs text-muted-foreground">Last used models...</span>
+              </div>
+            ) :
             selectedModelNames.length > 0 ? (
               <TooltipProvider>
                 <Tooltip>

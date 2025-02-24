@@ -111,6 +111,7 @@ interface CombinationResponse {
   status: boolean;
   message: string;
   combination: string;
+  id: number;
 }
 
 interface GetCombinationParams {

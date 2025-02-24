@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useSidebarStore } from "@/stores";
 import { useModelsStore } from "@/stores/models";
 import { useHistoryStore } from "@/stores";
+import { useSelectedModelsStore } from "@/stores";
 import { historyApi } from "@/lib/api/history";
 import { modelsApi } from "@/lib/api/models";
 
@@ -17,6 +18,12 @@ export default function ChatPage() {
     setError: setHistoryError,
     clearHistory
   } = useHistoryStore();
+  const { 
+    selectedModels,
+    setTempSelectedModels, 
+    saveSelectedModels, 
+    setLoadingLatest 
+  } = useSelectedModelsStore();
 
   useEffect(() => {
     setCurrentPage("chat");
@@ -60,17 +67,24 @@ export default function ChatPage() {
     };
 
     loadHistory();
-  }, [setHistory, setHistoryLoading, setHistoryError]);
+  }, [setHistory, setHistoryLoading, setHistoryError, history]);
 
   // Load previously selected models
   useEffect(() => {
     const loadLatestSelectedModels = async () => {
+      // If we already have selected models for chat, skip loading
+      if (selectedModels.chat && selectedModels.chat.length > 0) return;
+
+      setLoadingLatest(true);
       try {
         const latestModels = await modelsApi.getLatestSelectedModels();
-        console.log('Latest models loaded:', latestModels);
-        // We'll handle the response once you show me the structure
+        const modelUids = latestModels.map(model => model.model_uid);
+        setTempSelectedModels(modelUids);
+        saveSelectedModels('chat');
       } catch (err) {
         console.error('Error loading latest selected models:', err);
+      } finally {
+        setLoadingLatest(false);
       }
     };
 
