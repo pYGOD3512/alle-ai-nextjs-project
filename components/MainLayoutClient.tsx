@@ -35,10 +35,10 @@ export function MainLayoutClient({
   }
 
   return (
-    <Frigade.Provider
-      apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
-      userId="my-user-id">
-      <Frigade.Tour flowId="flow_Nx0Q4Shx" />
+    // <Frigade.Provider
+    //   apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
+    //   userId="my-user-id">
+    //   <Frigade.Tour flowId="flow_Nx0Q4Shx" />
       <div className="h-screen flex overflow-hidden">
         <Sidebar />
         <main className="flex-1 flex flex-col h-full relative">
@@ -54,6 +54,6 @@ export function MainLayoutClient({
           )}
         </main>
       </div>
-    </Frigade.Provider>
+    // </Frigade.Provider>
   );
 }

@@ -3585,39 +3585,94 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
 }
 
 export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialogProps) {
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+  const { toast } = useToast();
+
   const handleShare = (platform: typeof socialMediaOptions[0]) => {
     window.open(platform.handler(imageUrl), '_blank');
+    toast({
+      title: "Shared!",
+      description: `Your creation has been shared to ${platform.name}`,
+      duration: 3000,
+    });
     onClose();
   };
 
-  const { theme } = useTheme();
-  const dark = theme === "dark";
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share Image</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-3 gap-4 py-4">
-          {socialMediaOptions.map((platform) => (
-            <button
-              key={platform.name}
-              onClick={() => handleShare(platform)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-lg ${platform.color} ${platform.hoverColor} transition-colors duration-200`}
-            >
-              <Image
-                src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
-                alt={platform.name}
-                width={24}
-                height={24}
-                className="w-6 h-6"
-              />
-              <span className={`text-sm font-medium ${platform.textColor}`}>
-                {platform.name}
-              </span>
-            </button>
-          ))}
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+        {/* Header Section */}
+        <div className="p-6 border-b">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <div className="p-2 rounded-full bg-primary/10">
+                <Share2 className="h-5 w-5 text-primary" />
+              </div>
+              Share your creation
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Share your AI-generated masterpiece with the world
+            </p>
+          </DialogHeader>
+        </div>
+
+        {/* Content Section */}
+        <div className="p-6 space-y-6">
+          {/* Preview */}
+          <div className="relative aspect-square w-full max-w-[200px] mx-auto rounded-xl overflow-hidden border shadow-lg">
+            <Image
+              src={imageUrl}
+              alt="Share preview"
+              fill
+              className="object-cover"
+            />
+          </div>
+
+          {/* Share Options */}
+          <div className="grid grid-cols-2 gap-3">
+            {socialMediaOptions.map((platform) => (
+              <motion.button
+                key={platform.name}
+                onClick={() => handleShare(platform)}
+                className={cn(
+                  "group relative flex items-start gap-3 p-4 rounded-xl border transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                  "hover:shadow-md hover:border-primary/20",
+                  dark ? "hover:bg-primary/5" : "hover:bg-primary/5"
+                )}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
+              >
+                <div className={cn(
+                  "p-2 rounded-full transition-colors duration-200 bg-primary/10"
+                )}>
+                  <Image
+                    src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
+                    alt={platform.name}
+                    width={20}
+                    height={20}
+                    className="w-5 h-5"
+                  />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium">{platform.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Share to {platform.name}
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Section */}
+        <div className="p-4 border-t bg-muted/50">
+          <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
+            <Info className="h-3 w-3" />
+            Your share helps spread the magic of AI creativity
+          </p>
         </div>
       </DialogContent>
     </Dialog>

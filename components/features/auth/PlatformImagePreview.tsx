@@ -354,7 +354,7 @@ export function PlatformImagePreview({ onAnimationComplete }: PlatformPreviewPro
                 }}
               >
                 <div className="relative">
-                  <div className="absolute inset-0 bg-white rounded-full opacity-30 animate-ping" />
+                  <div className="w-full max-w-[200px] h-5 bg-background rounded-md text-start text-xs px-2 text-muted-foreground" >alle-ai.com</div>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
                       d="M3 1L13 8L3 15V1Z"

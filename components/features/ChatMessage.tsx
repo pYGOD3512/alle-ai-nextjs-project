@@ -63,30 +63,7 @@ export function ChatMessage({
   const messageId = `msg-${y}-${x}`;
   const branchId = `branch-${y}-${x}`;
 
-  // Find all versions in this message's branch chain
-  const versionsOfThisMessage = branches
-    .flatMap(branch => branch.messages)
-    .filter(msg => {
-      // For all messages at this Y level
-      if (msg.position[1] !== y || msg.sender !== sender) return false;
-      
-      // Include the original message
-      if (msg.position[0] === 0) return true;
-      
-      // Find the branch path from root to current message
-      const branchPath = findBranchPath(branches, position);
-      
-      // Include messages only if they're in the same branch path
-      return branchPath.some(pathBranch => 
-        pathBranch.messages.some(m => 
-          m.position[0] === msg.position[0] && 
-          m.position[1] === msg.position[1]
-        )
-      );
-    })
-    .sort((a, b) => a.position[0] - b.position[0]);
-
-  // Helper function to find the branch path from root to current message
+  // Move findBranchPath function definition here, before it's used
   const findBranchPath = (branches: Branch[], pos: [number, number]): Branch[] => {
     const [x, y] = pos;
     const path: Branch[] = [];
@@ -112,18 +89,34 @@ export function ChatMessage({
     return path;
   };
 
+  // Now we can use findBranchPath in versionsOfThisMessage
+  const versionsOfThisMessage = branches
+    .flatMap(branch => branch.messages)
+    .filter(msg => {
+      if (msg.position[1] !== y || msg.sender !== sender) return false;
+      
+      if (msg.position[0] === 0) return true;
+      
+      const branchPath = findBranchPath(branches, position);
+      
+      return branchPath.some(pathBranch => 
+        pathBranch.messages.some(m => 
+          m.position[0] === msg.position[0] && 
+          m.position[1] === msg.position[1]
+        )
+      );
+    })
+    .sort((a, b) => a.position[0] - b.position[0]);
+
   // Only show versioning if there are actual edits
   const shouldShowVersioning = versionsOfThisMessage.length > 1;
-
+  
   // Current version is based on x position + 1
   const currentVersion = x + 1;
   
   // Total versions is the highest x value across ALL branches for this message + 1
   const totalVersions = shouldShowVersioning ? 
-    Math.max(...branches
-      .flatMap(b => b.messages)
-      .filter(m => m.position[1] === y && m.sender === sender)
-      .map(m => m.position[0])) + 1 : 
+    Math.max(...versionsOfThisMessage.map(m => m.position[0])) + 1 : 
     1;
 
   const handleEditClick = () => {
@@ -231,7 +224,7 @@ export function ChatMessage({
           )}
         </Card>
 
-        {shouldShowVersioning && (
+        {/* {shouldShowVersioning && (
           <div className="mt-2 flex justify-end items-center gap-1 text-xs text-muted-foreground">
             <button
               onClick={() => handleVersionChange('prev')}
@@ -251,7 +244,7 @@ export function ChatMessage({
               {">"}
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

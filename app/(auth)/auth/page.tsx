@@ -32,7 +32,7 @@ function AuthPageInner() {
 
   const headingTexts = [
     "Your All-in-One AI Platform",
-    "Your All-in-One AI Platform",
+    "Combine AI models",
     "Your All-in-One AI Platform",
     "Your All-in-One AI Platform",
   ];

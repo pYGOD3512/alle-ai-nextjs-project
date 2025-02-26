@@ -1,6 +1,6 @@
 "use client";
 
-import { useSidebarStore } from "@/stores";
+import { useSelectedModelsStore, useSidebarStore } from "@/stores";
 import { useEffect } from "react";
 import RenderPageContent from "@/components/RenderPageContent";
 
@@ -16,17 +16,24 @@ export default function ImageGenerationPage() {
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
   const { imageModels, setImageModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const { 
+    history,
     setHistory, 
     setLoading: setHistoryLoading,
     setError: setHistoryError,
     clearHistory
   } = useHistoryStore();
+  const { 
+    selectedModels,
+    setTempSelectedModels, 
+    saveSelectedModels, 
+    setLoadingLatest 
+  } = useSelectedModelsStore();
 
   useEffect(() => {
     setCurrentPage("image");
     clearHistory();
 
-  }, [setCurrentPage, clearHistory]);
+  }, []);
 
     // Load image models on mount if not already loaded
     useEffect(() => {
@@ -36,7 +43,7 @@ export default function ImageGenerationPage() {
   
         setModelsLoading(true);
         try {
-          const models = await modelsApi.getImageModels();
+          const models = await modelsApi.getModels('image');
           setImageModels(models);
         } catch (err) {
           setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
@@ -46,13 +53,14 @@ export default function ImageGenerationPage() {
       };
   
       loadImageModels();
-    }, [setImageModels, setModelsLoading, setModelsError]);
+    }, []);
 
   // Load image history
   useEffect(() => {
     const loadHistory = async () => {
+      console.log(history, 'history')
       
-      if(history && history.length > 0) return;
+      // if(history && history.length > 0) return;
       setHistoryLoading(true);
       try {
         const response = await historyApi.getHistory('image');
@@ -65,7 +73,28 @@ export default function ImageGenerationPage() {
     };
 
     loadHistory();
-  }, [setHistory, setHistoryLoading, setHistoryError]);
+  }, []);
+
+  // Load previously selected models
+  useEffect(() => {
+    const loadLatestSelectedModels = async () => {
+      if (selectedModels.image && selectedModels.image.length > 0) return;
+
+      setLoadingLatest(true);
+      try {
+        const latestModels = await modelsApi.getLatestSelectedModels('image');
+        const modelUids = latestModels.map(model => model.model_uid);
+        setTempSelectedModels(modelUids);
+        saveSelectedModels('image');
+      } catch (err) {
+        console.error('Error loading latest selected models:', err);
+      } finally {
+        setLoadingLatest(false);
+      }
+    };
+
+    loadLatestSelectedModels();
+  }, []);
   
   return ;
 }

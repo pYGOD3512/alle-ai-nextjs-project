@@ -492,7 +492,7 @@ export function PlatformChatPreview({ onAnimationComplete }: PlatformPreviewProp
                 <div className="w-3 h-3 rounded-full bg-green-500" />
               </div>
               <div className="flex-1 ml-4">
-                <div className="w-full max-w-[200px] h-5 bg-background rounded-md" />
+                <div className="w-full max-w-[200px] h-5 bg-background rounded-md text-start text-xs px-2 text-muted-foreground" >alle-ai.com</div>
               </div>
             </div>
 
