@@ -38,7 +38,7 @@ export default function ChatPage() {
 
       setModelsLoading(true);
       try {
-        const models = await modelsApi.getChatModels();
+        const models = await modelsApi.getModels('chat');
         setChatModels(models);
       } catch (err) {
         setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
@@ -53,7 +53,9 @@ export default function ChatPage() {
   // Load chat history
   useEffect(() => {
     const loadHistory = async () => {
-      if(history && history.length > 0) return;
+      console.log(history, 'history')
+
+      // if(history && history.length > 0) return;
 
       setHistoryLoading(true);
       try {
@@ -67,7 +69,7 @@ export default function ChatPage() {
     };
 
     loadHistory();
-  }, [setHistory, setHistoryLoading, setHistoryError, history]);
+  }, []);
 
   // Load previously selected models
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function ChatPage() {
 
       setLoadingLatest(true);
       try {
-        const latestModels = await modelsApi.getLatestSelectedModels();
+        const latestModels = await modelsApi.getLatestSelectedModels('chat');
         const modelUids = latestModels.map(model => model.model_uid);
         setTempSelectedModels(modelUids);
         saveSelectedModels('chat');

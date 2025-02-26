@@ -119,6 +119,28 @@ interface GetCombinationParams {
   modelResponsePairs: [string, number][];
 }
 
+interface ConversationContent {
+  prompt: string;
+  responses: ModelResponse[];
+}
+
+// Define the response structure for image conversations
+interface LoadedImageResponse {
+  prompt: string;
+  prompt_id: number;
+  responses: Array<{
+    id: number | string;
+    model: {
+      uid: string;
+      name: string;
+      image: string;
+      model_plan: string;
+    };
+    body: string;
+    liked: boolean | null;
+  }>;
+}
+
 export const chatApi = {
   createConversation: async (models: string[], type: 'chat' | 'image' | 'audio' | 'video'): Promise<CreateConversationResponse> => {
     try {
@@ -234,6 +256,17 @@ export const chatApi = {
       return response.data;
     } catch (error) {
       console.error('Error in combination response:', error);
+      throw error;
+    }
+  },
+
+  getConversationContent: async (conversationType: 'chat' | 'image', conversationId: string): Promise<LoadedImageResponse[]> => {
+    try {
+      const response = await api.get(`/conversations/${conversationType}/${conversationId}`);
+      console.log('Response from getConversationContent:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error loading ${conversationType} conversation:`, error);
       throw error;
     }
   },

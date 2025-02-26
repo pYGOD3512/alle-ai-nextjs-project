@@ -224,7 +224,7 @@ export function ChatMessage({
           )}
         </Card>
 
-        {shouldShowVersioning && (
+        {/* {shouldShowVersioning && (
           <div className="mt-2 flex justify-end items-center gap-1 text-xs text-muted-foreground">
             <button
               onClick={() => handleVersionChange('prev')}
@@ -244,7 +244,7 @@ export function ChatMessage({
               {">"}
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

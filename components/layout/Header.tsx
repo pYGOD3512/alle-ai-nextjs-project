@@ -16,6 +16,7 @@ import {
   Share,
   Crown,
   Gem,
+  Loader2,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -448,7 +449,7 @@ export function Header() {
           {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
             isLoadingLatest ? (
               <div className="flex items-center ml-8 border border-muted-foreground rounded-md py-1 px-3">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent mr-2" />
+                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">Last used models...</span>
               </div>
             ) :

@@ -287,7 +287,7 @@ export const userMenuItems = [
     },
   },
   {
-    label: "Album",
+    label: "Favorites",
     icon: Heart,
     interactionType: "modal",
     onClick: () => {

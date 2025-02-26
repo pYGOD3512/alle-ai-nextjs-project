@@ -45,6 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useConversationStore } from "@/stores/models";
 
 
 export function Sidebar() {
@@ -63,6 +64,7 @@ export function Sidebar() {
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const { user, plan } = useAuthStore();
+  const { setGenerationType } = useConversationStore();
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -111,6 +113,10 @@ export function Sidebar() {
 
    return false;
  };
+
+ const isHistoryItemActive = (itemSession: string): boolean => {
+  return pathname.includes(`/res/${itemSession}`);
+};
  
   const handleRename = (id: string, currentTitle: string) => {
     setEditingId(id);
@@ -378,9 +384,13 @@ export function Sidebar() {
                         <ContextMenuTrigger>
                           <div
                             className={`group flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer ${
-                              editingId === item.session ? "bg-secondary" : "hover:bg-secondary/80"
+                              editingId === item.session ? "bg-secondary" 
+                              : isHistoryItemActive(item.session)
+                              ? "bg-backgroundSecondary"
+                              : "hover:bg-secondary/80"
                             }`}
                             onClick={() => {
+                              setGenerationType('load');
                               router.push(`/${currentType}/res/${item.session}`);
                               handleHistoryItemClick(item.session);
                             }}
@@ -409,7 +419,7 @@ export function Sidebar() {
                                           {item.title.length > 30
                                             ? `${item.title.substring(0, 30)}`
                                             : item.title}
-                                          <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-r from-transparent to-sideBarBackground group-hover:to-secondary/80" />
+                                          <div className={`absolute right-0 top-0 h-full w-12 bg-gradient-to-r from-transparent ${isHistoryItemActive(item.session) ? 'to-backgroundSecondary group-hover:to-backgroundSecondary/10' : 'to-sideBarBackground group-hover:to-secondary/80'}`} />
                                         </div>
                                       </div>
                                     </TooltipTrigger>
@@ -424,13 +434,13 @@ export function Sidebar() {
                                 </div>
                               )}
                             </div>
-                            <div className="absolute right-2">
+                            <div className="absolute right-4">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none"
+                                    className="h-5 w-5 p-0 border-none opacity-0 group-hover:opacity-100 outline-none bg-transparent hover:bg-transparent"
                                     aria-label="More Actions"
                                   >
                                     <EllipsisVertical className="h-4 w-4" />

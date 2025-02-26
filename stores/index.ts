@@ -191,7 +191,7 @@ interface ImageResponse {
 interface GeneratedImagesStore {
   images: ImageResponse[];
   lastPrompt: string | null;
-  setImages: (images: ImageResponse[]) => void;
+  setImages: (images: ImageResponse[] | ((prev: ImageResponse[]) => ImageResponse[])) => void;
   updateImage: (modelId: string, updates: Partial<ImageResponse>) => void;
   setLastPrompt: (prompt: string) => void;
   clearImages: () => void;
@@ -199,10 +199,12 @@ interface GeneratedImagesStore {
 
 export const useGeneratedImagesStore = create<GeneratedImagesStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       images: [],
       lastPrompt: null,
-      setImages: (images) => set({ images }),
+      setImages: (images) => set((state) => ({
+        images: typeof images === 'function' ? images(state.images) : images
+      })),
       updateImage: (modelId, updates) => set((state) => ({
         images: state.images.map(img => 
           img.modelId === modelId ? { ...img, ...updates } : img

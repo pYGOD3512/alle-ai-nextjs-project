@@ -46,11 +46,12 @@ export const historyApi = {
     }
   },
 
-  getConversationTitle: async (conversation: string, prompt: string): Promise<GetTitleResponse> => {
+  getConversationTitle: async (conversation: string, prompt: string, type: string): Promise<GetTitleResponse> => {
     try {
       const response = await api.post<GetTitleResponse>('/get-title', {
         conversation: conversation,
-        prompt: prompt
+        prompt: prompt,
+        type: type as 'chat' | 'image' | 'audio' | 'video',
       });
       return response.data;
     } catch (error) {
