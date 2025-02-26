@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/collapsible"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { CombinedLoader } from "@/components/features/CombinedLoader";
+import { cn } from "@/lib/utils";
 
 interface ChatSession {
   id: string; // conversation UUID
@@ -71,6 +72,7 @@ interface Message {
 interface Branch {
   messages: Message[];
   startPosition: [number, number];
+  parentPosition?: [number, number];
 }
 
 export function ChatArea() {
@@ -381,8 +383,8 @@ export function ChatArea() {
                   msg.id === promptId ? {
                     ...msg,
                     responses: [{
-                      id: 'combined',
-                      modelId: 'combined',
+                      id: String(combinationResponse.id),
+                      modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
                       model_images: modelImages
@@ -397,7 +399,7 @@ export function ChatArea() {
               ...prev,
               [promptId]: {
                 type: 'model',
-                id: 'combined'
+                id: 'alle-ai-comb'
               }
             }));
           }
@@ -410,78 +412,75 @@ export function ChatArea() {
     };
 
     handleInitialResponse();
-  }, [conversationId, promptId, isCombinedMode]);
+  }, []);
 
   const handleInputChange = (value: string) => {
     setInput(value);
   };
 
   const handleEditMessage = async (newContent: string, position: [number, number]) => {
-    setIsLoading(true);
+    if (!conversationId) return;
+
     try {
-      const [_, y] = position;
-      
-      // Find all messages at EXACTLY this Y level in the current branch
-      const messagesAtThisLevel = branches[currentBranch].messages.filter(
-        m => m.position[1] === y
-      );
-      
-      // Get the next X coordinate for this specific Y level only
-      const newX = Math.max(...messagesAtThisLevel.map(m => m.position[0])) + 1;
-      const newPosition: [number, number] = [newX, y];
-
+      // Create prompt
       const promptResponse = await chatApi.createPrompt(
-        conversationId!,
+        conversationId,
         newContent,
-        newPosition,
-        undefined
+        position
       );
 
-      // Create new branch that preserves ALL messages from previous levels exactly as they are
+      // Create new branch
       const newBranch: Branch = {
-        messages: [
-          // Keep ALL messages from previous levels unchanged
-          ...branches[currentBranch].messages.filter(m => m.position[1] < y),
-          // Add the edited message at this level
-          {
-            id: promptResponse.id,
-            content: newContent,
-            sender: 'user',
-            timestamp: new Date(),
-            position: newPosition,
-            createdInCombinedMode: isCombinedMode,
-            responses: selectedModels.chat.map(modelId => ({
-              id: `temp-${modelId}`,
-              modelId,
-              content: '',
-              status: 'loading'
-            }))
-          }
-        ],
-        startPosition: [newX, y]
+        messages: [{
+          id: promptResponse.id,
+          content: newContent,
+          sender: 'user',
+          timestamp: new Date(),
+          position,
+          createdInCombinedMode: isCombinedMode,
+          responses: selectedModels.chat.map(modelId => ({
+            id: `temp-${modelId}`,
+            modelId,
+            content: '',
+            status: 'loading'
+          }))
+        }],
+        startPosition: position,
+        parentPosition: position
       };
 
-      // Add the new branch without affecting existing ones
+      // Add new branch and switch to it
+      const newBranchIndex = branches.length;
       setBranches(prev => [...prev, newBranch]);
-      setCurrentBranch(branches.length);
+      setCurrentBranch(newBranchIndex);
 
-      // Handle model responses...
+      // Generate responses for the new branch
       const activeModels = selectedModels.chat.filter(
         modelId => !inactiveModels.includes(modelId)
       );
 
-      activeModels.forEach(async (modelId) => {
+      const modelResponsePairs: [string, number][] = [];
+      let isFirstResponse = true;
+
+      await Promise.all(activeModels.map(async (modelId) => {
         try {
+          if (isCombinedMode) {
+            setCombinedLoading(prev => ({ ...prev, [promptResponse.id]: true }));
+          }
+
           const response = await chatApi.generateResponse({
-            conversation: conversationId!,
+            conversation: conversationId,
             model: modelId,
             is_new: false,
             prompt: promptResponse.id
           });
 
           if (response.status && response.data) {
+            modelResponsePairs.push([response.data.model_uid, response.data.id]);
+            
+            // Update the branch with the response
             setBranches(prev => prev.map((branch, idx) => 
-              idx === branches.length ? {
+              idx === newBranchIndex ? {
                 ...branch,
                 messages: branch.messages.map(msg => 
                   msg.id === promptResponse.id ? {
@@ -498,18 +497,98 @@ export function ChatArea() {
                 )
               } : branch
             ));
+
+            // Set as active content if it's the first response
+            if (isFirstResponse && !isCombinedMode) {
+              setActiveContents(prev => ({
+                ...prev,
+                [promptResponse.id]: {
+                  type: 'model',
+                  id: modelId
+                }
+              }));
+              isFirstResponse = false;
+            }
           }
         } catch (error) {
-          console.error('Error generating response:', error);
-          // Handle error state...
+          console.error('Error in model response:', error);
+          // Update error state in the branch
+          setBranches(prev => prev.map((branch, idx) => 
+            idx === newBranchIndex ? {
+              ...branch,
+              messages: branch.messages.map(msg => 
+                msg.id === promptResponse.id ? {
+                  ...msg,
+                  responses: msg.responses.map(resp => 
+                    resp.modelId === modelId ? {
+                      ...resp,
+                      status: 'error',
+                      error: 'Failed to generate response'
+                    } : resp
+                  )
+                } : msg
+              )
+            } : branch
+          ));
         }
-      });
+      }));
+
+      // Handle combined mode if enabled
+      if (isCombinedMode && modelResponsePairs.length > 0) {
+        try {
+          const combinationResponse = await chatApi.getCombination({
+            promptId: promptResponse.id,
+            modelResponsePairs
+          });
+
+          const modelImages = selectedModels.chat
+            .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_image || null;
+            })
+            .filter((img): img is string => Boolean(img) && img !== '');
+
+          if (modelImages.length > 0) {
+            setBranches(prev => prev.map((branch, idx) => 
+              idx === newBranchIndex ? {
+                ...branch,
+                messages: branch.messages.map(msg => 
+                  msg.id === promptResponse.id ? {
+                    ...msg,
+                    responses: [{
+                      id: String(combinationResponse.id),
+                      modelId: 'alle-ai-comb',
+                      content: combinationResponse.combination,
+                      status: 'complete',
+                      model_images: modelImages
+                    }]
+                  } : msg
+                )
+              } : branch
+            ));
+
+            setActiveContents(prev => ({
+              ...prev,
+              [promptResponse.id]: {
+                type: 'model',
+                id: 'alle-ai-comb'
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error in combination response:', error);
+        } finally {
+          setCombinedLoading(prev => ({ ...prev, [promptResponse.id]: false }));
+        }
+      }
 
     } catch (error) {
-      console.error('Error creating new branch:', error);
-    } finally {
-      setIsLoading(false);
-      setCompleted(true);
+      console.error('Error editing message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to edit message",
+        variant: "destructive"
+      });
     }
   };
 
@@ -728,8 +807,8 @@ export function ChatArea() {
                   msg.id === promptResponse.id ? {
                     ...msg,
                     responses: [{
-                      id: 'combined',
-                      modelId: 'combined',
+                      id: String(combinationResponse.id),
+                      modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
                       model_images: modelImages
@@ -744,7 +823,7 @@ export function ChatArea() {
               ...prev,
               [promptResponse.id]: {
                 type: 'model',
-                id: 'combined'
+                id: 'alle-ai-comb'
               }
             }));
           }
@@ -886,7 +965,6 @@ export function ChatArea() {
     }
   };
 
-  // When generating a follow-up response, get previous prompt-response pairs for specific model
   const getPreviousPromptResponsePairs = (branch: Branch, currentY: number, modelId: string): [string, string][] => {
     const pairs: [string, string][] = [];
     
@@ -895,23 +973,31 @@ export function ChatArea() {
       .filter(msg => msg.position[1] < currentY)
       .sort((a, b) => a.position[1] - b.position[1]);
 
-    // For each message, get its prompt ID and the response ID for the specific model
+    // For each message, get its prompt ID and the response ID
     previousMessages.forEach(msg => {
-      const modelResponse = msg.responses.find(r => 
-        r.modelId === modelId && 
-        r.status === 'complete'
-      );
-      
-      if (modelResponse) {
-        pairs.push([msg.id, modelResponse.id]);
-        console.log(`Found pair for model ${modelId}:`, msg.id);
-        console.log(`Found pair for model ${modelId}:`, modelResponse.id);
+      // If message has a combined response, use that regardless of modelId
+      if (msg.createdInCombinedMode) {
+        const combinedResponse = msg.responses.find(r => 
+          r.modelId === 'alle-ai-comb' && 
+          r.status === 'complete'
+        );
+        if (combinedResponse) {
+          pairs.push([msg.id, combinedResponse.id]);
+        }
+      } else {
+        // Only for non-combined messages, look for specific model response
+        const modelResponse = msg.responses.find(r => 
+          r.modelId === modelId && 
+          r.status === 'complete'
+        );
+        if (modelResponse) {
+          pairs.push([msg.id, modelResponse.id]);
+        }
       }
     });
 
-    console.log(`Previous prompt-response pairs for model ${modelId}:`, pairs);
     return pairs;
-  };
+};
 
   const handleSourcesClick = (responseId: string, sources: Source[], userPrompt: string) => {
     setSourcesWindowState({
@@ -922,71 +1008,113 @@ export function ChatArea() {
     });
   };
 
+  // Simplified BranchTabs component
+  const BranchTabs = ({ level, branches, currentBranch, onBranchSelect }: {
+    level: number;
+    branches: Branch[];
+    currentBranch: number;
+    onBranchSelect: (index: number) => void;
+  }) => {
+    const versionsAtLevel = branches.filter(branch => 
+      branch.messages.some(msg => msg.position[1] === level)
+    );
+
+    if (versionsAtLevel.length <= 1) return null;
+
+    return (
+      <div className="flex gap-2 mb-2">
+        {versionsAtLevel.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => onBranchSelect(index)}
+            className={cn(
+              "px-2 py-1 rounded-md",
+              currentBranch === index 
+                ? "bg-primary text-primary-foreground" 
+                : "bg-muted hover:bg-muted/80"
+            )}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <RenderPageContent>
       <ScrollArea ref={scrollAreaRef} className="flex-1">
         <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
-          {branches[currentBranch]?.messages?.map((message, index) => (
-            <div key={`${message.position[0]}-${message.position[1]}`} className="mb-8">
-              <ChatMessage
-                content={message.content}
-                sender={message.sender}
-                timestamp={message.timestamp}
-                position={message.position}
-                onEditMessage={handleEditMessage}
-                totalBranches={branches.length}
-                currentBranch={currentBranch}
-                onBranchChange={setCurrentBranch}
-                branches={branches}
-              />
-              <div className="">
-                {webSearchLoading[message.id] && (
-                  <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
-                    <p className="text-sm animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
-                      Searching the web...
-                    </p>
-                  </div>
-                )}
-                {combinedLoading[message.id] && (
-                  <CombinedLoader 
-                    modelNames={selectedModels.chat
-                      .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
-                      .filter(Boolean) as string[]
-                    }
-                  />
-                )}
-                <div>
-                {!message.createdInCombinedMode && !combinedLoading[message.id] && (
-                    <Collapsible
-                      open={expandedResponses[message.id]}
-                      onOpenChange={(isOpen) => 
-                        setExpandedResponses(prev => ({ ...prev, [message.id]: isOpen }))
+          {branches[currentBranch]?.messages?.map((message, index) => {
+            const level = message.position[1];
+            
+            return (
+              <div key={`${message.position[0]}-${message.position[1]}`} className="mb-8">
+                <BranchTabs
+                  level={level}
+                  branches={branches}
+                  currentBranch={currentBranch}
+                  onBranchSelect={setCurrentBranch}
+                />
+                <ChatMessage
+                  content={message.content}
+                  sender={message.sender}
+                  timestamp={message.timestamp}
+                  position={message.position}
+                  onEditMessage={handleEditMessage}
+                  totalBranches={branches.length}
+                  currentBranch={currentBranch}
+                  onBranchChange={setCurrentBranch}
+                  branches={branches}
+                />
+                <div className="">
+                  {webSearchLoading[message.id] && (
+                    <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
+                      <p className="text-sm animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
+                        Searching the web...
+                      </p>
+                    </div>
+                  )}
+                  {combinedLoading[message.id] && (
+                    <CombinedLoader 
+                      modelNames={selectedModels.chat
+                        .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
+                        .filter(Boolean) as string[]
                       }
-                    >
-                      
-                        <CollapsibleTrigger className="ml-10">
-                        {(!webSearchLoading[message.id] && 
-                          !message.responses.some(r => r.status === 'loading')) && (
-                          <div className="flex items-center justify-start w-full space-x-2">
-                            <span></span>
-                            {expandedResponses[message.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                          </div>
-                        )}
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto mt-2">
-                          {selectedModels.chat.map((modelId, index) => {
-                            const model = chatModels.find(m => m.model_uid === modelId);
-                            if (!model) return null;
+                    />
+                  )}
+                  <div>
+                  {!message.createdInCombinedMode && !combinedLoading[message.id] && (
+                      <Collapsible
+                        open={expandedResponses[message.id]}
+                        onOpenChange={(isOpen) => 
+                          setExpandedResponses(prev => ({ ...prev, [message.id]: isOpen }))
+                        }
+                      >
+                        
+                          <CollapsibleTrigger className="ml-10">
+                          {(!webSearchLoading[message.id] && 
+                            !message.responses.some(r => r.status === 'loading')) && (
+                            <div className="flex items-center justify-start w-full space-x-2">
+                              <span></span>
+                              {expandedResponses[message.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </div>
+                          )}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto mt-2">
+                            {selectedModels.chat.map((modelId, index) => {
+                              const model = chatModels.find(m => m.model_uid === modelId);
+                              if (!model) return null;
 
                             const response = message.responses?.[index];
                             const isLoading = response?.status === 'loading';
                             const hasError = response?.status === 'error';
 
-                            // Skip rendering if in combined mode and still loading
-                            if (message.createdInCombinedMode && isLoading) {
-                              return null;
-                            }
+                              // Skip rendering if in combined mode and still loading
+                              if (message.createdInCombinedMode && isLoading) {
+                                return null;
+                              }
 
                             if (isLoading && !message.createdInCombinedMode) {
                               return (
@@ -1016,76 +1144,81 @@ export function ChatArea() {
                               );
                             }
 
-                            if (hasError) {
-                              return (
-                                <RetryResponse
-                                  key={modelId}
-                                  model={model}
-                                  onRetry={() => handleRetry(modelId, message.id)}
-                                />
-                              );
-                            }
+                              if (hasError) {
+                                return (
+                                  <RetryResponse
+                                    key={modelId}
+                                    model={model}
+                                    onRetry={() => handleRetry(modelId, message.id)}
+                                  />
+                                );
+                              }
 
                             
                             if (message.createdInCombinedMode) {
                               return null;
                             }
 
-                            return (
-                              <ModelSelector
-                                key={modelId}
-                                models={[{
-                                  ...model,
-                                  response: response?.content
-                                } as Model]}
-                                activeModel={activeContents[message.id]?.id === modelId ? modelId : ''}
-                                onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
-                              />
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  )}
-                </div>
-                <div className="mt-4">
-                  {activeContents[message.id]?.type === 'model' && (
-                    <ModelResponse
-                      key={`${conversationId}-${activeContents[message.id].id}`}
-                      model={activeContents[message.id].id === 'combined' 
-                        ? selectedModels.chat
-                            .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
-                            .filter(Boolean)
-                            .join(' + ')
-                        : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
-                      content={message.responses.find(r => 
-                        r.modelId === activeContents[message.id].id
-                      )?.content || ""}
-                      model_img={activeContents[message.id].id === 'combined'
-                        ? selectedModels.chat
-                            .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_image)
-                            .filter((img): img is string => Boolean(img) && img !== '')
-                        : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
-                      responseId={message.responses.find(r => 
-                        r.modelId === activeContents[message.id].id
-                      )?.id || ""}
-                      sessionId={conversationId!}
-                      feedback={responseFeedback[message.responses.find(r => 
-                        r.modelId === activeContents[message.id].id
-                      )?.id || ""]}
-                      onFeedbackChange={handleFeedbackChange}
-                      webSearchEnabled={isWebSearch}
-                      sources={message.responses.find(r => 
-                        r.modelId === activeContents[message.id].id
-                      )?.sources || []}
-                      onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
-                      onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)} // Reuse handleRetry
-                    />
-                  )}
+                              return (
+                                <ModelSelector
+                                  key={modelId}
+                                  models={[{
+                                    ...model,
+                                    response: response?.content
+                                  } as Model]}
+                                  activeModel={activeContents[message.id]?.id === modelId ? modelId : ''}
+                                  onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
+                                />
+                              );
+                            })}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    {activeContents[message.id]?.type === 'model' && (
+                      <ModelResponse
+                        key={`${conversationId}-${activeContents[message.id].id}`}
+                        model={activeContents[message.id].id === 'alle-ai-comb' 
+                          ? selectedModels.chat
+                              .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
+                              .filter(Boolean)
+                              .join(' + ')
+                          : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
+                        content={
+                          message.createdInCombinedMode 
+                            ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.content
+                            : message.responses.find(r => r.modelId === activeContents[message.id].id)?.content || ""
+                        }
+                        model_img={activeContents[message.id].id === 'alle-ai-comb'
+                          ? selectedModels.chat
+                              .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_image)
+                              .filter((img): img is string => Boolean(img) && img !== '')
+                          : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
+                        responseId={
+                          message.createdInCombinedMode
+                            ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.id
+                            : message.responses.find(r => r.modelId === activeContents[message.id].id)?.id || ""
+                        }
+                        sessionId={conversationId!}
+                        feedback={responseFeedback[message.responses.find(r => 
+                          r.modelId === activeContents[message.id].id
+                        )?.id || ""]}
+                        onFeedbackChange={handleFeedbackChange}
+                        webSearchEnabled={isWebSearch}
+                        sources={message.responses.find(r => 
+                          r.modelId === activeContents[message.id].id
+                        )?.sources || []}
+                        onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
+                        onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )) || null}
+            );
+          })}
         </div>
       </ScrollArea>
       <ScrollToBottom 

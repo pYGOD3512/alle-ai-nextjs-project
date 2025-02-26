@@ -67,7 +67,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
       
-      setContent("chat", "input", input);
       
       // Add all required properties when adding to history
       addHistory({
@@ -88,11 +87,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         } : undefined
       );
       
+      setContent("chat", "input", input);
       router.push(`/chat/res/${conversationId}`);
       setInput("");
 
       // Get actual title based on prompt
-      historyApi.getConversationTitle(conversationId, input)
+      historyApi.getConversationTitle(conversationId, input, 'chat')
         .then(response => {
           updateHistoryTitle(conversationId, response.title);
         })

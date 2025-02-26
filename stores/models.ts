@@ -34,16 +34,20 @@ interface ModelsState {
   interface ConversationStore {
     conversationId: string | null;
     promptId: string | null;
+    generationType: 'new' | 'load' | null;
     setConversationId: (id: string | null) => void;
     setPromptId: (id: string | null) => void;
+    setGenerationType: (type: 'new' | 'load' | null) => void;
     clearConversation: () => void;
   }
   
   export const useConversationStore = create<ConversationStore>((set) => ({
     conversationId: null,
     promptId: null,
+    generationType: null,
     setConversationId: (id) => set({ conversationId: id }),
     setPromptId: (id) => set({ promptId: id }),
+    setGenerationType: (type) => set({ generationType: type }),
     clearConversation: () => set({ conversationId: null, promptId: null })
   }));
   

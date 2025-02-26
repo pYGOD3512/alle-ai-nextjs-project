@@ -125,6 +125,8 @@ interface SelectedModelsStore {
   toggleModelActive: (modelId: string) => void;
   getSelectedModelNames: (type: 'chat' | 'image' | 'audio' | 'video') => any[];
   lastUpdate: number;
+  isLoadingLatest: boolean;
+  setLoadingLatest: (loading: boolean) => void;
 }
 
 export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => ({
@@ -137,6 +139,7 @@ export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => 
   inactiveModels: [],
   tempSelectedModels: [],
   lastUpdate: Date.now(),
+  isLoadingLatest: false,
   setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
   saveSelectedModels: (type) => {
     set((state) => ({
@@ -175,7 +178,8 @@ export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => 
         } : null;
       })
       .filter((item): item is { name: string; uid: string; type: string; isActive: boolean } => item !== null);
-  }
+  },
+  setLoadingLatest: (loading) => set({ isLoadingLatest: loading }),
 }));
 
 interface ImageResponse {
@@ -187,7 +191,7 @@ interface ImageResponse {
 interface GeneratedImagesStore {
   images: ImageResponse[];
   lastPrompt: string | null;
-  setImages: (images: ImageResponse[]) => void;
+  setImages: (images: ImageResponse[] | ((prev: ImageResponse[]) => ImageResponse[])) => void;
   updateImage: (modelId: string, updates: Partial<ImageResponse>) => void;
   setLastPrompt: (prompt: string) => void;
   clearImages: () => void;
@@ -195,10 +199,12 @@ interface GeneratedImagesStore {
 
 export const useGeneratedImagesStore = create<GeneratedImagesStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       images: [],
       lastPrompt: null,
-      setImages: (images) => set({ images }),
+      setImages: (images) => set((state) => ({
+        images: typeof images === 'function' ? images(state.images) : images
+      })),
       updateImage: (modelId, updates) => set((state) => ({
         images: state.images.map(img => 
           img.modelId === modelId ? { ...img, ...updates } : img

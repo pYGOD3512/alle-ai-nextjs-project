@@ -13,44 +13,15 @@ export interface Model {
 
 export interface ModelsResponse extends Array<Model> {}
 
+export type ModelType = 'chat' | 'image' | 'audio' | 'video';
+
 export const modelsApi = {
-  getChatModels: async (): Promise<Model[]> => {
+  getModels: async (type: ModelType): Promise<Model[]> => {
     try {
-      const response = await api.get<ModelsResponse>('/models/chat');
-      console.log('chat models', response)
+      const response = await api.get<ModelsResponse>(`/models/${type}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching chat models:', error);
-      throw error;
-    }
-  },
-
-  getImageModels: async (): Promise<Model[]> => {
-    try {
-      const response = await api.get<ModelsResponse>('/models/image');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching image models:', error);
-      throw error;
-    }
-  },
-
-  getAudioModels: async (): Promise<Model[]> => {
-    try {
-      const response = await api.get<ModelsResponse>('/models/audio');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching audio models:', error);
-      throw error;
-    }
-  },
-
-  getVideoModels: async (): Promise<Model[]> => {
-    try {
-      const response = await api.get<ModelsResponse>('/models/video');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching video models:', error);
+      console.error(`Error fetching ${type} models:`, error);
       throw error;
     }
   },
@@ -68,9 +39,9 @@ export const modelsApi = {
     }
   },
 
-  getLatestSelectedModels: async (): Promise<Model[]> => {
+  getLatestSelectedModels: async (type: ModelType): Promise<Model[]> => {
     try {
-      const response = await api.get('/models/chat/latest');
+      const response = await api.get(`/models/${type}/latest`);
       console.log('Latest selected models response:', response.data);
       return response.data;
     } catch (error) {

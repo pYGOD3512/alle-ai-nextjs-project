@@ -1,16 +1,17 @@
 // @ts-nocheck
 "use client";
+import { useState, useRef } from "react";
 import { ChatInput } from "@/components/features/ChatInput";
 import GreetingMessage from "@/components/features/GreetingMessage";
-import { useState, useRef, useEffect } from "react";
-import { useContentStore, useSidebarStore } from "@/stores";
-import { usePathname } from "next/navigation";
+import { useContentStore, useSidebarStore, useHistoryStore } from "@/stores";
+import { usePathname, useRouter } from "next/navigation";
 import RenderPageContent from "@/components/RenderPageContent";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Lightbulb , Image, Anchor, TreePalm } from 'lucide-react';
-
-
+import { Lightbulb, Image, Anchor, TreePalm } from 'lucide-react';
+import { chatApi } from '@/lib/api/chat';
+import { historyApi } from '@/lib/api/history';
+import { useSelectedModelsStore } from '@/stores';
+import { useConversationStore } from '@/stores/models';
 
 // static options
 const options = [
@@ -35,57 +36,96 @@ const options = [
     description: "Create a mystical forest with glowing trees, enchanted animals, and an ethereal atmosphere."
   }
 ];
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { setContent, resetContent } = useContentStore();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { content, setContent } = useContentStore();
   const router = useRouter();
   const pathname = usePathname();
+  const { isOpen } = useSidebarStore();
+  const { selectedModels } = useSelectedModelsStore();
+  const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
+  const { addHistory, updateHistoryTitle } = useHistoryStore();
 
-  const handleClicked = (opt: { label: String }) => {
-    setInput(opt.label as String);
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      const allSelectedModels = selectedModels.image;
+      
+      const conversationResponse = await chatApi.createConversation(allSelectedModels, 'image');
+      const conversationId = conversationResponse.session;
+
+      addHistory({
+        session: conversationId,
+        title: input,
+        type: 'image',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      const promptResponse = await chatApi.createPrompt(
+        conversationId, 
+        input,
+        [0, 0]
+      );
+      
+      setContent("image", "input", input);
+      setGenerationType('new');
+      router.push(`/image/res/${conversationId}`);
+      setInput("");
+
+      // Get actual title based on prompt
+      historyApi.getConversationTitle(conversationId, input, 'image')
+        .then(response => {
+          updateHistoryTitle(conversationId, response.title);
+        })
+        .catch(error => {
+          console.error('Error getting conversation title:', error);
+        });
+
+      // Get actual title based on prompt
+      setConversationId(conversationId);
+      setPromptId(promptResponse.id);
+
+    } catch (error) {
+      console.error('Error in image generation flow:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClicked = (opt: { label: string }) => {
+    setInput(opt.label);
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleGenerate = () => {
-    if (!input) return;
-    const chatId = crypto.randomUUID();
-    setContent("image", "input", input);
-    setInput("");
-
-    //
-    router.push(`/image/res/${chatId}`);
-  };
   return (
-    <>
-    <RenderPageContent>
-      <div className="flex-1 flex flex-col justify-center min-h-[calc(100vh-3.5rem)]">
+    <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
       {pathname === "/image" && (
-        <div className="mt-20">
-          <GreetingMessage
-            options={options}
-            // username="Pascal"
-            handlePressed={handleClicked}
-            questionText="ready to create something amazing today?"
-          />
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col justify-center items-center gap-8">
+            <GreetingMessage
+              options={options}
+              handlePressed={handleClicked}
+              questionText="Ready to create something amazing today?"
+            />
+            <div className="w-full max-w-3xl px-4">
+              <ChatInput
+                value={input}
+                onChange={setInput}
+                onSend={handleSend}
+                inputRef={inputRef}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
         </div>
       )}
-      <div className="flex justify-center items-center  p-4">
-        <div className="w-full max-w-3xl">
-          <ChatInput
-            value={input}
-            onChange={setInput}
-            onSend={handleGenerate}
-            inputRef={inputRef}
-            isLoading={isLoading}
-          />
-        </div>
-      </div>
-
-      <div className="flex-1"> {children} </div>
-      </div>
-    </RenderPageContent>
-    </>
+      <div className="flex-1">{children}</div>
+    </div>
   );
 }

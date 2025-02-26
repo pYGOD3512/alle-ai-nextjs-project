@@ -43,9 +43,9 @@ import { useTextSizeStore } from "@/stores/index";
 
 interface ModelResponseProps {
   model: string;
-  content: string;
+  content: string | undefined;
   model_img: string | string[];
-  responseId: string;
+  responseId: string | undefined;
   sessionId: string;
   feedback?: 'liked' | 'disliked' | null;
   onFeedbackChange: (responseId: string, feedback: 'liked' | 'disliked' | null) => void;
@@ -185,7 +185,7 @@ export function ModelResponse({
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(content);
+    await navigator.clipboard.writeText(content || '' );
     toast({
       title: "Copied to clipboard",
       description: "The response has been copied to your clipboard.",
@@ -200,11 +200,11 @@ export function ModelResponse({
       // If clicking the same button, set to 'none'
       const state = newState === feedback ? 'none' : newState;
       
-      const response = await chatApi.updateLikeState(responseId, state as LikeState);
+      const response = await chatApi.updateLikeState(responseId || '', state as LikeState);
       console.log('Response from updateLikeState:', response);
       
       if (response.status) {
-        onFeedbackChange(responseId, state === 'none' ? null : state as 'liked' | 'disliked');
+        onFeedbackChange(responseId || '', state === 'none' ? null : state as 'liked' | 'disliked');
         
         if (state !== 'none') {
           toast({
@@ -340,7 +340,7 @@ export function ModelResponse({
   };
 
   // Extract images from content
-  const images = useMemo(() => extractImagesFromMarkdown(content), [content]);
+  const images = useMemo(() => extractImagesFromMarkdown(content || ''), [content]);
   
   // Calculate visible images and remaining count
   const displayLimit = getDisplayLimit();
@@ -349,7 +349,7 @@ export function ModelResponse({
 
   // Remove images from content to prevent double rendering
   const textContent = useMemo(() => {
-    return content.replace(/!\[(.*?)\]\((.*?)\)/g, '');
+    return content?.replace(/!\[(.*?)\]\((.*?)\)/g, '');
   }, [content]);
 
   return (
@@ -510,7 +510,7 @@ export function ModelResponse({
               variant="ghost"
               size="icon"
               className="rounded-full h-8 w-8 text-muted-foreground"
-              onClick={() => onRegenerate?.(responseId)}
+              onClick={() => onRegenerate?.(responseId || '')}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -518,7 +518,7 @@ export function ModelResponse({
             {sources && sources.length > 0 && (
             <div className="">
               <SourcesPill 
-                onClick={() => onSourcesClick(responseId, sources)} 
+                onClick={() => onSourcesClick(responseId || '', sources)} 
                 sources={sources}
               />
             </div>
