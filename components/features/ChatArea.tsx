@@ -15,6 +15,7 @@ import {
 import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore } from "@/stores";
 import { useModelsStore, useConversationStore } from "@/stores/models";
 import { chatApi } from '@/lib/api/chat';
+import { historyApi } from '@/lib/api/history';
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
@@ -168,6 +169,9 @@ export function ChatArea() {
   // Initialize expandedResponses with true for all messages by default
   const [expandedResponses, setExpandedResponses] = useState<Record<string, boolean>>({});
 
+  // Add state for summary content
+  const [summaryContent, setSummaryContent] = useState<Record<string, string>>({});
+
   useEffect(() => {
     branches[currentBranch]?.messages.forEach(message => {
       setExpandedResponses(prev => ({
@@ -222,6 +226,51 @@ export function ChatArea() {
       }
     });
   }, [chatSessions, showSummary, generatingSummary]);
+
+  // Add this effect to handle summary generation when responses are complete
+  useEffect(() => {
+    const handleSummaryGeneration = async (messageId: string) => {
+      const message = branches[currentBranch].messages.find(msg => msg.id === messageId);
+      if (!message || message.createdInCombinedMode) return;
+
+      // Check if all responses are complete
+      const allResponsesComplete = message.responses.every(
+        response => response.status === 'complete'
+      );
+
+      if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId]) {
+        try {
+          setGeneratingSummary(prev => ({ ...prev, [messageId]: true }));
+          // Make API call to generate summary
+          const summaryResponse = await historyApi.getConversationTitle('6247c9f7-88ec-4e91-9ad5-5e19e26dfd08', 'What are eatries', 'chat');
+          console.log(summaryResponse, 'The simulated summary call')
+          // Update summary state
+          setShowSummary(prev => ({ ...prev, [messageId]: true }));
+          
+          // Store summary content (you might need to add this to your state)
+          // setSummaryContent(prev => ({
+          //   ...prev,
+          //   [messageId]: summaryResponse.summary
+          // }));
+
+        } catch (error) {
+          console.error('Error generating summary:', error);
+          toast({
+            title: "Error",
+            description: "Failed to generate summary",
+            variant: "destructive"
+          });
+        } finally {
+          setGeneratingSummary(prev => ({ ...prev, [messageId]: false }));
+        }
+      }
+    };
+
+    // Check each message in the current branch
+    branches[currentBranch]?.messages.forEach(message => {
+      handleSummaryGeneration(message.id);
+    });
+  }, [branches, currentBranch, showSummary, generatingSummary]);
 
   // Update the effect to handle initial responses
   useEffect(() => {
@@ -1091,8 +1140,7 @@ export function ChatArea() {
                           setExpandedResponses(prev => ({ ...prev, [message.id]: isOpen }))
                         }
                       >
-                        
-                          <CollapsibleTrigger className="ml-10">
+                        <CollapsibleTrigger className="ml-10">
                           {(!webSearchLoading[message.id] && 
                             !message.responses.some(r => r.status === 'loading')) && (
                             <div className="flex items-center justify-start w-full space-x-2">
@@ -1102,6 +1150,17 @@ export function ChatArea() {
                           )}
                         </CollapsibleTrigger>
                         <CollapsibleContent>
+                          {/* Only show Summary when all responses are complete AND not in combined mode */}
+                          {message.responses.every(r => r.status === 'complete') && 
+                           !message.createdInCombinedMode && (
+                            <div className="mb-4">
+                              <Summary 
+                                isGenerating={generatingSummary[message.id]}
+                                isActive={activeContents[message.id]?.type === 'summary'}
+                                onClick={() => handleSummarySelect(conversationId!, message.id)}
+                              />
+                            </div>
+                          )}
                           <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto mt-2">
                             {selectedModels.chat.map((modelId, index) => {
                               const model = chatModels.find(m => m.model_uid === modelId);

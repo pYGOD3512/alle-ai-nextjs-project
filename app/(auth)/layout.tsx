@@ -244,7 +244,7 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left side - Auth Forms */}
-      <div className="w-full xl:w-1/3 2xl:w-1/2 p-10 mt-10">
+      <div className="w-full xl:w-1/3 2xl:w-1/2 p-10 md:mt-10">
         {children}
       </div>
       
