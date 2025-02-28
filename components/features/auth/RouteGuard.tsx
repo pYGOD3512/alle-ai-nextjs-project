@@ -34,9 +34,16 @@ function RouteGuardInner({ children }: RouteGuardProps) {
         return;
       }
 
+      // Get stored return URL
+      const returnUrl = sessionStorage.getItem('returnUrl');
+
       // CASE 1: No token - only allow access to auth routes and public routes
       if (!token) {
         if (!authRoutes.includes(pathname) && !publicRoutes.includes(pathname)) {
+          // Save current path before redirecting to auth
+          if (pathname !== '/auth') {
+            sessionStorage.setItem('returnUrl', pathname);
+          }
           router.replace('/auth');
           return;
         }
@@ -54,7 +61,13 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           if (response.data.to === 'verify-email') {
             router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
             return;
-          } else if (response.data.to === 'chat' && response.plan ) {
+          } else if (response.data.to === 'chat' && response.plan) {
+            // Check for return URL when redirecting from auth
+            if (returnUrl && pathname === '/auth') {
+              sessionStorage.removeItem('returnUrl');
+              router.replace(returnUrl);
+              return;
+            }
             router.replace('/chat');
             return;
           } else if (!response.plan) {
@@ -69,6 +82,9 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           }
         } catch (error) {
           clearAuth();
+          if (pathname !== '/auth') {
+            sessionStorage.setItem('returnUrl', pathname);
+          }
           router.replace('/auth');
           return;
         }

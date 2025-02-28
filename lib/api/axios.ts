@@ -28,8 +28,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/auth') {
+        sessionStorage.setItem('returnUrl', currentPath);
+      }
+      
       useAuthStore.getState().clearAuth();
-      window.location.href = '/';
+      window.location.href = '/auth';
     }
     return Promise.reject(error);
   }

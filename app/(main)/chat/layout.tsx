@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setIsCombinedMode } = useCombinedModeStore();
   const { isOpen } = useSidebarStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
-  const { setConversationId, setPromptId } = useConversationStore();
+  const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle } = useHistoryStore();
   const { toast } = useToast();
 
@@ -88,6 +88,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       );
       
       setContent("chat", "input", input);
+      setGenerationType('new');
       router.push(`/chat/res/${conversationId}`);
       setInput("");
 

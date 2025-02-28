@@ -25,8 +25,6 @@ export const historyApi = {
       const response = await api.get(`/conversations/${type}`, {
         params: { page }
       });
-      console.log(response, 'this is the raw response');
-      console.log(response.data, 'this is the data');
       return {
         data: response.data.map((item: any) => ({
           id: item.session,

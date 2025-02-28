@@ -12,6 +12,9 @@ import { chatApi } from '@/lib/api/chat';
 import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // static options
 const options = [
@@ -48,10 +51,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { selectedModels } = useSelectedModelsStore();
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle } = useHistoryStore();
+  const [showNegativePrompt, setShowNegativePrompt] = useState(false);
+  const [negativePrompt, setNegativePrompt] = useState("");
 
   const handleSend = async () => {
     if (!input.trim()) return;
     
+    console.log('This is the negative prompt: ', negativePrompt);
     setIsLoading(true);
     try {
       const allSelectedModels = selectedModels.image;
@@ -105,14 +111,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
-      {pathname === "/image" && (
         <div className="flex-1 flex flex-col">
           <div className="flex-1 flex flex-col justify-center items-center gap-8">
+            {pathname === "/image" && (
             <GreetingMessage
               options={options}
               handlePressed={handleClicked}
               questionText="Ready to create something amazing today?"
             />
+            )}
             <div className="w-full max-w-3xl px-4">
               <ChatInput
                 value={input}
@@ -121,10 +128,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 inputRef={inputRef}
                 isLoading={isLoading}
               />
+              <div className="flex items-center space-x-2 p-2">
+                <Switch
+                  variant="sm"
+                  id="negative-prompt"
+                  checked={showNegativePrompt}
+                  onCheckedChange={setShowNegativePrompt}
+                />
+                <Label htmlFor="negative-prompt">Negative Prompt</Label>
+              </div>
+              {showNegativePrompt && (
+                <Textarea
+                  placeholder="Enter negative prompt here..."
+                  value={negativePrompt}
+                  onChange={(e) => setNegativePrompt(e.target.value)}
+                  className="min-h-[100px] border-borderColorPrimary focus-visible:outline-none"
+                />
+              )}
             </div>
           </div>
         </div>
-      )}
       <div className="flex-1">{children}</div>
     </div>
   );

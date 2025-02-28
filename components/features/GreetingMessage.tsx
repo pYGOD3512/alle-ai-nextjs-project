@@ -67,14 +67,14 @@ const GreetingMessage = ({
           initial="hidden" 
           whileInView="reveal" 
           transition={{staggerChildren: .02}} 
-          className="text-3xl font-bold mb-2 break-words"
+          className="font-bold mb-2 break-words"
         >
           {greetings.map(({char, id}) => (
               <motion.span
               key={id}
               transition={{duration: 0.5}}
               variants={charVariants}
-              className="text-md sm:text-lg"
+              className="text-md"
               >
                 {char}
               </motion.span>
@@ -115,7 +115,7 @@ const GreetingMessage = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleOptionClick(option)}
-              className="group inline-flex items-center gap-2 px-3 py-1.5 bg-background/50 hover:bg-primary/5 border border-borderColorPrimary hover:border-primary/30 rounded-full text-sm transition-all duration-200"
+              className="group inline-flex items-center  gap-2 px-3 py-1.5 bg-background/50 hover:bg-primary/5 border border-borderColorPrimary hover:border-primary/30 rounded-full text-sm transition-all duration-200"
             >
               <div className="flex-shrink-0 text-primary group-hover:text-primary/80 transition-colors">
                 {option.icon}

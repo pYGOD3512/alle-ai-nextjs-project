@@ -1174,23 +1174,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       },
     },
     personalization: {
-      combination: {
-        title: "Alle-AI Combination",
-        description:
-        "Merge responses for a cohesive answer. Combines insights from all models to minimize inaccuracies and enhance clarity.",
-        enabled: personalization.combination,
-      },
       summary: {
         title: "Alle-AI Summary",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
         enabled: personalization.summary,
-      },
-      comparison: {
-        title: "Alle-AI Comparison",
-        description:
-        "Highlight similarities and differences in AI responses. Identifies consistent and conflicting viewpoints, helping you see where models agree or differ",
-        enabled: personalization.comparison,
       },
       personalizedAds: {
         title: "Sponsored content",
@@ -1459,7 +1447,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                             checked={setting.enabled}
                             onCheckedChange={(checked) => 
                               handleSwitchChange(
-                                key as "summary" | "combination" | "comparison" | "personalizedAds",
+                                key as "summary" | "personalizedAds",
                                 checked
                               )
                             }
