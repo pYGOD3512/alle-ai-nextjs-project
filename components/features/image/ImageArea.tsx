@@ -115,7 +115,6 @@ const ImageArea = () => {
   const { imageModels } = useModelsStore();
   const { toast } = useToast();
   const params = useParams();
-  console.log('URL Params:', params);
   const loadConversationId = params.chatId as string;
 
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);

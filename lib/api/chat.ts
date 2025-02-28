@@ -116,7 +116,18 @@ interface CombinationResponse {
 
 interface GetCombinationParams {
   promptId: string;
-  modelResponsePairs: [string, number][];
+  modelResponsePairs: number[];
+}
+interface SummaryResponse {
+  status: boolean;
+  message: string;
+  summary: string;
+  id: number;
+}
+
+interface GetSummaryParams {
+  messageId: string;
+  modelResponsePairs: number[];
 }
 
 interface ConversationContent {
@@ -250,6 +261,21 @@ export const chatApi = {
     try {
       const response = await api.post('/combine', {
         prompt: promptId,
+        responses: modelResponsePairs
+      });
+      console.log('Combination response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in combination response:', error);
+      throw error;
+    }
+  },
+
+  getSummary: async ({ messageId, modelResponsePairs }: GetSummaryParams): Promise<SummaryResponse> => {
+    console.log('Getting summary with params:', messageId, modelResponsePairs);
+    try {
+      const response = await api.post('/get-summary', {
+        prompt: messageId,
         responses: modelResponsePairs
       });
       console.log('Combination response:', response.data);

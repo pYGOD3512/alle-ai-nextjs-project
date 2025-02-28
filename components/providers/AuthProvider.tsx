@@ -89,9 +89,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return response;
       }
 
+      // Check for return URL
+      const returnUrl = sessionStorage.getItem('returnUrl');
+    
+
       // User is verified, check where to redirect
       if (response.data.to === 'chat') {
-        router.push('/chat');
+        if (returnUrl) {
+          sessionStorage.removeItem('returnUrl');
+          router.push(returnUrl);
+        } else {
+          router.push('/chat');
+        }
       } else if (response.data.to === 'plans') {
         router.push('/plans');
       }

@@ -33,6 +33,8 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { CombinedLoader } from "@/components/features/CombinedLoader";
 import { cn } from "@/lib/utils";
+import { useParams } from 'next/navigation';
+
 
 interface ChatSession {
   id: string; // conversation UUID
@@ -81,7 +83,7 @@ export function ChatArea() {
   const { content } = useContentStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const { chatModels } = useModelsStore();
-  const { conversationId, promptId } = useConversationStore();
+  const { conversationId, promptId, setConversationId, generationType } = useConversationStore();
   const { personalization } = useSettingsStore();
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
@@ -91,10 +93,15 @@ export function ChatArea() {
   const [isLoading, setIsLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
 
+  const params = useParams();
+  const loadConversationId = params.chatId as string;
+
   const [activeSessionId, setActiveSessionId] = useState<string>();
   const [responseFeedback, setResponseFeedback] = useState<Record<string, 'liked' | 'disliked' | null>>({});
   const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
   const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
+  const [isLoadingConversation, setIsLoadingConversation] = useState(false);
+
   const [activeContents, setActiveContents] = useState<Record<string, {
     type: 'model' | 'summary';
     id: string;
@@ -239,19 +246,28 @@ export function ChatArea() {
       );
 
       if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId]) {
+        console.log(messageId,'is this the prompt id?')
         try {
           setGeneratingSummary(prev => ({ ...prev, [messageId]: true }));
+
+          const modelResponsePairs = message.responses
+          .filter(response => response.status === 'complete')
+          .map(response => Number(response.id));
+          
           // Make API call to generate summary
-          const summaryResponse = await historyApi.getConversationTitle('6247c9f7-88ec-4e91-9ad5-5e19e26dfd08', 'What are eatries', 'chat');
-          console.log(summaryResponse, 'The simulated summary call')
+          const summaryResponse = await chatApi.getSummary({
+            messageId,
+            modelResponsePairs
+          });
+          // console.log(summaryResponse, 'The simulated summary call')
           // Update summary state
           setShowSummary(prev => ({ ...prev, [messageId]: true }));
           
           // Store summary content (you might need to add this to your state)
-          // setSummaryContent(prev => ({
-          //   ...prev,
-          //   [messageId]: summaryResponse.summary
-          // }));
+          setSummaryContent(prev => ({
+            ...prev,
+            [messageId]: summaryResponse.summary
+          }));
 
         } catch (error) {
           console.error('Error generating summary:', error);
@@ -321,7 +337,7 @@ export function ChatArea() {
       }
 
       // Handle model responses
-      const modelResponsePairs: [string, number][] = [];
+      const modelResponsePairs: number[] = [];
       let isFirstResponse = true; // Flag to track first response
 
       await Promise.all(activeModels.map(async (modelId) => {
@@ -337,7 +353,7 @@ export function ChatArea() {
           });
 
           if (response.status && response.data) {
-            modelResponsePairs.push([modelId, response.data.id]);
+            modelResponsePairs.push(response.data.id);
             setBranches(prev => prev.map(branch => ({
               ...branch,
               messages: branch.messages.map(msg => 
@@ -460,7 +476,38 @@ export function ChatArea() {
       }
     };
 
-    handleInitialResponse();
+    const loadConversation = async () => {
+      if (!loadConversationId) {
+        console.log('no conversation id');
+        return;
+      }
+      
+      setIsLoadingConversation(true);
+      setConversationId(loadConversationId);     
+      try {
+        console.log('Loading conversation content');
+        const response = await chatApi.getConversationContent('chat', loadConversationId);
+        console.log('Loaded conversation content:', response);
+        
+      } catch (error) {
+        console.error('Error loading conversation:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load conversation",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingConversation(false);
+      }
+    };
+
+    if (generationType === 'load') {
+      loadConversation();
+    } else if(generationType === 'new'){
+      handleInitialResponse();
+    }
+
+    // handleInitialResponse();
   }, []);
 
   const handleInputChange = (value: string) => {
@@ -508,7 +555,7 @@ export function ChatArea() {
         modelId => !inactiveModels.includes(modelId)
       );
 
-      const modelResponsePairs: [string, number][] = [];
+      const modelResponsePairs: number[] = [];
       let isFirstResponse = true;
 
       await Promise.all(activeModels.map(async (modelId) => {
@@ -525,7 +572,7 @@ export function ChatArea() {
           });
 
           if (response.status && response.data) {
-            modelResponsePairs.push([response.data.model_uid, response.data.id]);
+            modelResponsePairs.push(response.data.id);
             
             // Update the branch with the response
             setBranches(prev => prev.map((branch, idx) => 
@@ -735,7 +782,7 @@ export function ChatArea() {
         modelId => !inactiveModels.includes(modelId)
       );
 
-      const modelResponsePairs: [string, number][] = [];
+      const modelResponsePairs: number[] = [];
       let isFirstResponse = true; // Flag to track first response
 
       await Promise.all(activeModels.map(async (modelId) => {
@@ -754,7 +801,7 @@ export function ChatArea() {
 
           if (response.status && response.data) {
             // Collect model_uid and response_id
-            modelResponsePairs.push([response.data.model_uid, response.data.id]);
+            modelResponsePairs.push(response.data.id);
             setBranches(prev => prev.map((branch, idx) => 
               idx === currentBranch ? {
                 ...branch,
@@ -1093,6 +1140,14 @@ export function ChatArea() {
   return (
     <RenderPageContent>
       <ScrollArea ref={scrollAreaRef} className="flex-1">
+      {isLoadingConversation && (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm text-muted-foreground">Loading content...</p>
+            </div>
+          </div>
+        )}
         <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
           {branches[currentBranch]?.messages?.map((message, index) => {
             const level = message.position[1];
@@ -1273,6 +1328,22 @@ export function ChatArea() {
                         onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)}
                       />
                     )}
+                    {activeContents[message.id]?.type === 'summary' && (
+                    <ModelResponse
+                      key={`${conversationId}-summary`}
+                      model="Alle-AI Summary"
+                      content={summaryContent[message.id] || ""}
+                      model_img="/svgs/logo-desktop-mini.png"
+                      responseId={`summary-${message.id}`}
+                      sessionId={conversationId!}
+                      onFeedbackChange={handleFeedbackChange}
+                      // You might want to disable certain features for summary display
+                      webSearchEnabled={false}
+                      sources={[]}
+                      onSourcesClick={() => {}}
+                      onRegenerate={() => {}}
+                    />
+                  )}
                   </div>
                 </div>
               </div>
