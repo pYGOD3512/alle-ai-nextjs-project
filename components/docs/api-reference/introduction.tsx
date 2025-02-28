@@ -127,10 +127,8 @@ export default function ApiIntroduction() {
             language="python"
             showLanguage={true}
             code={`# Best practice: Load from environment
-import os
-from your_api_sdk import Client
-
-client = Client(api_key=os.getenv("API_SECRET"))`}
+from alleai.core import AlleAIClient
+client = AlleAIClient(api_key=os.getenv("API_SECRET"))`}
           />
         </section>
 
@@ -173,8 +171,8 @@ curl https://api.yourservice.com/v1/endpoint \
             <RenderCode
               showLanguage={true}
               language="python"
-              code={`from alleai.client import alleai
-client = alleai(
+              code={`from alleai.coore  import AlleAIClient
+client = AlleAIClient(
   api_key='YOUR_API_KEY',
 )`}
             />
@@ -188,8 +186,8 @@ client = alleai(
             <RenderCode
               showLanguage={true}
               language="javascript"
-              code={`import { alleaiClient } from 'alleai';
-const client = new alleaiClient({
+              code={`const alleai = require('alleai');
+const client = new alleai({
   apiKey: 'YOUR_API_KEY',
 });`}
             />
@@ -226,12 +224,13 @@ const client = new alleaiClient({
             <RenderCode
               showLanguage={true}
               language="python"
-              code={`from alleai import Alleai
+              code={`from alleai.core import AlleAIClient
 
-client = Alleai()
+client = AlleAIClient(api_key="your
+_api_key")
 
-stream = client.chat.completions.create(
-    model="gpt-4o-mini",
+stream = client.chat.completions(
+    models=["gpt-4o-mini","claude-3.5-sonnet"],
     messages=[{"role": "user", "content": "Say this is a test"}],
     stream=True,
 )
@@ -249,13 +248,13 @@ for chunk in stream:
             <RenderCode
               showLanguage={true}
               language="javascript"
-              code={`import Alleai from "alleai";
+              code={`const alleai = require("alleai");
 
-const alleai = new Alleai();
+const client = new alleai();
 
 async function main() {
-    const stream = await alleai.chat.completions.create({
-        model: "gpt-4o-mini",
+    const stream = await alleai.chat.completions({
+        model:,
         messages: [{ role: "user", content: "Say this is a test" }],
         stream: true,
     });
