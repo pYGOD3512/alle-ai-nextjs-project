@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 export default function HomePage() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export default function HomePage() {
   //     router.replace('/auth');
   //   }
   // }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    router.replace('/auth');
+  }, [router])
 
   // Return null instead of LoadingScreen to avoid client/server mismatch
   return null;

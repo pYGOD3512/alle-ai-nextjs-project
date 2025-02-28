@@ -33,6 +33,7 @@ export default function ChatPage() {
 
   // Load chat models on mount if not already loaded
   useEffect(() => {
+    
     const loadChatModels = async () => {
       if (chatModels && chatModels.length > 0) return;
 
