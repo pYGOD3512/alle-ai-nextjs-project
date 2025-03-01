@@ -86,8 +86,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }) => {
     if (!input.trim()) return;
     
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const allSelectedModels = selectedModels.chat;
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');

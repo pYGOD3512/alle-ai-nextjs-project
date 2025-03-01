@@ -391,7 +391,7 @@ export function Sidebar() {
                             }`}
                             onClick={() => {
                               setGenerationType('load');
-                              router.push(`/${currentType}/res/${item.session}`);
+                              router.replace(`/${currentType}/res/${item.session}`);
                               handleHistoryItemClick(item.session);
                             }}
                           >

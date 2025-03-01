@@ -296,7 +296,6 @@ export const chatApi = {
   getConversationContent: async (conversationType: 'chat' | 'image', conversationId: string): Promise<LoadedImageResponse[]> => {
     try {
       const response = await api.get(`/conversations/${conversationType}/${conversationId}`);
-      console.log('Response from getConversationContent:', response.data);
       return response.data;
     } catch (error) {
       console.error(`Error loading ${conversationType} conversation:`, error);

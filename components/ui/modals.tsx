@@ -1345,7 +1345,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
 
   const handleSwitchChange = async (key: keyof typeof personalization, checked: boolean) => {
     if (key === "summary") {
-      if (isFreeUser) {
+      if (!isFreeUser) {
         setPromptConfig({
           title: "Upgrade Required",
           message: "Please upgrade your plan to enable the summary feature.",
