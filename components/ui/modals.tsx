@@ -178,7 +178,7 @@ import { feedbackApi } from '@/lib/api/feedback';
 import { profileApi } from '@/lib/api/profile';
 import { keysApi } from '@/lib/api/keys';
 
-import { useModelsStore } from '@/stores/models';
+import { useConversationStore, useModelsStore } from '@/stores/models';
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, 
   useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, 
   useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, 
@@ -188,6 +188,8 @@ import { HistoryItem } from "@/lib/api/history";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
 import Papa from "papaparse";
+
+import { chatApi } from "@/lib/api/chat";
 
 interface ModalProps {
   isOpen: boolean;
@@ -1127,7 +1129,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
   const [isDevicesOpen, setIsDevicesOpen] = useState(true);
 
+  const [promptConfig, setPromptConfig] = useState<any>(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
+
   const { personalization, setPersonalizationSetting } = useSettingsStore();
+  const { plan, user } = useAuthStore();
+  const isFreeUser = plan === 'free' || !plan;
 
 
   // Group voices by language/category with safety checks
@@ -1178,7 +1186,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         title: "Alle-AI Summary",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
-        enabled: personalization.summary,
+        enabled: user?.summary===1,
       },
       personalizedAds: {
         title: "Sponsored content",
@@ -1335,9 +1343,62 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     }
   };
 
-  const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
-    setPersonalizationSetting(key, checked);
+  const handleSwitchChange = async (key: keyof typeof personalization, checked: boolean) => {
+    if (key === "summary") {
+      if (isFreeUser) {
+        setPromptConfig({
+          title: "Upgrade Required",
+          message: "Please upgrade your plan to enable the summary feature.",
+          actions: [
+            {
+              label: "Upgrade Plan",
+              onClick: () => {
+                setShowPromptModal(false);
+                setPlansModalOpen(true)},
+                variant: "outline"
+            },
+          ],
+        });
+        setShowPromptModal(true);
+        return;
+      }
+  
+      try {
+        console.log(checked,'this is the initial state of the switch')
+        const response = await chatApi.updateSummaryPreference(checked);
+        if (response.status) {
+
+          useAuthStore.setState((state) => ({
+            ...state,
+            user: state.user ? {
+              ...state.user,
+              summary: response.value ? 1 : 0
+            } : state.user
+          }));
+          
+          setPersonalizationSetting(key, !checked);
+          toast({
+            title: "Success",
+            description: "Summary preference updated successfully",
+          });
+        }
+      } catch (error) {
+        setPersonalizationSetting(key, !checked);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update summary preference",
+        });
+      }
+    } else {
+      // Handle other personalization settings
+      setPersonalizationSetting(key, checked);
+    }
   };
+
+  // const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
+  //   setPersonalizationSetting(key, checked);
+  // };
 
   return (
     <>
@@ -1445,6 +1506,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           <Switch
                             className="data-[state=unchecked]:bg-borderColorPrimary"
                             checked={setting.enabled}
+                            // disabled={key === "summary" && isFreeUser}
                             onCheckedChange={(checked) => 
                               handleSwitchChange(
                                 key as "summary" | "personalizedAds",
@@ -2237,6 +2299,17 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       <TransactionHistoryModal 
         isOpen={isTransactionHistoryOpen} 
         onClose={() => setIsTransactionHistoryOpen(false)} 
+      />
+      {promptConfig && (
+        <PromptModal
+          isOpen={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
+          {...promptConfig}
+        />
+      )}
+      <PlansModal
+        isOpen={plansModalOpen}
+        onClose={() => setPlansModalOpen(false)}
       />
       {/* Single device logout modal */}
       {logoutDeviceId && (
@@ -3443,6 +3516,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   const { getHistoryByType, removeHistory: removeItem, renameHistory: renameItem } = useHistoryStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "oldest" | "az" | "za">("recent");
+  const router = useRouter();
+  const { setGenerationType } = useConversationStore();
+  const { setCurrentConversationLink, setSectionId } = useSidebarStore();
 
   const formatTimeDistance = (item: HistoryItem) => {
     try {
@@ -3481,6 +3557,21 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
         return 0;
       }
     });
+
+  const handleHistoryItemClick = async (item: HistoryItem) => {
+    // First close the modal
+    onClose();
+    
+    // Then update the stores
+    setGenerationType('load');
+    setCurrentConversationLink(null);
+    setSectionId(`${currentType}Id`, item.id);
+    
+    // Finally handle navigation after a small delay to ensure modal is closed
+    setTimeout(() => {
+      router.push(`/${currentType}/res/${item.session}`);
+    }, 0);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -3523,6 +3614,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                 <CommandItem 
                   key={item.id}
                   className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-accent rounded-md"
+                  onSelect={() => handleHistoryItemClick(item)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="bg-primary/10 p-2 rounded-md">

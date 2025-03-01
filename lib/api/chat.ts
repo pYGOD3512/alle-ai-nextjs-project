@@ -71,6 +71,7 @@ export interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   parentId?: string;
+  summaryEnabled?: boolean;
   responses?: Array<{
     id: string;
     modelId: string;
@@ -150,6 +151,12 @@ interface LoadedImageResponse {
     body: string;
     liked: boolean | null;
   }>;
+}
+
+interface UpdateSummaryResponse {
+  status: boolean;
+  message: string;
+  value: boolean;
 }
 
 export const chatApi = {
@@ -293,6 +300,20 @@ export const chatApi = {
       return response.data;
     } catch (error) {
       console.error(`Error loading ${conversationType} conversation:`, error);
+      throw error;
+    }
+  },
+
+  updateSummaryPreference: async (enabled: boolean): Promise<UpdateSummaryResponse> => {
+    console.log(enabled, 'this is the switch toggle from the call')
+    try {
+      const response = await api.post<UpdateSummaryResponse>('/summary/toggle', {
+        summary_toggle_value: enabled
+      });
+      console.log('Response from updateSummaryPreference:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating summary preference:', error);
       throw error;
     }
   },

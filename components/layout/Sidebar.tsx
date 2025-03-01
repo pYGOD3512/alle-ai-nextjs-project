@@ -201,7 +201,7 @@ export function Sidebar() {
   // Add this helper function for projects
   const handleProjectClick = (project: Project) => {
     setCurrentProject(project);
-    router.push(`/project/${project.slug}`);
+    router.replace(`/project/${project.slug}`);
   };
 
   // Handle project deletion

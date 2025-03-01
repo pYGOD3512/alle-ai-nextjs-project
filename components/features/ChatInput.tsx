@@ -478,6 +478,7 @@ export function ChatInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
+                          disabled={ isLoading }
                           onClick={handleWebSearchToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                             isWebSearch 
@@ -501,6 +502,7 @@ export function ChatInput({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
+                        disabled={ isLoading}
                         onClick={handleCombinedToggle}
                         className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                           isCombinedMode 

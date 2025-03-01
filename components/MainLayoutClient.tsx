@@ -49,7 +49,7 @@ export function MainLayoutClient({
           <HelpButton />
           {pathname === "/chat" && (
             <FooterText 
-              className={`fixed bottom-0 ${isOpen ? "right-[40%]" : "right-[45%]"} h-6 transition-all duration-300`}
+              className={`fixed bottom-0 ${isOpen ? "right-[38%]" : "right-[28%] sm:right-[32%] md:right-[36%] lg:right-[42%]"} h-6 transition-all duration-300`}
             />
           )}
         </main>
