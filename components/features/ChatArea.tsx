@@ -251,7 +251,7 @@ export function ChatArea() {
         }, 4000); 
       }
     });
-  }, [chatSessions, showSummary, generatingSummary]);
+  }, [generatingSummary]);
 
   // First, let's fix the useEffect that handles summary generation
   useEffect(() => {
@@ -304,7 +304,7 @@ export function ChatArea() {
         handleSummaryGeneration(message.id);
       });
     }
-  }, [branches, currentBranch, showSummary, generatingSummary, generationType]); // Add generationType to dependencies
+  }, [ generatingSummary]); // Add generationType to dependencies
 
   // Update the effect to handle initial responses
   useEffect(() => {
@@ -503,7 +503,6 @@ export function ChatArea() {
             })
             .filter((img): img is string => Boolean(img) && img !== '');
 
-          console.log(modelImages,'this is a model image')
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
             // Update the branch with the combined response
@@ -583,30 +582,57 @@ export function ChatArea() {
     setBranches(prev => prev.map((branch, idx) => 
       idx === currentBranch ? {
         ...branch,
-        messages: loadedConversation.map(message => ({
-          id: String(message.prompt_id),
-          content: message.prompt,
-          sender: 'user',
-          timestamp: new Date(),
-          position: message.position,
-          createdInCombinedMode: false,
-          responses: message.responses
-            .filter((response: LoadedResponse) => response.model.uid !== 'alle-ai-summ')
-            .map((response: LoadedResponse) => ({
-              id: String(response.id),
-              modelId: response.model.uid,
-              content: response.body,
-              status: 'complete' as const,
-              model_images: [response.model.image]
-            }))
-        }))
+        messages: loadedConversation.map(message => {
+          // Check if this message has a combined response
+          const combinedResponse = message.responses.find(
+            (response: LoadedResponse) => response.model.uid === 'alle-ai-comb'
+          );
+
+          const webSearchSources = message.input_content?.web_search_results?.results || [];
+
+          return {
+            id: String(message.prompt_id),
+            content: message.prompt,
+            sender: 'user',
+            timestamp: new Date(),
+            position: message.position,
+            createdInCombinedMode: !!combinedResponse, // Set based on presence of combined response
+            responses: combinedResponse 
+              ? [{
+                  id: String(combinedResponse.id),
+                  modelId: 'alle-ai-comb',
+                  content: combinedResponse.body,
+                  status: 'complete' as const,
+                  model_images: message.responses
+                    .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
+                    .map((r: LoadedResponse) => r.model.image)
+                }]
+              : message.responses
+                  .filter((response: LoadedResponse) => 
+                    response.model.uid !== 'alle-ai-comb' && 
+                    response.model.uid !== 'alle-ai-summ'
+                  )
+                  .map((response: LoadedResponse) => ({
+                    id: String(response.id),
+                    modelId: response.model.uid,
+                    content: response.body,
+                    status: 'complete' as const,
+                    model_images: [response.model.image],
+                    sources: webSearchSources
+                  }))
+          };
+        })
       } : branch
     ));
 
-    // Handle summaries separately
+    // Handle summaries and set active contents
     loadedConversation.forEach(message => {
       const summaryResponse = message.responses.find(
         (response: LoadedResponse) => response.model.uid === 'alle-ai-summ'
+      );
+      
+      const combinedResponse = message.responses.find(
+        (response: LoadedResponse) => response.model.uid === 'alle-ai-comb'
       );
       
       if (summaryResponse) {
@@ -618,25 +644,30 @@ export function ChatArea() {
           ...prev,
           [String(message.prompt_id)]: true
         }));
-        // Ensure the summary is not in generating state
         setGeneratingSummary(prev => ({
           ...prev,
           [String(message.prompt_id)]: false
         }));
       }
-    });
 
-    // Set active contents
-    loadedConversation.forEach(message => {
-      if (message.responses.length > 0) {
-        setActiveContents(prev => ({
-          ...prev,
-          [String(message.prompt_id)]: {
-            type: 'model',
-            id: message.responses[0].model.uid
-          }
-        }));
-      }
+      // Set active content based on response type
+      setActiveContents(prev => ({
+        ...prev,
+        [String(message.prompt_id)]: combinedResponse 
+          ? {
+              type: 'model',
+              id: 'alle-ai-comb'
+            }
+          : summaryResponse
+          ? {
+              type: 'summary',
+              id: 'alle-ai-summ'
+            }
+          : {
+              type: 'model',
+              id: message.responses[0].model.uid
+            }
+      }));
     });
   };
 
@@ -1059,7 +1090,6 @@ export function ChatArea() {
             })
             .filter((img): img is string => Boolean(img) && img !== '');
 
-            console.log(modelImages,'this is a model image')
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
             // Update the branch with the combined response
