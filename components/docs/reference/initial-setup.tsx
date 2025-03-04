@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { guideCodes } from "@/lib/constants/docsCodes";
 import {
   MessageCircle,
   Image,
@@ -164,7 +165,7 @@ client.generateText({ prompt: 'Hello, world!' })
         <div className="mb-5">
           <CodeToggle value={apiToggle} onChange={setApiToggle} />
         </div>
-        <RenderCode code={apiCode[apiToggle]} language={apiToggle} />
+        <RenderCode code={guideCodes.makeYourFirstRequest} language={apiToggle} />
       </section>
 
       <section className="mb-6">

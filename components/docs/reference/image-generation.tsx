@@ -241,14 +241,30 @@ generateImage();`,
         </div>
 
         {/* Code Examples Section */}
-        <div className="space-y-4 mt-8">
-          <h2 className="text-2xl font-bold">Code Examples</h2>
-          <RenderCode
-            languages={getCodeExamples(selectedModels)}
-            toggle={true}
-            maxHeight={400}
-            className="w-full"
-          />
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Code Examples</h2>
+          <div className="space-y-6">
+            <Tabs defaultValue="python" className="w-full">
+              <TabsList>
+                <TabsTrigger value="python">Python</TabsTrigger>
+                <TabsTrigger value="javascript">Node.js</TabsTrigger>
+              </TabsList>
+              <TabsContent value="python">
+                <RenderCode
+                  code={getCodeExamples(selectedModels)[0].code}
+                  language="python"
+                  showLanguage={false}
+                />
+              </TabsContent>
+              <TabsContent value="javascript">
+                <RenderCode
+                  code={getCodeExamples(selectedModels)[1].code}
+                  language="javascript"
+                  showLanguage={false}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
 
         {/* Response Format Section */}

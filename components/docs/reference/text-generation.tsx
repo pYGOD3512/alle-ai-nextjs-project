@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Copy, Info, CheckCircle2 } from "lucide-react";
+
 import { models } from "@/lib/models";
 import type { ModelDetails } from "@/lib/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import RenderCode from "@/components/RenderCode";
 import NavigationContainer from "@/components/NavigationContainer";
-
-
 
 const faqs = [
   {
@@ -225,32 +224,28 @@ generateText();
         {/* Code Examples Section */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">Code Examples</h2>
-          <p className="text-muted-foreground mb-4">
-            Below are comprehensive examples showing both basic and advanced
-            usage of the API, including multi-model generation:
-          </p>
-          <Tabs defaultValue="python" onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="python">Python</TabsTrigger>
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-            </TabsList>
-            <TabsContent value="python">
-              <div className="relative rounded-md">
+          <div className="space-y-6">
+            <Tabs defaultValue="python" className="w-full">
+              <TabsList>
+                <TabsTrigger value="python">Python</TabsTrigger>
+                <TabsTrigger value="javascript">Node.js</TabsTrigger>
+              </TabsList>
+              <TabsContent value="python">
                 <RenderCode
                   code={exampleCodePython(selectedModels)}
                   language="python"
+                  showLanguage={false}
                 />
-              </div>
-            </TabsContent>
-            <TabsContent value="javascript">
-              <div className="relative rounded-md">
+              </TabsContent>
+              <TabsContent value="javascript">
                 <RenderCode
                   code={exampleCodeJS(selectedModels)}
                   language="javascript"
+                  showLanguage={false}
                 />
-              </div>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
 
         {/* Response Format Section */}

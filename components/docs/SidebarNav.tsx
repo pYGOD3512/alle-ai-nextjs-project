@@ -174,7 +174,7 @@ export const SidebarNav = () => {
                   ) : (
                     <div className="mb-2">
                       <Link
-                        scroll={false}
+                        
                         href={`/docs/user-guides/${section.id}`}
                         className={cn(
                           "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
