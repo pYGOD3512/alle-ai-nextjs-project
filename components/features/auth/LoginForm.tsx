@@ -29,6 +29,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     
     try {
       const result = await login(email, password);
@@ -43,7 +44,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       setPassword("");
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again",
+        description: `${error}`,
         variant: "destructive",
       });
     } finally {

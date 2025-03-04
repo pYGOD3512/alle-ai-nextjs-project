@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
-import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X } from "lucide-react";
+import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader2 } from "lucide-react";
 import { IMAGE_MODELS } from '@/lib/constants';
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -40,12 +40,14 @@ interface SelectedImage {
   liked?: boolean;
 }
 
-const RetryImageGeneration = ({ modelInfo, onRetry }: { 
+const RetryImageGeneration = ({ modelInfo, onRetry, isRetrying }: { 
   modelInfo: { name: string; icon: string; }; 
-  onRetry: () => void; 
+  onRetry: () => void;
+  isRetrying?: boolean; 
 }) => {
   return (
-    <div className="relative w-80 h-80 lg:w-96 lg:h-96 border border-red-200 rounded-lg bg-background/50 flex flex-col items-center justify-center">
+    <div className="relative w-80 h-80 lg:w-96 lg:h-96 rounded-lg overflow-hidden bg-background/50">
+      {/* Model Info Header */}
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/50 p-2 rounded-lg">
         <Image 
           src={modelInfo.icon} 
@@ -58,16 +60,17 @@ const RetryImageGeneration = ({ modelInfo, onRetry }: {
           {modelInfo.name}
         </span>
       </div>
-      
-      <div className="text-center p-4">
-        <p className="text-red-500 mb-4">Failed to generate image</p>
+
+      {/* Simple centered retry button */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
         <Button 
           onClick={onRetry}
-          variant="outline" 
-          className="flex items-center gap-2"
+          variant="secondary" 
+          className="gap-2"
+          disabled={isRetrying}
         >
           <RefreshCcw className="w-4 h-4" />
-          Retry
+          Try Again
         </Button>
       </div>
     </div>
@@ -112,13 +115,13 @@ const ImageArea = () => {
   const { imageModels } = useModelsStore();
   const { toast } = useToast();
   const params = useParams();
-  console.log('URL Params:', params);
   const loadConversationId = params.chatId as string;
 
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [loadingModels, setLoadingModels] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
+  const [retryingModels, setRetryingModels] = useState<string[]>([]);
 
   useEffect(() => {
     const generateImage = async (modelId: string) => {
@@ -212,10 +215,10 @@ const ImageArea = () => {
       }
     };
 
-    if (generationType === 'load') {
-      loadConversation();
-    } else if(generationType === 'new'){
+    if (generationType === 'new') {
       handleInitialResponse();
+    } else if(generationType === 'load'){
+      loadConversation();
     }
   }, []);
 
@@ -335,6 +338,8 @@ const ImageArea = () => {
   const handleRetry = async (modelId: string) => {
     if (!conversationId || !promptId) return;
 
+    // Add model to loading state to show skeleton
+    setLoadingModels(prev => [...prev, modelId]);
     setErrors(prev => ({ ...prev, [modelId]: '' }));
     setGeneratedImages(prev => prev.filter(img => img.modelId !== modelId));
 
@@ -358,23 +363,15 @@ const ImageArea = () => {
           ...prev,
           [modelId]: response.message || 'Failed to generate image'
         }));
-        toast({
-          title: "Error",
-          description: `Failed to regenerate image for ${getModelInfo(modelId)?.name}`,
-          variant: "destructive",
-        });
       }
     } catch (error) {
-      console.error(`Error regenerating image for model ${modelId}:`, error);
       setErrors(prev => ({
         ...prev,
         [modelId]: 'Failed to generate image'
       }));
-      toast({
-        title: "Error",
-        description: `Failed to regenerate image for ${getModelInfo(modelId)?.name}`,
-        variant: "destructive",
-      });
+    } finally {
+      // Remove model from loading state
+      setLoadingModels(prev => prev.filter(id => id !== modelId));
     }
   };
 
@@ -481,6 +478,7 @@ const ImageArea = () => {
                       key={modelId}
                       modelInfo={modelInfo!}
                       onRetry={() => handleRetry(modelId)}
+                      isRetrying={isLoading}
                     />
                   );
                 }
@@ -614,6 +612,9 @@ const ImageArea = () => {
 
         <Dialog open={isModalOpen} onOpenChange={(open) => !open && handleModalClose()}>
           <DialogContent className="max-w-5xl h-[90vh] w-full p-0 overflow-hidden">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Generated image</DialogTitle>
+            </DialogHeader>
             {selectedImage && (
               <div className="relative w-full h-full group">
                 <Image

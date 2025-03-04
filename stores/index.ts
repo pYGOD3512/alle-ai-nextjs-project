@@ -8,7 +8,6 @@ import { HistoryItem } from '@/lib/api/history';
 
 import { driveService } from '@/lib/services/driveServices';
 
-import { CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS, chatHistory, imageHistory, audioHistory, videoHistory } from '@/lib/constants';
 import { useModelsStore } from "./models";
 
 type ContentKey = "input" | "voice" | "attachment";
@@ -589,9 +588,7 @@ export const useCodeThemeStore = create<CodeThemeStore>()(
 
 interface SettingsState {
   personalization: {
-    combination: boolean;
     summary: boolean;
-    comparison: boolean;
     personalizedAds: boolean;
   };
   setPersonalizationSetting: (key: keyof SettingsState['personalization'], value: boolean) => void;
@@ -601,10 +598,8 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       personalization: {
-        combination: true,
         summary: false,
-        comparison: true,
-        personalizedAds: true, // Default to true
+        personalizedAds: true,
       },
       setPersonalizationSetting: (key, value) =>
         set((state) => ({

@@ -19,14 +19,17 @@ interface GetTitleResponse {
   title: string;
 }
 
+interface DeleteHistoryResponse {
+  message: string;
+  deleted_at: string | null;
+}
+
 export const historyApi = {
   getHistory: async (type: string, page: number = 1): Promise<HistoryResponse> => {
     try {
       const response = await api.get(`/conversations/${type}`, {
         params: { page }
       });
-      console.log(response, 'this is the raw response');
-      console.log(response.data, 'this is the data');
       return {
         data: response.data.map((item: any) => ({
           id: item.session,
@@ -58,5 +61,34 @@ export const historyApi = {
       console.error('Error getting conversation title:', error);
       throw error;
     }
-  }
+  },
+
+  renameConversation: async (conversation: string, new_name: string): Promise<GetTitleResponse> => {
+    try {
+      const response = await api.post<GetTitleResponse>('/rename-conversation', {
+        conversation: conversation,
+        title: new_name,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting conversation title:', error);
+      throw error;
+    }
+  },
+
+  deleteHistory: async (conversation: string): Promise<DeleteHistoryResponse> => {
+    try {
+      const response = await api.delete<DeleteHistoryResponse>(`/history/${conversation}`, {
+        data: {
+          id: parseInt(conversation)
+        }
+      });
+      
+      console.log('Delete history key response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting history key:', error);
+      throw error;
+    }
+  },
 };

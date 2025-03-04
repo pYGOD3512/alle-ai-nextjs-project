@@ -71,6 +71,7 @@ export interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   parentId?: string;
+  summaryEnabled?: boolean;
   responses?: Array<{
     id: string;
     modelId: string;
@@ -116,7 +117,18 @@ interface CombinationResponse {
 
 interface GetCombinationParams {
   promptId: string;
-  modelResponsePairs: [string, number][];
+  modelResponsePairs: number[];
+}
+interface SummaryResponse {
+  status: boolean;
+  message: string;
+  summary: string;
+  id: number;
+}
+
+interface GetSummaryParams {
+  messageId: string;
+  modelResponsePairs: number[];
 }
 
 interface ConversationContent {
@@ -139,6 +151,12 @@ interface LoadedImageResponse {
     body: string;
     liked: boolean | null;
   }>;
+}
+
+interface UpdateSummaryResponse {
+  status: boolean;
+  message: string;
+  value: boolean;
 }
 
 export const chatApi = {
@@ -260,13 +278,41 @@ export const chatApi = {
     }
   },
 
+  getSummary: async ({ messageId, modelResponsePairs }: GetSummaryParams): Promise<SummaryResponse> => {
+    console.log('Getting summary with params:', messageId, modelResponsePairs);
+    try {
+      const response = await api.post('/get-summary', {
+        prompt: messageId,
+        responses: modelResponsePairs
+      });
+      console.log('Combination response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in combination response:', error);
+      throw error;
+    }
+  },
+
   getConversationContent: async (conversationType: 'chat' | 'image', conversationId: string): Promise<LoadedImageResponse[]> => {
     try {
       const response = await api.get(`/conversations/${conversationType}/${conversationId}`);
-      console.log('Response from getConversationContent:', response.data);
       return response.data;
     } catch (error) {
       console.error(`Error loading ${conversationType} conversation:`, error);
+      throw error;
+    }
+  },
+
+  updateSummaryPreference: async (enabled: boolean): Promise<UpdateSummaryResponse> => {
+    console.log(enabled, 'this is the switch toggle from the call')
+    try {
+      const response = await api.post<UpdateSummaryResponse>('/summary/toggle', {
+        summary_toggle_value: enabled
+      });
+      console.log('Response from updateSummaryPreference:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating summary preference:', error);
       throw error;
     }
   },

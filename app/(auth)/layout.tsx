@@ -52,7 +52,7 @@ const AnimatedBackground = () => {
       
       {/* Floating AI model logos - distributed across the space */}
       <div className="absolute inset-0">
-        {['stability-ai', 'qwen', 'anthropic', 'claude-3', 'deepseek', 'copilot', 'dream', 'gemini', 'gpt-3-5', 'gpt-4', 'grok', 'kling', 'luma', 'meta', 'mistral-ai', 'perplexity-ai', 'titan', 'midjourney'].map((logo, index) => (
+        {['stability-ai', 'qwen', 'anthropic', 'claude-3', 'deepseek', 'copilot', 'dream', 'gemini', 'gpt-3-5', 'gpt-4', 'grok', 'kling', 'luma', 'meta', 'mistral-ai', 'perplexity-ai', 'amazon', 'midjourney'].map((logo, index) => (
           <motion.div
             key={logo}
             className="absolute"
@@ -244,7 +244,7 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left side - Auth Forms */}
-      <div className="w-full xl:w-1/3 2xl:w-1/2 p-10 mt-10">
+      <div className="w-full xl:w-1/3 2xl:w-1/2 p-10 md:mt-10">
         {children}
       </div>
       

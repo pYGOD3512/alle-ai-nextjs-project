@@ -178,7 +178,7 @@ import { feedbackApi } from '@/lib/api/feedback';
 import { profileApi } from '@/lib/api/profile';
 import { keysApi } from '@/lib/api/keys';
 
-import { useModelsStore } from '@/stores/models';
+import { useConversationStore, useModelsStore } from '@/stores/models';
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, 
   useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, 
   useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, 
@@ -188,6 +188,9 @@ import { HistoryItem } from "@/lib/api/history";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
 import Papa from "papaparse";
+
+import { chatApi } from "@/lib/api/chat";
+import { truncate } from "fs";
 
 interface ModalProps {
   isOpen: boolean;
@@ -686,9 +689,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   // Plan limits
   const MODEL_LIMITS: Record<UserPlan, number> = {
-    free: 2,
-    standard: 3,
-    plus: 5
+    free: 6,
+    standard: 6,
+    plus: 6
   };
 
   const handleFavoriteToggle = async (e: React.MouseEvent, model: Model) => {
@@ -1107,6 +1110,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
 export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) {
   const { theme, setTheme } = useTheme();
+  const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
@@ -1126,9 +1130,47 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
   const [isDevicesOpen, setIsDevicesOpen] = useState(true);
+  const [showSummaryPrompt, setShowSummaryPrompt] = useState(false);
+
+  // Calculate active models count
+  const activeModelsCount = selectedModels.chat.filter(
+    modelId => !inactiveModels.includes(modelId)
+  ).length;
+
+  const [promptConfig, setPromptConfig] = useState<any>(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
 
   const { personalization, setPersonalizationSetting } = useSettingsStore();
+  const { plan, user } = useAuthStore();
+  const isFreeUser = plan === 'free' || !plan;
 
+  // Effect to handle summary toggle based on active models
+  useEffect(() => {
+    if (activeModelsCount > 2) {
+    const AutoActivate = async () => {
+        const response = await chatApi.updateSummaryPreference(false);
+        if (response.status) {
+            console.log('autoactivation', response)
+          useAuthStore.setState((state) => ({
+            ...state,
+            user: state.user ? {
+              ...state.user,
+              summary: response.value ? 1 : 0
+            } : state.user
+          }));
+          
+          setPersonalizationSetting('summary', false);
+          toast({
+            title: "Success",
+            description: "Summary preference updated successfully",
+          });
+        }
+      }
+      AutoActivate();
+    }
+
+  }, [activeModelsCount]);
 
   // Group voices by language/category with safety checks
   const voiceCategories = useMemo(() => {
@@ -1174,23 +1216,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       },
     },
     personalization: {
-      combination: {
-        title: "Alle-AI Combination",
-        description:
-        "Merge responses for a cohesive answer. Combines insights from all models to minimize inaccuracies and enhance clarity.",
-        enabled: personalization.combination,
-      },
       summary: {
         title: "Alle-AI Summary",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
-        enabled: personalization.summary,
-      },
-      comparison: {
-        title: "Alle-AI Comparison",
-        description:
-        "Highlight similarities and differences in AI responses. Identifies consistent and conflicting viewpoints, helping you see where models agree or differ",
-        enabled: personalization.comparison,
+        enabled: user?.summary===1,
       },
       personalizedAds: {
         title: "Sponsored content",
@@ -1347,9 +1377,67 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     }
   };
 
-  const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
-    setPersonalizationSetting(key, checked);
+  const handleSwitchChange = async (key: keyof typeof personalization, checked: boolean) => {
+    if (activeModelsCount < 2) {
+      setShowSummaryPrompt(true);
+      return;
+    }
+
+    if (key === "summary") {
+      if (!isFreeUser) {
+        setPromptConfig({
+          title: "Upgrade Required",
+          message: "Please upgrade your plan to enable the summary feature.",
+          actions: [
+            {
+              label: "Upgrade Plan",
+              onClick: () => {
+                setShowPromptModal(false);
+                setPlansModalOpen(true)},
+                variant: "outline"
+            },
+          ],
+        });
+        setShowPromptModal(true);
+        return;
+      }
+  
+      try {
+        console.log(checked,'this is the initial state of the switch')
+        const response = await chatApi.updateSummaryPreference(checked);
+        if (response.status) {
+
+          useAuthStore.setState((state) => ({
+            ...state,
+            user: state.user ? {
+              ...state.user,
+              summary: response.value ? 1 : 0
+            } : state.user
+          }));
+          
+          setPersonalizationSetting(key, !checked);
+          toast({
+            title: "Success",
+            description: "Summary preference updated successfully",
+          });
+        }
+      } catch (error) {
+        setPersonalizationSetting(key, !checked);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update summary preference",
+        });
+      }
+    } else {
+      // Handle other personalization settings
+      setPersonalizationSetting(key, checked);
+    }
   };
+
+  // const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
+  //   setPersonalizationSetting(key, checked);
+  // };
 
   return (
     <>
@@ -1457,9 +1545,10 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           <Switch
                             className="data-[state=unchecked]:bg-borderColorPrimary"
                             checked={setting.enabled}
+                            // disabled={key === "summary" && isFreeUser}
                             onCheckedChange={(checked) => 
                               handleSwitchChange(
-                                key as "summary" | "combination" | "comparison" | "personalizedAds",
+                                key as "summary" | "personalizedAds",
                                 checked
                               )
                             }
@@ -2250,6 +2339,17 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         isOpen={isTransactionHistoryOpen} 
         onClose={() => setIsTransactionHistoryOpen(false)} 
       />
+      {promptConfig && (
+        <PromptModal
+          isOpen={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
+          {...promptConfig}
+        />
+      )}
+      <PlansModal
+        isOpen={plansModalOpen}
+        onClose={() => setPlansModalOpen(false)}
+      />
       {/* Single device logout modal */}
       {logoutDeviceId && (
         <LogoutModal 
@@ -2259,6 +2359,19 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
           deviceInfo={settingsData.security.devices.activeDevices.find(d => d.id === logoutDeviceId)}
         />
       )}
+      <PromptModal
+        isOpen={showSummaryPrompt}
+        onClose={() => setShowSummaryPrompt(false)}
+        title="NOTICE"
+        message="At least 2 active models are required to enable the Alle-AI Summary."
+        actions={[
+          {
+            label: "Ok",
+            onClick: () => setShowSummaryPrompt(false),
+            variant: "default"
+          }
+        ]}
+      />
     </>
   );
 }
@@ -3455,6 +3568,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
   const { getHistoryByType, removeHistory: removeItem, renameHistory: renameItem } = useHistoryStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "oldest" | "az" | "za">("recent");
+  const router = useRouter();
+  const { setGenerationType } = useConversationStore();
+  const { setCurrentConversationLink, setSectionId } = useSidebarStore();
 
   const formatTimeDistance = (item: HistoryItem) => {
     try {
@@ -3493,6 +3609,21 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
         return 0;
       }
     });
+
+  const handleHistoryItemClick = async (item: HistoryItem) => {
+    // First close the modal
+    onClose();
+    
+    // Then update the stores
+    setGenerationType('load');
+    setCurrentConversationLink(null);
+    setSectionId(`${currentType}Id`, item.id);
+    
+    // Finally handle navigation after a small delay to ensure modal is closed
+    setTimeout(() => {
+      router.push(`/${currentType}/res/${item.session}`);
+    }, 0);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -3535,6 +3666,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                 <CommandItem 
                   key={item.id}
                   className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-accent rounded-md"
+                  onSelect={() => handleHistoryItemClick(item)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="bg-primary/10 p-2 rounded-md">

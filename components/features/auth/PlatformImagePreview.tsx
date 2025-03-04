@@ -40,7 +40,7 @@ const aiModels: AIModel[] = [
     id: "titan",
     name: "Titan",
     provider: "Amazon",
-    icon: "/models/titan.png"
+    icon: "/models/amazon.png"
   }
 ];
 

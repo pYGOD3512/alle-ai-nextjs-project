@@ -16,7 +16,7 @@ export default function ChatPage() {
     setHistory, 
     setLoading: setHistoryLoading,
     setError: setHistoryError,
-    clearHistory
+    getHistoryByType
   } = useHistoryStore();
   const { 
     selectedModels,
@@ -33,6 +33,7 @@ export default function ChatPage() {
 
   // Load chat models on mount if not already loaded
   useEffect(() => {
+    
     const loadChatModels = async () => {
       if (chatModels && chatModels.length > 0) return;
 
@@ -53,9 +54,10 @@ export default function ChatPage() {
   // Load chat history
   useEffect(() => {
     const loadHistory = async () => {
-      console.log(history, 'history')
-
-      // if(history && history.length > 0) return;
+      const chatHistory = getHistoryByType('chat');
+      if (chatHistory && chatHistory.length > 0) {
+        return;
+      }
 
       setHistoryLoading(true);
       try {

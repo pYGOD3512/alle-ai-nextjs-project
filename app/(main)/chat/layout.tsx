@@ -11,6 +11,17 @@ import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const options = [
   {
@@ -46,9 +57,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setIsCombinedMode } = useCombinedModeStore();
   const { isOpen } = useSidebarStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
-  const { setConversationId, setPromptId } = useConversationStore();
+  const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle } = useHistoryStore();
   const { toast } = useToast();
+
+  // Calculate number of active models
+  const activeModelsCount = selectedModels.chat.filter(
+    modelId => !inactiveModels.includes(modelId)
+  ).length;
 
   const handleSend = async (fileContent?: {
     uploaded_files: Array<{
@@ -60,8 +76,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }) => {
     if (!input.trim()) return;
     
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const allSelectedModels = selectedModels.chat;
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
@@ -88,6 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       );
       
       setContent("chat", "input", input);
+      setGenerationType('new');
       router.push(`/chat/res/${conversationId}`);
       setInput("");
 

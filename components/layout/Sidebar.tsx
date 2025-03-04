@@ -201,7 +201,7 @@ export function Sidebar() {
   // Add this helper function for projects
   const handleProjectClick = (project: Project) => {
     setCurrentProject(project);
-    router.push(`/project/${project.slug}`);
+    router.replace(`/project/${project.slug}`);
   };
 
   // Handle project deletion
@@ -391,7 +391,7 @@ export function Sidebar() {
                             }`}
                             onClick={() => {
                               setGenerationType('load');
-                              router.push(`/${currentType}/res/${item.session}`);
+                              router.replace(`/${currentType}/res/${item.session}`);
                               handleHistoryItemClick(item.session);
                             }}
                           >

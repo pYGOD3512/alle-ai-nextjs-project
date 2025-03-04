@@ -18,7 +18,7 @@ const aiLogos = [
   { src: "/models/kling.png", alt: "Kling" },
   { src: "/models/luma.png", alt: "Luma" },
   { src: "/models/midjourney.png", alt: "Midjourney" },
-  { src: "/models/titan.png", alt: "Titan" },
+  { src: "/models/amazon.png", alt: "Titan" },
   { src: "/models/copilot.png", alt: "Copilot" },
   { src: "/models/microsoft.png", alt: "Microsoft" },
   // Add more AI company logos as needed
