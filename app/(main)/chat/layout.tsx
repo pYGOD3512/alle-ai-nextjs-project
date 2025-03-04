@@ -60,21 +60,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle } = useHistoryStore();
   const { toast } = useToast();
-  const [showAlertDialog, setShowAlertDialog] = useState(false);
 
   // Calculate number of active models
   const activeModelsCount = selectedModels.chat.filter(
     modelId => !inactiveModels.includes(modelId)
   ).length;
-
-  // Show alert dialog if fewer than 2 models are active
-  useEffect(() => {
-    if (activeModelsCount < 2) {
-      setShowAlertDialog(true);
-    } else {
-      setShowAlertDialog(false);
-    }
-  }, [activeModelsCount]);
 
   const handleSend = async (fileContent?: {
     uploaded_files: Array<{
@@ -156,20 +146,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
-      <AlertDialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>NOTICE</AlertDialogTitle>
-            <AlertDialogDescription>
-              At least 2 active models are required to generate summary and combined responses on Alle-AI.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Ok</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
       {pathname === "/chat" && (
         <div className="flex-1 flex flex-col">
           <div className="flex-1 flex flex-col justify-center items-center gap-8">

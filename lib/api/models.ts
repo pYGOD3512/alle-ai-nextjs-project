@@ -45,7 +45,7 @@ export const modelsApi = {
       console.log('Latest selected models response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching latest selected models:', error);
+      console.log('Error fetching latest selected models:', error);
       throw error;
     }
   },

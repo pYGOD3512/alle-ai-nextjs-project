@@ -20,7 +20,7 @@ export default function ImageGenerationPage() {
     setHistory, 
     setLoading: setHistoryLoading,
     setError: setHistoryError,
-    clearHistory
+    getHistoryByType
   } = useHistoryStore();
   const { 
     selectedModels,
@@ -31,7 +31,7 @@ export default function ImageGenerationPage() {
 
   useEffect(() => {
     setCurrentPage("image");
-    clearHistory();
+    // clearHistory();
 
   }, []);
 
@@ -58,12 +58,15 @@ export default function ImageGenerationPage() {
   // Load image history
   useEffect(() => {
     const loadHistory = async () => {
-      console.log(history, 'history')
+      const imageHistory = getHistoryByType('image');
+      if (imageHistory && imageHistory.length > 0) {
+        return;
+      }
       
-      // if(history && history.length > 0) return;
       setHistoryLoading(true);
       try {
         const response = await historyApi.getHistory('image');
+        console.log("Fetched image history:", response.data);
         setHistory(response.data);
       } catch (err) {
         setHistoryError(err instanceof Error ? err.message : 'Failed to load chat history');
@@ -87,7 +90,7 @@ export default function ImageGenerationPage() {
         setTempSelectedModels(modelUids);
         saveSelectedModels('image');
       } catch (err) {
-        console.error('Error loading latest selected models:', err);
+        console.log('Error: ', err);
       } finally {
         setLoadingLatest(false);
       }

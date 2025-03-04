@@ -473,7 +473,6 @@ export function Header() {
                       ))}
                     </div>
                   </TooltipTrigger>
-                  {pathname.includes('/chat') ? (
                   <TooltipContent side="bottom" sideOffset={5} className="w-64 p-0">
                     <div className="w-full bg-backgroundSecondary rounded-lg">
                       <div className="flex items-center justify-between px-4 py-2 border-b border-borderColorPrimary">
@@ -523,13 +522,6 @@ export function Header() {
                       </div>
                     </div>
                   </TooltipContent>
-                  ):(
-                    <TooltipContent side="bottom" className="bg-backgroundSecondary">
-                      <div className="flex items-center justify-between">
-                        <Text className="text-xs font-medium">Selected Models</Text>
-                      </div>
-                  </TooltipContent>
-                  )}
                 </Tooltip>
               </TooltipProvider>
             ) : (

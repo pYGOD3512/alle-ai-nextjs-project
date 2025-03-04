@@ -190,6 +190,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import Papa from "papaparse";
 
 import { chatApi } from "@/lib/api/chat";
+import { truncate } from "fs";
 
 interface ModalProps {
   isOpen: boolean;
@@ -688,9 +689,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   // Plan limits
   const MODEL_LIMITS: Record<UserPlan, number> = {
-    free: 2,
-    standard: 3,
-    plus: 5
+    free: 6,
+    standard: 6,
+    plus: 6
   };
 
   const handleFavoriteToggle = async (e: React.MouseEvent, model: Model) => {
@@ -1109,6 +1110,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
 export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) {
   const { theme, setTheme } = useTheme();
+  const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
@@ -1128,6 +1130,12 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
   const [isDevicesOpen, setIsDevicesOpen] = useState(true);
+  const [showSummaryPrompt, setShowSummaryPrompt] = useState(false);
+
+  // Calculate active models count
+  const activeModelsCount = selectedModels.chat.filter(
+    modelId => !inactiveModels.includes(modelId)
+  ).length;
 
   const [promptConfig, setPromptConfig] = useState<any>(null);
   const [showPromptModal, setShowPromptModal] = useState(false);
@@ -1137,6 +1145,32 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const { plan, user } = useAuthStore();
   const isFreeUser = plan === 'free' || !plan;
 
+  // Effect to handle summary toggle based on active models
+  useEffect(() => {
+    if (activeModelsCount > 2) {
+    const AutoActivate = async () => {
+        const response = await chatApi.updateSummaryPreference(false);
+        if (response.status) {
+            console.log('autoactivation', response)
+          useAuthStore.setState((state) => ({
+            ...state,
+            user: state.user ? {
+              ...state.user,
+              summary: response.value ? 1 : 0
+            } : state.user
+          }));
+          
+          setPersonalizationSetting('summary', false);
+          toast({
+            title: "Success",
+            description: "Summary preference updated successfully",
+          });
+        }
+      }
+      AutoActivate();
+    }
+
+  }, [activeModelsCount]);
 
   // Group voices by language/category with safety checks
   const voiceCategories = useMemo(() => {
@@ -1344,6 +1378,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   };
 
   const handleSwitchChange = async (key: keyof typeof personalization, checked: boolean) => {
+    if (activeModelsCount < 2) {
+      setShowSummaryPrompt(true);
+      return;
+    }
+
     if (key === "summary") {
       if (!isFreeUser) {
         setPromptConfig({
@@ -2320,6 +2359,19 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
           deviceInfo={settingsData.security.devices.activeDevices.find(d => d.id === logoutDeviceId)}
         />
       )}
+      <PromptModal
+        isOpen={showSummaryPrompt}
+        onClose={() => setShowSummaryPrompt(false)}
+        title="NOTICE"
+        message="At least 2 active models are required to enable the Alle-AI Summary."
+        actions={[
+          {
+            label: "Ok",
+            onClick: () => setShowSummaryPrompt(false),
+            variant: "default"
+          }
+        ]}
+      />
     </>
   );
 }

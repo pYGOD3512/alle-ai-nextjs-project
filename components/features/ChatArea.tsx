@@ -312,9 +312,7 @@ export function ChatArea() {
       if (!conversationId || !promptId) return;
 
       const summaryEnabledForMessage = user?.summary === 1;
-      const activeModels = selectedModels.chat.filter(
-        modelId => !inactiveModels.includes(modelId)
-      );
+      const activeModels = selectedModels.chat.filter(modelId => !inactiveModels.includes(modelId));
 
       setBranches(prev => prev.map(branch => ({
         ...branch,
@@ -497,11 +495,20 @@ export function ChatArea() {
           console.log('Combination response received:', combinationResponse);
 
           const modelImages = selectedModels.chat
+            .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
             .map(modelId => {
-              const model = chatModels.find(m => m.model_uid === modelId);
-              return model?.model_image || null;
+                const model = chatModels.find(m => m.model_uid === modelId);
+                return model?.model_image || null;
             })
             .filter((img): img is string => Boolean(img) && img !== '');
+
+          const modelNames = selectedModels.chat
+            .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+            .map(modelId => {
+                const model = chatModels.find(m => m.model_uid === modelId);
+                return model?.model_name || null; // Collect model names
+            })
+            .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
 
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
@@ -517,7 +524,8 @@ export function ChatArea() {
                       modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
-                      model_images: modelImages
+                      model_images: modelImages,
+                      model_names: modelNames
                     }]
                   } : msg
                 )
@@ -564,7 +572,7 @@ export function ChatArea() {
         });
       } finally {
         setIsLoadingConversation(false);
-        setGenerationType('new');
+        // setGenerationType('new');
       }
     };
 
@@ -590,6 +598,12 @@ export function ChatArea() {
 
           const webSearchSources = message.input_content?.web_search_results?.results || [];
 
+          // Extract model names
+          const modelNames = message.responses.map((response: LoadedResponse) => {
+            const model = chatModels.find(m => m.model_uid === response.model.uid);
+            return model ? model.model_name : null;
+          }).filter(Boolean); // Filter out nulls
+
           return {
             id: String(message.prompt_id),
             content: message.prompt,
@@ -605,21 +619,23 @@ export function ChatArea() {
                   status: 'complete' as const,
                   model_images: message.responses
                     .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
-                    .map((r: LoadedResponse) => r.model.image)
+                    .map((r: LoadedResponse) => r.model.image),
+                  model_names: modelNames // Store model names here
                 }]
-              : message.responses
-                  .filter((response: LoadedResponse) => 
-                    response.model.uid !== 'alle-ai-comb' && 
-                    response.model.uid !== 'alle-ai-summ'
-                  )
-                  .map((response: LoadedResponse) => ({
-                    id: String(response.id),
-                    modelId: response.model.uid,
-                    content: response.body,
-                    status: 'complete' as const,
-                    model_images: [response.model.image],
-                    sources: webSearchSources
-                  }))
+                : message.responses
+                    .filter((response: LoadedResponse) => 
+                      response.model.uid !== 'alle-ai-comb' && 
+                      response.model.uid !== 'alle-ai-summ'
+                    )
+                    .map((response: LoadedResponse) => ({
+                      id: String(response.id),
+                      modelId: response.model.uid,
+                      content: response.body,
+                      status: 'complete' as const,
+                      model_images: [response.model.image],
+                      model_names: modelNames, // Store model names here
+                      sources: webSearchSources
+                    }))
           };
         })
       } : branch
@@ -832,11 +848,20 @@ export function ChatArea() {
           });
 
           const modelImages = selectedModels.chat
-            .map(modelId => {
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
               const model = chatModels.find(m => m.model_uid === modelId);
               return model?.model_image || null;
-            })
-            .filter((img): img is string => Boolean(img) && img !== '');
+          })
+          .filter((img): img is string => Boolean(img) && img !== '');
+
+          const modelNames = selectedModels.chat
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_name || null; // Collect model names
+          })
+          .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
 
           if (modelImages.length > 0) {
             setBranches(prev => prev.map((branch, idx) => 
@@ -850,7 +875,8 @@ export function ChatArea() {
                       modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
-                      model_images: modelImages
+                      model_images: modelImages,
+                      model_names: modelNames
                     }]
                   } : msg
                 )
@@ -1084,11 +1110,20 @@ export function ChatArea() {
 
           // Add null check and filter out any undefined or empty strings
           const modelImages = selectedModels.chat
-            .map(modelId => {
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
               const model = chatModels.find(m => m.model_uid === modelId);
               return model?.model_image || null;
-            })
-            .filter((img): img is string => Boolean(img) && img !== '');
+          })
+          .filter((img): img is string => Boolean(img) && img !== '');
+
+          const modelNames = selectedModels.chat
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_name || null; // Collect model names
+          })
+          .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
 
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
@@ -1104,7 +1139,8 @@ export function ChatArea() {
                       modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
-                      model_images: modelImages
+                      model_images: modelImages,
+                      model_names: modelNames
                     }]
                   } : msg
                 )
@@ -1380,8 +1416,9 @@ export function ChatArea() {
                     {combinedLoading[message.id] && (
                       <CombinedLoader 
                         modelNames={selectedModels.chat
+                          .filter(modelId => !inactiveModels.includes(modelId)) // Filter to get only active models
                           .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
-                          .filter(Boolean) as string[]
+                          .filter(Boolean) as string[] // Ensure no undefined values are included
                         }
                       />
                     )}
@@ -1494,10 +1531,7 @@ export function ChatArea() {
                         <ModelResponse
                           key={`${conversationId}-${activeContents[message.id].id}`}
                           model={activeContents[message.id].id === 'alle-ai-comb' 
-                            ? selectedModels.chat
-                                .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
-                                .filter(Boolean)
-                                .join(' + ')
+                            ? message.responses.flatMap(r => r.model_names).filter(Boolean).join(' + ')
                             : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
                           content={
                             message.createdInCombinedMode 
@@ -1505,10 +1539,8 @@ export function ChatArea() {
                               : message.responses.find(r => r.modelId === activeContents[message.id].id)?.content || ""
                           }
                           model_img={activeContents[message.id].id === 'alle-ai-comb'
-                            ? selectedModels.chat
-                                .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_image)
-                                .filter((img): img is string => Boolean(img) && img !== '')
-                            : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
+                            ? message.responses.flatMap(r => r.model_images).filter(Boolean)
+                            :  chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
                           responseId={
                             message.createdInCombinedMode
                               ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.id

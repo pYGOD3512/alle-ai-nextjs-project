@@ -44,6 +44,7 @@ interface ChatInputProps {
   isCombined?: boolean;
   onWebSearchToggle?: (enabled: boolean) => void;
   onCombinedToggle?: (enabled: boolean) => void;
+  disableCombined?: boolean;
 }
 
 export function ChatInput({
@@ -55,13 +56,14 @@ export function ChatInput({
   isWeb,
   isCombined,
   onWebSearchToggle,
-  onCombinedToggle
+  onCombinedToggle,
+  disableCombined
 }: ChatInputProps) {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
   const { isWebSearch, setIsWebSearch } = useWebSearchStore();
   const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
-  const { selectedModels } = useSelectedModelsStore();
+  const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [fileContent, setFileContent] = useState<{
@@ -72,6 +74,7 @@ export function ChatInput({
       file_content: string;
     }>;
   } | null>(null);
+  const [showCombinedPrompt, setShowCombinedPrompt] = useState(false);
 
   const pathname = usePathname();
 
@@ -354,6 +357,12 @@ export function ChatInput({
   };
 
   const handleCombinedToggle = () => {
+    // Check for minimum active models before enabling combined mode
+    if (!isCombinedMode && activeModelsCount < 2) {
+      setShowCombinedPrompt(true);
+      return;
+    }
+
     const newValue = !isCombinedMode;
     setIsCombinedMode(newValue);
     onCombinedToggle?.(newValue);
@@ -426,6 +435,27 @@ export function ChatInput({
           };
       }
     };
+
+  // Calculate active models count
+  const activeModelsCount = selectedModels.chat.filter(
+    modelId => !inactiveModels.includes(modelId)
+  ).length;
+
+  // Add an effect to monitor active models count
+  useEffect(() => {
+    if (isCombinedMode && activeModelsCount < 2) {
+      // Automatically disable combined mode
+      setIsCombinedMode(false);
+      onCombinedToggle?.(false);
+      
+      // Show notification
+      toast({
+        title: "Combined Mode Disabled",
+        description: "Combined mode has been disabled due to insufficient active models (minimum 2 required).",
+        variant: "default"
+      });
+    }
+  }, [activeModelsCount, isCombinedMode, onCombinedToggle]);
 
   return (
     <>
@@ -587,6 +617,20 @@ export function ChatInput({
               setShowModelPrompt(false);
               setModelSelectionModalOpen(true)
             },
+            variant: "default"
+          }
+        ]}
+      />
+
+      <PromptModal
+        isOpen={showCombinedPrompt}
+        onClose={() => setShowCombinedPrompt(false)}
+        title="NOTICE"
+        message="At least 2 active models are required to generate summary and combined responses on Alle-AI."
+        actions={[
+          {
+            label: "Ok",
+            onClick: () => setShowCombinedPrompt(false),
             variant: "default"
           }
         ]}
