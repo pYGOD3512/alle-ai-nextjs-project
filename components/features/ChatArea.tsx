@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSelector } from "./ModelSelector";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { ModelResponse, useSourcesWindowStore } from "./ModelResponse";
+import { ModelResponse as ModelResponseComponent, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import RetryResponse from "./RetryResponse"
 import {
@@ -45,6 +45,17 @@ interface ChatSession {
   activeModel: string;
   status: 'active' | 'complete';
 }
+interface ModelResponse {
+  id: string; // response ID
+  modelId: string; // model_uid
+  content: string;
+  status: 'loading' | 'complete' | 'error';
+  error?: string;
+  sources?: Source[];
+  model_names?: string[];
+  model_images?: string[];
+}
+
 
 interface ChatMessage {
   id: string;
@@ -53,15 +64,6 @@ interface ChatMessage {
   timestamp: Date;
   responses: ModelResponse[];
   createdInCombinedMode: boolean;
-}
-
-interface ModelResponse {
-  id: string; // response ID
-  modelId: string; // model_uid
-  content: string;
-  status: 'loading' | 'complete' | 'error';
-  error?: string;
-  sources?: Source[];
 }
 
 interface Message {
@@ -1528,7 +1530,7 @@ export function ChatArea() {
                     </div>
                     <div className="mt-4">
                       {activeContents[message.id]?.type === 'model' && (
-                        <ModelResponse
+                        <ModelResponseComponent
                           key={`${conversationId}-${activeContents[message.id].id}`}
                           model={activeContents[message.id].id === 'alle-ai-comb' 
                             ? message.responses.flatMap(r => r.model_names).filter(Boolean).join(' + ')
@@ -1539,7 +1541,7 @@ export function ChatArea() {
                               : message.responses.find(r => r.modelId === activeContents[message.id].id)?.content || ""
                           }
                           model_img={activeContents[message.id].id === 'alle-ai-comb'
-                            ? message.responses.flatMap(r => r.model_images).filter(Boolean)
+                            ? message.responses.flatMap(r => r.model_images).filter(Boolean) as string[]
                             :  chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
                           responseId={
                             message.createdInCombinedMode
@@ -1560,7 +1562,7 @@ export function ChatArea() {
                         />
                       )}
                       {activeContents[message.id]?.type === 'summary' && (
-                      <ModelResponse
+                      <ModelResponseComponent
                         key={`${conversationId}-alle-ai-summ`}
                         model="Alle-AI Summary"
                         content={summaryContent[message.id] || ""}

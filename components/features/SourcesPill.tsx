@@ -31,8 +31,7 @@ import Image from 'next/image';
           {displaySources.map((source, index) => (
             <div
               key={index}
-              className="relative w-4 h-4 rounded-full border border-background
-                        ring-2 ring-background
+              className="bg-bodyColor relative w-4 h-4 rounded-full border border-background
                         transition-transform duration-200
                         hover:translate-y-[-2px]"
               style={{
