@@ -13,9 +13,9 @@ export function CombinedLoader({ modelNames }: CombinedLoaderProps) {
   
   // Create loading messages based on model names
   const loadingMessages = [
-    `Combining ${modelNames.join(' & ')}...`,
-    `${modelNames.join(' & ')} working together...`,
-    `Creating a unified response...`
+    `Combining ${modelNames.join(' & ')}`,
+    `${modelNames.join(' & ')} working together`,
+    `Creating a unified response`
   ];
 
   const currentMessage = textReveal(loadingMessages[currentIndex]);

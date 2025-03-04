@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import OrganizationPlansArea from "./OrganizationPlansArea";
+import { useAuthStore } from "@/stores";
 
 const PlansArea = () => {
   const [isYearly, setIsYearly] = useState(false);
@@ -18,6 +19,8 @@ const PlansArea = () => {
   const [showOrgPlans, setShowOrgPlans] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { user, token, plan, setAuth } = useAuthStore();
+
 
   const handleCustomPlan = () => {
     toast({
@@ -43,6 +46,7 @@ const PlansArea = () => {
 
       if (response.status && response.to) {
         if (planName.toLowerCase() === 'free') {
+          setAuth(user!, token!, 'free');
           router.push(response.to);
         } else {
           window.location.href = response.to;

@@ -215,10 +215,10 @@ const ImageArea = () => {
       }
     };
 
-    if (generationType === 'load') {
-      loadConversation();
-    } else if(generationType === 'new'){
+    if (generationType === 'new') {
       handleInitialResponse();
+    } else if(generationType === 'load'){
+      loadConversation();
     }
   }, []);
 

@@ -8,7 +8,6 @@ import { HistoryItem } from '@/lib/api/history';
 
 import { driveService } from '@/lib/services/driveServices';
 
-import { CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS, chatHistory, imageHistory, audioHistory, videoHistory } from '@/lib/constants';
 import { useModelsStore } from "./models";
 
 type ContentKey = "input" | "voice" | "attachment";

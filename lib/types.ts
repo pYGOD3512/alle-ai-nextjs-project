@@ -177,3 +177,21 @@ export interface Branch {
   messages: Message[];
   startPosition: [number, number];
 }
+
+export interface LoadedConversation {
+  input_content: any | null;
+  position: [number, number];
+  prompt: string;
+  prompt_id: number;
+  responses: Array<{
+    body: string;
+    id: number;
+    liked: boolean | null;
+    model: {
+      uid: string;
+      name: string;
+      image: string;
+      model_plan: string;
+    }
+  }>;
+}

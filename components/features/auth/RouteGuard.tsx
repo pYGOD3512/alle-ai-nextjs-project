@@ -5,6 +5,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores';
 import { LoadingScreen } from './LoadingScreen';
 import { authApi } from '@/lib/api/auth';
+import { useConversationStore } from '@/stores/models';
+
 
 interface RouteGuardProps {
   children: ReactNode;
@@ -21,6 +23,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   const { token, setAuth, clearAuth } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
   const [canRender, setCanRender] = useState(false);
+  const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
 
   useEffect(() => {
     const checkAuth = async () => {

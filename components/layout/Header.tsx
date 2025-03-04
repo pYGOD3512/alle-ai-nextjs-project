@@ -453,7 +453,7 @@ export function Header() {
                 <span className="text-xs text-muted-foreground">Last used models...</span>
               </div>
             ) :
-            selectedModelNames.length > 0 ? (
+            (selectedModelNames.length > 0) ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

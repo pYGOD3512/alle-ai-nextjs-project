@@ -44,7 +44,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       setPassword("");
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again",
+        description: `${error}`,
         variant: "destructive",
       });
     } finally {

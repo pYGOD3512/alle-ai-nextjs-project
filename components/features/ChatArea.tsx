@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSelector } from "./ModelSelector";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { ModelResponse, useSourcesWindowStore } from "./ModelResponse";
+import { ModelResponse as ModelResponseComponent, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import RetryResponse from "./RetryResponse"
 import {
@@ -24,7 +24,7 @@ import { SourcesWindow } from "../SourcesWindow";
 import { Summary } from "./Summary";
 import { Card } from "@/components/ui/card";
 import { Model } from "@/lib/api/models";
-import { Source } from '@/lib/types';
+import { Source, LoadedConversation } from '@/lib/types';
 import {
   Collapsible,
   CollapsibleContent,
@@ -34,6 +34,8 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { CombinedLoader } from "@/components/features/CombinedLoader";
 import { cn } from "@/lib/utils";
 import { useParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useAuthStore } from "@/stores";
 
 
 interface ChatSession {
@@ -43,6 +45,17 @@ interface ChatSession {
   activeModel: string;
   status: 'active' | 'complete';
 }
+interface ModelResponse {
+  id: string; // response ID
+  modelId: string; // model_uid
+  content: string;
+  status: 'loading' | 'complete' | 'error';
+  error?: string;
+  sources?: Source[];
+  model_names?: string[];
+  model_images?: string[];
+}
+
 
 interface ChatMessage {
   id: string;
@@ -53,20 +66,12 @@ interface ChatMessage {
   createdInCombinedMode: boolean;
 }
 
-interface ModelResponse {
-  id: string; // response ID
-  modelId: string; // model_uid
-  content: string;
-  status: 'loading' | 'complete' | 'error';
-  error?: string;
-  sources?: Source[];
-}
-
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
+  summaryEnabled?: boolean;
   position: [number, number];
   responses: ModelResponse[];
   createdInCombinedMode: boolean;
@@ -78,12 +83,24 @@ interface Branch {
   parentPosition?: [number, number];
 }
 
+interface LoadedResponse {
+  id: number;
+  body: string;
+  model: {
+    uid: string;
+    name: string;
+    image: string;
+    model_plan: string;
+  };
+  liked: boolean | null;
+}
+
 export function ChatArea() {
   const { toast } = useToast();
   const { content } = useContentStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const { chatModels } = useModelsStore();
-  const { conversationId, promptId, setConversationId, generationType } = useConversationStore();
+  const { conversationId, promptId, setConversationId, generationType, setGenerationType } = useConversationStore();
   const { personalization } = useSettingsStore();
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
@@ -92,6 +109,10 @@ export function ChatArea() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const pathname = usePathname();
+
+  const { user } = useAuthStore();
+  const isSummaryEnabled = user?.summary === 1;
 
   const params = useParams();
   const loadConversationId = params.chatId as string;
@@ -232,38 +253,36 @@ export function ChatArea() {
         }, 4000); 
       }
     });
-  }, [chatSessions, showSummary, generatingSummary]);
+  }, [generatingSummary]);
 
-  // Add this effect to handle summary generation when responses are complete
+  // First, let's fix the useEffect that handles summary generation
   useEffect(() => {
+    if (!isSummaryEnabled) return;
+
     const handleSummaryGeneration = async (messageId: string) => {
       const message = branches[currentBranch].messages.find(msg => msg.id === messageId);
       if (!message || message.createdInCombinedMode) return;
 
-      // Check if all responses are complete
+      // Check if all responses are complete and summary isn't already shown or generating
       const allResponsesComplete = message.responses.every(
         response => response.status === 'complete'
       );
 
-      if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId]) {
-        console.log(messageId,'is this the prompt id?')
+      // Only generate summary for new messages (not loaded ones)
+      if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId] && generationType !== 'load') {
         try {
           setGeneratingSummary(prev => ({ ...prev, [messageId]: true }));
 
           const modelResponsePairs = message.responses
-          .filter(response => response.status === 'complete')
-          .map(response => Number(response.id));
-          
-          // Make API call to generate summary
+            .filter(response => response.status === 'complete')
+            .map(response => Number(response.id));
+
           const summaryResponse = await chatApi.getSummary({
             messageId,
             modelResponsePairs
           });
-          // console.log(summaryResponse, 'The simulated summary call')
-          // Update summary state
+
           setShowSummary(prev => ({ ...prev, [messageId]: true }));
-          
-          // Store summary content (you might need to add this to your state)
           setSummaryContent(prev => ({
             ...prev,
             [messageId]: summaryResponse.summary
@@ -282,20 +301,37 @@ export function ChatArea() {
       }
     };
 
-    // Check each message in the current branch
-    branches[currentBranch]?.messages.forEach(message => {
-      handleSummaryGeneration(message.id);
-    });
-  }, [branches, currentBranch, showSummary, generatingSummary]);
+    if (isSummaryEnabled) {
+      branches[currentBranch]?.messages.forEach(message => {
+        handleSummaryGeneration(message.id);
+      });
+    }
+  }, [ generatingSummary]); // Add generationType to dependencies
 
   // Update the effect to handle initial responses
   useEffect(() => {
     const handleInitialResponse = async () => {
       if (!conversationId || !promptId) return;
 
-      const activeModels = selectedModels.chat.filter(
-        modelId => !inactiveModels.includes(modelId)
-      );
+      const summaryEnabledForMessage = user?.summary === 1;
+      const activeModels = selectedModels.chat.filter(modelId => !inactiveModels.includes(modelId));
+
+      setBranches(prev => prev.map(branch => ({
+        ...branch,
+        messages: branch.messages.map(msg => 
+          msg.id === promptId ? {
+            ...msg,
+            createdInCombinedMode: isCombinedMode,
+            summaryEnabled: summaryEnabledForMessage,
+            responses: activeModels.map(modelId => ({
+              id: `temp-${modelId}`,
+              modelId,
+              content: '',
+              status: 'loading'
+            }))
+          } : msg
+        )
+      })));
 
       // Handle web search first if enabled
       if (isWebSearch) {
@@ -359,6 +395,8 @@ export function ChatArea() {
               messages: branch.messages.map(msg => 
                 msg.id === promptId ? {
                   ...msg,
+                  createdInCombinedMode: isCombinedMode,
+                  summaryEnabled: summaryEnabledForMessage,
                   responses: msg.responses.map(resp => 
                     resp.modelId === modelId ? {
                       ...resp,
@@ -421,6 +459,34 @@ export function ChatArea() {
         }
       }));
 
+      // Handle summary response
+      if (summaryEnabledForMessage && !isCombinedMode) {
+        try {
+          setGeneratingSummary(prev => ({ ...prev, [promptId]: true }));
+  
+          // Make API call to generate summary
+          const summaryResponse = await chatApi.getSummary({
+            messageId: promptId,
+            modelResponsePairs
+          });
+  
+          setShowSummary(prev => ({ ...prev, [promptId]: true }));
+          setSummaryContent(prev => ({
+            ...prev,
+            [promptId]: summaryResponse.summary
+          }));
+        } catch (error) {
+          console.error('Error generating summary:', error);
+          toast({
+            title: "Error",
+            description: "Failed to generate summary",
+            variant: "destructive"
+          });
+        } finally {
+          setGeneratingSummary(prev => ({ ...prev, [promptId]: false }));
+        }
+      }
+
       // Handle combined mode response
       if (isCombinedMode) {
         try {
@@ -431,13 +497,21 @@ export function ChatArea() {
           console.log('Combination response received:', combinationResponse);
 
           const modelImages = selectedModels.chat
+            .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
             .map(modelId => {
-              const model = chatModels.find(m => m.model_uid === modelId);
-              return model?.model_image || null;
+                const model = chatModels.find(m => m.model_uid === modelId);
+                return model?.model_image || null;
             })
             .filter((img): img is string => Boolean(img) && img !== '');
 
-          console.log(modelImages,'this is a model image')
+          const modelNames = selectedModels.chat
+            .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+            .map(modelId => {
+                const model = chatModels.find(m => m.model_uid === modelId);
+                return model?.model_name || null; // Collect model names
+            })
+            .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
+
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
             // Update the branch with the combined response
@@ -452,7 +526,8 @@ export function ChatArea() {
                       modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
-                      model_images: modelImages
+                      model_images: modelImages,
+                      model_names: modelNames
                     }]
                   } : msg
                 )
@@ -489,6 +564,7 @@ export function ChatArea() {
         const response = await chatApi.getConversationContent('chat', loadConversationId);
         console.log('Loaded conversation content:', response);
         
+        handleLoadConversation(response);
       } catch (error) {
         console.error('Error loading conversation:', error);
         toast({
@@ -498,17 +574,120 @@ export function ChatArea() {
         });
       } finally {
         setIsLoadingConversation(false);
+        // setGenerationType('new');
       }
     };
 
-    if (generationType === 'load') {
-      loadConversation();
-    } else if(generationType === 'new'){
+    if (generationType === 'new') {
       handleInitialResponse();
+    } else if(generationType === 'load'){
+      loadConversation();
     }
 
     // handleInitialResponse();
   }, []);
+
+  // When loading the conversation
+  const handleLoadConversation = (loadedConversation: any[]) => {
+    setBranches(prev => prev.map((branch, idx) => 
+      idx === currentBranch ? {
+        ...branch,
+        messages: loadedConversation.map(message => {
+          // Check if this message has a combined response
+          const combinedResponse = message.responses.find(
+            (response: LoadedResponse) => response.model.uid === 'alle-ai-comb'
+          );
+
+          const webSearchSources = message.input_content?.web_search_results?.results || [];
+
+          // Extract model names
+          const modelNames = message.responses.map((response: LoadedResponse) => {
+            const model = chatModels.find(m => m.model_uid === response.model.uid);
+            return model ? model.model_name : null;
+          }).filter(Boolean); // Filter out nulls
+
+          return {
+            id: String(message.prompt_id),
+            content: message.prompt,
+            sender: 'user',
+            timestamp: new Date(),
+            position: message.position,
+            createdInCombinedMode: !!combinedResponse, // Set based on presence of combined response
+            responses: combinedResponse 
+              ? [{
+                  id: String(combinedResponse.id),
+                  modelId: 'alle-ai-comb',
+                  content: combinedResponse.body,
+                  status: 'complete' as const,
+                  model_images: message.responses
+                    .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
+                    .map((r: LoadedResponse) => r.model.image),
+                  model_names: modelNames // Store model names here
+                }]
+                : message.responses
+                    .filter((response: LoadedResponse) => 
+                      response.model.uid !== 'alle-ai-comb' && 
+                      response.model.uid !== 'alle-ai-summ'
+                    )
+                    .map((response: LoadedResponse) => ({
+                      id: String(response.id),
+                      modelId: response.model.uid,
+                      content: response.body,
+                      status: 'complete' as const,
+                      model_images: [response.model.image],
+                      model_names: modelNames, // Store model names here
+                      sources: webSearchSources
+                    }))
+          };
+        })
+      } : branch
+    ));
+
+    // Handle summaries and set active contents
+    loadedConversation.forEach(message => {
+      const summaryResponse = message.responses.find(
+        (response: LoadedResponse) => response.model.uid === 'alle-ai-summ'
+      );
+      
+      const combinedResponse = message.responses.find(
+        (response: LoadedResponse) => response.model.uid === 'alle-ai-comb'
+      );
+      
+      if (summaryResponse) {
+        setSummaryContent(prev => ({
+          ...prev,
+          [String(message.prompt_id)]: summaryResponse.body
+        }));
+        setShowSummary(prev => ({
+          ...prev,
+          [String(message.prompt_id)]: true
+        }));
+        setGeneratingSummary(prev => ({
+          ...prev,
+          [String(message.prompt_id)]: false
+        }));
+      }
+
+      // Set active content based on response type
+      setActiveContents(prev => ({
+        ...prev,
+        [String(message.prompt_id)]: combinedResponse 
+          ? {
+              type: 'model',
+              id: 'alle-ai-comb'
+            }
+          : summaryResponse
+          ? {
+              type: 'summary',
+              id: 'alle-ai-summ'
+            }
+          : {
+              type: 'model',
+              id: message.responses[0].model.uid
+            }
+      }));
+    });
+  };
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -518,6 +697,7 @@ export function ChatArea() {
     if (!conversationId) return;
 
     try {
+      const summaryEnabledForMessage = user?.summary === 1;
       // Create prompt
       const promptResponse = await chatApi.createPrompt(
         conversationId,
@@ -534,11 +714,14 @@ export function ChatArea() {
           timestamp: new Date(),
           position,
           createdInCombinedMode: isCombinedMode,
-          responses: selectedModels.chat.map(modelId => ({
-            id: `temp-${modelId}`,
-            modelId,
-            content: '',
-            status: 'loading'
+          summaryEnabled: summaryEnabledForMessage,
+          responses: selectedModels.chat
+            .filter(modelId => !inactiveModels.includes(modelId))
+            .map(modelId => ({
+              id: `temp-${modelId}`,
+              modelId,
+              content: '',
+              status: 'loading'
           }))
         }],
         startPosition: position,
@@ -629,6 +812,35 @@ export function ChatArea() {
         }
       }));
 
+
+      //Handle summary mode if enabled
+      if (summaryEnabledForMessage && !isCombinedMode) {
+      try {
+        setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: true }));
+
+        // Make API call to generate summary
+        const summaryResponse = await chatApi.getSummary({
+          messageId: promptResponse.id,
+          modelResponsePairs
+        });
+
+        setShowSummary(prev => ({ ...prev, [promptResponse.id]: true }));
+        setSummaryContent(prev => ({
+          ...prev,
+          [promptResponse.id]: summaryResponse.summary
+        }));
+      } catch (error) {
+        console.error('Error generating summary:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate summary",
+          variant: "destructive"
+        });
+      } finally {
+        setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: false }));
+      }
+    }
+
       // Handle combined mode if enabled
       if (isCombinedMode && modelResponsePairs.length > 0) {
         try {
@@ -638,11 +850,20 @@ export function ChatArea() {
           });
 
           const modelImages = selectedModels.chat
-            .map(modelId => {
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
               const model = chatModels.find(m => m.model_uid === modelId);
               return model?.model_image || null;
-            })
-            .filter((img): img is string => Boolean(img) && img !== '');
+          })
+          .filter((img): img is string => Boolean(img) && img !== '');
+
+          const modelNames = selectedModels.chat
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_name || null; // Collect model names
+          })
+          .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
 
           if (modelImages.length > 0) {
             setBranches(prev => prev.map((branch, idx) => 
@@ -656,7 +877,8 @@ export function ChatArea() {
                       modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
-                      model_images: modelImages
+                      model_images: modelImages,
+                      model_names: modelNames
                     }]
                   } : msg
                 )
@@ -694,6 +916,8 @@ export function ChatArea() {
     
     
     try {
+      const summaryEnabledForMessage = user?.summary === 1;
+
       const currentBranchMessages = branches[currentBranch].messages;
       const lastMessage = currentBranchMessages[currentBranchMessages.length - 1];
       
@@ -711,26 +935,28 @@ export function ChatArea() {
       setInput("");
 
       // Store the current combined mode state with the message
-      setBranches(prev => prev.map((branch, index) => 
-        index === currentBranch
-          ? {
-              ...branch,
-              messages: [...branch.messages, {
-                id: promptResponse.id,
-                content: input,
-                sender: 'user',
-                timestamp: new Date(),
-                position: nextPosition,
-                createdInCombinedMode: isCombinedMode,
-                responses: selectedModels.chat.map(modelId => ({
-                  id: `temp-${modelId}`,
-                  modelId,
-                  content: '',
-                  status: 'loading'
-                }))
-              }]
-            }
-          : branch
+
+      setBranches(prev => prev.map((branch, idx) => 
+        idx === currentBranch ? {
+          ...branch,
+          messages: [...branch.messages, {
+            id: promptResponse.id,
+            content: input,
+            sender: 'user',
+            timestamp: new Date(),
+            position: nextPosition,
+            createdInCombinedMode: isCombinedMode,
+            summaryEnabled: summaryEnabledForMessage,
+            responses: selectedModels.chat
+              .filter(modelId => !inactiveModels.includes(modelId))
+              .map(modelId => ({
+                id: `temp-${modelId}`,
+                modelId,
+                content: '',
+                status: 'loading'
+            }))
+          } as Message]
+        } : branch
       ));
 
       // Handle web search first if enabled
@@ -886,13 +1112,21 @@ export function ChatArea() {
 
           // Add null check and filter out any undefined or empty strings
           const modelImages = selectedModels.chat
-            .map(modelId => {
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
               const model = chatModels.find(m => m.model_uid === modelId);
               return model?.model_image || null;
-            })
-            .filter((img): img is string => Boolean(img) && img !== '');
+          })
+          .filter((img): img is string => Boolean(img) && img !== '');
 
-            console.log(modelImages,'this is a model image')
+          const modelNames = selectedModels.chat
+          .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
+          .map(modelId => {
+              const model = chatModels.find(m => m.model_uid === modelId);
+              return model?.model_name || null; // Collect model names
+          })
+          .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
+
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
             // Update the branch with the combined response
@@ -907,7 +1141,8 @@ export function ChatArea() {
                       modelId: 'alle-ai-comb',
                       content: combinationResponse.combination,
                       status: 'complete',
-                      model_images: modelImages
+                      model_images: modelImages,
+                      model_names: modelNames
                     }]
                   } : msg
                 )
@@ -966,7 +1201,7 @@ export function ChatArea() {
       ...prev,
       [messageId]: {
         type: 'summary',
-        id: 'default'
+        id: 'alle-ai-summ'
       }
     }));
   }, []);
@@ -1148,208 +1383,207 @@ export function ChatArea() {
             </div>
           </div>
         )}
-        <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
-          {branches[currentBranch]?.messages?.map((message, index) => {
-            const level = message.position[1];
-            
-            return (
-              <div key={`${message.position[0]}-${message.position[1]}`} className="mb-8">
-                <BranchTabs
-                  level={level}
-                  branches={branches}
-                  currentBranch={currentBranch}
-                  onBranchSelect={setCurrentBranch}
-                />
-                <ChatMessage
-                  content={message.content}
-                  sender={message.sender}
-                  timestamp={message.timestamp}
-                  position={message.position}
-                  onEditMessage={handleEditMessage}
-                  totalBranches={branches.length}
-                  currentBranch={currentBranch}
-                  onBranchChange={setCurrentBranch}
-                  branches={branches}
-                />
-                <div className="">
-                  {webSearchLoading[message.id] && (
-                    <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
-                      <p className="text-sm animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
-                        Searching the web...
-                      </p>
-                    </div>
-                  )}
-                  {combinedLoading[message.id] && (
-                    <CombinedLoader 
-                      modelNames={selectedModels.chat
-                        .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
-                        .filter(Boolean) as string[]
-                      }
-                    />
-                  )}
-                  <div>
-                  {!message.createdInCombinedMode && !combinedLoading[message.id] && (
-                      <Collapsible
-                        open={expandedResponses[message.id]}
-                        onOpenChange={(isOpen) => 
-                          setExpandedResponses(prev => ({ ...prev, [message.id]: isOpen }))
-                        }
-                      >
-                        <CollapsibleTrigger className="ml-10">
-                          {(!webSearchLoading[message.id] && 
-                            !message.responses.some(r => r.status === 'loading')) && (
-                            <div className="flex items-center justify-start w-full space-x-2">
-                              <span></span>
-                              {expandedResponses[message.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            </div>
-                          )}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          {/* Only show Summary when all responses are complete AND not in combined mode */}
-                          {message.responses.every(r => r.status === 'complete') && 
-                           !message.createdInCombinedMode && (
-                            <div className="mb-4">
-                              <Summary 
-                                isGenerating={generatingSummary[message.id]}
-                                isActive={activeContents[message.id]?.type === 'summary'}
-                                onClick={() => handleSummarySelect(conversationId!, message.id)}
-                              />
-                            </div>
-                          )}
-                          <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto mt-2">
-                            {selectedModels.chat.map((modelId, index) => {
-                              const model = chatModels.find(m => m.model_uid === modelId);
-                              if (!model) return null;
-
-                            const response = message.responses?.[index];
-                            const isLoading = response?.status === 'loading';
-                            const hasError = response?.status === 'error';
-
-                              // Skip rendering if in combined mode and still loading
-                              if (message.createdInCombinedMode && isLoading) {
-                                return null;
-                              }
-
-                            if (isLoading && !message.createdInCombinedMode) {
-                              return (
-                                <div 
-                                  key={modelId}
-                                  className="flex flex-col items-start p-4 rounded-md border border-borderColorPrimary bg-background"
-                                >
-                                  <div className="flex items-center justify-center w-full space-x-2">
-                                    <div className="relative">
-                                      <Image
-                                        src={model.model_image}
-                                        alt={model.model_name}
-                                        width={24}
-                                        height={24}
-                                        className="rounded-full animate-pulse"
-                                      />
-                                      <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                                    </div>
-                                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-auto scrollbar-none">
-                                      {model.model_name}
-                                    </span>
-                                  </div>
-                                  <div className="w-full mt-3 space-y-2">
-                                    <Skeleton className="h-2 w-full" />
-                                  </div>
-                                </div>
-                              );
-                            }
-
-                              if (hasError) {
-                                return (
-                                  <RetryResponse
-                                    key={modelId}
-                                    model={model}
-                                    onRetry={() => handleRetry(modelId, message.id)}
-                                  />
-                                );
-                              }
-
-                            
-                            if (message.createdInCombinedMode) {
-                              return null;
-                            }
-
-                              return (
-                                <ModelSelector
-                                  key={modelId}
-                                  models={[{
-                                    ...model,
-                                    response: response?.content
-                                  } as Model]}
-                                  activeModel={activeContents[message.id]?.id === modelId ? modelId : ''}
-                                  onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
-                                />
-                              );
-                            })}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+        {!isLoadingConversation && (
+          <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
+            {branches[currentBranch]?.messages?.map((message, index) => {
+              const level = message.position[1];
+              
+              return (
+                <div key={`${message.position[0]}-${message.position[1]}`} className="mb-8">
+                  <BranchTabs
+                    level={level}
+                    branches={branches}
+                    currentBranch={currentBranch}
+                    onBranchSelect={setCurrentBranch}
+                  />
+                  <ChatMessage
+                    content={message.content}
+                    sender={message.sender}
+                    timestamp={message.timestamp}
+                    position={message.position}
+                    onEditMessage={handleEditMessage}
+                    totalBranches={branches.length}
+                    currentBranch={currentBranch}
+                    onBranchChange={setCurrentBranch}
+                    branches={branches}
+                  />
+                  <div className="">
+                    {webSearchLoading[message.id] && (
+                      <div className="p-4 grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto">
+                        <p className="text-sm animate-pulse bg-gradient-to-r from-primary via-primary/50 to-primary/20 bg-clip-text text-transparent">
+                          Searching the web...
+                        </p>
+                      </div>
                     )}
-                  </div>
-                  <div className="mt-4">
-                    {activeContents[message.id]?.type === 'model' && (
-                      <ModelResponse
-                        key={`${conversationId}-${activeContents[message.id].id}`}
-                        model={activeContents[message.id].id === 'alle-ai-comb' 
-                          ? selectedModels.chat
-                              .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
-                              .filter(Boolean)
-                              .join(' + ')
-                          : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
-                        content={
-                          message.createdInCombinedMode 
-                            ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.content
-                            : message.responses.find(r => r.modelId === activeContents[message.id].id)?.content || ""
+                    {combinedLoading[message.id] && (
+                      <CombinedLoader 
+                        modelNames={selectedModels.chat
+                          .filter(modelId => !inactiveModels.includes(modelId)) // Filter to get only active models
+                          .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_name)
+                          .filter(Boolean) as string[] // Ensure no undefined values are included
                         }
-                        model_img={activeContents[message.id].id === 'alle-ai-comb'
-                          ? selectedModels.chat
-                              .map(modelId => chatModels.find(m => m.model_uid === modelId)?.model_image)
-                              .filter((img): img is string => Boolean(img) && img !== '')
-                          : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
-                        responseId={
-                          message.createdInCombinedMode
-                            ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.id
-                            : message.responses.find(r => r.modelId === activeContents[message.id].id)?.id || ""
-                        }
-                        sessionId={conversationId!}
-                        feedback={responseFeedback[message.responses.find(r => 
-                          r.modelId === activeContents[message.id].id
-                        )?.id || ""]}
-                        onFeedbackChange={handleFeedbackChange}
-                        webSearchEnabled={isWebSearch}
-                        sources={message.responses.find(r => 
-                          r.modelId === activeContents[message.id].id
-                        )?.sources || []}
-                        onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
-                        onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)}
                       />
                     )}
-                    {activeContents[message.id]?.type === 'summary' && (
-                    <ModelResponse
-                      key={`${conversationId}-summary`}
-                      model="Alle-AI Summary"
-                      content={summaryContent[message.id] || ""}
-                      model_img="/svgs/logo-desktop-mini.png"
-                      responseId={`summary-${message.id}`}
-                      sessionId={conversationId!}
-                      onFeedbackChange={handleFeedbackChange}
-                      // You might want to disable certain features for summary display
-                      webSearchEnabled={false}
-                      sources={[]}
-                      onSourcesClick={() => {}}
-                      onRegenerate={() => {}}
-                    />
-                  )}
+                    <div>
+                    {!message.createdInCombinedMode && !combinedLoading[message.id] && (
+                        <Collapsible
+                          open={expandedResponses[message.id]}
+                          onOpenChange={(isOpen) => 
+                            setExpandedResponses(prev => ({ ...prev, [message.id]: isOpen }))
+                          }
+                        >
+                          <CollapsibleTrigger className="ml-10">
+                            {(!webSearchLoading[message.id] && 
+                              !message.responses.some(r => r.status === 'loading')) && (
+                              <div className="flex items-center justify-start w-full space-x-2">
+                                <span></span>
+                                {expandedResponses[message.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                              </div>
+                            )}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            {/* Only show Summary when all responses are complete AND not in combined mode */}
+                            {message.responses.every(r => r.status === 'complete') && 
+                             !message.createdInCombinedMode && 
+                             (showSummary[message.id] || summaryContent[message.id]) && (
+                                <Summary 
+                                  isGenerating={generatingSummary[message.id]}
+                                  isActive={activeContents[message.id]?.type === 'summary'}
+                                  onClick={() => handleSummarySelect(conversationId!, message.id)}
+                                />
+                            )}
+                            <div className="grid grid-cols-auto-fit gap-4 max-w-[90%] mx-auto mt-2">
+                              {message.responses.map((response, responseIndex) => {
+                                const model = chatModels.find(m => m.model_uid === response.modelId);
+                                if (!model) return null;
+
+                                const isLoading = response.status === 'loading';
+                                const hasError = response.status === 'error';
+
+                                // Skip rendering if in combined mode and still loading
+                                if (message.createdInCombinedMode && isLoading) {
+                                  return null;
+                                }
+
+                                // We should only show loaders for 'new' generation type
+                                if (isLoading && !message.createdInCombinedMode) {
+                                  // if (generationType === 'new') {
+                                    return (
+                                      <div 
+                                        key={response.modelId}
+                                        className="flex flex-col items-start p-4 rounded-md border border-borderColorPrimary bg-background"
+                                      >
+                                        <div className="flex items-center justify-center w-full space-x-2">
+                                          <div className="relative">
+                                            <Image
+                                              src={model.model_image}
+                                              alt={model.model_name}
+                                              width={24}
+                                              height={24}
+                                              className="rounded-full animate-pulse"
+                                            />
+                                            <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                                          </div>
+                                          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-auto scrollbar-none">
+                                            {model.model_name}
+                                          </span>
+                                        </div>
+                                        <div className="w-full mt-3 space-y-2">
+                                          <Skeleton className="h-2 w-full" />
+                                        </div>
+                                      </div>
+                                    );
+                                  // }
+                                  
+                                }
+
+                                if (hasError) {
+                                  return (
+                                    <RetryResponse
+                                      key={response.modelId}
+                                      model={model}
+                                      onRetry={() => handleRetry(response.modelId, message.id)}
+                                    />
+                                  );
+                                }
+
+                                if (message.createdInCombinedMode) {
+                                  return null;
+                                }
+
+                                return (
+                                  <ModelSelector
+                                    key={response.modelId}
+                                    models={[{
+                                      ...model,
+                                      response: response.content
+                                    } as Model]}
+                                    activeModel={activeContents[message.id]?.id === response.modelId ? response.modelId : ''}
+                                    onSelect={(modelId) => handleModelSelect(modelId, conversationId!, message.id)}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )}
+                    </div>
+                    <div className="mt-4">
+                      {activeContents[message.id]?.type === 'model' && (
+                        <ModelResponseComponent
+                          key={`${conversationId}-${activeContents[message.id].id}`}
+                          model={activeContents[message.id].id === 'alle-ai-comb' 
+                            ? message.responses.flatMap(r => r.model_names).filter(Boolean).join(' + ')
+                            : chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_name || ""}
+                          content={
+                            message.createdInCombinedMode 
+                              ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.content
+                              : message.responses.find(r => r.modelId === activeContents[message.id].id)?.content || ""
+                          }
+                          model_img={activeContents[message.id].id === 'alle-ai-comb'
+                            ? message.responses.flatMap(r => r.model_images).filter(Boolean) as string[]
+                            :  chatModels.find(m => m.model_uid === activeContents[message.id].id)?.model_image || ""}
+                          responseId={
+                            message.createdInCombinedMode
+                              ? message.responses.find(r => r.modelId === 'alle-ai-comb')?.id
+                              : message.responses.find(r => r.modelId === activeContents[message.id].id)?.id || ""
+                          }
+                          sessionId={conversationId!}
+                          feedback={responseFeedback[message.responses.find(r => 
+                            r.modelId === activeContents[message.id].id
+                          )?.id || ""]}
+                          onFeedbackChange={handleFeedbackChange}
+                          webSearchEnabled={isWebSearch}
+                          sources={message.responses.find(r => 
+                            r.modelId === activeContents[message.id].id
+                          )?.sources || []}
+                          onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
+                          onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)}
+                        />
+                      )}
+                      {activeContents[message.id]?.type === 'summary' && (
+                      <ModelResponseComponent
+                        key={`${conversationId}-alle-ai-summ`}
+                        model="Alle-AI Summary"
+                        content={summaryContent[message.id] || ""}
+                        model_img="/svgs/logo-desktop-mini.png"
+                        responseId={`alle-ai-summ-${message.id}`}
+                        sessionId={conversationId!}
+                        onFeedbackChange={handleFeedbackChange}
+                        // You might want to disable certain features for summary display
+                        webSearchEnabled={false}
+                        sources={[]}
+                        onSourcesClick={() => {}}
+                        onRegenerate={() => {}}
+                      />
+                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </ScrollArea>
       <ScrollToBottom 
         scrollAreaRef={scrollAreaRef}
