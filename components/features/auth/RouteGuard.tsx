@@ -22,6 +22,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   const searchParams = useSearchParams();
   const { token, setAuth, clearAuth } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [canRender, setCanRender] = useState(false);
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
 
@@ -29,19 +30,29 @@ function RouteGuardInner({ children }: RouteGuardProps) {
     const checkAuth = async () => {
       const callback = searchParams.get('callback');
       const tokenFromUrl = searchParams.get('token');
-
+  
       if (callback === 'google' && tokenFromUrl) {
         setAuth({} as User, tokenFromUrl);
-
+  
         try {
           const response = await authApi.getUser();
           setAuth(response.data.user, tokenFromUrl, response.plan);
+  
+          if (!response.plan) {
+            router.push('/plans');
+          } else {
+            router.push('/chat');
+          }
         } catch (error) {
-          clearAuth();
-        }
-        router.push('/auth');
-      }
 
+          clearAuth();
+        } finally {
+          setIsLoading(false);
+        }
+  
+        return;
+      }
+      
       setIsChecking(true);
       setCanRender(false);
 
@@ -116,9 +127,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
     checkAuth();
   }, [pathname, token, searchParams]);
 
-  // Show loading screen for authenticated users accessing auth routes or plans
-  if (isChecking && token && (authRoutes.includes(pathname)) && 
-      !(pathname === '/auth' && searchParams.get('mode') === 'verify-email')) {
+  if (isLoading || isChecking) {
     return <LoadingScreen />;
   }
 
