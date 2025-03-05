@@ -1161,10 +1161,6 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
           }));
           
           setPersonalizationSetting('summary', false);
-          toast({
-            title: "Success",
-            description: "Summary preference updated successfully",
-          });
         }
       }
       AutoActivate();
@@ -1416,10 +1412,6 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
           }));
           
           setPersonalizationSetting(key, !checked);
-          toast({
-            title: "Success",
-            description: "Summary preference updated successfully",
-          });
         }
       } catch (error) {
         setPersonalizationSetting(key, !checked);

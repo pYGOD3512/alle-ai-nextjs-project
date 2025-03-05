@@ -312,7 +312,7 @@ export const chatApi = {
       console.log('Response from updateSummaryPreference:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error updating summary preference:', error);
+      console.log('Error updating summary preference:', error);
       throw error;
     }
   },

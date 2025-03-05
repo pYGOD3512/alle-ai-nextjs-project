@@ -53,52 +53,52 @@ export interface ReleaseNote {
 }
 
 export const notifications: NotificationItem[] = [
-  {
-    id: "1",
-    title: "New Model Available",
-    message: "Claude 3 Opus is now available for all users. Experience state-of-the-art AI with improved reasoning, coding, and mathematical capabilities.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
-    read: false,
-    type: 'feature',
-    priority: 'high',
-    actionUrl: '/',
-    actionLabel: 'Try it now',
-    metadata: {
-      category: 'AI Models',
-      tags: ['claude', 'new-feature', 'ai'],
-      relatedFeature: 'text-generation'
-    }
-  },
-  {
-    id: "2",
-    title: "Security Update Required",
-    message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 24),
-    read: false,
-    type: 'security',
-    priority: 'high',
-    actionUrl: '/',
-    actionLabel: 'Enable 2FA',
-    metadata: {
-      category: 'Security',
-      tags: ['security', '2fa', 'account'],
-    }
-  },
-  {
-    id: "3",
-    title: "Security Update Required",
-    message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 24),
-    read: true,
-    type: 'security',
-    priority: 'high',
-    actionUrl: '/',
-    actionLabel: 'Enable 2FA',
-    metadata: {
-      category: 'Security',
-      tags: ['security', '2fa', 'account'],
-    }
-  },
+  // {
+  //   id: "1",
+  //   title: "New Model Available",
+  //   message: "Claude 3 Opus is now available for all users. Experience state-of-the-art AI with improved reasoning, coding, and mathematical capabilities.",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 5),
+  //   read: false,
+  //   type: 'feature',
+  //   priority: 'high',
+  //   actionUrl: '/',
+  //   actionLabel: 'Try it now',
+  //   metadata: {
+  //     category: 'AI Models',
+  //     tags: ['claude', 'new-feature', 'ai'],
+  //     relatedFeature: 'text-generation'
+  //   }
+  // },
+  // {
+  //   id: "2",
+  //   title: "Security Update Required",
+  //   message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 24),
+  //   read: false,
+  //   type: 'security',
+  //   priority: 'high',
+  //   actionUrl: '/',
+  //   actionLabel: 'Enable 2FA',
+  //   metadata: {
+  //     category: 'Security',
+  //     tags: ['security', '2fa', 'account'],
+  //   }
+  // },
+  // {
+  //   id: "3",
+  //   title: "Security Update Required",
+  //   message: "To ensure the security of your account, please enable two-factor authentication. This helps protect your data and access.",
+  //   timestamp: new Date(Date.now() - 1000 * 60 * 24),
+  //   read: true,
+  //   type: 'security',
+  //   priority: 'high',
+  //   actionUrl: '/',
+  //   actionLabel: 'Enable 2FA',
+  //   metadata: {
+  //     category: 'Security',
+  //     tags: ['security', '2fa', 'account'],
+  //   }
+  // },
 ];
 
 export const navItems = [
