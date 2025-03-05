@@ -355,7 +355,7 @@ export function ModelResponse({
   return (
     <Card className="bg-transparent border-none shadow-none p-4">
       <div className="flex items-start gap-6 mb-3">
-        <div className="w-8 h-8 rounded-full flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center">
           {Array.isArray(model_img) ? (
             <div className="flex -space-x-6">
               {model_img
@@ -388,7 +388,7 @@ export function ModelResponse({
           )}
         </div>
         <div className="flex flex-col flex-1">
-          <span className={`font-medium text-sm text-semibold mb-4 ${Array.isArray(model_img) ? model_img.length > 3 ? "ml-4 mt-1" : "" : ""}`}>{model}</span>
+          <span className={`hidden sm:flex font-medium text-sm text-semibold mb-4 ${Array.isArray(model_img) ? model_img.length > 3 ? "ml-4 mt-1" : "" : ""}`}>{model}</span>
           
           {/* Render images grid if there are images */}
           {images.length > 0 && (

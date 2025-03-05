@@ -18,7 +18,7 @@ export default function HomePage() {
   // }, [isAuthenticated, router]);
 
   useEffect(() => {
-    router.replace('/auth');
+    router.replace('/chat');
   }, [router])
 
   // Return null instead of LoadingScreen to avoid client/server mismatch

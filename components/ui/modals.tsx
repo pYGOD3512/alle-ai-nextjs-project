@@ -1147,10 +1147,15 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
 
   // Effect to handle summary toggle based on active models
   useEffect(() => {
-    if (activeModelsCount > 2) {
-    const AutoActivate = async () => {
-        const response = await chatApi.updateSummaryPreference(false);
-        if (response.status) {
+    if (activeModelsCount < 2) {
+
+      if (useAuthStore.getState().user?.summary === 0) {
+        return;
+      }
+      
+        const AutoActivate = async () => {
+          const response = await chatApi.updateSummaryPreference(false);
+          if (response.status) {
             console.log('autoactivation', response)
           useAuthStore.setState((state) => ({
             ...state,

@@ -572,8 +572,8 @@ export function Sidebar() {
             </div>
           </>
         ) : (
-          <div className="space-y-2">
-            <div className="space-y-2 mb-8">
+          <div className="space-y-2 px-2">
+            <div className="flex flex-col space-y-2 mb-8">
               <Button
                 onClick={handleNewChat}
                 variant="outline"

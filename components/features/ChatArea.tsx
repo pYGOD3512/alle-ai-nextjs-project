@@ -36,6 +36,8 @@ import { cn } from "@/lib/utils";
 import { useParams } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from "@/stores";
+import { PromptModal } from "@/components/ui/modals";
+import { useRouter } from "next/navigation";
 
 
 interface ChatSession {
@@ -98,7 +100,7 @@ interface LoadedResponse {
 export function ChatArea() {
   const { toast } = useToast();
   const { content } = useContentStore();
-  const { selectedModels, inactiveModels } = useSelectedModelsStore();
+  const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
   const { chatModels } = useModelsStore();
   const { conversationId, promptId, setConversationId, generationType, setGenerationType } = useConversationStore();
   const { personalization } = useSettingsStore();
@@ -111,6 +113,8 @@ export function ChatArea() {
   const [completed, setCompleted] = useState(false);
   const pathname = usePathname();
 
+  const router = useRouter();
+
   const { user } = useAuthStore();
   const isSummaryEnabled = user?.summary === 1;
 
@@ -122,6 +126,11 @@ export function ChatArea() {
   const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
   const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
+  const [conversationModels, setConversationModels] = useState<string[]>([]);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [promptConfig, setPromptConfig] = useState<any>(null);
+  const [previousSelectedModels, setPreviousSelectedModels] = useState<string[]>([]);
+  
 
   const [activeContents, setActiveContents] = useState<Record<string, {
     type: 'model' | 'summary';
@@ -237,24 +246,6 @@ export function ChatArea() {
     });
   }, [chatSessions, handleAutoActivation]);
 
-  useEffect(() => {
-    chatSessions.forEach(session => {
-      const allResponsesComplete = session.messages[0]?.responses?.every(
-        response => response.status === 'complete'
-      );
-
-      if (allResponsesComplete && !showSummary[session.id] && !generatingSummary[session.id]) {
-        setGeneratingSummary(prev => ({ ...prev, [session.id]: true }));
-        
-        // Simulate summary generation
-        setTimeout(() => {
-          setGeneratingSummary(prev => ({ ...prev, [session.id]: false }));
-          setShowSummary(prev => ({ ...prev, [session.id]: true }));
-        }, 4000); 
-      }
-    });
-  }, [generatingSummary]);
-
   // First, let's fix the useEffect that handles summary generation
   useEffect(() => {
     if (!isSummaryEnabled) return;
@@ -269,7 +260,7 @@ export function ChatArea() {
       );
 
       // Only generate summary for new messages (not loaded ones)
-      if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId] && generationType !== 'load') {
+      if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId]) {
         try {
           setGeneratingSummary(prev => ({ ...prev, [messageId]: true }));
 
@@ -306,7 +297,7 @@ export function ChatArea() {
         handleSummaryGeneration(message.id);
       });
     }
-  }, [ generatingSummary]); // Add generationType to dependencies
+  }, [ generatingSummary]); 
 
   // Update the effect to handle initial responses
   useEffect(() => {
@@ -553,9 +544,15 @@ export function ChatArea() {
 
     const loadConversation = async () => {
       if (!loadConversationId) {
-        console.log('no conversation id');
         return;
       }
+
+      if (conversationId) {
+      console.log('conversationId for conversation model instance', conversationId);
+      getConversationModels(conversationId);
+    }
+
+      console.log('loadConversationId', loadConversationId);
       
       setIsLoadingConversation(true);
       setConversationId(loadConversationId);     
@@ -585,10 +582,45 @@ export function ChatArea() {
     }
 
     // handleInitialResponse();
-  }, []);
+  }, [conversationId]);
+
+  useEffect(() => {
+
+    if(selectedModels.chat.length > 0 && conversationModels.length > 0){
+      setPreviousSelectedModels(selectedModels.chat);
+        if (JSON.stringify(conversationModels) !== JSON.stringify(selectedModels.chat)) {
+          setPromptConfig({
+            title: "Change Models",
+            message: "Selecting new models will start a new conversation. Do you want to continue?",
+            type: "warning",
+            actions: [
+              {
+                label: "Cancel",
+                onClick: () => {
+                  setTempSelectedModels(previousSelectedModels);
+                  saveSelectedModels('chat');
+                  setShowPrompt(false);
+                },
+                variant: "default"
+              },
+              {
+                label: "Proceed",
+                onClick: () => {
+                  setShowPrompt(false);
+                  router.replace(`/chat`);
+                },
+                variant: "default"
+              }
+            ]
+          });
+          setShowPrompt(true);
+        }
+    }
+  }, [selectedModels]);
 
   // When loading the conversation
   const handleLoadConversation = (loadedConversation: any[]) => {
+
     setBranches(prev => prev.map((branch, idx) => 
       idx === currentBranch ? {
         ...branch,
@@ -687,6 +719,25 @@ export function ChatArea() {
             }
       }));
     });
+  };
+
+  // Get the models used in the conversation
+  const getConversationModels = (conversationId: string) => {
+    setLoadingLatest(true);
+    chatApi.getModelsForConversation(conversationId)
+      .then(response => {
+        console.log('Models used in conversation:', response);
+        const modelUids = response.map((model: Model) => model.model_uid);
+        setConversationModels(modelUids);
+        setTempSelectedModels(modelUids);
+        saveSelectedModels('chat');
+      })
+      .catch(error => {
+        console.error('Error fetching models for conversation:', error);
+      })
+      .finally(() => {
+        setLoadingLatest(false);
+      });
   };
 
   const handleInputChange = (value: string) => {
@@ -912,7 +963,6 @@ export function ChatArea() {
 
   const handleSendMessage = async (fileContent?: any) => {
     if (!input.trim() || !conversationId) return;
-
     
     
     try {
@@ -1100,6 +1150,35 @@ export function ChatArea() {
           ));
         }
       }));
+
+        // Handle summary response
+        if (summaryEnabledForMessage && !isCombinedMode) {
+          try {
+            setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: true }));
+    
+            // Make API call to generate summary
+            const summaryResponse = await chatApi.getSummary({
+              messageId: promptResponse.id,
+              modelResponsePairs
+            });
+    
+            setShowSummary(prev => ({ ...prev, [promptResponse.id]: true }));
+            setSummaryContent(prev => ({
+              ...prev,
+              [promptResponse.id]: summaryResponse.summary
+            }));
+          } catch (error) {
+            console.error('Error generating summary:', error);
+            toast({
+              title: "Error",
+              description: "Failed to generate summary",
+              variant: "destructive"
+            });
+          } finally {
+            setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: false }));
+          }
+        }
+      
 
       
       if (isCombinedMode) {
@@ -1607,6 +1686,11 @@ export function ChatArea() {
         onClose={() => setSourcesWindowState(prev => ({ ...prev, isOpen: false }))}
         responseId={sourcesWindowState.activeResponseId || ''}
         userPrompt={sourcesWindowState.userPrompt}
+      />
+      <PromptModal 
+        isOpen={showPrompt} 
+        onClose={() => setShowPrompt(false)} 
+        {...promptConfig}
       />
     </RenderPageContent>
   );

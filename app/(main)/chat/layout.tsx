@@ -82,6 +82,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
+      setGenerationType('new');
+      router.push(`/chat/res/${conversationId}`);
+      setContent("chat", "input", input);
+
+
+
       
       
       // Add all required properties when adding to history
@@ -103,9 +109,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         } : undefined
       );
       
-      setContent("chat", "input", input);
-      setGenerationType('new');
-      router.push(`/chat/res/${conversationId}`);
+      // setContent("chat", "input", input);
+      // setGenerationType('new');
+      // router.push(`/chat/res/${conversationId}`);
       setInput("");
 
       // Get actual title based on prompt
@@ -119,9 +125,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       setConversationId(conversationId);
       setPromptId(promptResponse.id);
-      // setContent("chat", "input", input);
-      // router.push(`/chat/res/${conversationId}`);
-      // setInput("");
 
     } catch (error) {
       console.error('Error in chat flow:', error);

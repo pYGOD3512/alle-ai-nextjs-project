@@ -448,16 +448,16 @@ export function Header() {
         >
           {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
             isLoadingLatest ? (
-              <div className="flex items-center ml-8 border border-muted-foreground rounded-md py-1 px-3">
+              <div className={`flex items-center ml-8 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 px-3 ${selectedModelNames.length > 0 ? 'w-2/5 sm:w-fit' : 'w-fit'}`}>
                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Last used models...</span>
+                <span className="text-xs text-muted-foreground"></span>
               </div>
             ) :
             (selectedModelNames.length > 0) ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-8 border border-muted-foreground rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors">
+                    <div className={`w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-8 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}>
                       {selectedModelNames.map((model, index) => (
                         <span 
                           key={`${model}-${index}`} 

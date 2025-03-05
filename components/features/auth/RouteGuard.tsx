@@ -65,6 +65,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
 
       // Get stored return URL
       const returnUrl = sessionStorage.getItem('returnUrl');
+      console.log('returnUrl', returnUrl);
 
       // CASE 1: No token - only allow access to auth routes and public routes
       if (!token) {
@@ -94,6 +95,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             // Check for return URL when redirecting from auth
             if (returnUrl && pathname === '/auth') {
               sessionStorage.removeItem('returnUrl');
+              setGenerationType('load');
               router.replace(returnUrl);
               return;
             }
