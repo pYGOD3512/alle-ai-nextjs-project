@@ -16,12 +16,14 @@ export interface HistoryResponse {
 }
 
 interface GetTitleResponse {
+  status: boolean;
   title: string;
 }
 
 interface DeleteHistoryResponse {
   message: string;
   deleted_at: string | null;
+  status: boolean;
 }
 
 export const historyApi = {
@@ -65,8 +67,8 @@ export const historyApi = {
 
   renameConversation: async (conversation: string, new_name: string): Promise<GetTitleResponse> => {
     try {
-      const response = await api.post<GetTitleResponse>('/rename-conversation', {
-        conversation: conversation,
+      const response = await api.post<GetTitleResponse>(`/conversation/title/${conversation}`, {
+        conversation,
         title: new_name,
       });
       return response.data;

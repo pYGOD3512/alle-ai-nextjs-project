@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { authApi } from "@/lib/api/auth";
 
 export function GoogleButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,10 +13,13 @@ export function GoogleButton() {
     setIsLoading(true);
     
     try {
-      // Simulate API call with 3-second delay
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      // Add your actual Google sign-in logic here
-      console.log("Google sign-in attempted");
+      const response = await authApi.handleGoogleCallback();
+
+      if (!response.url) {
+        throw new Error("Failed to get redirect URL");
+      }
+      
+      window.location.href = response.url;
     } catch (error) {
       console.error("Google sign-in failed:", error);
     } finally {
