@@ -46,6 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useConversationStore } from "@/stores/models";
+import { historyApi } from "@/lib/api/history";
 
 
 export function Sidebar() {
@@ -60,7 +61,7 @@ export function Sidebar() {
 
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
-  const [isMoreOpen, setIsMoreOpen] = useState(true);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const { user, plan } = useAuthStore();
@@ -68,6 +69,7 @@ export function Sidebar() {
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [historyToDelete, setHistoryToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -123,9 +125,18 @@ export function Sidebar() {
     setEditingTitle(currentTitle);
   };
 
-  const handleRenameSubmit = (id: string) => {
+  const handleRenameSubmit = async (id: string) => {
     if (editingTitle.trim()) {
-      renameItem(id, editingTitle.trim());
+      try {
+        const response = await historyApi.renameConversation(id, editingTitle.trim());
+        console.log('Rename response:', response);
+        if (response.status && response.title) {
+          setEditingTitle(response.title);
+          renameItem(id, editingTitle.trim());
+        }
+      } catch (error) {
+        console.error('Error renaming conversation:', error);
+      }
     }
     setEditingId(null);
     setEditingTitle("");
@@ -213,6 +224,19 @@ export function Sidebar() {
     if (currentProject?.id === projectId) {
       router.push('/');
     }
+  };
+
+  const handleDeleteHistory = async (sessionId: string) => {
+    try {
+      const response = await historyApi.deleteHistory(sessionId);
+      console.log('Delete history response:', response);
+      if (response.status && response.deleted_at) {
+        removeItem(sessionId);
+      }
+    } catch (error) {
+      console.error('Error deleting history item:', error);
+    }
+    setHistoryToDelete(null);
   };
 
   return (
@@ -452,8 +476,10 @@ export function Sidebar() {
                                     <span>Rename</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem 
-                                    onClick={() => removeItem(item.session)}
-                                    className="text-red-500"
+                                    onClick={() => {
+                                      setHistoryToDelete(item.session);
+                                    }}
+                                    className="text-red-500 focus:text-red-500"
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     <span>Delete</span>
@@ -469,8 +495,10 @@ export function Sidebar() {
                             <span>Rename</span>
                           </ContextMenuItem>
                           <ContextMenuItem 
-                            onClick={() => removeItem(item.session)}
-                            className="text-red-500"
+                            onClick={() => {
+                              setHistoryToDelete(item.session);
+                            }}
+                            className="text-red-500 focus:text-red-500"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             <span>Delete</span>
@@ -514,13 +542,13 @@ export function Sidebar() {
 
             {/* User section at bottom */}
             <div className="flex-shrink-0 p-4 mt-auto">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-4 rounded-full">
                 <Image
                   src={user?.photo_url || "/user.jpg"}
                   alt="User"
                   width={40}
                   height={40}
-                  className="rounded-full"
+                  className="h-10 w-10 rounded-full"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -626,6 +654,27 @@ export function Sidebar() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => projectToDelete && handleDeleteProject(projectToDelete)}
+              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Alert dialog for deleting history */}
+      <AlertDialog open={!!historyToDelete} onOpenChange={() => setHistoryToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete History Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this history item? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => historyToDelete && handleDeleteHistory(historyToDelete)}
               className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
             >
               Delete

@@ -569,7 +569,7 @@ export function Header() {
                 alt="User Image"
                 width={35}
                 height={35}
-                className="rounded-full mx-auto cursor-pointer select-none"
+                className="h-8 w-8 rounded-full mx-auto cursor-pointer select-none"
               />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-backgroundSecondary">
@@ -597,7 +597,7 @@ export function Header() {
                     alt="User Image"
                     width={35}
                     height={35}
-                    className="rounded-full mx-auto cursor-pointer"
+                    className="h-10 w-10 rounded-full mx-auto cursor-pointer"
                   />
                   <div className="flex flex-col mr-4">
                     <Text className="text-sm">{user?.first_name} {user?.last_name}</Text>

@@ -116,6 +116,16 @@ export const authApi = {
     return response.data;
   },
 
+  handleGoogleCallback: async () => {
+    try {
+      const response = await api.get(`/auth/google`);
+      return response.data;
+    } catch (error) {
+      console.error('Error handling Google callback:', error);
+      throw error;
+    }
+  },
+
   logout: async () => {
     const response = await api.post('/logout');
     console.log(response,'logged out')
