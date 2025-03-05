@@ -21,7 +21,7 @@ export function ModelSelector({ models, activeModel, onSelect }: ModelSelectorPr
           onClick={() => onSelect(model.model_uid)}
         >
           <p className="hidden md:flex text-xs text-left text-muted-foreground line-clamp-2 mb-auto">
-            {model.response ? model.response.substring(0, 100) + '...' : 'No preview available'}
+            {model.response ? model.response.substring(0, 30) + '...' : 'No preview available'}
           </p>
           <div className="flex items-center justify-center sm:justify-start gap-2 mt-0 md:mt-2 w-full whitespace-nowrap overflow-auto scrollbar-none">
             <Image

@@ -54,10 +54,11 @@ export default function ModelGlossary() {
           <section>
             <h2 className="text-lg font-semibold mb-4">All Chat Models</h2>
             {displayedChatModels.length === 0 && searchQuery && (
-              <div className="flex items-center justify-center text-red-500">
-                <Info className="w-5 h-5 mr-2" />
-                <span>No matches found. The model you&apos;re looking for may not be available under this category or on Alle-AI.</span>
-              </div>
+              // <div className="flex items-center justify-center text-red-500">
+              //   <Info className="w-5 h-5 mr-2" />
+              //   <span>No matches found. The model you&apos;re looking for may not be available under this category or on Alle-AI.</span>
+              // </div>
+              ''
             )}
             <div className="grid grid-cols-2 max-[500px]:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {displayedChatModels.map((model) => (

@@ -4,7 +4,7 @@ import { useEffect, ReactNode, useState, Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores';
 import { LoadingScreen } from './LoadingScreen';
-import { authApi } from '@/lib/api/auth';
+import { authApi, User } from '@/lib/api/auth';
 import { useConversationStore } from '@/stores/models';
 
 
@@ -13,7 +13,7 @@ interface RouteGuardProps {
 }
 
 const authRoutes = ['/', '/auth', '/plans'];
-const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes', '/reset-password'];
+const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes', '/reset-password', '/'];
 
 // Create a separate component for the route guard logic
 function RouteGuardInner({ children }: RouteGuardProps) {
@@ -27,6 +27,21 @@ function RouteGuardInner({ children }: RouteGuardProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const callback = searchParams.get('callback');
+      const tokenFromUrl = searchParams.get('token');
+
+      if (callback === 'google' && tokenFromUrl) {
+        setAuth({} as User, tokenFromUrl);
+
+        try {
+          const response = await authApi.getUser();
+          setAuth(response.data.user, tokenFromUrl, response.plan);
+        } catch (error) {
+          clearAuth();
+        }
+        router.push('/auth');
+      }
+
       setIsChecking(true);
       setCanRender(false);
 

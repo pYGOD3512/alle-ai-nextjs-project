@@ -2478,7 +2478,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={() => {onClose(); setIsEditing(false);}}>
         <DialogContent className="max-w-sm sm:max-w-lg rounded-md">
           <DialogHeader className="flex flex-row items-center justify-between relative">
             <div className="flex flex-col items-center w-full gap-2">
@@ -2648,7 +2648,10 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
               <Button 
                 className='p-2 sm:p-3 text-xs sm:text-sm' 
                 variant="outline" 
-                onClick={onClose}
+                onClick={() => {
+                  setIsEditing(false)
+                  onClose(); 
+                }}
               >
                 Cancel
               </Button>
