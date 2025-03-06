@@ -307,6 +307,13 @@ export function ChatArea() {
       const summaryEnabledForMessage = user?.summary === 1;
       const activeModels = selectedModels.chat.filter(modelId => !inactiveModels.includes(modelId));
 
+      setConversationModels(selectedModels.chat);
+      setPreviousSelectedModels(selectedModels.chat);
+
+      console.log('Conversation Models', conversationModels);
+      console.log('Selected Models', selectedModels.chat);
+      console.log('Previous Selected Models', previousSelectedModels);
+
       setBranches(prev => prev.map(branch => ({
         ...branch,
         messages: branch.messages.map(msg => 

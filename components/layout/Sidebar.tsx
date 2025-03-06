@@ -65,7 +65,7 @@ export function Sidebar() {
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const { user, plan } = useAuthStore();
-  const { setGenerationType } = useConversationStore();
+  const { setGenerationType, conversationId } = useConversationStore();
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -227,10 +227,14 @@ export function Sidebar() {
   };
 
   const handleDeleteHistory = async (sessionId: string) => {
+    console.log('Deleting history for conversationjj:', sessionId);
     try {
       const response = await historyApi.deleteHistory(sessionId);
       console.log('Delete history response:', response);
-      if (response.status && response.deleted_at) {
+      if (response.status) {
+        if(sessionId === conversationId){
+          router.replace(`/${currentType}`);
+        }
         removeItem(sessionId);
       }
     } catch (error) {
@@ -413,11 +417,6 @@ export function Sidebar() {
                               ? "bg-backgroundSecondary"
                               : "hover:bg-secondary/80"
                             }`}
-                            onClick={() => {
-                              setGenerationType('load');
-                              router.replace(`/${currentType}/res/${item.session}`);
-                              handleHistoryItemClick(item.session);
-                            }}
                           >
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               {editingId === item.session ? (
@@ -434,7 +433,14 @@ export function Sidebar() {
                                   className="h-6 text-xs"
                                 />
                               ) : (
-                                <div className="relative flex-1 min-w-0">
+                                <div 
+                                onClick={() => {
+                                  setGenerationType('load');
+                                  router.replace(`/${currentType}/res/${item.session}`);
+                                  handleHistoryItemClick(item.session);
+                                }}
+                                
+                                className="relative flex-1 min-w-0">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
