@@ -28,7 +28,6 @@ interface userGuides {
   section: GuideSection[];
 }
 
-
 const href = "/docs/api";
 
 const hrefApi = "/docs/api-reference";
@@ -480,9 +479,10 @@ export const tutorial = [
     sections: [
       {
         id: "using-platform",
-        title: "Overview",
-        description:
-          "An introduction to the platform, its features, and how to navigate through its functionalities.",
+        title: "Getting started",
+        description: `Welcome to Alle-ai! We’re happy to have you. Alle-ai brings together the world’s
+               leading AI models for chat, image, video, and audio generation in one unified platform designed 
+               to power creativity and productivity. To get started, check out the guide below for a quick tour.`,
       },
 
       {

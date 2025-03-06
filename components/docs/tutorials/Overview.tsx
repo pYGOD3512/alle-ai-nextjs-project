@@ -1,161 +1,172 @@
+"use client";
 import React from "react";
-import {
-  Link,
-  ChevronRight,
-  Sparkles,
-  MessageSquare,
-  Image,
-  Video,
-  Music,
-} from "lucide-react";
+import { Sparkles, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+//  components
+const HomeContent = () => <div>This is the Home tab content.</div>;
+const DMsContent = () => <div>This is the DMs tab content.</div>;
+const ActivityContent = () => <div>This is the Activity tab content.</div>;
+const LaterContent = () => <div>This is the Later tab content.</div>;
+const InfoCards = () => {
+  return (
+    <div className="space-y-4">
+      {/* Heads Up Card */}
+      <Card className="border-green-500 bg-background shadow-lg  dark:border-green-400 ">
+        <CardContent className="p-4 flex items-start space-x-3 text-gray-900 dark:text-gray-100">
+          <Info className="text-green-400 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-black dark:text-green-300">
+              Heads up:
+            </p>
+            <p className="">
+              Some features require a paid plan. Check out our  
+              <a
+                href="#"
+                className="text-blue-500 underline hover:text-blue-400 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                feature limitations
+              </a>
+                or consider  
+              <a
+                href="#"
+                className="text-blue-500 underline hover:text-blue-400 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                upgrading your plan
+              </a>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Tip Card */}
+      <Card className="border-blue-500 bg-background shadow-lg  dark:border-blue-400 ">
+        <CardContent className="p-4 flex items-start space-x-3 text-gray-900 dark:text-gray-100">
+          <Sparkles className="text-blue-400 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-black dark:text-blue-300">Tip:</p>
+            <p className="">
+              To access our Help Center and resources, click  
+              <a
+                href="#"
+                className="text-blue-500 underline hover:text-blue-400 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Help Center
+              </a>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 const Overview = () => {
-  const quickLinks = [
-    {
-      id: "developer-quickstart",
-      title: "Developer quickstart",
-      description: "Learn how to integrate our AI platform",
-      link: "/quickstart",
-      span: "col-span-1",
-    },
-    {
-      id: "conversational-ai",
-      title: "Developer playground",
-      description: "Deploy AI chat agents in minutes",
-      link: "/conversational-ai",
-      span: "col-span-1",
-    },
-    {
-      id: "product-guides",
-      title: "Product guides",
-      description: "Learn how to use our AI platform",
-      link: "/guides",
-      span: "col-span-1",
-    },
-    {
-      id: "api-reference",
-      title: "API reference",
-      description: "Dive into our API reference",
-      link: "/api",
-      span: "col-span-1",
-    },
-  ];
-
-  const features = [
-    {
-      id: "multi-model-chat",
-      title: "Multi-Model Chat",
-      icon: <MessageSquare className="w-6 h-6 " />,
-      description:
-        "Access ChatGPT, Claude, Gemini, and more AI models in one unified interface. Compare responses and choose the best model for your needs.",
-    },
-    {
-      id: "image-generation",
-      title: "Image Generation",
-      icon: <Image className="w-6 h-6 " />,
-      description:
-        "Create stunning visuals using state-of-the-art AI image generation models. Perfect for design, content creation, and artistic projects.",
-    },
-    {
-      id: "video-creation",
-      title: "Video Creation",
-      icon: <Video className="w-6 h-6 " />,
-      description:
-        "Generate and edit videos with AI assistance. Transform your ideas into engaging video content effortlessly.",
-    },
-    {
-      id: "audio-generation",
-      title: "Audio Generation",
-      icon: <Music className="w-6 h-6 " />,
-      description:
-        "Create voice-overs, music, and sound effects using advanced AI audio generation capabilities.",
-    },
-  ];
-
-  const quickStartSteps = [
-    "Starting a New Chat ",
-    "Using Prompts Effectively",
-    "Frequently Asked Questions",
-  ];
+  const [activeTab, setActiveTab] = React.useState("new-chat");
+  const renderContent = () => {
+    switch (activeTab) {
+      case "new-chat":
+        return <HomeContent />;
+      case "mode-selector":
+        return <DMsContent />;
+      case "model-switcher":
+        return <ActivityContent />;
+      case "feature-hub":
+        return <LaterContent />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen ">
       {/* Popular */}
       <div className="max-w-6xl mx-auto ">
-        <div className="flex items-center gap-2 mb-6">
-        </div>
+        <div className="flex items-center gap-2 mb-6"></div>
       </div>
 
       {/*  Overview */}
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-2">
         <div className="space-y-8">
-          <div className="text-center space-y-4 mt-12">
-            <Sparkles className="w-12 h-12 mx-auto text-black dark:text-white" />
-            <h2 id="platform-capabilities" className="text-4xl font-bold ">
-              Your All-in-One AI Platform
+          {/* <div className="text-center space-y-4 mt-6">
+            <h2 id="platform-capabilities" className="text-2xl font-bold ">
+              Getting Started with Alle-ai: Your Quick Start Guide
             </h2>
             <p className="text-xl text-muted-foreground mb-5 max-w-3xl mx-auto">
-              {`        Access the world's leading AI models for chat, image, video, and
-              audio generation in one unified platform.`}
+              {`    Welcome to Alle-ai! We’re happy to have you. Alle-ai brings together the world’s
+               leading AI models for chat, image, video, and audio generation in one unified platform designed 
+               to power creativity and productivity. To get started, check out the guide below for a quick tour.`}
             </p>
-          </div>
+          </div> */}
 
           {/* Feature  */}
-          <h2 id="capabilities" className="text-2xl font-bold">
-            Capabilities
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6 mt-12">
-            {features.map((feature, index) => (
-              <Card
-                key={index}
-                className="hover:border-blue-600 cursor-pointer dark:bg-zinc-800 transition-shadow duration-300"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-2 bg-gray-200 dark:bg-zinc-900 rounded-lg dark:text-white">
-                      {feature.icon}
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-semibold ">
-                        {feature.title}
-                      </h4>
-                      <p className="mt-2 text-muted-foreground">
-                        {feature.description}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
-          {/* Quick  Guide */}
-          <div className="mt-16 ">
-            <h2 id="quick-start-guide" className="text-2xl font-bold  mb-6">
-              Quick Start Guide
-            </h2>
-            <div className="space-y-4">
-              {quickStartSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-3 p-4 dark:bg-zinc-800  rounded-lg border border-zinc-900 hover:border-blue-600 cursor-pointer transition-colors"
+          {/* awareness */}
+          <div className="mt-5 mb-10 ">
+            <InfoCards />
+          </div>
+        </div>
+        {/* sidebar */}
+
+        <div className="mt-12 mb-8">
+          <h2 className="text-2xl font-bold mb-4">Sidebar</h2>
+          <hr className="border-t-1 dark:border-zinc-700 border-gray-200 " />
+          <p className="mt-5 text-muted-foreground">
+            {`From the sidebar, you can switch between different modes, including
+            Chat, Image Generation, Audio Generation, and Video Generation.
+            You'll also find tools like Chat History, the Model Glossary, the
+            Changelog, and Model Analysis to keep track of updates and access
+            key information easily.`}
+          </p>
+        </div>
+        {/* sidebar image placeholder */}
+        <div className="mb-5">
+          <Image
+            src="/screenshots/mockUiSidebar.png"
+            alt="sidebar"
+            width={700}
+            height={400}
+          />
+        </div>
+        <div className="mt-5">
+          <div>
+            <Tabs
+              defaultValue="new-chat"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="flex justify-start space-x-4 border-b dark:border-zinc-700 border-gray-200 bg-transparent">
+                <TabsTrigger
+                  value="new-chat"
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-black dark:text-muted-foreground dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-gray-700 dark:data-[state=active]:border-gray-400"
                 >
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-900 dark:text-white text-black font-semibold">
-                    {index + 1}
-                  </span>
-                  <p className="text-muted-foreground">{step}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+                  1. New Chat
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mode-selector"
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-black dark:text-muted-foreground dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-gray-700 dark:data-[state=active]:border-gray-400"
+                >
+                  2. Mode Selector
+                </TabsTrigger>
+                <TabsTrigger
+                  value="model-switcher"
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-black dark:text-muted-foreground dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-gray-700 dark:data-[state=active]:border-gray-400"
+                >
+                  3. Model Switcher
+                </TabsTrigger>
+                <TabsTrigger
+                  value="feature-hub"
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-black dark:text-muted-foreground dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-gray-700 dark:data-[state=active]:border-gray-400"
+                >
+                  4. Feature Hub
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-          {/* Button */}
-          <div className="text-center mt-12">
-            <button className="inline-flex items-center px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-slate-200 transition-colors">
-              Get Started Now
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </button>
+            {/* Render the content based on the active tab */}
+            <div className="mt-4">{renderContent()}</div>
           </div>
         </div>
       </div>
