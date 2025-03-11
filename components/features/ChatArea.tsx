@@ -8,21 +8,15 @@ import { ChatInput } from "./ChatInput";
 import { ModelResponse as ModelResponseComponent, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import RetryResponse from "./RetryResponse"
-import {
-  MODEL_RESPONSES,
-  SUMMARY_DATA
-} from "@/lib/constants";
 import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore } from "@/stores";
 import { useModelsStore, useConversationStore } from "@/stores/models";
 import { chatApi } from '@/lib/api/chat';
-import { historyApi } from '@/lib/api/history';
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
 import { useToast } from "@/hooks/use-toast";
 import { SourcesWindow } from "../SourcesWindow";
 import { Summary } from "./Summary";
-import { Card } from "@/components/ui/card";
 import { Model } from "@/lib/api/models";
 import { Source, LoadedConversation } from '@/lib/types';
 import {
@@ -38,7 +32,6 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from "@/stores";
 import { PromptModal } from "@/components/ui/modals";
 import { useRouter } from "next/navigation";
-import { Alert } from "../ui/alert";
 
 
 interface ChatSession {
