@@ -16,13 +16,6 @@ export default function ImageGenerationPage() {
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
   const { imageModels, setImageModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const { 
-    history,
-    setHistory, 
-    setLoading: setHistoryLoading,
-    setError: setHistoryError,
-    getHistoryByType
-  } = useHistoryStore();
-  const { 
     selectedModels,
     setTempSelectedModels, 
     saveSelectedModels, 
@@ -31,20 +24,20 @@ export default function ImageGenerationPage() {
 
   useEffect(() => {
     setCurrentPage("image");
-    // clearHistory();
-
-  }, []);
+  }, [setCurrentPage]);
 
     // Load image models on mount if not already loaded
     useEffect(() => {
       const loadImageModels = async () => {
         // Skip if models are already loaded
         if (imageModels && imageModels.length > 0) return;
-  
+        
+        console.log('Loading image models this code is running');
         setModelsLoading(true);
         try {
           const models = await modelsApi.getModels('image');
           setImageModels(models);
+          console.log('Image models loaded', models);
         } catch (err) {
           setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
         } finally {
@@ -53,30 +46,7 @@ export default function ImageGenerationPage() {
       };
   
       loadImageModels();
-    }, []);
-
-  // Load image history
-  useEffect(() => {
-    const loadHistory = async () => {
-      const imageHistory = getHistoryByType('image');
-      if (imageHistory && imageHistory.length > 0) {
-        return;
-      }
-      
-      setHistoryLoading(true);
-      try {
-        const response = await historyApi.getHistory('image');
-        console.log("Fetched image history:", response.data);
-        setHistory(response.data);
-      } catch (err) {
-        setHistoryError(err instanceof Error ? err.message : 'Failed to load chat history');
-      } finally {
-        setHistoryLoading(false);
-      }
-    };
-
-    loadHistory();
-  }, []);
+    }, [setImageModels, setModelsLoading, setModelsError]);
 
   // Load previously selected models
   useEffect(() => {

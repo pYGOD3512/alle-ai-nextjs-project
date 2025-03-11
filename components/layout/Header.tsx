@@ -306,11 +306,11 @@ export function Header() {
         }
         break;
       case 'link':
-        if (item.label === 'Developer') {
-          router.push('/developer');
-        } else {
+        // if (item.label === 'Developer') {
+        //   router.push('/developer');
+        // } else {
           window.open(item.href, '_blank');
-        }
+        // }
         break;
       case 'function':
         const functionMap = {

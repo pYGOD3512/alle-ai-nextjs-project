@@ -30,7 +30,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, Info, } from "lucide-react"
 import { CombinedLoader } from "@/components/features/CombinedLoader";
 import { cn } from "@/lib/utils";
 import { useParams } from 'next/navigation';
@@ -38,6 +38,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from "@/stores";
 import { PromptModal } from "@/components/ui/modals";
 import { useRouter } from "next/navigation";
+import { Alert } from "../ui/alert";
 
 
 interface ChatSession {
@@ -130,6 +131,7 @@ export function ChatArea() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
   const [previousSelectedModels, setPreviousSelectedModels] = useState<string[]>([]);
+
   
 
   const [activeContents, setActiveContents] = useState<Record<string, {
@@ -253,6 +255,9 @@ export function ChatArea() {
     const handleSummaryGeneration = async (messageId: string) => {
       const message = branches[currentBranch].messages.find(msg => msg.id === messageId);
       if (!message || message.createdInCombinedMode) return;
+      
+      // Add this check to only generate summaries for messages that were created with summaries enabled
+      if (!message.summaryEnabled) return;
 
       // Check if all responses are complete and summary isn't already shown or generating
       const allResponsesComplete = message.responses.every(
@@ -343,7 +348,6 @@ export function ChatArea() {
           prev: null
         })
         .then(webSearchResponse => {
-          console.log('Web search response received:', webSearchResponse);
           setBranches(prev => prev.map(branch => ({
             ...branch,
             messages: branch.messages.map(msg => 
@@ -492,7 +496,6 @@ export function ChatArea() {
             promptId,
             modelResponsePairs
           });
-          console.log('Combination response received:', combinationResponse);
 
           const modelImages = selectedModels.chat
             .filter(modelId => !inactiveModels.includes(modelId)) // Filter for active models
@@ -554,15 +557,13 @@ export function ChatArea() {
         return;
       }
 
+      setConversationId(loadConversationId);     
+
       if (conversationId) {
-      console.log('conversationId for conversation model instance', conversationId);
       getConversationModels(conversationId);
     }
-
-      console.log('loadConversationId', loadConversationId);
       
       setIsLoadingConversation(true);
-      setConversationId(loadConversationId);     
       try {
         console.log('Loading conversation content');
         const response = await chatApi.getConversationContent('chat', loadConversationId);
@@ -639,11 +640,21 @@ export function ChatArea() {
 
           const webSearchSources = message.input_content?.web_search_results?.results || [];
 
-          // Extract model names
-          const modelNames = message.responses.map((response: LoadedResponse) => {
-            const model = chatModels.find(m => m.model_uid === response.model.uid);
-            return model ? model.model_name : null;
-          }).filter(Boolean); // Filter out nulls
+          // Extract model names - ensure we're getting names from the correct models
+          const modelNames = message.responses
+            .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
+            .map((response: LoadedResponse) => {
+              // First try to get from the response itself
+              if (response.model.name) {
+                return response.model.name;
+              }
+              // Fallback to finding in chatModels
+              const model = chatModels.find(m => m.model_uid === response.model.uid);
+              return model ? model.model_name : null;
+            })
+            .filter(Boolean); // Filter out nulls
+
+          console.log('Model names for combined response:', modelNames);
 
           return {
             id: String(message.prompt_id),
@@ -651,7 +662,7 @@ export function ChatArea() {
             sender: 'user',
             timestamp: new Date(),
             position: message.position,
-            createdInCombinedMode: !!combinedResponse, // Set based on presence of combined response
+            createdInCombinedMode: !!combinedResponse,
             responses: combinedResponse 
               ? [{
                   id: String(combinedResponse.id),
@@ -661,7 +672,7 @@ export function ChatArea() {
                   model_images: message.responses
                     .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
                     .map((r: LoadedResponse) => r.model.image),
-                  model_names: modelNames // Store model names here
+                  model_names: modelNames
                 }]
                 : message.responses
                     .filter((response: LoadedResponse) => 
@@ -674,7 +685,7 @@ export function ChatArea() {
                       content: response.body,
                       status: 'complete' as const,
                       model_images: [response.model.image],
-                      model_names: modelNames, // Store model names here
+                      model_names: [response.model.name || chatModels.find(m => m.model_uid === response.model.uid)?.model_name].filter(Boolean),
                       sources: webSearchSources
                     }))
           };
@@ -735,6 +746,7 @@ export function ChatArea() {
       .then(response => {
         console.log('Models used in conversation:', response);
         const modelUids = response.map((model: Model) => model.model_uid);
+        console.log('modelUids for setting and saving conversation models', modelUids);
         setConversationModels(modelUids);
         setTempSelectedModels(modelUids);
         saveSelectedModels('chat');
@@ -1029,7 +1041,6 @@ export function ChatArea() {
             prev: getPreviousPromptResponsePairs(branches[currentBranch], nextPosition[1], 'websearch')
           });
           
-          console.log('Web search response received:', webSearchResponse);
           
           // Store the web search results in the state
           setBranches(prev => prev.map((branch, index) => 
@@ -1194,7 +1205,6 @@ export function ChatArea() {
             promptId: promptResponse.id,
             modelResponsePairs: modelResponsePairs
           });
-          console.log('Combination response received:', combinationResponse);
 
           // Add null check and filter out any undefined or empty strings
           const modelImages = selectedModels.chat
@@ -1676,6 +1686,20 @@ export function ChatArea() {
         className="z-50 w-8 h-8"
         content={branches[currentBranch]?.messages || []}
       />
+        {/* <div className="w-1/2 mb-2 mx-auto bg-gray-800 border border-blue-500 text-blue-200 p-3 rounded-md flex items-center">
+          <Info className="w-4 h-4" />
+          <div className="flex-1">
+            <p className="text-sm text-center">
+              This conversation happened in a previous build. 
+              <span 
+                className="text-blue-400 cursor-pointer hover:underline"
+                onClick={() => router.push('/chat')}
+              >
+                Start a new chat
+              </span> to begin a new conversation.
+            </p>
+          </div>
+        </div> */}
       <ChatInput
         value={input}
         onChange={handleInputChange}

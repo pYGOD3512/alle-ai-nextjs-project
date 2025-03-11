@@ -200,13 +200,13 @@ export function Sidebar() {
 
   const CurrentIcon = getCurrentSectionIcon();
 
-  // Add this function to handle history item clicks
-  const handleHistoryItemClick = (itemId: string) => {
+  // Modify the handleHistoryItemClick function
+  const handleHistoryItemClick = (item: string) => {
     // Clear the conversation link when switching to a different conversation
     setCurrentConversationLink(null);
     
     // Set the current section ID based on the type
-    setSectionId(`${currentType}Id`, itemId);
+    setSectionId(`${currentType}Id`, item);
   };
 
   // Add this helper function for projects
@@ -320,8 +320,11 @@ export function Sidebar() {
 
             {/* Scrollable content area */}
             <div className="flex-1 overflow-hidden flex flex-col">
+              {/* <NEW BUILD> */}
+              
               {/* Projects Section */}
               {(pathname.includes('chat') || pathname.includes('project')) && (
+                
                 <>
                   <div className="flex-shrink-0 px-2">
                     <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
@@ -336,6 +339,7 @@ export function Sidebar() {
                       </Button>
                     </div>
                   </div>
+
 
                   {/* Scrollable projects list */}
                   <ScrollArea className="flex-shrink-0 max-h-[30vh]">
@@ -382,6 +386,9 @@ export function Sidebar() {
                   </ScrollArea>
                 </>
               )}
+
+              {/* </ NEW BUILD> */}
+
 
               {/* History Section */}
               <div className="flex-shrink-0 px-4 mt-4">
