@@ -123,10 +123,10 @@ const Overview = () => {
         {/* sidebar image placeholder */}
         <div className="mb-5">
           <Image
-            src="/screenshots/mockUiSidebar.png"
+            src="/svgs/sidebarSvg.svg"
             alt="sidebar"
-            width={700}
-            height={400}
+            width={585}
+            height={393}
           />
         </div>
         <div className="mt-5">
@@ -160,7 +160,7 @@ const Overview = () => {
                   value="feature-hub"
                   className="px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-black dark:text-muted-foreground dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-gray-700 dark:data-[state=active]:border-gray-400"
                 >
-                  4. Feature Hub
+                  4. More
                 </TabsTrigger>
               </TabsList>
             </Tabs>
