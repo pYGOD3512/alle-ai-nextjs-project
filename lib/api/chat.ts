@@ -316,4 +316,14 @@ export const chatApi = {
       throw error;
     }
   },
+
+  getModelsForConversation: async (conversationId: string) => {
+    try {
+      const response = await api.get(`/models/${conversationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting models for conversation:', error);
+      throw error;
+    }
+  },
 };

@@ -1,6 +1,6 @@
 // @ts-nocheck
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChatInput } from "@/components/features/ChatInput";
 import GreetingMessage from "@/components/features/GreetingMessage";
 import { useContentStore, useSidebarStore, useHistoryStore } from "@/stores";
@@ -16,6 +16,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import { useModelsStore } from "@/stores/models";
+import { modelsApi } from "@/lib/api/models";
 // static options
 const options = [
   {
@@ -50,9 +52,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { isOpen } = useSidebarStore();
   const { selectedModels } = useSelectedModelsStore();
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
-  const { addHistory, updateHistoryTitle } = useHistoryStore();
+  const { addHistory, updateHistoryTitle, getHistoryByType, setHistory, setLoading: setHistoryLoading, setError: setHistoryError } = useHistoryStore();
   const [showNegativePrompt, setShowNegativePrompt] = useState(false);
   const [negativePrompt, setNegativePrompt] = useState("");
+  const { imageModels, setImageModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -103,6 +106,52 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   };
+
+  // Load image models on mount if not already loaded
+  useEffect(() => {
+    const loadImageModels = async () => {
+      // Skip if models are already loaded
+      if (imageModels && imageModels.length > 0) return;
+      
+      console.log('Loading image models this code is running');
+      setModelsLoading(true);
+      try {
+        const models = await modelsApi.getModels('image');
+        setImageModels(models);
+        console.log('Image models loaded', models);
+      } catch (err) {
+        setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+
+    loadImageModels();
+  }, [setImageModels, setModelsLoading, setModelsError]);
+
+        // Load image history
+  useEffect(() => {
+    const loadHistory = async () => {
+      const imageHistory = getHistoryByType('image');
+      if (imageHistory && imageHistory.length > 0) {
+        return;
+      }
+      
+      setHistoryLoading(true);
+      try {
+        const response = await historyApi.getHistory('image');
+        console.log("Fetched image history:", response.data);
+        setHistory(response.data);
+      } catch (err) {
+        setHistoryError(err instanceof Error ? err.message : 'Failed to load chat history');
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    loadHistory();
+  }, []);
+  
 
   const handleClicked = (opt: { label: string }) => {
     setInput(opt.label);

@@ -689,9 +689,9 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   // Plan limits
   const MODEL_LIMITS: Record<UserPlan, number> = {
-    free: 6,
-    standard: 6,
-    plus: 6
+    free: 3,
+    standard: 3,
+    plus: 5
   };
 
   const handleFavoriteToggle = async (e: React.MouseEvent, model: Model) => {
@@ -908,27 +908,6 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const handleRemoveAll = () => {
     setTempSelectedModels([]);
   };
-
-  // const PlanSwitcher = () => (
-  //   <div className="flex items-center gap-2 p-2 bg-backgroundSecondary rounded-lg">
-  //     <span className="text-sm font-medium">Test as:</span>
-  //     <Select value={userPlan} onValueChange={(value: UserPlan) => {setUserPlan(value); setTempSelectedModels([]) }}>
-  //       <SelectTrigger className="w-[180px]">
-  //         <SelectValue placeholder="Select plan" />
-  //       </SelectTrigger>
-  //       <SelectContent>
-  //         <SelectGroup>
-  //           <SelectItem value="free">Free Plan</SelectItem>
-  //           <SelectItem value="standard">Standard Plan</SelectItem>
-  //           <SelectItem value="plus">Plus Plan</SelectItem>
-  //         </SelectGroup>
-  //       </SelectContent>
-  //     </Select>
-  //     <Badge variant="outline" className="ml-auto">
-  //       {MODEL_LIMITS[userPlan]} models max
-  //     </Badge>
-  //   </div>
-  // );
 
   return (
     <>
@@ -1147,10 +1126,15 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
 
   // Effect to handle summary toggle based on active models
   useEffect(() => {
-    if (activeModelsCount > 2) {
-    const AutoActivate = async () => {
-        const response = await chatApi.updateSummaryPreference(false);
-        if (response.status) {
+    if (activeModelsCount < 2) {
+
+      if (useAuthStore.getState().user?.summary === 0) {
+        return;
+      }
+      
+        const AutoActivate = async () => {
+          const response = await chatApi.updateSummaryPreference(false);
+          if (response.status) {
             console.log('autoactivation', response)
           useAuthStore.setState((state) => ({
             ...state,
@@ -4623,7 +4607,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
 
             <div className="flex gap-2 bg-muted p-1 border border-borderColorPrimary rounded-full">
               <Input
-                value={currentConversationLink || "https://alle-ai.com/share/..."}
+                value={currentConversationLink || `${process.env.NEXT_PUBLIC_APP_URL}/share/...`}
                 readOnly
                 placeholder=""
                 className="bg-muted rounded-full focus-visible:outline-none border-none"

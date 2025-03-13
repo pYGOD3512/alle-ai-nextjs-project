@@ -165,7 +165,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
           Enter Verification Code
         </h2>
         <p className="text-sm text-muted-foreground">
-          We've sent a verification code to
+          We&apos;ve sent a verification code to
         </p>
         <p className="font-medium text-foreground">{email}</p>
       </div>
@@ -220,7 +220,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
       {/* Resend Code Section */}
       <div className="text-center space-y-4">
         <div className="text-sm text-muted-foreground">
-          Didn't receive the code?{" "}
+          Didn&apos;t receive the code?{" "}
           {countdown > 0 ? (
             <span>Resend in {countdown}s</span>
           ) : (
