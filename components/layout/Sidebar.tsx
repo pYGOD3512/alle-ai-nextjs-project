@@ -65,7 +65,7 @@ export function Sidebar() {
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const { user, plan } = useAuthStore();
-  const { setGenerationType } = useConversationStore();
+  const { setGenerationType, conversationId } = useConversationStore();
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -200,13 +200,13 @@ export function Sidebar() {
 
   const CurrentIcon = getCurrentSectionIcon();
 
-  // Add this function to handle history item clicks
-  const handleHistoryItemClick = (itemId: string) => {
+  // Modify the handleHistoryItemClick function
+  const handleHistoryItemClick = (item: string) => {
     // Clear the conversation link when switching to a different conversation
     setCurrentConversationLink(null);
     
     // Set the current section ID based on the type
-    setSectionId(`${currentType}Id`, itemId);
+    setSectionId(`${currentType}Id`, item);
   };
 
   // Add this helper function for projects
@@ -227,10 +227,14 @@ export function Sidebar() {
   };
 
   const handleDeleteHistory = async (sessionId: string) => {
+    console.log('Deleting history for conversationjj:', sessionId);
     try {
       const response = await historyApi.deleteHistory(sessionId);
       console.log('Delete history response:', response);
-      if (response.status && response.deleted_at) {
+      if (response.status) {
+        if(sessionId === conversationId){
+          router.replace(`/${currentType}`);
+        }
         removeItem(sessionId);
       }
     } catch (error) {
@@ -316,8 +320,11 @@ export function Sidebar() {
 
             {/* Scrollable content area */}
             <div className="flex-1 overflow-hidden flex flex-col">
+              {/* <NEW BUILD> */}
+              
               {/* Projects Section */}
               {(pathname.includes('chat') || pathname.includes('project')) && (
+                
                 <>
                   <div className="flex-shrink-0 px-2">
                     <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
@@ -332,6 +339,7 @@ export function Sidebar() {
                       </Button>
                     </div>
                   </div>
+
 
                   {/* Scrollable projects list */}
                   <ScrollArea className="flex-shrink-0 max-h-[30vh]">
@@ -379,6 +387,9 @@ export function Sidebar() {
                 </>
               )}
 
+              {/* </ NEW BUILD> */}
+
+
               {/* History Section */}
               <div className="flex-shrink-0 px-4 mt-4">
                 <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
@@ -413,11 +424,6 @@ export function Sidebar() {
                               ? "bg-backgroundSecondary"
                               : "hover:bg-secondary/80"
                             }`}
-                            onClick={() => {
-                              setGenerationType('load');
-                              router.replace(`/${currentType}/res/${item.session}`);
-                              handleHistoryItemClick(item.session);
-                            }}
                           >
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               {editingId === item.session ? (
@@ -434,7 +440,14 @@ export function Sidebar() {
                                   className="h-6 text-xs"
                                 />
                               ) : (
-                                <div className="relative flex-1 min-w-0">
+                                <div 
+                                onClick={() => {
+                                  setGenerationType('load');
+                                  router.replace(`/${currentType}/res/${item.session}`);
+                                  handleHistoryItemClick(item.session);
+                                }}
+                                
+                                className="relative flex-1 min-w-0">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -572,8 +585,8 @@ export function Sidebar() {
             </div>
           </>
         ) : (
-          <div className="space-y-2">
-            <div className="space-y-2 mb-8">
+          <div className="space-y-2 px-2">
+            <div className="flex flex-col space-y-2 mb-8">
               <Button
                 onClick={handleNewChat}
                 variant="outline"

@@ -79,10 +79,11 @@ export const historyApi = {
   },
 
   deleteHistory: async (conversation: string): Promise<DeleteHistoryResponse> => {
+    console.log('Deleting history for conversation:', conversation);
     try {
-      const response = await api.delete<DeleteHistoryResponse>(`/history/${conversation}`, {
+      const response = await api.delete<DeleteHistoryResponse>(`/delete/conversation/${conversation}`, {
         data: {
-          id: parseInt(conversation)
+          conversation,
         }
       });
       

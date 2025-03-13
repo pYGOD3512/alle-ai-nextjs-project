@@ -11,6 +11,9 @@ import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
 import { useToast } from "@/hooks/use-toast";
+import { modelsApi } from '@/lib/api/models';
+import { useModelsStore } from "@/stores/models";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import {
@@ -58,7 +61,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { isOpen } = useSidebarStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
-  const { addHistory, updateHistoryTitle } = useHistoryStore();
+  const { addHistory, updateHistoryTitle, getHistoryByType, setHistory, setLoading: setHistoryLoading, setError: setHistoryError } = useHistoryStore();
+  const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const { toast } = useToast();
 
   // Calculate number of active models
@@ -82,8 +86,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
-      
-      
+      setGenerationType('new');
+      router.push(`/chat/res/${conversationId}`);
+      setContent("chat", "input", input);
+
       // Add all required properties when adding to history
       addHistory({
         // id: conversationId,
@@ -103,9 +109,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         } : undefined
       );
       
-      setContent("chat", "input", input);
-      setGenerationType('new');
-      router.push(`/chat/res/${conversationId}`);
       setInput("");
 
       // Get actual title based on prompt
@@ -119,9 +122,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       setConversationId(conversationId);
       setPromptId(promptResponse.id);
-      // setContent("chat", "input", input);
-      // router.push(`/chat/res/${conversationId}`);
-      // setInput("");
 
     } catch (error) {
       console.error('Error in chat flow:', error);
@@ -129,6 +129,69 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   };
+
+  // const preferredOrder = ['gpt-4-5', 'o3-mini', 'deepseek-r1', 'gpt-3-5-turbo', 'claude-3-5-sonnet'];
+
+    // Load chat models on mount if not already loaded
+    useEffect(() => {
+    
+      const loadChatModels = async () => {
+        if (chatModels && chatModels.length > 0) return;
+  
+        setModelsLoading(true);
+        try {
+          const models = await modelsApi.getModels('chat');
+          // const sortedChatModels = models.sort((a, b) => {
+          //   const indexA = preferredOrder.indexOf(a.model_uid);
+          //   const indexB = preferredOrder.indexOf(b.model_uid);
+          
+          //   // If both models are in the preferred order, sort by their index
+          //   if (indexA !== -1 && indexB !== -1) {
+          //     return indexA - indexB;
+          //   }
+            
+          //   // If only a is in the preferred order, it should come first
+          //   if (indexA !== -1) return -1;
+            
+          //   // If only b is in the preferred order, it should come first
+          //   if (indexB !== -1) return 1;
+          
+          //   // If neither are in the preferred order, maintain their original order
+          //   return 0;
+          // });
+          // console.log('Chat models loaded', sortedChatModels);
+          setChatModels(models);
+        } catch (err) {
+          setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
+        } finally {
+          setModelsLoading(false);
+        }
+      };
+  
+      loadChatModels();
+    }, [setChatModels, setModelsLoading, setModelsError]);
+
+    // Load chat history
+    useEffect(() => {
+      const loadHistory = async () => {
+        const chatHistory = getHistoryByType('chat');
+        if (chatHistory && chatHistory.length > 0) {
+          return;
+        }
+  
+        setHistoryLoading(true);
+        try {
+          const response = await historyApi.getHistory('chat');
+          setHistory(response.data);
+        } catch (err) {
+          setHistoryError(err instanceof Error ? err.message : 'Failed to load chat history');
+        } finally {
+          setHistoryLoading(false);
+        }
+      };
+  
+      loadHistory();
+    }, []);
 
   const handleClicked = (opt: { label: string }) => {
     setInput(opt.label);
@@ -172,4 +235,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex-1">{children}</div>
     </div>
   );
+}
+
+function getHistoryByType(arg0: string) {
+  throw new Error("Function not implemented.");
 }

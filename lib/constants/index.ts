@@ -277,7 +277,7 @@ export const userMenuItems = [
     label: "Developer",
     icon: Braces,
     interactionType: "link",
-    href: "https://alle-ai.com/developer",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/developer`,
   },
   {
     label: "Refer",

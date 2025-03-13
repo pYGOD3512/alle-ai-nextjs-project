@@ -13,7 +13,20 @@ interface RouteGuardProps {
 }
 
 const authRoutes = ['/', '/auth', '/plans'];
-const publicRoutes = ['/model-glossary', '/privacy-policy', '/terms-of-service', '/collection', '/release-notes', '/reset-password', '/'];
+
+const publicRoutes = [
+  '/model-glossary',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/collection',
+  '/release-notes',
+  '/reset-password',
+  '/docs',
+  '/changelog',
+  '/hub',
+  '/404',
+  '/',
+];
 
 // Create a separate component for the route guard logic
 function RouteGuardInner({ children }: RouteGuardProps) {
@@ -25,6 +38,21 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [canRender, setCanRender] = useState(false);
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
+
+  // Helper function to check if current path is a public route
+  const isPublicRoute = (path: string): boolean => {
+    // Check exact matches first
+    if (publicRoutes.includes(path)) {
+      return true;
+    }
+    
+    // Check for nested routes under public paths
+    return publicRoutes.some(route => 
+      // Check if the current path starts with a public route prefix
+      // but make sure we're checking complete segments (using /)
+      path.startsWith(route + '/')
+    );
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -39,9 +67,9 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           setAuth(response.data.user, tokenFromUrl, response.plan);
   
           if (!response.plan) {
-            router.push('/plans');
+            router.replace('/plans');
           } else {
-            router.push('/chat');
+            router.replace('/chat');
           }
         } catch (error) {
 
@@ -65,10 +93,11 @@ function RouteGuardInner({ children }: RouteGuardProps) {
 
       // Get stored return URL
       const returnUrl = sessionStorage.getItem('returnUrl');
+      console.log('returnUrl', returnUrl);
 
       // CASE 1: No token - only allow access to auth routes and public routes
       if (!token) {
-        if (!authRoutes.includes(pathname) && !publicRoutes.includes(pathname)) {
+        if (!authRoutes.includes(pathname) && !isPublicRoute(pathname)) {
           // Save current path before redirecting to auth
           if (pathname !== '/auth') {
             sessionStorage.setItem('returnUrl', pathname);
@@ -94,6 +123,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             // Check for return URL when redirecting from auth
             if (returnUrl && pathname === '/auth') {
               sessionStorage.removeItem('returnUrl');
+              setGenerationType('load');
               router.replace(returnUrl);
               return;
             }

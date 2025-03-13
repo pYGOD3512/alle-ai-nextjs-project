@@ -123,12 +123,12 @@ export function DeveloperDashboard() {
                 </div>
               </div>
 
-              <Button 
-                size="sm" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              <Link 
+                href="/developer/settings/billing"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-md"
               >
                 Buy credits
-              </Button>
+              </Link>
             </div>
           </div>
         </div>
