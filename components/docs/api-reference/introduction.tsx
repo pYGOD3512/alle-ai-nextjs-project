@@ -7,7 +7,10 @@ import RenderCode from "@/components/RenderCode";
 import { useActiveSectionStore } from "@/stores/ui";
 import { OnThisPage } from "@/components/docs/OnThisPage";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-
+import {
+  introCodes,
+  installSdks,
+} from "@/lib/constants/code-snippets-docs/apiDocs";
 const hheading = [
   {
     id: "Random test",
@@ -53,14 +56,14 @@ export default function ApiIntroduction() {
                     To install the official Python bindings, run the following
                     command:
                   </p>
-                  <RenderCode language="bash" code="$ pip install alleai" />
+                  <RenderCode language="bash" code={installSdks.python} />
                 </div>
                 <div>
                   <p className="mb-4">
                     To install the official Node.js library, run the following
                     command in your Node.js project directory:
                   </p>
-                  <RenderCode language="bash" code="$ npm install alleai" />
+                  <RenderCode language="bash" code={installSdks.javascript} />
                 </div>
               </div>
             </div>
@@ -109,13 +112,6 @@ export default function ApiIntroduction() {
                   authentication. Provide your API key as the Bearer token value
                   in the Authorization header.
                 </p>
-                <RenderCode
-                  language="bash"
-                  code="curl --request POST \
-  --url https://api.alleai.com/v1/chat/completions \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --header 'Content-Type: application/json'"
-                />
               </div>
             </div>
           </div>
@@ -126,11 +122,7 @@ export default function ApiIntroduction() {
           <RenderCode
             language="python"
             showLanguage={true}
-            code={`# Best practice: Load from environment
-import os
-from your_api_sdk import Client
-
-client = Client(api_key=os.getenv("API_SECRET"))`}
+            code={introCodes.loadenvPython}
           />
         </section>
 
@@ -152,15 +144,7 @@ curl https://api.yourservice.com/v1/endpoint \
         <RenderCode
           showLanguage={true}
           language="bash"
-          code={`
-    curl https://api.yourservice.com/v1/chat \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $API_KEY" \
-  -d '{
-    "model": "your-model-v1",
-    "messages": [{"role": "user", "content": "Hello!"}],
-    "temperature": 0.7
-  }'`}
+          code={introCodes.curl}
         />
         {/* alle-ai Examples */}
         <div className=""></div>
@@ -173,10 +157,7 @@ curl https://api.yourservice.com/v1/endpoint \
             <RenderCode
               showLanguage={true}
               language="python"
-              code={`from alleai.client import alleai
-client = alleai(
-  api_key='YOUR_API_KEY',
-)`}
+              code={introCodes.python}
             />
           </div>
 
@@ -188,10 +169,7 @@ client = alleai(
             <RenderCode
               showLanguage={true}
               language="javascript"
-              code={`import { alleaiClient } from 'alleai';
-const client = new alleaiClient({
-  apiKey: 'YOUR_API_KEY',
-});`}
+              code={introCodes.javascript}
             />
           </div>
         </section>
@@ -226,18 +204,7 @@ const client = new alleaiClient({
             <RenderCode
               showLanguage={true}
               language="python"
-              code={`from alleai import Alleai
-
-client = Alleai()
-
-stream = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Say this is a test"}],
-    stream=True,
-)
-for chunk in stream:
-    if chunk.choices[0].delta.content is not None:
-        print(chunk.choices[0].delta.content, end="")`}
+              code={introCodes.streamPython}
             />
           </div>
 
@@ -249,32 +216,9 @@ for chunk in stream:
             <RenderCode
               showLanguage={true}
               language="javascript"
-              code={`import Alleai from "alleai";
-
-const alleai = new Alleai();
-
-async function main() {
-    const stream = await alleai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: "Say this is a test" }],
-        stream: true,
-    });
-    for await (const chunk of stream) {
-        process.stdout.write(chunk.choices[0]?.delta?.content || "");
-    }
-}
-
-main();`}
+              code={introCodes.streamJavascript}
             />
           </div>
-
-          <h3 className="text-2xl mb-4">Parsing Server-sent Events</h3>
-          <p className="text-muted-foreground mb-4">
-            Parsing Server-sent events is non-trivial and should be done with
-            caution. Simple strategies like splitting by a new line may result
-            in parsing errors. We recommend using existing client libraries when
-            possible.
-          </p>
 
           {/* Best Practices for Streaming */}
           <h3 className="text-2xl mb-4">Best Practices for Streaming</h3>
@@ -318,25 +262,7 @@ main();`}
             <RenderCode
               showLanguage={true}
               language="python"
-              code={`from alleai import Alleai
-import time
-
-client = Alleai()
-
-try:
-    stream = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": "Say this is a test"}],
-        stream=True,
-    )
-    for chunk in stream:
-        if chunk.choices[0].delta.content is not None:
-            print(chunk.choices[0].delta.content, end="")
-except Exception as e:
-    print(f"An error occurred: {e}")
-    # Implement retry logic here
-    time.sleep(2)
-    print("Retrying...")`}
+              code={introCodes.handleStreamError}
             />
           </div>
 
@@ -403,28 +329,10 @@ makeStreamingRequest();`}
               showLanguage={true}
               language="bash"
               code={`# Install the Python SDK
-pip install alleai`}
+${installSdks.python}`}
             />
           </div>
-          <div className="mb-5">
-            <RenderCode
-              showLanguage={true}
-              language="python"
-              code={`from alleai import Alleai
-
-# Initialize the client
-client = Alleai(api_key="your_api_key")
-
-# Make a request
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Hello, world!"}]
-)
-
-# Print the response
-print(response.choices[0].message.content)`}
-            />
-          </div>
+          <div className="mb-5"></div>
 
           {/* Node.js SDK */}
           <h3 className="text-2xl mb-4">Node.js SDK</h3>
@@ -437,34 +345,10 @@ print(response.choices[0].message.content)`}
               showLanguage={true}
               language="bash"
               code={`# Install the Node.js SDK
-npm install alleai`}
+${installSdks.javascript}`}
             />
           </div>
-          <div className="mb-5">
-            <RenderCode
-              showLanguage={true}
-              language="javascript"
-              code={`import { Alleai } from 'alleai';
-
-// Initialize the client
-const client = new Alleai({
-  apiKey: 'your_api_key',
-});
-
-// Make a request
-async function main() {
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: 'Hello, world!' }],
-  });
-
-  // Print the response
-  console.log(response.choices[0].message.content);
-}
-
-main();`}
-            />
-          </div>
+          <div className="mb-5"></div>
 
           {/* Best Practices for SDKs */}
           <h3 className="text-2xl mb-4">Best Practices for Using SDKs</h3>
@@ -492,33 +376,6 @@ main();`}
               bug fixes.
             </li>
           </ul>
-
-          {/* Example: Using Environment Variables */}
-          <h3 className="text-2xl mb-4">Using Environment Variables</h3>
-          <p className="text-muted-foreground mb-4">
-            Here’s an example of how to securely use environment variables with
-            the Python SDK:
-          </p>
-          <div className="">
-            <RenderCode
-              showLanguage={true}
-              language="python"
-              code={`import os
-from alleai import Alleai
-
-# Load API key from environment variable
-client = Alleai(api_key=os.getenv("ALLEAI_API_KEY"))
-
-# Make a request
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Hello, world!"}]
-)
-
-# Print the response
-print(response.choices[0].message.content)`}
-            />
-          </div>
         </section>
       </div>
       {/* Right Side - On This Page */}
