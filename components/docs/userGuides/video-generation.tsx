@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import RenderCode from "@/components/RenderCode";
 import NavigationContainer from "@/components/NavigationContainer";
+import { GuidesVideoGeneration } from "@/lib/constants/code-snippets-docs/userGuides";
 // Static data
 const suggestions = [
   { title: "Text Generation", href: "/text-generation" },
@@ -86,7 +87,7 @@ with open("input.mp4", "rb") as file:
 
 # Save the interpolated video
 with open("interpolated_output.mp4", "wb") as f:
-    f.write(response.video_data)`
+    f.write(response.video_data)`,
     },
     {
       language: "javascript",
@@ -139,8 +140,8 @@ async function generateVideo() {
   }
 }
 
-generateVideo();`
-    }
+generateVideo();`,
+    },
   ];
 
   return (
@@ -266,14 +267,14 @@ generateVideo();`
               </TabsList>
               <TabsContent value="python">
                 <RenderCode
-                  code={getCodeExamples(selectedModels)[0].code}
+                  code={GuidesVideoGeneration.python}
                   language="python"
                   showLanguage={false}
                 />
               </TabsContent>
               <TabsContent value="javascript">
                 <RenderCode
-                  code={getCodeExamples(selectedModels)[1].code}
+                  code={GuidesVideoGeneration.javascript}
                   language="javascript"
                   showLanguage={false}
                 />

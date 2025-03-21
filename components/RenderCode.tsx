@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import {
   atomOneDark,
@@ -42,6 +42,16 @@ const RenderCode = ({
   const [currentLanguage, setCurrentLanguage] = useState(
     language || (languages.length > 0 ? languages[0].language : "")
   );
+
+  // Sync internal state with props when they change
+  useEffect(() => {
+    if (code !== undefined && code !== currentCode) {
+      setCurrentCode(code);
+    }
+    if (language !== undefined && language !== currentLanguage) {
+      setCurrentLanguage(language);
+    }
+  }, [code, language, currentCode, currentLanguage]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode).then(() => {

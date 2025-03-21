@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Copy, Info, CheckCircle2 } from "lucide-react";
-
+import { Info, CheckCircle2 } from "lucide-react";
 import { models } from "@/lib/models";
 import type { ModelDetails } from "@/lib/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import Link from "next/link";
 import RenderCode from "@/components/RenderCode";
 import NavigationContainer from "@/components/NavigationContainer";
-
 const faqs = [
   {
     title: "Can I use multiple models for text generation?",
@@ -40,30 +36,29 @@ export default function TextGenerationDocs() {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   // Example code for Python
-  const exampleCodePython = (modelNames: string[]) => `
-import alleai
+  const exampleCodePython = (modelNames: string[]) => `from alleai.core import AlleAIClient
 
-client = alleai.Client(api_key="[YOUR API KEY HERE]")
+# Initialize client
+client = AlleAIClient(api_key="[YOUR API KEY HERE]")
 
-# Example 1: Basic text generation
-response = client.generate_text(
-    prompt="Write a short story about a futuristic city",
-    models=${JSON.stringify(modelNames)},
-    max_tokens=500
-)
+# Basic text generation
+response = client.chat.completions({
+    "models": ["gpt-4o", "deepseek-r1", "claude-3.5-sonnet"],
+    "messages": [
+        {"system": "You are a helpful assistant."},
+        {
+            "user": [
+                {"type": "text", "text": "What is photosynthesis?"}
+            ]
+        }
+    ],
+    "response_format": {"type": "text"}
+})
 
 # Print the generated text
 print(response.text)
 
-# Example 2: Advanced options
-response = client.generate_text(
-    prompt="Explain quantum computing in simple terms",
-    models=${JSON.stringify(modelNames)},
-    max_tokens=300,
-    temperature=0.7,  # Controls creativity
-    top_p=0.9,       # Controls diversity
-    stop=["\\n", "###"]  # Stop sequences
-)
+# For advanced requests, refer to API reference documentation
 
 # Access response metadata
 print(f"Generation time: {response.metadata.generation_time}s")
@@ -72,42 +67,33 @@ print(f"Total cost: {response.metadata.cost} credits")
 `;
 
   // Example code for JavaScript
-  const exampleCodeJS = (modelNames: string[]) => `
-const alleai = require('alleai');
+  const exampleCodeJS = (modelNames: string[]) => `const client = require("alleai-sdk");
 
-const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
-
-async function generateText() {
-  try {
-    // Example 1: Basic text generation
-    const response = await client.generateText({
-      prompt: 'Write a short story about a futuristic city',
-      models: ${JSON.stringify(modelNames)},
-      maxTokens: 500
-    });
-    
-    console.log('Generated Text:', response.text);
-
-    // Example 2: Advanced options
-    const advancedResponse = await client.generateText({
-      prompt: 'Explain quantum computing in simple terms',
-      models: ${JSON.stringify(modelNames)},
-      maxTokens: 300,
-      temperature: 0.7,  // Controls creativity
-      topP: 0.9,         // Controls diversity
-      stop: ["\\n", "###"]  // Stop sequences
+async function runChat() {
+    const alleai = new client.AlleAI({
+        apiKey: "[YOUR API KEY HERE]"
     });
 
-    // Access response metadata
-    console.log('Generation time:', advancedResponse.metadata.generationTime);
-    console.log('Models used:', advancedResponse.metadata.models);
-    console.log('Total cost:', advancedResponse.metadata.cost, 'credits');
-  } catch (error) {
-    console.error('Error:', error);
-  }
+    const chat = await alleai.chat.completions({
+        models: ["gpt-4o", "deepseek-r1", "claude-3.5-sonnet"],
+        messages: [
+            { system: "You are a helpful assistant." },
+            {
+                user: [
+                    {
+                        type: "text",
+                        text: "What is photosynthesis?"
+                    }
+                ]
+            }
+        ],
+        response_format: { type: "text" }
+    });
+
+    console.log(chat);
 }
 
-generateText();
+runChat();
 `;
 
   return (
@@ -234,14 +220,14 @@ generateText();
                 <RenderCode
                   code={exampleCodePython(selectedModels)}
                   language="python"
-                  showLanguage={false}
+                  showLanguage={true}
                 />
               </TabsContent>
               <TabsContent value="javascript">
                 <RenderCode
                   code={exampleCodeJS(selectedModels)}
                   language="javascript"
-                  showLanguage={false}
+                  showLanguage={true}
                 />
               </TabsContent>
             </Tabs>

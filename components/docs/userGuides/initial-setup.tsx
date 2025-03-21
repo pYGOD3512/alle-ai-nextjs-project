@@ -1,8 +1,7 @@
 // @ts-nocheck
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { guideCodes } from "@/lib/constants/docsCodes";
 import {
   MessageCircle,
   Image,
@@ -12,104 +11,56 @@ import {
   TvMinimalPlay,
 } from "lucide-react";
 import RenderCode from "@/components/RenderCode";
-
-const nextSteps = [
-  {
-    name: "Chat Completions",
-    description:
-      "Learn more about generating text responses to natural language prompts",
-    icon: <MessageCircle className="w-6 h-6" />,
-    link: "#",
-  },
-  {
-    name: "Image Generation",
-    description: "Generate images using our DALL·E model",
-    icon: <Image className="w-6 h-6" />,
-    link: "#",
-  },
-
-  {
-    name: "Speech-to-text",
-    description:
-      "Create transcriptions of voice recordings with our Whisper model",
-    icon: <Mic className="w-6 h-6" />,
-    link: "#",
-  },
-  {
-    name: "Audio generation",
-    description:
-      "Analyze and filter user-created content with our moderation model",
-    icon: <FileAudio className="w-6 h-6" />,
-    link: "#",
-  },
-  {
-    name: "Video generation",
-    description: "Interact with multiple video models",
-    icon: <TvMinimalPlay className="w-6 h-6" />,
-    link: "#",
-  },
-  {
-    name: "Batch",
-    description: "Batch requests for async jobs",
-    icon: <Clock className="w-6 h-6" />,
-    link: "#",
-  },
-];
-
+import { makeYourFirstRequest } from "@/lib/constants/code-snippets-docs/userGuides";
 export default function Quickstart() {
-  const [installToggle, setInstallToggle] = useState("python");
-  const [apiToggle, setApiToggle] = useState("python");
-
-  const CodeToggle = ({ value, onChange }) => {
-    return (
-      <ToggleGroup
-        type="single"
-        className="bg-black p-1 rounded-md w-1/4"
-        value={value}
-        onValueChange={(value) => {
-          if (value) onChange(value);
-        }}
-      >
-        <ToggleGroupItem
-          value="python"
-          className="data-[state=on]:bg-accent w-1/2 data-[state=on]:dark:text-white text-white hover:bg-accent/10 px-4 py-2 transition-colors"
-        >
-          Python
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="javascript"
-          className="data-[state=on]:bg-accent data-[state=on]:dark:text-white text-white hover:bg-accent/10 px-4 py-2 transition-colors"
-        >
-          Javascript
-        </ToggleGroupItem>
-      </ToggleGroup>
-    );
-  };
+  const [selectedLanguage, setSelectedLanguage] = useState("python");
 
   const installCommands = {
     python: "pip install alle-ai",
     javascript: "npm install alle-ai",
   };
 
-  const apiCode = {
-    python: `import alleai
-
-# Initialize the client
-client = alleai.Client(api_key="your_api_key")
-
-# Make a request
-response = client.generate_text(prompt="Hello, world!")
-print(response)`,
-    javascript: `const alleai = require('alleai');
-
-// Initialize the client
-const client = new alleai.Client({ apiKey: 'your_api_key' });
-
-// Make a request
-client.generateText({ prompt: 'Hello, world!' })
-  .then(response => console.log(response))
-  .catch(error => console.error(error));`,
-  };
+  const nextSteps = [
+    {
+      name: "Chat Completions",
+      description:
+        "Learn more about generating text responses to natural language prompts",
+      icon: <MessageCircle className="w-6 h-6" />,
+      link: "#",
+    },
+    {
+      name: "Image Generation",
+      description: "Generate images using our DALL·E model",
+      icon: <Image className="w-6 h-6" />,
+      link: "#",
+    },
+    {
+      name: "Speech-to-text",
+      description:
+        "Create transcriptions of voice recordings with our Whisper model",
+      icon: <Mic className="w-6 h-6" />,
+      link: "#",
+    },
+    {
+      name: "Audio generation",
+      description:
+        "Analyze and filter user-created content with our moderation model",
+      icon: <FileAudio className="w-6 h-6" />,
+      link: "#",
+    },
+    {
+      name: "Video generation",
+      description: "Interact with multiple video models",
+      icon: <TvMinimalPlay className="w-6 h-6" />,
+      link: "#",
+    },
+    {
+      name: "Batch",
+      description: "Batch requests for async jobs",
+      icon: <Clock className="w-6 h-6" />,
+      link: "#",
+    },
+  ];
 
   return (
     <div className="text-base">
@@ -144,12 +95,32 @@ client.generateText({ prompt: 'Hello, world!' })
       <section className="mb-6">
         <h2 className="text-3xl font-bold mb-3">Install the SDK</h2>
         <div className="mb-5">
-          <CodeToggle value={installToggle} onChange={setInstallToggle} />
+          <ToggleGroup
+            type="single"
+            value={selectedLanguage}
+            onValueChange={(value) => {
+              if (value) setSelectedLanguage(value);
+            }}
+            className="bg-black p-1 rounded-md w-1/4"
+          >
+            <ToggleGroupItem
+              value="python"
+              className="data-[state=on]:bg-accent w-1/2 data-[state=on]:dark:text-white text-white hover:bg-accent/10 px-4 py-2 transition-colors"
+            >
+              Python
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="javascript"
+              className="data-[state=on]:bg-accent w-1/2 data-[state=on]:dark:text-white text-white hover:bg-accent/10 px-4 py-2 transition-colors"
+            >
+              Javascript
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <RenderCode
+            code={installCommands[selectedLanguage]}
+            language={selectedLanguage}
+          />
         </div>
-        <RenderCode
-          code={installCommands[installToggle]}
-          language={installToggle}
-        />
       </section>
 
       <section className="mb-6">
@@ -163,9 +134,32 @@ client.generateText({ prompt: 'Hello, world!' })
           as shown below.
         </p>
         <div className="mb-5">
-          <CodeToggle value={apiToggle} onChange={setApiToggle} />
+          <ToggleGroup
+            type="single"
+            value={selectedLanguage}
+            onValueChange={(value) => {
+              if (value) setSelectedLanguage(value); // Only update if a value is provided
+            }}
+            className="bg-black p-1 rounded-md w-1/4"
+          >
+            <ToggleGroupItem
+              value="python"
+              className="data-[state=on]:bg-accent w-1/2 data-[state=on]:dark:text-white text-white hover:bg-accent/10 px-4 py-2 transition-colors"
+            >
+              Python
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="javascript"
+              className="data-[state=on]:bg-accent w-1/2 data-[state=on]:dark:text-white text-white hover:bg-accent/10 px-4 py-2 transition-colors"
+            >
+              Javascript
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <RenderCode
+            code={makeYourFirstRequest[selectedLanguage]}
+            language={selectedLanguage}
+          />
         </div>
-        <RenderCode code={guideCodes.makeYourFirstRequest} language={apiToggle} />
       </section>
 
       <section className="mb-6">

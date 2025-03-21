@@ -115,7 +115,7 @@ export default function ApiTextGenerationDocs() {
                           </TabsContent>
                           <TabsContent value="node">
                             <RenderCode
-                              code={requestCodes.node}
+                              code={requestCodes.javascript}
                               language="javascript"
                             />
                           </TabsContent>

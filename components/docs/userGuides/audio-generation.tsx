@@ -1,145 +1,64 @@
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Copy, Info, CheckCircle2 } from "lucide-react";
 import { models } from "@/lib/models";
 import type { ModelDetails } from "@/lib/types";
 import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import RenderCode from "@/components/RenderCode";
 import NavigationContainer from "@/components/NavigationContainer";
+import { GuidesAudiodeGeneration } from "@/lib/constants/code-snippets-docs/userGuides";
 // Static data
 const suggestions = [
   { title: "Text Generation", href: "/text-generation" },
-  { title: "Audio Generation", href: "/audio-generation" },
-  { title: "Working with Files", href: "/working-with-files" },
+  { title: "Image Generation", href: "/image-generation" },
+  { title: "Video Generation", href: "/video-generation" },
 ];
 
 const faqs = [
   {
-    title: "Can I choose just a single model?",
+    title: "Can I generate audio in multiple formats?",
     description:
-      "No, we encourage the use of multiple models to achieve the best results. Using a variety of models helps ensure a broader range of creative outputs and greater flexibility.",
+      "Yes, you can generate audio in various formats such as MP3, WAV, and FLAC. Specify the desired format in your API request.",
   },
   {
-    title: "Do we support streaming of responses?",
+    title: "Do you support real-time audio streaming?",
     description:
-      "Yes, we support streaming of responses. This allows for faster processing and real-time feedback, making it ideal for applications where you need quick updates without waiting for a full response.",
+      "Yes, we support real-time audio streaming for applications that require immediate playback or processing of generated audio.",
   },
   {
-    title: "What are the error messages and how can I avoid them?",
-    description: (
-      <>
-        Read more on{" "}
-        <a href="your-link-here" className="text-blue-500 hover:underline">
-          error messages and their corresponding meaning and how to avoid them
-          here
-        </a>
-        .
-      </>
-    ),
+    title: "What languages are supported for audio generation?",
+    description:
+      "Our models support a wide range of languages, including English, Spanish, French, German, and more. Check the model documentation for specific language support.",
   },
 ];
 
-export default function ImageGenerationDocs() {
-  const imageModels = models.filter(
-    (model) => model.type === "image"
+export default function AudioGenerationDocs() {
+  // Filter models for audio generation (type: "audio")
+  const audioModels = models.filter(
+    (model) => model.type === "audio"
   ) as ModelDetails[];
   const [selectedModels, setSelectedModels] = useState([
-    imageModels[0]?.name.toLowerCase().replace(/ /g, "_") || "",
+    audioModels[0]?.name.toLowerCase().replace(/ /g, "_") || "",
   ]);
   const [expanded, setExpanded] = useState<number | null>(null);
 
-  // Code examples for both languages
-  const getCodeExamples = (modelNames: string[]) => [
-    {
-      language: "python",
-      code: `import alleai
-
-client = alleai.Client(api_key="[YOUR API KEY HERE]")
-
-# Example 1: Basic image generation
-response = client.generate_image(
-    prompt="A futuristic cityscape at sunset, highly detailed",
-    models=${JSON.stringify(modelNames)},
-    size="1024x1024"
-)
-
-# Save the generated image
-with open("output.png", "wb") as f:
-    f.write(response.image_data)
-
-# Example 2: Advanced options
-response = client.generate_image(
-    prompt="A serene mountain landscape with a lake",
-    models=${JSON.stringify(modelNames)},
-    size="1024x1024",
-    negative_prompt="blurry, low quality, distorted",
-    num_outputs=1,
-    seed=42,  # For reproducible results
-    style_preset="photographic"  # Available presets: photographic, digital-art, anime, cinematic
-)
-
-# Access response metadata
-print(f"Generation time: {response.metadata.generation_time}s")
-print(f"Models used: {response.metadata.models}")
-print(f"Total cost: {response.metadata.cost} credits")`,
-    },
-    {
-      language: "javascript",
-      code: `const alleai = require('alleai');
-
-const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
-
-async function generateImage() {
-  try {
-    // Example 1: Basic image generation
-    const response = await client.generateImage({
-      prompt: 'A futuristic cityscape at sunset, highly detailed',
-      models: ${JSON.stringify(modelNames)},
-      size: '1024x1024'
-    });
-
-    // Save the generated image
-    const fs = require('fs');
-    fs.writeFileSync('output.png', response.imageData);
-
-    // Example 2: Advanced options
-    const advancedResponse = await client.generateImage({
-      prompt: 'A serene mountain landscape with a lake',
-      models: ${JSON.stringify(modelNames)},
-      size: '1024x1024',
-      negativePrompt: 'blurry, low quality, distorted',
-      numOutputs: 1,
-      seed: 42,  // For reproducible results
-      stylePreset: 'photographic'  // Available presets: photographic, digital-art, anime, cinematic
-    });
-
-    // Access response metadata
-    console.log(\`Generation time: \${response.metadata.generationTime}s\`);
-    console.log(\`Models used: \${response.metadata.models}\`);
-    console.log(\`Total cost: \${response.metadata.cost} credits\`);
-  } catch (error) {
-    console.error('Error generating image:', error);
-  }
-}
-
-generateImage();`,
-    },
-  ];
-
   return (
     <div className="pb-16 w-full max-w-[100%] pr-4">
-      {" "}
-      {/* Added right padding */}
       <div className="space-y-8">
         {/* Title Section */}
         <div>
           <div className="prose prose-blue max-w-none">
             <p className="text-muted-foreground text-lg">
-              The Alle-AI Model Hub provides a powerful API that enables
-              high-quality image generation using multiple state-of-the-art
-              foundation models. Our unique multi-model approach allows you to
-              combine different models' strengths in a single API call, without
-              managing complex infrastructure or individual model endpoints.
+              {`The Alle-AI Model Hub offers a powerful API for generating
+              high-quality audio using multiple state-of-the-art foundation
+              models. Our unique multi-model approach enables seamless blending
+              of different models' strengths in a single API call, eliminating
+              the need to manage complex infrastructure or individual model
+              endpoints. Whether you're creating music, speech, or sound
+              effects, our API simplifies the process and enhances creative
+              possibilities.`}
             </p>
           </div>
         </div>
@@ -177,7 +96,7 @@ generateImage();`,
         {/* Installation Section */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">Installation</h2>
-          <Tabs defaultValue="python">
+          <Tabs defaultValue="python" /* onValueChange={setActiveTab} */>
             <TabsList>
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
@@ -219,9 +138,9 @@ generateImage();`,
                 </tr>
               </thead>
               <tbody>
-                {imageModels.map((model) => (
+                {audioModels.map((model) => (
                   <tr
-                    key={model.name}
+                    key={model.id}
                     className="hover:bg-gray-50 dark:hover:bg-zinc-800"
                   >
                     <td className="py-2 px-4 border border-gray-200 font-mono text-sm">
@@ -251,14 +170,14 @@ generateImage();`,
               </TabsList>
               <TabsContent value="python">
                 <RenderCode
-                  code={getCodeExamples(selectedModels)[0].code}
+                  code={GuidesAudiodeGeneration.python}
                   language="python"
                   showLanguage={false}
                 />
               </TabsContent>
               <TabsContent value="javascript">
                 <RenderCode
-                  code={getCodeExamples(selectedModels)[1].code}
+                  code={GuidesAudiodeGeneration.javascript}
                   language="javascript"
                   showLanguage={false}
                 />
@@ -274,9 +193,9 @@ generateImage();`,
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
             <li>
               <code className="bg-gray-100 text-black px-1 rounded">
-                image_data
+                audio_data
               </code>
-              : Generated image in binary format (Python) or URL (JavaScript)
+              : Generated audio in binary format (Python) or URL (JavaScript)
             </li>
             <li>
               <code className="bg-gray-100 text-black px-1 rounded">
@@ -289,6 +208,42 @@ generateImage();`,
               : Error message if the generation failed
             </li>
           </ul>
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2">
+              Read More on Error Handling and Error Messages
+            </h3>
+            <p className="text-muted-foreground">
+              Here are some common error messages you might encounter and how to
+              resolve them:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li>
+                <code className="bg-gray-100 text-black px-1 rounded">
+                  INVALID_API_KEY
+                </code>
+                : Ensure your API key is correct and has not expired.
+              </li>
+              <li>
+                <code className="bg-gray-100 text-black px-1 rounded">
+                  MODEL_NOT_FOUND
+                </code>
+                : Check that the model identifier is correct and supported.
+              </li>
+              <li>
+                <code className="bg-gray-100 text-black px-1 rounded">
+                  RATE_LIMIT_EXCEEDED
+                </code>
+                : Upgrade your plan or reduce the frequency of requests.
+              </li>
+              <li>
+                <code className="bg-gray-100 text-black px-1 rounded">
+                  INVALID_AUDIO_FORMAT
+                </code>
+                : Ensure the audio format specified is supported (e.g., MP3,
+                WAV).
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* FAQs Section */}
@@ -324,12 +279,12 @@ generateImage();`,
 
         {/* What to Read Next Section */}
         <NavigationContainer
-          previousTitle="Audio Generation"
-          previousDescription="Interacting with audio models"
-          preUrl="/docs/user-guides/audio-generation"
-          nextTitle="Video Generation"
-          nextDesciption="Learn interacting with video models "
-          nextUrl="/docs/user-guides/video-generation"
+          previousTitle="Text Generation"
+          previousDescription="Interacting with chat models"
+          preUrl=""
+          nextTitle="Audio Generation"
+          nextDesciption="Learn interacting with audio models "
+          nextUrl="/docs/user-guides/audio-generation"
         />
       </div>
     </div>

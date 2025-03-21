@@ -41,28 +41,28 @@ const faqComponents = {
 
   //api reference  pages
   quickstart: dynamic(
-    () => import("@/components/docs/reference/initial-setup")
+    () => import("@/components/docs/userGuides/initial-setup")
   ),
   "text-generation": dynamic(
-    () => import("@/components/docs/reference/text-generation")
+    () => import("@/components/docs/userGuides/text-generation")
   ),
   "image-generation": dynamic(
-    () => import("@/components/docs/reference/image-generation")
+    () => import("@/components/docs/userGuides/image-generation")
   ),
-  limits: dynamic(() => import("@/components/docs/reference/limits")),
+  limits: dynamic(() => import("@/components/docs/userGuides/limits")),
   "audio-generation": dynamic(
-    () => import("@/components/docs/reference/audio-generation")
+    () => import("@/components/docs/userGuides/audio-generation")
   ),
   "file-uploads": dynamic(
-    () => import("@/components/docs/reference/file-uploads")
+    () => import("@/components/docs/userGuides/file-uploads")
   ),
   "video-generation": dynamic(
-    () => import("@/components/docs/reference/video-generation")
+    () => import("@/components/docs/userGuides/video-generation")
   ),
-  pricing: dynamic(() => import("@/components/docs/reference/pricing")),
-  "error-codes": dynamic(() => import("@/components/docs/reference/Errors")),
+  pricing: dynamic(() => import("@/components/docs/userGuides/pricing")),
+  "error-codes": dynamic(() => import("@/components/docs/userGuides/Errors")),
   "prompts-inputs": dynamic(
-    () => import("@/components/docs/reference/fine-tuning-inputs")
+    () => import("@/components/docs/userGuides/fine-tuning-inputs")
   ),
 
   // tutorials pages
@@ -84,7 +84,7 @@ const faqComponents = {
   prompts: dynamic(() => import("@/components/docs/tutorials/prompts")),
   history: dynamic(() => import("@/components/docs/tutorials/History")),
 
-  models: dynamic(() => import("@/components/docs/reference/models")),
+  models: dynamic(() => import("@/components/docs/userGuides/models")),
 
  
 };
