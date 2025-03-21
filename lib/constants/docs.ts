@@ -594,126 +594,6 @@ export const basicResponse = `
 
 `;
 
-export const requestCodes = {
-  curl: `curl -X POST https://api.yourdomain.com/v1/ai/generate \
--H "Authorization: Bearer YOUR_API_KEY" \
--H "Content-Type: application/json" \
--d '{
-  "models": ["gpt-4o", "deepseek-r1", "claude-3.5-sonnet"],  
-  "messages": [
-    {
-      "system": [
-        {
-          "type": "text",
-          "text": "You are a helpful assistant."
-        }
-      ]
-    },
-    {
-      "user": [
-        {
-        "type": "text",
-        "text": "What is photosynthesis?"
-      }
-    ]
-  ],
-  "response_format": {
-    "type": "text",
-    "model_specific": {
-      "gpt-4o": "text",
-      "deepseek-r1": "audio_url"
-    }
-  },
-  "temperature": 0.7,
-  "max_tokens": 2000
-}'
-
-`,
-  javascript: `const alleai = require('alleai');
-
-const requestBody = {
-  models: ["gpt-4o", "deepseek-r1", "claude-3.5-sonnet"],
-  messages: [
-    {
-      system: [
-        {
-          type: "text",
-          text: "You are a helpful assistant."
-        }
-      ]
-    },
-    {
-      user: [
-        {
-          type: "text",
-          text: "What is photosynthesis?"
-        }
-      ]
-    }
-  ],
-  response_format: {
-    type: "text",
-    model_specific: {
-      "gpt-4o": "text",
-      "deepseek-r1": "audio_url"
-    }
-  },
-  temperature: 0.7,
-  max_tokens: 2000
-};
-
-alleai.generate(requestBody)
-  .then(response => {
-    console.log('Response:', response);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-
-`,
-  python: `const alleai = require('alleai');
-
-const requestBody = {
-  models: ["gpt-4o", "deepseek-r1", "claude-3.5-sonnet"],
-  messages: [
-    {
-      system: [
-        {
-          type: "text",
-          text: "You are a helpful assistant."
-        }
-      ]
-    },
-    {
-      user: [
-        {
-          type: "text",
-          text: "What is photosynthesis?"
-        }
-      ]
-    }
-  ],
-  response_format: {
-    type: "text",
-    model_specific: {
-      "gpt-4o": "text",
-      "deepseek-r1": "audio_url"
-    }
-  },
-  temperature: 0.7,
-  max_tokens: 2000
-};
-
-alleai.generate(requestBody)
-  .then(response => {
-    console.log('Response:', response);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-
-`,
-};
 
 export const requestBody = `
 {
@@ -1067,98 +947,157 @@ export const parameters = [
     type: "array",
     required: true,
     description:
-      "List of models to use (gpt-4, deepseek-1, claude-3.5-sonnet).",
+      "A list of AI model names that will process your request. You can include options like 'gpt-4', 'deepseek-1', or 'claude-3.5-sonnet' to decide which models generate responses or handle tasks, based on what each one is good at.",
+    keywords: ["model names", "gpt-4", "deepseek-1", "claude-3.5-sonnet"],
   },
   {
     name: "messages",
     type: "array",
     required: true,
-    description: "User messages, system prompts, and multimedia inputs.",
+    description:
+      "The full set of inputs and context for the models to work with. This includes optional system instructions to guide the models’ behavior (like setting their role or tone), user inputs such as text questions, audio recordings, images, or videos for the models to respond to, and prior assistant responses organized by model name to keep the conversation flowing. Each message can contain content in formats like text, audio URLs, image URLs, or video URLs, giving you flexibility in how you communicate with the models.",
+    keywords: [
+      "system instructions",
+      "user inputs",
+      "assistant responses",
+      "text",
+      "audio URLs",
+      "image URLs",
+      "video URLs",
+    ],
   },
   {
     name: "response_format",
     type: "object",
     required: true,
     description:
-      "Specifies output format (text, audio, etc.) with model-specific configurations.",
+      "Controls how the models deliver their output to you. You specify the main format—whether you want text, an audio URL, an image URL, or a video URL—and can optionally set different formats for specific models if you’re using more than one. This ensures the response matches what you need, tailored to each model’s contribution.",
+    keywords: [
+      "main format",
+      "text",
+      "audio URL",
+      "image URL",
+      "video URL",
+      "specific models",
+    ],
   },
   {
     name: "web_search",
     type: "boolean",
     required: false,
     description:
-      "Enables or disables web search capability for generating responses.",
+      "Lets you decide if the models can search the web to include up-to-date or outside information in their responses. Turn it on with true to broaden their knowledge, or keep it off with false to rely only on what the models already know.",
+    keywords: ["web search", "true", "false"],
   },
   {
     name: "summary",
     type: "array",
     required: false,
     description:
-      "Configuration for generating summaries using different model combinations and output types.",
+      "Configures how to get a shorter version of the response, perfect for quick insights. You can choose the format—like text, audio URL, image URL, or video URL—and pick which models (from your 'models' list) should create the summary, letting you customize how it’s condensed and presented.",
+    keywords: [
+      "shorter version",
+      "format",
+      "text",
+      "audio URL",
+      "image URL",
+      "video URL",
+      "models",
+    ],
   },
   {
     name: "combination",
     type: "array",
     required: false,
     description:
-      "Settings for combining outputs from multiple models with specified output types.",
+      "Sets up how to merge responses from multiple models into one cohesive output. You define the format—text, audio URL, image URL, or video URL—and select which models’ answers to blend, combining their strengths into a single result that suits your needs.",
+    keywords: [
+      "merge responses",
+      "format",
+      "text",
+      "audio URL",
+      "image URL",
+      "video URL",
+      "models",
+    ],
   },
   {
     name: "temperature",
     type: "number",
     required: false,
     description:
-      "Controls randomness in model outputs (0.1 = deterministic, 1.0 = creative).",
+      "Adjusts how creative or predictable the models’ responses are. Use a lower value (like 0.1) for straightforward, focused answers, or a higher value (up to 1.0) for more imaginative or varied replies, depending on the tone you’re aiming for.",
+    keywords: ["creative", "predictable", "lower value", "higher value"],
   },
   {
     name: "max_tokens",
     type: "integer",
     required: false,
-    description: "Maximum length of response in tokens (default: 2000).",
+    description:
+      "Caps the length of the response, measured in small units like words or characters. Set a number to keep answers brief or allow them to run longer, giving you control over how much detail you get back.",
+    keywords: ["length", "small units", "brief", "longer"],
   },
   {
     name: "top_p",
     type: "number",
     required: false,
     description:
-      "Nucleus sampling parameter that controls diversity of model outputs (0.0-1.0).",
+      "Shapes how varied the models’ responses can be. A lower value (like 0.5) keeps answers focused on the most likely ideas, while a higher value (up to 1.0) lets the models explore a wider range of possibilities, balancing focus with diversity.",
+    keywords: ["varied", "lower value", "higher value", "focus", "diversity"],
   },
   {
     name: "frequency_penalty",
     type: "number",
     required: false,
     description:
-      "Reduces likelihood of repeating similar phrases (-2.0 to 2.0, default: 0.2).",
+      "Controls how much the models repeat themselves. A higher value (up to 2.0) pushes them to avoid reusing phrases or ideas, keeping things fresh, while a lower or negative value (down to -2.0) lets them repeat more if that’s what you want.",
+    keywords: ["repeat", "higher value", "lower value", "fresh"],
   },
   {
     name: "presence_penalty",
     type: "number",
     required: false,
     description:
-      "Encourages discussing new topics (-2.0 to 2.0, default: 0.3).",
+      "Influences whether the models stick to what’s already been said or bring up new topics. A higher value (up to 2.0) encourages fresh ideas, while a lower or negative value (down to -2.0) keeps them focused on the current discussion.",
+    keywords: [
+      "new topics",
+      "higher value",
+      "lower value",
+      "current discussion",
+    ],
   },
   {
     name: "stream",
     type: "boolean",
     required: false,
-    description: "Enables streaming of partial responses as they're generated.",
+    description:
+      "Determines if you get the response bit by bit as it’s being created (with true) or all at once when it’s finished (with false). Streaming is handy for real-time updates, while waiting gives you the complete answer in one go.",
+    keywords: ["bit by bit", "true", "all at once", "false", "real-time"],
   },
   {
     name: "metadata",
     type: "object",
     required: false,
     description:
-      "Additional request metadata including request_id, user_id, and timestamp.",
+      "Adds extra details about your request, like a unique request ID, a user ID, or a timestamp. This is optional but useful for keeping track of requests or linking them to specific people or times.",
+    keywords: ["extra details", "request ID", "user ID", "timestamp"],
   },
   {
     name: "model_specific_params",
     type: "object",
     required: false,
     description:
-      "Model-specific parameter overrides for temperature, max_tokens, etc.",
+      "Fine-tunes settings for individual models, overriding the general options. You can adjust things like system instructions, creativity level, response length, or repetition controls for specific models (like 'gpt-4' or 'deepseek-1'), giving you precise control over each one’s behavior.",
+    keywords: [
+      "fine-tunes",
+      "system instructions",
+      "creativity level",
+      "response length",
+      "repetition controls",
+      "specific models",
+    ],
   },
 ];
-
 export const apiReferenceFields = [
   {
     name: "id",

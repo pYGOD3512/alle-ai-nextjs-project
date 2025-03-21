@@ -13,18 +13,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Divide } from "lucide-react";
-import { ArrowRight } from "lucide-react";
-
+import { introCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
 import {
-  apiReference,
-  requestCodes,
-  basicParameter,
   apiReferenceFields,
   basicRequest,
   basicResponse,
+  parameters,
 } from "@/lib/constants/docs";
-
+import { chatCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
+const highlightText = (text, keywords) => {
+  let result = text;
+  keywords.forEach((keyword) => {
+    const regex = new RegExp(`\\b${keyword}\\b`, "gi");
+    result = result.replace(
+      regex,
+      `<span class="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono mr-2">${keyword}</span>`
+    );
+  });
+  return result;
+};
 export default function ApiTextGenerationDocs() {
   const router = useRouter();
   const pathname = usePathname();
@@ -72,7 +79,10 @@ export default function ApiTextGenerationDocs() {
                         </ul>
                       </div>
                     </div>
-
+                  </div>
+                }
+                rightContent={
+                  <div className="space-y-8">
                     {/* Base URL and Endpoint */}
                     <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
                       <h4 className="font-semibold">Base URL</h4>
@@ -89,41 +99,6 @@ export default function ApiTextGenerationDocs() {
                     </div>
                   </div>
                 }
-                rightContent={
-                  <div className="space-y-8">
-                    <Card className="p-6 bg-background">
-                      <div className="space-y-6">
-                        <Tabs defaultValue="curl" className="w-full">
-                          <TabsList>
-                            <TabsTrigger value="curl">cURL</TabsTrigger>
-                            <TabsTrigger value="python">Python</TabsTrigger>
-                            <TabsTrigger value="node">Node.js</TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="curl">
-                            <RenderCode
-                              code={requestCodes.curl}
-                              language="bash"
-                              showLanguage={false}
-                              title="Example Request"
-                            />
-                          </TabsContent>
-                          <TabsContent value="python">
-                            <RenderCode
-                              code={requestCodes.python}
-                              language="python"
-                            />
-                          </TabsContent>
-                          <TabsContent value="node">
-                            <RenderCode
-                              code={requestCodes.javascript}
-                              language="javascript"
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      </div>
-                    </Card>
-                  </div>
-                }
               />
             </div>
           </Card>
@@ -137,27 +112,56 @@ export default function ApiTextGenerationDocs() {
                 <h3 className="text-3xl font-bold  mb-3">Request Parameters</h3>
                 <Card className="p-8 bg-background">
                   <div className="space-y-6">
-                    {basicParameter.map((param) => (
-                      <div key={param.name} className="mb-4">
-                        <div className="flex items-center gap-2 mb-1">
-                          <code className="bg-gray-800 px-2 py-1 rounded text-sm">
-                            {param.name}
-                          </code>
-                          <code className="text-muted-foreground px-2 py-1 rounded text-sm">
-                            {param.type}
-                          </code>
-                          {param.required && (
-                            <span className="text-red-500 text-sm">
-                              required
-                            </span>
-                          )}
+                    {parameters.map((param) => {
+                      // Function to highlight keywords in the description
+                      const highlightKeywords = (description, keywords) => {
+                        let highlightedText = description;
+                        keywords.forEach((keyword) => {
+                          // Case-insensitive regex to match whole keyword and escape special chars
+                          const regex = new RegExp(
+                            `\\b${keyword.replace(
+                              /[-/\\^$*+?.()|[\]{}]/g,
+                              "\\$&"
+                            )}\\b`,
+                            "gi"
+                          );
+                          highlightedText = highlightedText.replace(
+                            regex,
+                            `<span class="highlight">${keyword}</span>`
+                          );
+                        });
+                        // Return as HTML to be rendered with dangerouslySetInnerHTML
+                        return highlightedText;
+                      };
+
+                      return (
+                        <div key={param.name} className="mb-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <code className="bg-gray-800 px-2 py-1 rounded text-sm">
+                              {param.name}
+                            </code>
+                            <code className="text-muted-foreground px-2 py-1 rounded text-sm">
+                              {param.type}
+                            </code>
+                            {param.required && (
+                              <span className="text-red-500 text-sm">
+                                required
+                              </span>
+                            )}
+                          </div>
+                          <p
+                            className="text-muted-foreground text-sm"
+                            dangerouslySetInnerHTML={{
+                              __html: highlightKeywords(
+                                param.description,
+                                param.keywords || []
+                              ),
+                            }}
+                          />
+                          <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10" />
                         </div>
-                        <p className="text-muted-foreground text-sm">
-                          {param.description}
-                        </p>
-                        <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </Card>
               </div>
@@ -224,35 +228,31 @@ export default function ApiTextGenerationDocs() {
             rightContent={
               <div>
                 <Card className="p-6 bg-background">
-                  <div className="mt-3">
-                    <Tabs defaultValue="javascript">
+                  <div className="space-y-6">
+                    <Tabs defaultValue="curl" className="w-full">
                       <TabsList>
-                        <TabsTrigger value="javascript">JavaScript</TabsTrigger>
                         <TabsTrigger value="curl">cURL</TabsTrigger>
                         <TabsTrigger value="python">Python</TabsTrigger>
+                        <TabsTrigger value="node">Node.js</TabsTrigger>
                       </TabsList>
-                      <TabsContent value="javascript">
-                        <RenderCode
-                          language="javascript"
-                          code={requestCodes.javascript}
-                          showLanguage={false}
-                          title="Request to the API"
-                        />
-                      </TabsContent>
                       <TabsContent value="curl">
                         <RenderCode
+                          code={introCodes.curl}
                           language="bash"
                           showLanguage={false}
-                          title="Request to the API"
-                          code={requestCodes.curl}
+                          title="Example Request"
                         />
                       </TabsContent>
                       <TabsContent value="python">
                         <RenderCode
+                          code={introCodes.python}
                           language="python"
-                          code={requestCodes.python}
-                          showLanguage={false}
-                          title="Request to the API"
+                        />
+                      </TabsContent>
+                      <TabsContent value="node">
+                        <RenderCode
+                          code={introCodes.javascript}
+                          language="javascript"
                         />
                       </TabsContent>
                     </Tabs>
@@ -336,13 +336,14 @@ export default function ApiTextGenerationDocs() {
         {/* Api search : enabling web search  */}
         <div className="mt-10 ">
           <h2 className="text-3xl mb-4 font-semibold text-gray-800 dark:text-gray-200">
+            Using &nbsp;
             <span
               data-section="chat-search"
               className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2"
             >
               web_search
             </span>
-            Parameter
+            in Completion Endpoint
           </h2>
           <div>
             <ApiDocLayout
@@ -476,7 +477,104 @@ export default function ApiTextGenerationDocs() {
             />
           </div>
         </div>
-
+        {/* web search as endpoint  */}
+        <div className="mt-10 ">
+          <h2 className="text-3xl mb-4 font-semibold text-gray-800 dark:text-gray-200">
+            Dedicated Web Search Endpoints
+          </h2>
+          <ApiDocLayout
+            leftContent={
+              <div>
+                <div className="">
+                  <p
+                    className="text-muted-foreground text-sm leading-relaxed mb-4"
+                    dangerouslySetInnerHTML={{
+                      __html: highlightText(
+                        "The web search endpoints take the same familiar parameters you’re used to, like messages for your query, response_format to dictate the output type (text, audio URL, etc.), and even max_tokens to cap the length, but with a key difference: the response contains only web search results, not the individual outputs from models specified in models.",
+                        [
+                          "messages",
+                          "response_format",
+                          "max_tokens",
+                          "web search results",
+                          "models",
+                        ]
+                      ),
+                    }}
+                  />
+                  <p
+                    className="text-muted-foreground text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: highlightText(
+                        "To use these endpoints, simply send your request to the web search-specific route (e.g., /websearch instead of /completions), keeping the parameter structure intact.Define your query in messages, and set response_format to get results in your preferred style. The output skips model responses entirely, focusing solely on what’s pulled from the web. This keeps the process lightweight and targeted.",
+                        [
+                          "web_search",
+                          "messages",
+                          "response_format",
+                          "model responses",
+                          "temperature",
+                          "frequency_penalty",
+                        ]
+                      ),
+                    }}
+                  />
+                </div>
+              </div>
+            }
+            rightContent={
+              <div className="">
+                {/* web search endpoing */}
+                {/* Base URL and Endpoint */}
+                <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
+                  <h4 className="font-semibold">Web search endpoint</h4>
+                  <RenderCode
+                    code="https://api.yourdomain.com/v1/ai/generate"
+                    language="bash"
+                    className="text-sm"
+                    showLanguage={false}
+                  />
+                  {/* Example codes */}
+                  <div>
+                    <Card className="p-6 bg-background">
+                      <div className="space-y-6">
+                        <Tabs defaultValue="curl" className="w-full">
+                          <TabsList>
+                            <TabsTrigger value="curl">cURL</TabsTrigger>
+                            <TabsTrigger value="python">Python</TabsTrigger>
+                            <TabsTrigger value="node">Node.js</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="curl">
+                            <RenderCode
+                              code={introCodes.curl}
+                              language="bash"
+                              showLanguage={false}
+                              title="Example Request"
+                            />
+                          </TabsContent>
+                          <TabsContent value="python">
+                            <RenderCode
+                              code={chatCodes.webPython}
+                              language="python"
+                              title="Example Request python sdk"
+                              showLanguage={false}
+                            />
+                          </TabsContent>
+                          <TabsContent value="node">
+                            <RenderCode
+                              code={chatCodes.webJavascript}
+                              language="javascript"
+                              title="Example Request node sdk"
+                              showLanguage={false}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            }
+          />
+        </div>
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
         {/*model  comparison  */}
 

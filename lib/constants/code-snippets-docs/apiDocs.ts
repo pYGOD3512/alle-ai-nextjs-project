@@ -201,3 +201,47 @@ export const installSdks = {
 
 
 // chat completions,summary and others snippets 
+
+export const chatCodes = {
+  webPython: `from alleai.core import AlleAIClient
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make chat web search request
+response = client.chat.search({
+    "models": ["gpt-4o", "claude-3.5-sonnet"],
+    "messages": [{"user": [{"type": "text", "text": "Hello!"}]}],
+    "response_format": {"type": "text"},
+    "web_search":true
+})
+
+# Print the response
+print(response.text)`,
+  webJavascript: `const client = require("alleai-sdk");
+
+
+async function chat() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make chat web search request
+    const response = await alleai.chat.search({
+        models: ["gpt-4o", "claude-3.5-sonnet"],
+        messages: [{ user: [{ type: "text", text: "Hello!" }] }],
+        response_format: { type: "text" }
+        web_search: true
+    });
+
+    // Log the response
+    console.log(response.text);
+}
+
+chat();`,
+};
