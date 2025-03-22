@@ -58,7 +58,11 @@ export default function MobileNav() {
     setExpandedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
 
+  // Exact match for sidebar items
   const isActive = (path: string) => pathname === path;
+
+  // Broader match for top-level nav items
+  const isNavActive = (href: string) => pathname.startsWith(href);
 
   const handleReferenceClick = (e, sectionHref) => {
     e.preventDefault();
@@ -195,7 +199,6 @@ export default function MobileNav() {
 
   return (
     <>
-      {/* Top Bar */}
       <header className="sticky top-0 z-50 w-full border-b bg-sideBarBackground backdrop-blur">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center space-x-2">
@@ -223,28 +226,24 @@ export default function MobileNav() {
         </div>
       </header>
 
-      {/* Modal Menu */}
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="w-full h-[100vh] bg-sideBarBackground flex flex-col relative">
-            {/* Close Button */}
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 p-2 text-foreground hover:text-muted-foreground z-50"
             >
               <X className="h-6 w-6" />
             </button>
-            {/* Modal Content */}
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-6">
-                {/* Header Nav Items (No "NAVIGATION" label) */}
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={`${item.href}/${item.pageOne}`}
                     className={cn(
                       "block px-4 py-2 text-sm",
-                      isActive(`${item.href}/${item.pageOne}`)
+                      isNavActive(item.href)
                         ? "bg-accent text-foreground font-medium"
                         : "text-muted-foreground hover:bg-accent/50"
                     )}
@@ -254,13 +253,11 @@ export default function MobileNav() {
                   </Link>
                 ))}
 
-                {/* Dynamic Sidebar Content */}
                 {pathname.startsWith("/docs/api-reference") &&
                   renderApiReference()}
                 {pathname.startsWith("/docs/user-guides") && renderUserGuides()}
                 {pathname.startsWith("/docs/tutorials") && renderTutorials()}
 
-                {/* Action Buttons */}
                 <div>
                   <Link
                     href="/playground"
@@ -283,7 +280,6 @@ export default function MobileNav() {
         </div>
       )}
 
-      {/* Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={toggleSearch} />
     </>
   );

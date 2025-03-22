@@ -4,7 +4,8 @@ import { usePathname } from "next/navigation";
 import { DocsHeader } from "@/components/docs/docsHeader";
 import { SidebarNav } from "@/components/docs/SidebarNav";
 import { OnThisPage } from "@/components/docs/OnThisPage";
-import MobileNav from "@/components/docs/mobileNav";
+import MobileNav from "@/components/docs/MobileNav";
+
 const hheading = [
   { id: "Random test", href: "" },
   { id: "Random heading 2 ", href: "" },
@@ -20,18 +21,18 @@ export default function Layout({ children }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Mobile: Show MobileNav, hide DocsHeader */}
-      <div className="block sm:hidden">
+      {/* Mobile: Show MobileNav up to md */}
+      <div className="block md:hidden">
         <MobileNav />
       </div>
-      {/* Desktop: Show DocsHeader, hide MobileNav */}
-      <div className="hidden sm:block">
+      {/* Medium+: Show DocsHeader */}
+      <div className="hidden md:block">
         <DocsHeader />
       </div>
 
       {isThreeColumnLayout ? (
         <div className="flex-1 flex">
-          <aside className="hidden lg:block w-[280px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-sideBarBackground border-r border-border/40">
+          <aside className="hidden md:block w-[280px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-sideBarBackground border-r border-border/40">
             <SidebarNav />
           </aside>
           <main className="flex-1 min-w-0">
@@ -45,7 +46,7 @@ export default function Layout({ children }) {
         </div>
       ) : isTwoColumnLayout ? (
         <div className="flex-1 flex">
-          <aside className="hidden lg:block w-[280px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-sideBarBackground border-r border-border/40">
+          <aside className="hidden md:block w-[280px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-sideBarBackground border-r border-border/40">
             <SidebarNav />
           </aside>
           <main className="flex-1 min-w-0">
