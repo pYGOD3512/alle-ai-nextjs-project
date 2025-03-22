@@ -5,6 +5,7 @@ import ApiDocLayout from "@/components/TwoLayout";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import NavigationContainer from "@/components/NavigationContainer";
+import { videoGenCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
 const requestbody = `{
   type: "text-to-speech",
   prompt:
@@ -79,53 +80,37 @@ const response = `
 `;
 const requestBodyFields = [
   {
-    name: "type",
-    type: "string",
+    name: "models",
+    type: "string[]",
     required: true,
-    description:
-      "indicate the type of request [text-to-speech], [transcription] audio generation ",
+    description: "Array of selected models for generating video from text.",
   },
   {
     name: "prompt",
     type: "string",
     required: true,
     description:
-      "The text to generate audio for. The maximum length is 4096 characters.",
+      "The text description to generate video from. Maximum length is 4096 characters.",
   },
   {
-    name: "models",
-    type: "array",
-    required: true,
-    description: "Array of selected audio models for API call",
-  },
-
-  {
-    name: "voice",
-    type: "string",
-    required: true,
-    description:
-      "The voice to use when generating the audio. Supported voices are alloy, ash, coral, echo, fable, onyx, nova, sage and shimmer. Previews of the voices are available in the Text t",
-  },
-  {
-    name: "response_format",
-    type: "string or null",
+    name: "output_format",
+    type: "'mp4' | 'mov'",
     required: false,
     description:
-      "The format to audio in. Supported formats are mp3, opus, aac, flac, wav,",
+      "The output video format. Supported values are 'mp4' or 'mov'. Optional.",
   },
   {
-    name: "size",
-    type: "string or null",
-    required: false,
-    description:
-      "The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of  1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models. Defaults to 1024x1024.",
-  },
-  {
-    name: "speed",
+    name: "duration",
     type: "number",
     required: false,
+    description: "The duration of the generated video in seconds. Optional.",
+  },
+  {
+    name: "aspect_ratio",
+    type: "string",
+    required: false,
     description:
-      "The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.",
+      "The aspect ratio of the video (e.g., '16:9', '4:3'). Optional.",
   },
 ];
 const musicRequest = [
@@ -168,42 +153,25 @@ options:[
 `;
 const EditRequestBody = [
   {
-    name: "file",
-    type: "file",
-    required: true,
-    description:
-      "The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.",
-  },
-  {
     name: "models",
-    type: "array",
+    type: "string[]",
     required: true,
-    description: "selected models for audio transcription",
+    description: "Array of selected models for video editing.",
   },
   {
     name: "prompt",
     type: "string",
-    required: false,
-    description:
-      "An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language.",
+    required: true,
+    description: "The text description to guide the video editing process.",
   },
   {
-    name: "language",
+    name: "videoUrl",
     type: "string",
-    required: false,
+    required: true,
     description:
-      "A text description of the desired image(s). The maximum length is 1000 characters.",
-  },
-
-  {
-    name: "response_format",
-    type: "string or null",
-    required: false,
-    description:
-      "The format in which the generated images are returned. Must be one of url or b64_json. URLs are only valid for 60 minutes after the image has been generated.",
+      "A base64-encoded string or a web URL pointing to the video file to edit.",
   },
 ];
-
 const editRequestCurl = `
 curl https://api.alleai.com/v1/images/edits \
   -H "Authorization: Bearer $alleai_key" \
@@ -300,17 +268,6 @@ export default function ApiVideoGenerationDocs() {
                 </Link>{" "}
                 &nbsp; and navigating to the API Keys section in your dashboard.
               </p>
-              <section className="">
-                <div className="bg-yellow-500/10 border-yellow-500/50 border p-4 rounded-lg">
-                  <h4 className="font-semibold text-yellow-500 mb-2">
-                    Important: API Key Required
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Security Note: Keep your API key secure and never expose it
-                    in client-side code or public repositories.
-                  </p>
-                </div>
-              </section>
             </Card>
           }
         />
@@ -364,7 +321,7 @@ export default function ApiVideoGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestbody}
+                  code={videoGenCodes.body}
                   language="json"
                 />
               </div>
@@ -379,7 +336,7 @@ export default function ApiVideoGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={python}
+                      code={videoGenCodes.python}
                       language="python"
                     />
                   </TabsContent>
@@ -387,7 +344,7 @@ export default function ApiVideoGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={node}
+                      code={videoGenCodes.javascript}
                       language="javascript"
                     />
                   </TabsContent>
@@ -395,7 +352,7 @@ export default function ApiVideoGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={curl}
+                      code={videoGenCodes.curl}
                       language="bash"
                     />
                   </TabsContent>
@@ -459,7 +416,7 @@ export default function ApiVideoGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestEdit}
+                  code={videoGenCodes.editBody}
                   language="json"
                 />
               </div>
@@ -475,7 +432,7 @@ export default function ApiVideoGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="javascript"
-                      code={editRequestJavascript}
+                      code={videoGenCodes.editJavascript}
                     />
                   </TabsContent>
                   <TabsContent value="curl">
@@ -483,7 +440,7 @@ export default function ApiVideoGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="bash"
-                      code={editRequestCurl}
+                      code={videoGenCodes.editCurl}
                     />
                   </TabsContent>
                   <TabsContent value="python">
@@ -491,7 +448,7 @@ export default function ApiVideoGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="python"
-                      code={editRequestPython}
+                      code={videoGenCodes.editPython}
                     />
                   </TabsContent>
                 </Tabs>

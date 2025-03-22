@@ -663,3 +663,125 @@ generateAudio();`,
     "format": "mp3"
   }'`,
 };
+// video generation snippets 
+
+export const videoGenCodes = {
+  body: `{
+  "models": ["RunwayML", "Sora"],
+  "prompt": "A futuristic cityscape at sunset with flying cars",
+  "output_format": "mp4",
+  "duration": 15,
+  "aspect_ratio": "16:9"
+}`,
+  curl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "models": ["RunwayML", "Sora"],
+    "prompt": "A futuristic cityscape at sunset with flying cars",
+    "output_format": "mp4",
+    "duration": 15,
+    "aspect_ratio": "16:9"
+  }'`,
+  python: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make video generation request
+response = client.video.generate({
+    "models": ["RunwayML", "Sora"],
+    "prompt": "A futuristic cityscape at sunset with flying cars",
+    "output_format": "mp4",
+    "duration": 15,
+    "aspect_ratio": "16:9"
+})
+
+print(response)`,
+  javascript: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function generateVideo() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make video generation request
+    const response = await alleai.video.generate({
+        models: ["RunwayML", "Sora"],
+        prompt: "A futuristic cityscape at sunset with flying cars",
+        output_format: "mp4",
+        duration: 15,
+        aspect_ratio: "16:9"
+    });
+
+    console.log(response);
+}
+
+generateVideo();`,
+  editBody: `{
+  "models": ["RunwayML", "Kaiber"],
+  "prompt": "Enhance the colors and add a slow-motion effect",
+  "videoUrl": "https://example.com/videos/sample.mp4"
+}`,
+  editPython: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make video edit request
+response = client.video.edit({
+    "models": ["RunwayML", "Kaiber"],
+    "prompt": "Enhance the colors and add a slow-motion effect",
+    "videoUrl": "https://example.com/videos/sample.mp4"
+})
+
+print(response)`,
+  editJavascript: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function editVideo() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make video edit request
+    const response = await alleai.video.edit({
+        models: ["RunwayML", "Kaiber"],
+        prompt: "Enhance the colors and add a slow-motion effect",
+        videoUrl: "https://example.com/videos/sample.mp4"
+    });
+
+    console.log(response);
+}
+
+editVideo();`,
+  editCurl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "models": ["RunwayML", "Kaiber"],
+    "prompt": "Enhance the colors and add a slow-motion effect",
+    "videoUrl": "https://example.com/videos/sample.mp4"
+  }'`,
+};
