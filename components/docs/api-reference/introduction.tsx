@@ -1,6 +1,6 @@
 // @ts-nocheck
 "use client";
-
+import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import RenderCode from "@/components/RenderCode";
@@ -95,6 +95,15 @@ export default function ApiIntroduction() {
                     keys).
                   </li>
                 </ul>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-4">
+                                You can obtain an API key by &nbsp;{" "}
+                                <Link href={"/"} target="_blank" className="text-blue-600">
+                                  registering for an account
+                                </Link>{" "}
+                                &nbsp; and navigating to the API Keys section in your dashboard.
+                              </p>
               </div>
 
               <div className="bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200 px-6 py-4 rounded-lg">

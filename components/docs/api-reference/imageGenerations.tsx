@@ -4,60 +4,9 @@ import Link from "next/link";
 import ApiDocLayout from "@/components/TwoLayout";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import NavigationContainer from "@/components/NavigationContainer";
-const requestbody = `{
-  type: "text-to-image",
-  prompt:
-    "a serene mountain landscape with a lake reflecting the sunset, photorealistic style",
-  models: ["stable-diffusion-xl", "midjourney-v5", "dalle-3"],
-  options: {
-    width: 1024,
-    height: 768,
-    num_outputs_per_model: 1,
-    guidance_scale: 7.5,
-    seed: 42,
-    safety_check: true,
-  },
-  quality: "hd",
-  response_format: "url",
-};`;
+import { imageGenCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
 
-const curl = `
-curl https://alleai.com/v1/images/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -d '{
-    "model": ["dall-e-3","midjourney"],
-    "prompt": "A cute baby sea otter",
-    "n": 1,
-    "size": "1024x1024"
-  }'
-`;
-const python = `
-from alleai import alleImage
-client = alleImage()
 
-client.images.generate(
-  models=["dall-e-3","midjourney"],
-  prompt="A cute baby sea otter",
-  n=1,
-  size="1024x1024"
-)
-
-`;
-
-const node = `
-import alleai from "alleImage";
-
-const image = new alleai();
-
-async function main() {
-  const image = await openai.images.generate({ model: "dall-e-3", prompt: "A cute baby sea otter" });
-
-  console.log(image.data);
-}
-main();
-`;
 const response = `
 {
   "created": 1589478378,
@@ -74,46 +23,74 @@ const response = `
 `;
 const requestBodyFields = [
   {
-    name: "type",
-    type: "string",
+    name: "models",
+    type: "string[]",
     required: true,
-    description:
-      "indicate the type of request [text-to-image] or [image-editing] ",
+    description: "An array of selected image models for the API call.",
   },
   {
     name: "prompt",
     type: "string",
     required: true,
-    description:
-      "A text description of the desired image(s). The maximum length is 1000 characters for dall-e-2 and 4000 characters for dall-e-3.",
+    description: "A text description of the desired image(s).",
   },
   {
-    name: "models",
-    type: "array",
-    required: true,
-    description: "Array of selected images models for API call",
+    name: "width",
+    type: "number",
+    required: false,
+    description: "The width of the generated image in pixels. Optional.",
   },
-
   {
-    name: "quality",
+    name: "height",
+    type: "number",
+    required: false,
+    description: "The height of the generated image in pixels. Optional.",
+  },
+  {
+    name: "num_images",
+    type: "number",
+    required: false,
+    description: "The number of images to generate. Optional.",
+  },
+  {
+    name: "style",
+    type: "string",
+    required: false,
+    description: "The style of the generated image. Optional.",
+  },
+  {
+    name: "negative_prompt",
     type: "string",
     required: false,
     description:
-      "The quality of the image that will be generated. hd creates images with finer details and greater consistency across the image. This param is only supported for dall-e-3. Defaults to standard.",
+      "A text description of elements to exclude from the image. Optional.",
   },
   {
-    name: "response_format",
-    type: "string or null",
+    name: "seed",
+    type: "number",
     required: false,
-    description:
-      "The format in which the generated images are returned. Must be one of url or b64_json. URLs are only valid for 60 minutes after the image has been generated. Defaults to url.",
+    description: "A seed value for reproducible image generation. Optional.",
   },
   {
-    name: "size",
-    type: "string or null",
+    name: "guidance_scale",
+    type: "number",
     required: false,
     description:
-      "The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of  1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models. Defaults to 1024x1024.",
+      "A value controlling the influence of the prompt on the image generation. Optional.",
+  },
+  {
+    name: "quality",
+    type: "'standard' | 'hd'",
+    required: false,
+    description:
+      "The quality of the generated image. Either 'standard' or 'hd'. Defaults to 'standard'.",
+  },
+  {
+    name: "format",
+    type: "'png' | 'jpg' | 'webp'",
+    required: false,
+    description:
+      "The file format of the generated image. Either 'png', 'jpg', or 'webp'. Optional.",
   },
 ];
 const requestEdit = `
@@ -127,45 +104,84 @@ options:[
 `;
 const EditRequestBody = [
   {
-    name: "type",
-    type: "string",
-    required: true,
-    description:
-      "image-edit, this is required to get and edited edition of original images",
-  },
-  {
-    name: "images",
-    type: "file",
-    required: true,
-    description:
-      "The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.",
-  },
-  {
-    name: "prompt",
-    type: "string",
-    required: true,
-    description:
-      "A text description of the desired image(s). The maximum length is 1000 characters.",
-  },
-  {
-    name: "prompt",
-    type: "string",
-    required: true,
-    description:
-      "A text description of the desired image(s). The maximum length is 1000 characters.",
-  },
-  {
     name: "models",
-    type: "string",
+    type: "string[]",
     required: true,
-    description: "The models to be use for image generation.",
+    description: "An array of models to use for image editing.",
   },
   {
-    name: "response_format",
-    type: "string or null",
+    name: "type",
+    type: "'imageUrl' | 'file'",
+    required: true,
+    description:
+      "Specifies the input type: 'imageUrl' for a URL or 'file' for a local file upload.",
+  },
+  {
+    name: "file_path",
+    type: "string",
+    required: true,
+    description:
+      "base64-encoded string or a web URL pointing to the image to edit.",
+  },
+  {
+    name: "prompt",
+    type: "string",
+    required: true,
+    description:
+      "A text description of the desired edit. Maximum length is 1000 characters.",
+  },
+  {
+    name: "mask_path",
+    type: "string",
     required: false,
     description:
-      "The format in which the generated images are returned. Must be one of url or b64_json. URLs are only valid for 60 minutes after the image has been generated.",
+      "The path to an optional mask file defining editable areas. If omitted, transparency in the image may be used as the mask.",
+  },
+  {
+    name: "strength",
+    type: "number",
+    required: false,
+    description:
+      "The strength of the edit effect, typically between 0 and 1. Optional.",
+  },
+  {
+    name: "preserve_color",
+    type: "boolean",
+    required: false,
+    description:
+      "Whether to preserve the original image colors during editing. Optional.",
+  },
+  {
+    name: "num_outputs",
+    type: "number",
+    required: false,
+    description: "The number of edited outputs to generate. Optional.",
+  },
+  {
+    name: "style",
+    type: "string",
+    required: false,
+    description: "The style to apply to the edited image. Optional.",
+  },
+  {
+    name: "negative_prompt",
+    type: "string",
+    required: false,
+    description: "A description of elements to avoid in the edit. Optional.",
+  },
+  {
+    name: "format",
+    type: "'png' | 'jpg' | 'webp'",
+    required: false,
+    description:
+      "The file format of the edited image. Optional, defaults to implementation-specific.",
+  },
+  {
+    name: "quality",
+    type: "'standard' | 'hd'",
+    required: false,
+    description:
+      "The quality of the edited image: 'standard' or 'hd'. Optional, defaults to 'standard'.",
   },
 ];
 
@@ -284,17 +300,6 @@ export default function ApiImageGenerationDocs() {
                 </Link>{" "}
                 &nbsp; and navigating to the API Keys section in your dashboard.
               </p>
-              <section className="">
-                <div className="bg-yellow-500/10 border-yellow-500/50 border p-4 rounded-lg">
-                  <h4 className="font-semibold text-yellow-500 mb-2">
-                    Important: API Key Required
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Security Note: Keep your API key secure and never expose it
-                    in client-side code or public repositories.
-                  </p>
-                </div>
-              </section>
             </Card>
           }
         />
@@ -360,7 +365,7 @@ export default function ApiImageGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestbody}
+                  code={imageGenCodes.exampleBody}
                   language="json"
                 />
               </div>
@@ -375,7 +380,7 @@ export default function ApiImageGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={python}
+                      code={imageGenCodes.python}
                       language="python"
                     />
                   </TabsContent>
@@ -383,7 +388,7 @@ export default function ApiImageGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={node}
+                      code={imageGenCodes.javascript}
                       language="javascript"
                     />
                   </TabsContent>
@@ -391,7 +396,7 @@ export default function ApiImageGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={curl}
+                      code={imageGenCodes.curl}
                       language="bash"
                     />
                   </TabsContent>
@@ -456,7 +461,7 @@ export default function ApiImageGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestEdit}
+                  code={imageGenCodes.editBody}
                   language="json"
                 />
               </div>
@@ -472,7 +477,7 @@ export default function ApiImageGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="javascript"
-                      code={editRequestJavascript}
+                      code={imageGenCodes.editJavascript}
                     />
                   </TabsContent>
                   <TabsContent value="curl">
@@ -480,7 +485,7 @@ export default function ApiImageGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="bash"
-                      code={editRequestCurl}
+                      code={imageGenCodes.editcurl}
                     />
                   </TabsContent>
                   <TabsContent value="python">
@@ -488,7 +493,7 @@ export default function ApiImageGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="python"
-                      code={editRequestPython}
+                      code={imageGenCodes.editPython}
                     />
                   </TabsContent>
                 </Tabs>

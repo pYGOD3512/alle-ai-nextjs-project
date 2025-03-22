@@ -345,3 +345,321 @@ chat();`,
     }
 ]`,
 };
+
+
+// image generation snippets 
+
+export const imageGenCodes = {
+  exampleBody: `{
+  "models": ["Stable-Diffusion", "DALL-E"],
+  "prompt": "A serene mountain landscape at sunset",
+  "width": 1024,
+  "height": 768,
+  "quality": "hd"
+}`,
+  python: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make image generation request
+response = client.image.generate({
+    "models": ["Stable-Diffusion", "DALL-E"],
+    "prompt": "A serene mountain landscape at sunset",
+    "width": 1024,
+    "height": 768,
+    "quality": "hd"
+})
+
+# Print the response 
+print(response)`,
+  javascript: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function generateImage() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make image generation request
+    const response = await alleai.image.generate({
+        models: ["Stable-Diffusion", "DALL-E"],
+        prompt: "A serene mountain landscape at sunset",
+        width: 1024,
+        height: 768,
+        quality: "hd"
+    });
+
+    // Log the response 
+    console.log(response);
+}
+
+generateImage();`,
+  curl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "models": ["Stable-Diffusion", "DALL-E"],
+    "prompt": "A serene mountain landscape at sunset",
+    "width": 1024,
+    "height": 768,
+    "quality": "hd"
+  }'`,
+  editcurl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "imageUrl",
+    "file_path": "https://example.com/images/mountain.png",
+    "models": ["Stable-Diffusion", "DALL-E"],
+    "prompt": "Add a bright blue sky and fluffy clouds",
+    "quality": "hd"
+  }'`,
+  editPython: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+
+client = AlleAIClient(api_key=api_key)
+
+# Make image edit request
+response = client.image.edit({
+    "type": "imageUrl",
+    "file_path": "https://example.com/images/mountain.png",
+    "models": ["Stable-Diffusion", "DALL-E"],
+    "prompt": "Add a bright blue sky and fluffy clouds",
+    "quality": "hd"
+})
+
+
+print(response)`,
+  editJavascript: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function editImage() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make image edit request
+    const response = await alleai.image.edit({
+        type: "imageUrl",
+        file_path: "https://example.com/images/mountain.png",
+        models: ["Stable-Diffusion", "DALL-E"],
+        prompt: "Add a bright blue sky and fluffy clouds",
+        quality: "hd"
+    });
+
+    console.log(response);
+}
+
+editImage();`,
+  editBody: `{
+    "type": "imageUrl",
+    "file_path": "https://example.com/images/mountain.png",
+    "models": ["Stable-Diffusion", "DALL-E"],
+    "prompt": "Add a bright blue sky and fluffy clouds",
+    "quality": "hd"
+}`,
+};
+
+// audio generation snippets
+export const audioGenCodes = {
+  curl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "models": ["ElevenLabs", "Google-TTS"],
+    "text": "Welcome to the world of audio generation!",
+    "voice_id": "alloy",
+    "speed": 1.2,
+    "format": "mp3"
+  }'`,
+  examplBody: `{
+  "models": ["ElevenLabs", "Google-TTS"],
+  "text": "Welcome to the world of audio generation!",
+  "voice_id": "alloy",
+  "speed": 1.2,
+  "format": "mp3"
+}`,
+  python: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make TTS request
+response = client.audio.tts({
+    "models": ["ElevenLabs", "Google-TTS"],
+    "text": "Welcome to the world of audio generation!",
+    "voice_id": "alloy",
+    "speed": 1.2,
+    "format": "mp3"
+})
+
+# Print the response (adjust based on actual response structure)
+print(response)`,
+  javascritp: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function generateTTS() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make TTS request
+    const response = await alleai.audio.tts({
+        models: ["ElevenLabs", "Google-TTS"],
+        text: "Welcome to the world of audio generation!",
+        voice_id: "alloy",
+        speed: 1.2,
+        format: "mp3"
+    });
+
+    // Log the response (adjust based on actual response structure)
+    console.log(response);
+}
+
+generateTTS();`,
+  transcribeCurl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "models": ["Whisper", "DeepSpeech"],
+    "audioUrl": "https://example.com/audio/sample.mp3",
+    "language": "en-US",
+    "output_format": "text"
+  }'`,
+  transcribebody: `{
+  "models": ["Whisper", "DeepSpeech"],
+  "audioUrl": "https://example.com/audio/sample.mp3",
+  "language": "en-US",
+  "output_format": "text"
+}`,
+  transcribePython: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make STT request
+response = client.audio.stt({
+    "models": ["Whisper", "DeepSpeech"],
+    "audioUrl": "https://example.com/audio/sample.mp3",
+    "language": "en-US",
+    "output_format": "text"
+})
+
+print(response)`,
+  transcribeJavascript: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function transcribeAudio() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make STT request
+    const response = await alleai.audio.stt({
+        models: ["Whisper", "DeepSpeech"],
+        audioUrl: "https://example.com/audio/sample.mp3",
+        language: "en-US",
+        output_format: "text"
+    });
+
+    console.log(response);
+}
+
+transcribeAudio();`,
+  generatebody: `{
+  "models": ["Suno", "MusicGen"],
+  "prompt": "A cheerful jazz tune with a fast tempo",
+  "duration": 30,
+  "genre": "jazz",
+  "format": "mp3"
+}`,
+  generatePython: `from alleai.core import AlleAIClient
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make audio generation request
+response = client.audio.generate({
+    "models": ["Suno", "MusicGen"],
+    "prompt": "A cheerful jazz tune with a fast tempo",
+    "duration": 30,
+    "genre": "jazz",
+    "format": "mp3"
+})
+
+print(response)`,
+  generateJavascript: `const client = require("alleai-sdk");
+require("dotenv").config();
+
+async function generateAudio() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make audio generation request
+    const response = await alleai.audio.generate({
+        models: ["Suno", "MusicGen"],
+        prompt: "A cheerful jazz tune with a fast tempo",
+        duration: 30,
+        genre: "jazz",
+        format: "mp3"
+    });
+
+    console.log(response);
+}
+
+generateAudio();`,
+  generateCurl: `curl -X POST "<ENDPOINT_URL>" \
+  -H "Authorization: Bearer <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "models": ["Suno", "MusicGen"],
+    "prompt": "A cheerful jazz tune with a fast tempo",
+    "duration": 30,
+    "genre": "jazz",
+    "format": "mp3"
+  }'`,
+};

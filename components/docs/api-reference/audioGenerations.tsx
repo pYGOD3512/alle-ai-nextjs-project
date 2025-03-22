@@ -4,65 +4,8 @@ import Link from "next/link";
 import ApiDocLayout from "@/components/TwoLayout";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import NavigationContainer from "@/components/NavigationContainer";
-const requestbody = `{
-  type: "text-to-speech",
-  prompt:
-    "Rich men do what it takes to double money",
-  models: ["elevenlabs", "Gemini", "gpt-4o"],
-  voice: "alloy",
-  response_format: "mp3",
-  speed:0.25
-};`;
+import { audioGenCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
 
-const curl = `
-curl https://alleai.com/v1/images/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -d '{
-    "model": ["dall-e-3","midjourney"],
-    "prompt": "A cute baby sea otter",
-    "n": 1,
-    "size": "1024x1024"
-  }'
-`;
-const python = `
-from pathlib import Path
-import alleai
-
-speech_file_path = Path(__file__).parent / "speech.mp3"
-response = alleai.audio.speech.create(
-  models: ["elevenlabs", "Gemini", "gpt-4o"],
-  voice="alloy",
-  input="The quick brown fox jumped over the lazy dog."
-)
-response.stream_to_file(speech_file_path)
-
-
-`;
-
-const node = `
-import fs from "fs";
-import path from "path";
-import alleai from "alleai";
-
-const alleai = new alleAI();
-
-const speechFile = path.resolve("./speech.mp3");
-
-async function main() {
-  const mp3 = await openai.audio.speech.create({
-    model: ["tts-1",,"Gemini"]
-    voice: "alloy",
-    input: "Today is a wonderful day to build something people love!",
-  });
-  console.log(speechFile);
-  const buffer = Buffer.from(await mp3.arrayBuffer());
-  await fs.promises.writeFile(speechFile, buffer);
-}
-main();
-
-`;
 const response = `
 {
   "created": 1589478378,
@@ -79,169 +22,219 @@ const response = `
 `;
 const requestBodyFields = [
   {
-    name: "type",
-    type: "string",
-    required: true,
-    description:
-      "indicate the type of request [text-to-speech], [transcription] audio generation ",
-  },
-  {
-    name: "prompt",
-    type: "string",
-    required: true,
-    description:
-      "The text to generate audio for. The maximum length is 4096 characters.",
-  },
-  {
     name: "models",
-    type: "array",
+    type: "string[]",
     required: true,
-    description: "Array of selected audio models for API call",
+    description:
+      "Array of selected audio models for the text-to-speech API call.",
   },
-
   {
-    name: "voice",
+    name: "text",
     type: "string",
     required: true,
     description:
-      "The voice to use when generating the audio. Supported voices are alloy, ash, coral, echo, fable, onyx, nova, sage and shimmer. Previews of the voices are available in the Text t",
+      "The text to generate audio for. Maximum length is 4096 characters.",
   },
   {
-    name: "response_format",
-    type: "string or null",
+    name: "voice_id",
+    type: "string",
     required: false,
     description:
-      "The format to audio in. Supported formats are mp3, opus, aac, flac, wav,",
+      "The ID of the voice to use for audio generation. Optional, defaults to a model-specific voice.",
   },
   {
-    name: "size",
-    type: "string or null",
+    name: "language",
+    type: "string",
     required: false,
-    description:
-      "The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of  1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models. Defaults to 1024x1024.",
+    description: "The language code for the audio (e.g., 'en-US'). Optional.",
   },
   {
     name: "speed",
     type: "number",
     required: false,
     description:
-      "The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.",
+      "The speed of the generated audio. Ranges from 0.25 to 4.0. Defaults to 1.0.",
+  },
+  {
+    name: "pitch",
+    type: "number",
+    required: false,
+    description: "Voice pitch adjustment, ranging from -20 to 20. Optional.",
+  },
+  {
+    name: "format",
+    type: "'mp3' | 'wav' | 'ogg'",
+    required: false,
+    description:
+      "The audio output format. Supported values are 'mp3', 'wav', or 'ogg'. Optional.",
+  },
+  {
+    name: "quality",
+    type: "'standard' | 'hd'",
+    required: false,
+    description:
+      "The quality of the generated audio: 'standard' or 'hd'. Optional, defaults to 'standard'.",
+  },
+  {
+    name: "emotion",
+    type: "'neutral' | 'happy' | 'sad' | 'angry' | 'excited'",
+    required: false,
+    description:
+      "The emotional tone of the voice. Options are 'neutral', 'happy', 'sad', 'angry', or 'excited'. Optional.",
+  },
+  {
+    name: "volume",
+    type: "number",
+    required: false,
+    description: "The volume level of the generated audio. Optional.",
   },
 ];
 const musicRequest = [
   {
-    name: "type",
-    type: "string",
+    name: "models",
+    type: "string[]",
     required: true,
     description:
-      "indicate the type of request [text-to-speech], [transcription] audio generation, In this case will be audio-generation ",
+      "Array of selected audio models for generating audio from text.",
   },
   {
     name: "prompt",
     type: "string",
     required: true,
     description:
-      "The text to generate audio for. The maximum length is 4096 characters.",
+      "The text description to generate audio from. Maximum length is 4096 characters.",
   },
   {
-    name: "models",
-    type: "array",
-    required: true,
-    description: "Array of selected audio models for API call",
+    name: "duration",
+    type: "number",
+    required: false,
+    description: "The duration of the generated audio in seconds. Optional.",
   },
   {
-    name: "response_format",
-    type: "string or null",
+    name: "tempo",
+    type: "number",
     required: false,
     description:
-      "The format to audio in. Supported formats are mp3, opus, aac, flac, wav,",
+      "The tempo of the generated audio in beats per minute (BPM). Optional.",
+  },
+  {
+    name: "genre",
+    type: "string",
+    required: false,
+    description:
+      "The musical genre for the generated audio (e.g., 'jazz', 'rock'). Optional.",
+  },
+  {
+    name: "instruments",
+    type: "string[]",
+    required: false,
+    description:
+      "Array of instruments to include in the audio (e.g., 'piano', 'drums'). Optional.",
+  },
+  {
+    name: "quality",
+    type: "'standard' | 'hd'",
+    required: false,
+    description:
+      "The quality of the generated audio: 'standard' or 'hd'. Optional, defaults to 'standard'.",
+  },
+  {
+    name: "format",
+    type: "'mp3' | 'wav' | 'ogg'",
+    required: false,
+    description:
+      "The audio output format. Supported values are 'mp3', 'wav', or 'ogg'. Optional.",
+  },
+  {
+    name: "loop",
+    type: "boolean",
+    required: false,
+    description: "Whether the generated audio should be loopable. Optional.",
+  },
+  {
+    name: "mood",
+    type: "string",
+    required: false,
+    description:
+      "The mood of the generated audio (e.g., 'happy', 'calm'). Optional.",
+  },
+  {
+    name: "volume",
+    type: "number",
+    required: false,
+    description: "The volume level of the generated audio. Optional.",
   },
 ];
-const requestEdit = `
-{
-type:"image-edit"
-models:['dall-e-3','midjourney'],
-prompt:"modify the cap",
-options:[
-]      // other options
-}
-`;
+
 const EditRequestBody = [
   {
-    name: "file",
-    type: "file",
-    required: true,
-    description:
-      "The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.",
-  },
-  {
     name: "models",
-    type: "array",
+    type: "string[]",
     required: true,
-    description: "selected models for audio transcription",
+    description: "Array of selected models for audio transcription.",
   },
   {
-    name: "prompt",
+    name: "audioUrl",
     type: "string",
-    required: false,
+    required: true,
     description:
-      "An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language.",
+      "A base64-encoded string or a web URL pointing to the audio file to transcribe. Supported formats include flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.",
   },
   {
     name: "language",
     type: "string",
     required: false,
-    description:
-      "A text description of the desired image(s). The maximum length is 1000 characters.",
+    description: "The source audio language (e.g., 'en-US'). Optional.",
   },
-
   {
-    name: "response_format",
-    type: "string or null",
+    name: "timestamp",
+    type: "boolean",
     required: false,
     description:
-      "The format in which the generated images are returned. Must be one of url or b64_json. URLs are only valid for 60 minutes after the image has been generated.",
+      "Whether to include word-level timestamps in the transcription. Optional.",
+  },
+  {
+    name: "diarization",
+    type: "boolean",
+    required: false,
+    description:
+      "Whether to enable speaker identification (diarization). Optional.",
+  },
+  {
+    name: "filter_profanity",
+    type: "boolean",
+    required: false,
+    description:
+      "Whether to filter inappropriate content from the transcription. Optional.",
+  },
+  {
+    name: "output_format",
+    type: "'json' | 'text' | 'srt' | 'vtt'",
+    required: false,
+    description:
+      "The format of the transcription output. Options are 'json', 'text', 'srt', or 'vtt'. Optional.",
+  },
+  {
+    name: "noise_reduction",
+    type: "boolean",
+    required: false,
+    description: "Whether to apply background noise filtering. Optional.",
+  },
+  {
+    name: "punctuation",
+    type: "boolean",
+    required: false,
+    description:
+      "Whether to automatically add punctuation to the transcription. Optional.",
+  },
+  {
+    name: "max_speakers",
+    type: "number",
+    required: false,
+    description:
+      "The maximum number of speakers to identify during diarization. Optional.",
   },
 ];
-
-const editRequestCurl = `
-curl https://api.alleai.com/v1/images/edits \
-  -H "Authorization: Bearer $alleai_key" \
-  -F image="@otter.png" \
-  -F models =['dall-3-e","midjourney"]\
-  -F prompt="A cute baby sea otter wearing a beret" \
-  -F size="1024x1024"
-
-`;
-const editRequestPython = `
-
-from alleai import alleImageEdit
-client = alleImageEdit()
-
-client.images.edit(
-  image=open("otter.png", "rb"),
-  prompt="A cute baby sea otter wearing a beret",
-  size="1024x1024",
-  models=["dall-e-3","midjourney"]
-)
-
-`;
-const editRequestJavascript = `
-import fs from "fs";
-import alleai from "alleImageEdit";
-
-const alleaiImage = new alleImageEdit();
-async function main() {
-  const image = await alleImageEdit.images.edit({
-    image: fs.createReadStream("otter.png"),
-    mask: fs.createReadStream("mask.png"),
-    prompt: "A cute baby sea otter wearing a beret",
-    models=["dall-e-3","midjourney"]
-  });
-}
-main();
-
-`;
 
 export default function ApiAudioGenerationDocs() {
   return (
@@ -312,17 +305,6 @@ export default function ApiAudioGenerationDocs() {
                 </Link>{" "}
                 &nbsp; and navigating to the API Keys section in your dashboard.
               </p>
-              <section className="">
-                <div className="bg-yellow-500/10 border-yellow-500/50 border p-4 rounded-lg">
-                  <h4 className="font-semibold text-yellow-500 mb-2">
-                    Important: API Key Required
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Security Note: Keep your API key secure and never expose it
-                    in client-side code or public repositories.
-                  </p>
-                </div>
-              </section>
             </Card>
           }
         />
@@ -377,7 +359,7 @@ export default function ApiAudioGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestbody}
+                  code={audioGenCodes.examplBody}
                   language="json"
                 />
               </div>
@@ -392,7 +374,7 @@ export default function ApiAudioGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={python}
+                      code={audioGenCodes.python}
                       language="python"
                     />
                   </TabsContent>
@@ -400,7 +382,7 @@ export default function ApiAudioGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={node}
+                      code={audioGenCodes.javascritp}
                       language="javascript"
                     />
                   </TabsContent>
@@ -408,7 +390,7 @@ export default function ApiAudioGenerationDocs() {
                     <RenderCode
                       showLanguage={false}
                       title="Example request "
-                      code={curl}
+                      code={audioGenCodes.curl}
                       language="bash"
                     />
                   </TabsContent>
@@ -472,7 +454,7 @@ export default function ApiAudioGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestEdit}
+                  code={audioGenCodes.transcribebody}
                   language="json"
                 />
               </div>
@@ -488,7 +470,7 @@ export default function ApiAudioGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="javascript"
-                      code={editRequestJavascript}
+                      code={audioGenCodes.transcribeJavascript}
                     />
                   </TabsContent>
                   <TabsContent value="curl">
@@ -496,7 +478,7 @@ export default function ApiAudioGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="bash"
-                      code={editRequestCurl}
+                      code={audioGenCodes.transcribeCurl}
                     />
                   </TabsContent>
                   <TabsContent value="python">
@@ -504,7 +486,7 @@ export default function ApiAudioGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="python"
-                      code={editRequestPython}
+                      code={audioGenCodes.transcribePython}
                     />
                   </TabsContent>
                 </Tabs>
@@ -571,7 +553,7 @@ export default function ApiAudioGenerationDocs() {
                 <RenderCode
                   showLanguage={false}
                   title="Example request body"
-                  code={requestEdit}
+                  code={audioGenCodes.generatebody}
                   language="json"
                 />
               </div>
@@ -587,7 +569,7 @@ export default function ApiAudioGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="javascript"
-                      code={editRequestJavascript}
+                      code={audioGenCodes.generateJavascript}
                     />
                   </TabsContent>
                   <TabsContent value="curl">
@@ -595,7 +577,7 @@ export default function ApiAudioGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="bash"
-                      code={editRequestCurl}
+                      code={audioGenCodes.generateCurl}
                     />
                   </TabsContent>
                   <TabsContent value="python">
@@ -603,7 +585,7 @@ export default function ApiAudioGenerationDocs() {
                       showLanguage={false}
                       title="Example request"
                       language="python"
-                      code={editRequestPython}
+                      code={audioGenCodes.generatePython}
                     />
                   </TabsContent>
                 </Tabs>
