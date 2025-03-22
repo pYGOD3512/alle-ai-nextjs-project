@@ -6,64 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import NavigationContainer from "@/components/NavigationContainer";
 import { videoGenCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
-const requestbody = `{
-  type: "text-to-speech",
-  prompt:
-    "Rich men do what it takes to double money",
-  models: ["elevenlabs", "Gemini", "gpt-4o"],
-  voice: "alloy",
-  response_format: "mp3",
-  speed:0.25
-};`;
 
-const curl = `
-curl https://alleai.com/v1/images/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -d '{
-    "model": ["dall-e-3","midjourney"],
-    "prompt": "A cute baby sea otter",
-    "n": 1,
-    "size": "1024x1024"
-  }'
-`;
-const python = `
-from pathlib import Path
-import alleai
-
-speech_file_path = Path(__file__).parent / "speech.mp3"
-response = alleai.audio.speech.create(
-  models: ["elevenlabs", "Gemini", "gpt-4o"],
-  voice="alloy",
-  input="The quick brown fox jumped over the lazy dog."
-)
-response.stream_to_file(speech_file_path)
-
-
-`;
-
-const node = `
-import fs from "fs";
-import path from "path";
-import alleai from "alleai";
-
-const alleai = new alleAI();
-
-const speechFile = path.resolve("./speech.mp3");
-
-async function main() {
-  const mp3 = await openai.audio.speech.create({
-    model: ["tts-1",,"Gemini"]
-    voice: "alloy",
-    input: "Today is a wonderful day to build something people love!",
-  });
-  console.log(speechFile);
-  const buffer = Buffer.from(await mp3.arrayBuffer());
-  await fs.promises.writeFile(speechFile, buffer);
-}
-main();
-
-`;
 const response = `
 {
   "created": 1589478378,
@@ -78,7 +21,7 @@ const response = `
 }
 
 `;
-const requestBodyFields = [
+const generateRequest = [
   {
     name: "models",
     type: "string[]",
@@ -113,45 +56,8 @@ const requestBodyFields = [
       "The aspect ratio of the video (e.g., '16:9', '4:3'). Optional.",
   },
 ];
-const musicRequest = [
-  {
-    name: "type",
-    type: "string",
-    required: true,
-    description:
-      "indicate the type of request [text-to-speech], [transcription] audio generation, In this case will be audio-generation ",
-  },
-  {
-    name: "prompt",
-    type: "string",
-    required: true,
-    description:
-      "The text to generate audio for. The maximum length is 4096 characters.",
-  },
-  {
-    name: "models",
-    type: "array",
-    required: true,
-    description: "Array of selected audio models for API call",
-  },
-  {
-    name: "response_format",
-    type: "string or null",
-    required: false,
-    description:
-      "The format to audio in. Supported formats are mp3, opus, aac, flac, wav,",
-  },
-];
-const requestEdit = `
-{
-type:"image-edit"
-models:['dall-e-3','midjourney'],
-prompt:"modify the cap",
-options:[
-]      // other options
-}
-`;
-const EditRequestBody = [
+
+const videoEditRequest = [
   {
     name: "models",
     type: "string[]",
@@ -172,44 +78,6 @@ const EditRequestBody = [
       "A base64-encoded string or a web URL pointing to the video file to edit.",
   },
 ];
-const editRequestCurl = `
-curl https://api.alleai.com/v1/images/edits \
-  -H "Authorization: Bearer $alleai_key" \
-  -F image="@otter.png" \
-  -F models =['dall-3-e","midjourney"]\
-  -F prompt="A cute baby sea otter wearing a beret" \
-  -F size="1024x1024"
-
-`;
-const editRequestPython = `
-
-from alleai import alleImageEdit
-client = alleImageEdit()
-
-client.images.edit(
-  image=open("otter.png", "rb"),
-  prompt="A cute baby sea otter wearing a beret",
-  size="1024x1024",
-  models=["dall-e-3","midjourney"]
-)
-
-`;
-const editRequestJavascript = `
-import fs from "fs";
-import alleai from "alleImageEdit";
-
-const alleaiImage = new alleImageEdit();
-async function main() {
-  const image = await alleImageEdit.images.edit({
-    image: fs.createReadStream("otter.png"),
-    mask: fs.createReadStream("mask.png"),
-    prompt: "A cute baby sea otter wearing a beret",
-    models=["dall-e-3","midjourney"]
-  });
-}
-main();
-
-`;
 
 export default function ApiVideoGenerationDocs() {
   return (
@@ -288,7 +156,7 @@ export default function ApiVideoGenerationDocs() {
               <section className="mt-6">
                 <h3 className="text-xl font-semibold mb-4">Request Body</h3>
                 <div className="space-y-6">
-                  {requestBodyFields.map((field, index) => (
+                  {generateRequest.map((field, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="font-mono">{field.name}</span>
@@ -387,7 +255,7 @@ export default function ApiVideoGenerationDocs() {
               </p>
 
               <h2 className="text-xl font-semibold mb-4">Request body</h2>
-              {EditRequestBody.map((field, index) => (
+              {videoEditRequest.map((field, index) => (
                 <div key={index} className="space-y-2 mt-2">
                   <div className="flex items-center gap-2">
                     <span className="font-mono">{field.name}</span>
