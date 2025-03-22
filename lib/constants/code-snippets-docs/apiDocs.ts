@@ -194,13 +194,11 @@ for attempt in range(max_retries):
             print("`,
 };
 export const installSdks = {
-    python:`pip install alleai-sdk`,
-    javascript:`npm install alleai-sdk`,
-}
+  python: `pip install alleai-sdk`,
+  javascript: `npm install alleai-sdk`,
+};
 
-
-
-// chat completions,summary and others snippets 
+// chat completions,summary and others snippets
 
 export const chatCodes = {
   webPython: `from alleai.core import AlleAIClient
@@ -237,6 +235,94 @@ async function chat() {
         messages: [{ user: [{ type: "text", text: "Hello!" }] }],
         response_format: { type: "text" }
         web_search: true
+    });
+
+    // Log the response
+    console.log(response.text);
+}
+
+chat();`,
+  SummaryPython: `from alleai.core import AlleAIClient
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make dedicated summary request
+response = client.chat.summary({
+    "models": ["gpt-4o", "claude-3.5-sonnet"],
+    "messages": [{"user": [{"type": "text", "text": "Hello!"}]}],
+    "response_format": {"type": "text"},
+    "summary":true
+})
+
+# Print the response
+print(response.text)`,
+  SummaryJavascript: `const client = require("alleai-sdk");
+async function chat() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make dedicated summary request
+    const response = await alleai.chat.summary({
+        models: ["gpt-4o", "claude-3.5-sonnet"],
+        messages: [{ user: [{ type: "text", text: "Hello!" }] }],
+        response_format: { type: "text" }
+        summary: true
+    });
+
+    // Log the response
+    console.log(response.text);
+}
+
+chat();`,
+  combinations: `"combination":[
+        {
+            "type":"text",
+            "models":["gpt-4o+deepseek-r1+claude-3.5-sonnet"] 
+        },
+        {
+            "type":"audio_url",
+            "models":["gpt-4o+claude-3.5-sonnet"]  
+        }
+    ],`,
+  combinationPython: `from alleai.core import AlleAIClient
+
+# Get API key from .env
+api_key = os.getenv("ALLEAI_API_KEY")
+
+# Initialize client with API key
+client = AlleAIClient(api_key=api_key)
+
+# Make dedicated summary request
+response = client.chat.combinations({
+    "models": ["gpt-4o", "claude-3.5-sonnet"],
+    "messages": [{"user": [{"type": "text", "text": "Hello!"}]}],
+    "response_format": {"type": "text"},
+    
+})
+
+# Print the response
+print(response.text)`,
+  combinationJavascript: `const client = require("alleai-sdk");
+async function chat() {
+    // Get API key from .env
+    const apiKey = process.env.ALLEAI_API_KEY;
+
+    // Initialize client with API key
+    const alleai = new client.AlleAI({ apiKey });
+
+    // Make dedicated summary request
+    const response = await alleai.chat.combinations({
+        models: ["gpt-4o", "claude-3.5-sonnet"],
+        messages: [{ user: [{ type: "text", text: "Hello!" }] }],
+        response_format: { type: "text" }
+      
     });
 
     // Log the response

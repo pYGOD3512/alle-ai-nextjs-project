@@ -21,13 +21,14 @@ import {
   parameters,
 } from "@/lib/constants/docs";
 import { chatCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
+import { Section } from "lucide-react";
 const highlightText = (text, keywords) => {
   let result = text;
   keywords.forEach((keyword) => {
     const regex = new RegExp(`\\b${keyword}\\b`, "gi");
     result = result.replace(
       regex,
-      `<span class="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono mr-2">${keyword}</span>`
+      `<span class="bg-accent font-bold text-muted-foreground rounded-md px-2 py-1 font-mono mr-2">${keyword}</span>`
     );
   });
   return result;
@@ -757,7 +758,7 @@ export default function ApiTextGenerationDocs() {
             }
           />
         </div>
-        {/*  summary and comparison */}
+        {/*  summary  */}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
 
         <div className="mt-10">
@@ -765,41 +766,218 @@ export default function ApiTextGenerationDocs() {
             <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
               Summary
             </span>
-            and{" "}
-            <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
-              Combination
-            </span>
-            Fields (Optional)
+            in Completion Endpoint
           </h2>
-
-          <p className="mt-4 text-muted-foreground">
-            The <code>summary</code> and <code>combination</code> fields are
-            both optional parameters that allow you to request summarized model
-            outputs and specify different combinations of models, respectively.
-            Both fields use the same structure as the{" "}
-            <a
-              href="#comparison"
-              className="text-blue-500 hover:text-blue-700 underline"
-            >
-              <code>comparison</code> field
-            </a>
-            . Please refer to that section for details on the allowed types and
-            model string format.
-          </p>
-
-          <p className="mt-4 text-muted-foreground">
-            The <code>summary_results</code> and{" "}
-            <code>combination_results</code> in the API response mirror the
-            structure of the <code>comparison_results</code>. See the &nbsp;
-            <a
-              href="#comparison"
-              className="text-blue-500 hover:text-blue-700 underline"
-            >
-              Response Format
-            </a>
-            &nbsp; section for more information.
-          </p>
+          <ApiDocLayout
+            leftContent={
+              <section>
+                <div className="mb-6">
+                  <p
+                    className="text-muted-foreground text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: highlightText(
+                        "The completion endpoint supports summaries through the optional summary parameter. Set it to true, and your response will include both the full outputs from each model in your models array, such as gpt-4 or claude-3.5-sonnet—and a concise summary of those responses. This approach delivers detailed model answers alongside a quick overview, all within the same request. Your existing parameters, like messages for input, response_format for output type, and max_tokens for length control, remain fully functional, making it a seamless addition to your workflow when you need both depth and brevity.",
+                        [
+                          "summary",
+                          "true",
+                          "models",
+                          "messages",
+                          "response_format",
+                          "max_tokens",
+                        ]
+                      ),
+                    }}
+                  />
+                </div>
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-muted-foreground mb-2">
+                    Dedicated Summary Endpoints
+                  </h2>
+                  <p
+                    className="text-muted-foreground text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: highlightText(
+                        "For a streamlined summary without individual model outputs, use the dedicated summary endpoints at [baseUrl]/summary. These endpoints mirror the completion request structure using messages for your query, response_format to define the output (text, audio URL, etc.), and settings like temperature for fine-tuning but focus solely on delivering summary results from the models. Unlike the completion endpoint, you won’t get per-model responses here; it’s just the distilled summary, ideal for scenarios where you want a lightweight, essential take without the extra detail.",
+                        [
+                          "summary",
+                          "messages",
+                          "response_format",
+                          "temperature",
+                          "[baseUrl]/summary",
+                        ]
+                      ),
+                    }}
+                  />
+                </div>
+              </section>
+            }
+            rightContent={
+              <section>
+                <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
+                  <h4 className="font-semibold">Summary endpoint</h4>
+                  <RenderCode
+                    code="https://api.yourdomain.com/v1/ai/generate"
+                    language="bash"
+                    className="text-sm"
+                    showLanguage={false}
+                  />
+                  {/* Example codes */}
+                  <div>
+                    <Card className="p-6 bg-background">
+                      <div className="space-y-6">
+                        <Tabs defaultValue="curl" className="w-full">
+                          <TabsList>
+                            <TabsTrigger value="curl">cURL</TabsTrigger>
+                            <TabsTrigger value="python">Python</TabsTrigger>
+                            <TabsTrigger value="node">Node.js</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="curl">
+                            <RenderCode
+                              code={introCodes.curl}
+                              language="bash"
+                              showLanguage={false}
+                              title="Example Request"
+                            />
+                          </TabsContent>
+                          <TabsContent value="python">
+                            <RenderCode
+                              code={chatCodes.SummaryPython}
+                              language="python"
+                              title="Example Request python sdk"
+                              showLanguage={false}
+                            />
+                          </TabsContent>
+                          <TabsContent value="node">
+                            <RenderCode
+                              code={chatCodes.SummaryJavascript}
+                              language="javascript"
+                              title="Example Request node sdk"
+                              showLanguage={false}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              </section>
+            }
+          />
         </div>
+        <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
+        {/* Combinations */}
+        <div className="mt-10">
+          <h2
+            data-section="chat-combination"
+            className="text-3xl font-bold mt-4 "
+          >
+            <span className="bg-accent text-muted-foreground rounded-md px-2 py-1 font-mono  mr-2">
+              Combinations
+            </span>
+            in Completion Endpoint
+          </h2>
+          <ApiDocLayout
+            leftContent={
+              <section>
+                <div className="mb-6">
+                  <p
+                    className="text-muted-foreground text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: highlightText(
+                        `The completion endpoint lets you combine model responses by including the optional combination parameter. When set, it merges the outputs from the models you specify like gpt-4o, deepseek-r1, or claude-3.5-sonnet—into a single result, returned alongside the individual responses from each model in your models array. You can define this in an array, such as "combination": [{"type": "text", "models": ["gpt-4o<span class=" font-bold">+</span>deepseek-r1<span class=" font-bold">+</span>claude-3.5-sonnet"]}, {"type": "audio_url", "models": ["gpt-4o<span class=" font-bold">+</span>claude-3.5-sonnet"]}], where the + separates models to combine for each output type. This gives you both the full per-model details and a unified blend, all while using familiar parameters like messages, response_format, and max_tokens to shape the request.`,
+                        [
+                          "combination",
+                          "models",
+                          "messages",
+                          "response_format",
+                          "max_tokens",
+                        ]
+                      ),
+                    }}
+                  />
+                </div>
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-muted-foreground mb-2">
+                    Dedicated Combination Endpoints
+                  </h2>
+                  <p
+                    className="text-muted-foreground text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: highlightText(
+                        `For a focused result that skips individual model outputs, use the dedicated combination endpoint at [baseUrl]/combinations. This endpoint mirrors the completion request body, messages for your query, response_format for output style, and temperature for adjustments, but this only delivers the combined results from the models you specify. Using the same combination array (e.g., "combination": [{"type": "text", "models": ["gpt-4o<span class=" font-bold">+</span>deepseek-r1<span class=" font-bold">+</span>claude-3.5-sonnet"]}, {"type": "audio_url", "models": ["gpt-4o<span class=" font-bold">+</span>claude-3.5-sonnet"]}), you pick which models to blend with the + notation, and that’s all you get back no separate responses. It’s a clean, efficient way to get a synthesized output when you don’t need the raw model-by-model breakdown.`,
+                        [
+                          "combination",
+                          "messages",
+                          "response_format",
+                          "temperature",
+                          "[baseUrl]/combination",
+                        ]
+                      ),
+                    }}
+                  />
+                </div>
+              </section>
+            }
+            rightContent={
+              <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
+                <h4 className="font-semibold">Combination endpoint</h4>
+                <RenderCode
+                  code="https://api.yourdomain.com/v1/ai/generate"
+                  language="bash"
+                  className="text-sm"
+                  showLanguage={false}
+                />
+                <div className="mt-5 mb-5">
+                  <RenderCode
+                    code={chatCodes.combinations}
+                    language="json"
+                    showLanguage={false}
+                    title="request body with combination"
+                  />
+                </div>
+                {/* Example codes */}
+                <div>
+                  <Card className="p-6 bg-background">
+                    <div className="space-y-6">
+                      <Tabs defaultValue="curl" className="w-full">
+                        <TabsList>
+                          <TabsTrigger value="curl">cURL</TabsTrigger>
+                          <TabsTrigger value="python">Python</TabsTrigger>
+                          <TabsTrigger value="node">Node.js</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="curl">
+                          <RenderCode
+                            code={introCodes.curl}
+                            language="bash"
+                            showLanguage={false}
+                            title="Example Request"
+                          />
+                        </TabsContent>
+                        <TabsContent value="python">
+                          <RenderCode
+                            code={chatCodes.combinationPython}
+                            language="python"
+                            title="Example Request python sdk"
+                            showLanguage={false}
+                          />
+                        </TabsContent>
+                        <TabsContent value="node">
+                          <RenderCode
+                            code={chatCodes.combinationJavascript}
+                            language="javascript"
+                            title="Example Request node sdk"
+                            showLanguage={false}
+                          />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            }
+          />
+        </div>
+        <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
       </div>
     </div>
   );
