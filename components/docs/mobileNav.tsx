@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, ExternalLink, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SearchCommand } from "@/components/features/developer/search-command";
-import SearchModal from "@/components/docs/docSearchModal";
 import { apiReference, guides, tutorial } from "@/lib/constants/docs";
+import SearchModal from "../docSearchModal";
 
 export default function MobileNav() {
   const { resolvedTheme } = useTheme();
@@ -23,7 +23,6 @@ export default function MobileNav() {
   >({});
   const [isSearchOpen, setSearchOpen] = useState(false);
 
-  // Header nav items
   const navItems = [
     { name: "Welcome", href: "/docs/getting-started", pageOne: "" },
     { name: "User Guide", href: "/docs/user-guides", pageOne: "quickstart" },
@@ -36,13 +35,9 @@ export default function MobileNav() {
     { name: "Community", href: "/discord" },
   ];
 
-  // Toggle menu
   const toggleMenu = () => setIsOpen((prev) => !prev);
-
-  // Toggle search modal
   const toggleSearch = () => setSearchOpen((prev) => !prev);
 
-  // Auto-expand active API reference sections (from SidebarNav)
   useEffect(() => {
     if (!pathname || !pathname.startsWith("/docs/api-reference")) return;
     const currentPath = pathname.replace("/docs/api-reference/", "");
@@ -59,22 +54,18 @@ export default function MobileNav() {
     }
   }, [pathname]);
 
-  // Toggle collapsible sections
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
 
-  // Check if a link is active
   const isActive = (path: string) => pathname === path;
 
-  // Handle API reference clicks with smooth routing
   const handleReferenceClick = (e, sectionHref) => {
     e.preventDefault();
     router.push(`/docs/api-reference/${sectionHref}`, { scroll: false });
-    setIsOpen(false); // Close menu after navigation
+    setIsOpen(false);
   };
 
-  // Render API Reference sections
   const renderApiReference = () => (
     <div className="space-y-2">
       {apiReference.map((item) => (
@@ -140,7 +131,6 @@ export default function MobileNav() {
     </div>
   );
 
-  // Render User Guides
   const renderUserGuides = () => (
     <div className="space-y-2">
       {guides.map((item) => (
@@ -176,7 +166,6 @@ export default function MobileNav() {
     </div>
   );
 
-  // Render Tutorials
   const renderTutorials = () => (
     <div className="space-y-2">
       {tutorial.map((item) => (
@@ -209,14 +198,9 @@ export default function MobileNav() {
       {/* Top Bar */}
       <header className="sticky top-0 z-50 w-full border-b bg-sideBarBackground backdrop-blur">
         <div className="flex h-14 items-center justify-between px-4">
-          {/* Hamburger and Logo */}
           <div className="flex items-center space-x-2">
             <button onClick={toggleMenu} className="p-2">
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              <Menu className="h-6 w-6" />
             </button>
             <Link href="/" className="flex items-center">
               <Image
@@ -232,7 +216,6 @@ export default function MobileNav() {
               />
             </Link>
           </div>
-          {/* Right Side */}
           <div className="flex items-center space-x-2">
             <SearchCommand toggleModal={toggleSearch} />
             <ThemeToggle />
@@ -240,16 +223,21 @@ export default function MobileNav() {
         </div>
       </header>
 
-      {/* Full-Screen Menu */}
+      {/* Modal Menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto">
-          <ScrollArea className="h-full p-4">
-            <div className="space-y-6">
-              {/* Header Nav Items */}
-              <div>
-                <span className="font-bold text-sm px-4 py-2 block">
-                  NAVIGATION
-                </span>
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="w-full h-[100vh] bg-sideBarBackground flex flex-col relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-4 right-4 p-2 text-foreground hover:text-muted-foreground z-50"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            {/* Modal Content */}
+            <ScrollArea className="flex-1 p-6">
+              <div className="space-y-6">
+                {/* Header Nav Items (No "NAVIGATION" label) */}
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
@@ -265,36 +253,33 @@ export default function MobileNav() {
                     {item.name}
                   </Link>
                 ))}
-              </div>
 
-              {/* Dynamic Sidebar Content */}
-              {pathname.startsWith("/docs/api-reference") &&
-                renderApiReference()}
-              {pathname.startsWith("/docs/user-guides") && renderUserGuides()}
-              {pathname.startsWith("/docs/tutorials") && renderTutorials()}
+                {/* Dynamic Sidebar Content */}
+                {pathname.startsWith("/docs/api-reference") &&
+                  renderApiReference()}
+                {pathname.startsWith("/docs/user-guides") && renderUserGuides()}
+                {pathname.startsWith("/docs/tutorials") && renderTutorials()}
 
-              {/* Action Buttons */}
-              <div>
-                <span className="font-bold text-sm px-4 py-2 block">
-                  ACTIONS
-                </span>
-                <Link
-                  href="/playground"
-                  className="block px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Playground
-                </Link>
-                <Link
-                  href="/api"
-                  className="block px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50"
-                  onClick={() => setIsOpen(false)}
-                >
-                  API
-                </Link>
+                {/* Action Buttons */}
+                <div>
+                  <Link
+                    href="/playground"
+                    className="block px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Playground
+                  </Link>
+                  <Link
+                    href="/api"
+                    className="block px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    API
+                  </Link>
+                </div>
               </div>
-            </div>
-          </ScrollArea>
+            </ScrollArea>
+          </div>
         </div>
       )}
 
