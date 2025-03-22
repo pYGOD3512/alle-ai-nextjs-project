@@ -821,6 +821,14 @@ export default function ApiTextGenerationDocs() {
                     className="text-sm"
                     showLanguage={false}
                   />
+                  <div className="mt-5 mb-5">
+                    <RenderCode
+                      code={chatCodes.summary}
+                      language="json"
+                      showLanguage={false}
+                      title="request body with summary"
+                    />
+                  </div>
                   {/* Example codes */}
                   <div>
                     <Card className="p-6 bg-background">

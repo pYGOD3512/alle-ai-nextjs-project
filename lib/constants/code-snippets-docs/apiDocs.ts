@@ -281,16 +281,18 @@ async function chat() {
 }
 
 chat();`,
-  combinations: `"combination":[
-        {
-            "type":"text",
-            "models":["gpt-4o+deepseek-r1+claude-3.5-sonnet"] 
-        },
-        {
-            "type":"audio_url",
-            "models":["gpt-4o+claude-3.5-sonnet"]  
-        }
-    ],`,
+  combinations: `// You can set "combination": true to merge all model responses automatically
+// Or pass an array to specify which models to combine for each output type
+"combination": [
+    {
+        "type": "text",
+        "models": ["gpt-4o+deepseek-r1+claude-3.5-sonnet"]
+    },
+    {
+        "type": "audio_url",
+        "models": ["gpt-4o+claude-3.5-sonnet"]
+    }
+]`,
   combinationPython: `from alleai.core import AlleAIClient
 
 # Get API key from .env
@@ -330,4 +332,16 @@ async function chat() {
 }
 
 chat();`,
+  summary: `// You can set "summary": true to include a summary with all model responses
+// Or pass an array to specify which models to summarize for each output type
+"summary": [
+    {
+        "type": "text",
+        "models": ["gpt-4o", "deepseek-r1", "claude-3.5-sonnet"]
+    },
+    {
+        "type": "audio_url",
+        "models": ["gpt-4o", "claude-3.5-sonnet"]
+    }
+]`,
 };
