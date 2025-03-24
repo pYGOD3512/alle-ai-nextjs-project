@@ -3,13 +3,110 @@ import React from "react";
 import { Sparkles, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import { useState } from "react";
+import NavigationContainer from "@/components/NavigationContainer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 //  components
-const HomeContent = () => <div>This is the Home tab content.</div>;
-const DMsContent = () => <div>This is the DMs tab content.</div>;
-const ActivityContent = () => <div>This is the Activity tab content.</div>;
-const LaterContent = () => <div>This is the Later tab content.</div>;
+const NewChat = () => (
+  <div>
+    <h2 className="text-2xl font-bold mb-2">Start a Fresh Conversation</h2>
+    <p className="text-muted-foreground mb-4">
+      The <strong>"New Chat"</strong> button (labeled <strong>1</strong>) lets
+      you start a new conversation with multiple AI models, whether for text,
+      images, audio, or videos.
+    </p>
+    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+      <li>
+        <strong>How It Works:</strong> Click <strong>"New Chat"</strong> to
+        begin. The button adapts to your active tab e.g., it becomes{" "}
+        <strong>"New Image"</strong> in the Image Generation tab or{" "}
+        <strong>"New Audio"</strong> in the Audio tab.
+      </li>
+      <li>
+        <strong>Stay Organized:</strong> All sessions are saved in the{" "}
+        <strong>Chat History</strong>Access past chats anytime using the search
+        bar at history tab.
+      </li>
+    </ul>
+  </div>
+);
+
+const ModeSwitcher = () => (
+  <div>
+    <h2 className="text-2xl font-bold mb-2">Create with the Right Tools</h2>
+    <p className="text-muted-foreground mb-4">
+      The <strong>Mode Selector</strong> (labeled <strong>2</strong>) lets you
+      choose your creative mode—Chat, Image Generation, Audio Generation, or
+      Video Generation. Each mode uses specialized AI models to deliver the best
+      results for your task, whether you’re chatting, designing visuals,
+      composing audio, or producing videos.
+    </p>
+    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+      <li>
+        <strong>How It Works:</strong> Select a mode to switch between Chat,
+        Image, Audio, or Video Generation. We have included the best multiple AI
+        models AI models suited for that mode.
+      </li>
+      <li>
+        <strong>Tailored History:</strong> The history tab (labeled{" "}
+        <strong>3</strong>) updates to match your active mode—e.g., see{" "}
+        <strong>Image History</strong> in Image Generation mode or{" "}
+        <strong>Video History</strong> in Video Generation mode.
+      </li>
+    </ul>
+  </div>
+);
+const ModelSwitcher = () => (
+  <div>
+    <h2 className="text-2xl font-bold mb-2">Pick Your AI Models</h2>
+    <p className="text-muted-foreground mb-4">
+      The <strong>Model Switcher</strong> (labeled <strong>3</strong>) opens a
+      modal where you can select AI models tailored to your active mode—whether
+      it’s Chat, Image Generation, Audio Generation, or Video Generation. Our
+      platform combines multiple AI models, so you can choose the best ones for
+      your task.
+    </p>
+    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+      <li>
+        <strong>How It Works:</strong> Click the Model Switcher to open the
+        modal. You’ll see a list of AI models available for your current mode
+        (e.g., image-focused models in Image Generation mode).
+      </li>
+      <li>
+        <strong>Select Multiple Models:</strong> Pick as many AI models as you’d
+        like to interact with, giving you flexibility to experiment and create.
+      </li>
+      <li>
+        <strong>Customized Experience:</strong> Use the right AI models for the
+        job, ensuring top-notch results for chatting, generating images, audio,
+        or videos.
+      </li>
+    </ul>
+  </div>
+);
+const MoreContent = () => (
+  <div>
+    <h2 className="text-2xl font-bold mb-2"> Explore Extra Tools</h2>
+    <p className="text-muted-foreground mb-4">
+      The <strong>More</strong> tab (labeled <strong>4</strong>) provides access
+      to resources to help you understand and stay updated with our platform’s
+      features and AI models.
+    </p>
+    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+      <li>
+        <strong>Model Glossary:</strong> Learn about the AI models available for
+        each mode with detailed explanations.
+      </li>
+      <li>
+        <strong>Model Analytics:</strong> Check insights into your usage, like
+        which models you’ve used or how many creations you’ve made.
+      </li>
+      <li>
+        <strong>Changelog:</strong> Stay in the up to date with updates, new
+        features, and platform improvements.
+      </li>
+    </ul>
+  </div>
+);
 const InfoCards = () => {
   return (
     <div className="space-y-4">
@@ -67,13 +164,13 @@ const Overview = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "new-chat":
-        return <HomeContent />;
+        return <NewChat />;
       case "mode-selector":
-        return <DMsContent />;
+        return <ModeSwitcher />;
       case "model-switcher":
-        return <ActivityContent />;
+        return <ModelSwitcher />;
       case "feature-hub":
-        return <LaterContent />;
+        return <MoreContent />;
       default:
         return null;
     }
@@ -89,25 +186,10 @@ const Overview = () => {
       {/*  Overview */}
       <div className="max-w-6xl mx-auto p-2">
         <div className="space-y-8">
-          {/* <div className="text-center space-y-4 mt-6">
-            <h2 id="platform-capabilities" className="text-2xl font-bold ">
-              Getting Started with Alle-ai: Your Quick Start Guide
-            </h2>
-            <p className="text-xl text-muted-foreground mb-5 max-w-3xl mx-auto">
-              {`    Welcome to Alle-ai! We’re happy to have you. Alle-ai brings together the world’s
-               leading AI models for chat, image, video, and audio generation in one unified platform designed 
-               to power creativity and productivity. To get started, check out the guide below for a quick tour.`}
-            </p>
-          </div> */}
-
-          {/* Feature  */}
-
-          {/* awareness */}
           <div className="mt-5 mb-10 ">
             <InfoCards />
           </div>
         </div>
-        {/* sidebar */}
 
         <div className="mt-12 mb-8">
           <h2 className="text-2xl font-bold mb-4">Sidebar</h2>
@@ -169,6 +251,17 @@ const Overview = () => {
             <div className="mt-4">{renderContent()}</div>
           </div>
         </div>
+      </div>
+      {/* continuation */}
+      <div>
+        <NavigationContainer
+          previousTitle="Get started"
+          preUrl=""
+          nextUrl=""
+          nextTitle="Text Generation"
+          nextDesciption="Explore tutorial for Text Generation"
+          previousDescription=""
+        />
       </div>
     </div>
   );
