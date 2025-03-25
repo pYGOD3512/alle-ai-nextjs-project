@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+
 // file : initial-setup.tsx make your first request
 export const makeYourFirstRequest = {
   python: `from alleai.core import AlleAIClient

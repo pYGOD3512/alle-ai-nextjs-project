@@ -1,5 +1,28 @@
 // landing page introductions snipppets
 
+const BaseUrl = "https://boar-ace-gecko.ngrok-free.app";
+export const apiDocsEndpoints = {
+ chat:{
+  completion: `${BaseUrl}/chat/completions`,
+  search: `${BaseUrl}/chat/search`,
+  summary: `${BaseUrl}/chat/summary`,
+  combinations: `${BaseUrl}/chat/combinations`,
+ },
+  image: {
+    generate: `${BaseUrl}/image/generate`,
+    edit: `${BaseUrl}/image/edit`,
+  },
+  audio: {
+    tts: `${BaseUrl}/audio/tts`,
+    stt: `${BaseUrl}/audio/stt`,
+    generate: `${BaseUrl}/audio/generate`,
+  },
+  video: {
+    generate: `${BaseUrl}/video/generate`,
+    edit: `${BaseUrl}/video/edit`,
+  },
+  BaseUrl: `${BaseUrl}`,
+}
 export const introCodes = {
   curl: `curl -X POST "[ENDPOINT_URL_HERE]" \
   -H "Authorization: Bearer [YOUR_API_KEY_HERE]" \

@@ -5,7 +5,7 @@ import ApiDocLayout from "@/components/TwoLayout";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { imageGenCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
-
+import { apiDocsEndpoints } from "@/lib/constants/code-snippets-docs/apiDocs";
 
 const response = `
 {
@@ -185,44 +185,7 @@ const EditRequestBody = [
   },
 ];
 
-const editRequestCurl = `
-curl https://api.alleai.com/v1/images/edits \
-  -H "Authorization: Bearer $alleai_key" \
-  -F image="@otter.png" \
-  -F models =['dall-3-e","midjourney"]\
-  -F prompt="A cute baby sea otter wearing a beret" \
-  -F size="1024x1024"
 
-`;
-const editRequestPython = `
-
-from alleai import alleImageEdit
-client = alleImageEdit()
-
-client.images.edit(
-  image=open("otter.png", "rb"),
-  prompt="A cute baby sea otter wearing a beret",
-  size="1024x1024",
-  models=["dall-e-3","midjourney"]
-)
-
-`;
-const editRequestJavascript = `
-import fs from "fs";
-import alleai from "alleImageEdit";
-
-const alleaiImage = new alleImageEdit();
-async function main() {
-  const image = await alleImageEdit.images.edit({
-    image: fs.createReadStream("otter.png"),
-    mask: fs.createReadStream("mask.png"),
-    prompt: "A cute baby sea otter wearing a beret",
-    models=["dall-e-3","midjourney"]
-  });
-}
-main();
-
-`;
 
 export default function ApiImageGenerationDocs() {
   return (
@@ -287,10 +250,11 @@ export default function ApiImageGenerationDocs() {
               <div className="bg-muted/50 mb-4 p-4 rounded-lg border">
                 <h4 className="font-semibold mb-2">Base URL</h4>
                 <RenderCode
-                  code="https://api.imagedomain.com/v1/generate/text-to-image"
+                  code={`${apiDocsEndpoints.BaseUrl}/image`}
                   language="bash"
                   className="text-sm block mb-2"
                   showLanguage={false}
+                  isLink={true}
                 />
               </div>
               <p className="text-muted-foreground mb-4">
@@ -361,6 +325,16 @@ export default function ApiImageGenerationDocs() {
           }
           rightContent={
             <Card className="bg-background p-4">
+              <div className="mb-4 mt-4">
+                <h4 className="font-semibold p-3">image generation endpoint</h4>
+                <RenderCode
+                  code={apiDocsEndpoints.image.generate}
+                  language="bash"
+                  className="text-sm"
+                  showLanguage={false}
+                  isLink={true}
+                />
+              </div>
               <div className="mb-7">
                 <RenderCode
                   showLanguage={false}
@@ -457,6 +431,16 @@ export default function ApiImageGenerationDocs() {
           }
           rightContent={
             <Card className="bg-background p-4 mb-10">
+              <div className="mb-4 mt-4">
+                <h4 className="font-semibold p-3">image edit endpoint</h4>
+                <RenderCode
+                  code={apiDocsEndpoints.image.edit}
+                  language="bash"
+                  className="text-sm"
+                  showLanguage={false}
+                  isLink={true}
+                />
+              </div>
               <div className="mb-8">
                 <RenderCode
                   showLanguage={false}

@@ -20,6 +20,7 @@ interface CodeProps {
   code?: string;
   maxHeight?: string | number | boolean;
   maxWidth?: string | number | boolean;
+  isLink?: boolean; // New prop added
 }
 
 const RenderCode = ({
@@ -33,6 +34,7 @@ const RenderCode = ({
   code,
   maxHeight = "300px",
   maxWidth = "100%",
+  isLink = false, // Default value set to false
 }: CodeProps) => {
   const { resolvedTheme } = useTheme();
   const [isCopied, setIsCopied] = useState(false);
@@ -125,7 +127,7 @@ const RenderCode = ({
             padding: "1rem",
             fontSize: "0.875rem",
           }}
-          showLineNumbers
+          showLineNumbers={!isLink} // Show line numbers only if isLink is false
           lineNumberStyle={{
             marginRight: "1rem",
           }}

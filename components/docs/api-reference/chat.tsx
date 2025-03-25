@@ -1,5 +1,5 @@
 "use client";
-
+import { apiDocsEndpoints } from "@/lib/constants/code-snippets-docs/apiDocs";
 import { useRouter, usePathname } from "next/navigation";
 import RenderCode from "@/components/RenderCode";
 import ApiDocLayout from "@/components/TwoLayout";
@@ -86,15 +86,16 @@ export default function ApiTextGenerationDocs() {
                   <div className="space-y-8">
                     {/* Base URL and Endpoint */}
                     <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
-                      <h4 className="font-semibold">Base URL</h4>
+                      <h4 className="font-semibold">completion Endpoint</h4>
                       <RenderCode
-                        code="https://api.yourdomain.com/v1/ai/generate"
+                        code={apiDocsEndpoints.chat.completion}
                         language="bash"
                         className="text-sm"
                         showLanguage={false}
+                        isLink={true}
                       />
                       <p className="text-sm text-muted-foreground">
-                        All API requests should be made to this base URL using
+                        All completions API requests should be made to this  URL using
                         HTTPS.
                       </p>
                     </div>
@@ -528,10 +529,11 @@ export default function ApiTextGenerationDocs() {
                 <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
                   <h4 className="font-semibold">Web search endpoint</h4>
                   <RenderCode
-                    code="https://api.yourdomain.com/v1/ai/generate"
+                    code={apiDocsEndpoints.chat.search}
                     language="bash"
                     className="text-sm"
                     showLanguage={false}
+                    isLink={true}
                   />
                   {/* Example codes */}
                   <div>
@@ -816,10 +818,11 @@ export default function ApiTextGenerationDocs() {
                 <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
                   <h4 className="font-semibold">Summary endpoint</h4>
                   <RenderCode
-                    code="https://api.yourdomain.com/v1/ai/generate"
+                    code={apiDocsEndpoints.chat.summary}
                     language="bash"
                     className="text-sm"
                     showLanguage={false}
+                    isLink={true}
                   />
                   <div className="mt-5 mb-5">
                     <RenderCode
@@ -930,10 +933,11 @@ export default function ApiTextGenerationDocs() {
               <div className="bg-muted/50 p-6 rounded-lg border space-y-4">
                 <h4 className="font-semibold">Combination endpoint</h4>
                 <RenderCode
-                  code="https://api.yourdomain.com/v1/ai/generate"
+                  code={apiDocsEndpoints.chat.combinations}
                   language="bash"
                   className="text-sm"
                   showLanguage={false}
+                  isLink={true}
                 />
                 <div className="mt-5 mb-5">
                   <RenderCode

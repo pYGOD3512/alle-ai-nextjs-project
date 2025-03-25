@@ -5,7 +5,7 @@ import ApiDocLayout from "@/components/TwoLayout";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { audioGenCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
-
+import { apiDocsEndpoints } from "@/lib/constants/code-snippets-docs/apiDocs";
 const response = `
 {
   "created": 1589478378,
@@ -292,10 +292,11 @@ export default function ApiAudioGenerationDocs() {
               <div className="bg-muted/50 mb-4 p-4 rounded-lg border">
                 <h4 className="font-semibold mb-2">Base URL</h4>
                 <RenderCode
-                  code="https://api.imagedomain.com/v1/generate/text-to-image"
+                  code={`${apiDocsEndpoints.BaseUrl}/audio`}
                   language="bash"
                   className="text-sm block mb-2"
                   showLanguage={false}
+                  isLink={true}
                 />
               </div>
               <p className="text-muted-foreground mb-4">
@@ -355,6 +356,16 @@ export default function ApiAudioGenerationDocs() {
           }
           rightContent={
             <Card className="bg-background p-4">
+              <div className="mb-4 mt-4">
+                <h4 className="font-semibold p-3">text-to-speech endpoint</h4>
+                <RenderCode
+                  code={apiDocsEndpoints.audio.tts}
+                  language="bash"
+                  className="text-sm"
+                  showLanguage={false}
+                  isLink={true}
+                />
+              </div>
               <div className="mb-7">
                 <RenderCode
                   showLanguage={false}
@@ -450,6 +461,16 @@ export default function ApiAudioGenerationDocs() {
           }
           rightContent={
             <Card className="bg-background p-4 mb-10">
+              <div className="mb-4 mt-4">
+                <h4 className="font-semibold p-3">transcription endpoint</h4>
+                <RenderCode
+                  code={apiDocsEndpoints.audio.stt}
+                  language="bash"
+                  className="text-sm"
+                  showLanguage={false}
+                  isLink={true}
+                />
+              </div>
               <div className="mb-8">
                 <RenderCode
                   showLanguage={false}
@@ -549,6 +570,16 @@ export default function ApiAudioGenerationDocs() {
           }
           rightContent={
             <Card className="bg-background p-4 mb-10">
+              <div className="mb-4 mt-4">
+                <h4 className="font-semibold p-3">audio generation endpoint</h4>
+                <RenderCode
+                  code={apiDocsEndpoints.audio.generate}
+                  language="bash"
+                  className="text-sm"
+                  showLanguage={false}
+                  isLink={true}
+                />
+              </div>
               <div className="mb-8">
                 <RenderCode
                   showLanguage={false}
