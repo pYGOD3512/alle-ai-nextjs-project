@@ -4,21 +4,26 @@ import { cn } from "@/lib/utils";
 import { List } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-export function OnThisPage() {
-  const [sections, setSections] = useState<Array<{ id: string; title: string }>>([]);
+export function OnThisPage({ usePassedData = false, sections = [] }) {
+  const [dynamicSections, setDynamicSections] = useState<
+    Array<{ id: string; title: string }>
+  >([]);
   const [activeSection, setActiveSection] = useState("");
   const currentPathname = usePathname();
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Extract h2 elements when pathname changes
+  // Implementation 1: Dynamic DOM-based Heading Extraction
+  // This runs only if usePassedData is false, fetching h2 elements from the page
   useEffect(() => {
+    if (usePassedData) return; // Skip this if we're using passed data
+
     const fetchHeadings = () => {
       const h2Elements = document.querySelectorAll("h2");
       const newSections = Array.from(h2Elements)
         .filter((h2) => h2.id)
         .map((h2) => ({
           id: h2.id,
-          title: h2.id.replace(/_/g, " "),
+          title: h2.id.replace(/_/g, " "), // Convert ID to readable title
         }));
 
       h2Elements.forEach((h2) => {
@@ -27,7 +32,7 @@ export function OnThisPage() {
         }
       });
 
-      setSections(newSections);
+      setDynamicSections(newSections);
       setActiveSection("");
     };
 
@@ -37,11 +42,12 @@ export function OnThisPage() {
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => observer.disconnect();
-  }, [currentPathname]);
+  }, [currentPathname, usePassedData]);
 
-  // Set up Intersection Observer for active section tracking
+  // Implementation 1: Intersection Observer for Dynamic Sections
+  // Tracks which section is in view when using DOM-based data
   useEffect(() => {
-    if (!sections.length) return;
+    if (usePassedData || !dynamicSections.length) return;
 
     if (observerRef.current) {
       observerRef.current.disconnect();
@@ -61,7 +67,7 @@ export function OnThisPage() {
       });
     }, options);
 
-    sections.forEach((section) => {
+    dynamicSections.forEach((section) => {
       const element = document.getElementById(section.id);
       if (element && observerRef.current) {
         observerRef.current.observe(element);
@@ -73,43 +79,52 @@ export function OnThisPage() {
         observerRef.current.disconnect();
       }
     };
-  }, [sections]);
+  }, [dynamicSections, usePassedData]);
 
-  // Simplified scroll handler
-  const handleButtonClick = useCallback((sectionId: string) => {
-    const element = document.getElementById(sectionId);
+  // Scroll Handler for Both Implementations
+  // Handles scrolling to sections, works with either dynamic IDs or passed hashes
+  const handleButtonClick = useCallback((targetId) => {
+    const element = document.getElementById(targetId);
     if (!element) {
-      console.warn(`Element with ID ${sectionId} not found`);
+      console.warn(`Element with ID ${targetId} not found`);
       return;
     }
 
-    // Get the header height - adjust this value based on your layout
-    const headerHeight = 100; // 100px offset
-
-    // Calculate the element's position relative to the viewport
+    const headerHeight = 100; // Adjust based on your layout
     const elementPosition = element.getBoundingClientRect().top;
-    
-    // Add current scroll position to get absolute position
     const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
 
-    // Perform the scroll
     window.scrollTo({
       top: offsetPosition,
-      behavior: "smooth"
+      behavior: "smooth",
     });
 
-    // Update active section and URL
-    setActiveSection(sectionId);
-    window.history.pushState({}, "", `#${sectionId}`);
-  }, []); 
+    setActiveSection(targetId);
+    window.history.pushState({}, "", `#${targetId}`);
+  }, []);
 
-  // Handle initial hash
+  // Implementation 2: Handle Passed Data
+  // If usePassedData is true, use the sections prop directly without DOM scanning
+  const sectionsToRender = usePassedData
+    ? sections.map((section) => ({
+        id: section.hash, // Use hash as the ID for scrolling
+        title: section.title,
+      }))
+    : dynamicSections;
+
+  // Handle Initial Hash for Both Implementations
+  // Ensures the page scrolls to the correct section on load if there's a hash in the URL
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
-    if (hash && sections.length > 0) {
-      handleButtonClick(hash);
+    if (hash && sectionsToRender.length > 0) {
+      const targetSection = sectionsToRender.find(
+        (section) => section.id === hash
+      );
+      if (targetSection) {
+        handleButtonClick(hash);
+      }
     }
-  }, [sections, handleButtonClick]);
+  }, [sectionsToRender, handleButtonClick]);
 
   return (
     <aside className="hidden xl:sticky xl:top-14 xl:block xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto bg-background/90 p-4 rounded-lg">
@@ -123,7 +138,7 @@ export function OnThisPage() {
 
         <nav className="text-sm">
           <div className="space-y-1">
-            {sections.map((section) => (
+            {sectionsToRender.map((section) => (
               <button
                 key={`${currentPathname}-${section.id}`}
                 onClick={() => handleButtonClick(section.id)}

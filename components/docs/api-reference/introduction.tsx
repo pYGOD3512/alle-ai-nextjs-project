@@ -29,7 +29,18 @@ const hheading = [
 export default function ApiIntroduction() {
   const router = useRouter();
   const pathname = usePathname();
-
+  // Define the sections manually for this page
+  const baseUrl = "/docs/api-reference/introduction";
+  const customSections = [
+    { title: "Alle-AI", hash: "alle-ai", baseUrl: pathname },
+    { title: "Authentication", hash: "authentication", baseUrl: pathname },
+    { title: "Streaming", hash: "streaming", baseUrl: pathname },
+    {
+      title: "SDKs and Libraries",
+      hash: "sdks-and-libraries",
+      baseUrl: pathname,
+    },
+  ];
   return (
     <main className="flex gap-2">
       {/* Main content */}
@@ -98,12 +109,13 @@ export default function ApiIntroduction() {
               </div>
               <div>
                 <p className="text-muted-foreground mb-4">
-                                You can obtain an API key by &nbsp;{" "}
-                                <Link href={"/"} target="_blank" className="text-blue-600">
-                                  registering for an account
-                                </Link>{" "}
-                                &nbsp; and navigating to the API Keys section in your dashboard.
-                              </p>
+                  You can obtain an API key by &nbsp;{" "}
+                  <Link href={"/"} target="_blank" className="text-blue-600">
+                    registering for an account
+                  </Link>{" "}
+                  &nbsp; and navigating to the API Keys section in your
+                  dashboard.
+                </p>
               </div>
 
               <div className="bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200 px-6 py-4 rounded-lg">
@@ -389,7 +401,7 @@ ${installSdks.javascript}`}
       </div>
       {/* Right Side - On This Page */}
       <aside className="w-1/4 sticky ">
-        <OnThisPage pathname={pathname} sections={hheading} />
+        <OnThisPage pathname={pathname} sections={customSections} />
       </aside>
     </main>
   );
