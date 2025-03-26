@@ -1,17 +1,10 @@
-// api guides
-
-interface searchParams {
-  section_id: string;
-  keywords: string[];
-  title: string;
-  description?: string;
-}
+// user guides
 interface GuideSection {
   id: string;
   title: string;
   href: string;
   description?: string;
-  searchParams?: searchParams[];
+  keywords?: keywordsProps[];
 }
 
 interface Guide {
@@ -22,15 +15,8 @@ interface Guide {
   sections: GuideSection[];
 }
 
-interface userGuides {
-  id?: string;
-  title: string;
-  section: GuideSection[];
-}
-
 const href = "/docs/api";
 
-const hrefApi = "/docs/api-reference";
 // user guides guides
 
 export const guides: Guide[] = [
@@ -44,11 +30,13 @@ export const guides: Guide[] = [
         title: "Quickstart",
         href: href,
         description: "Learn how to make your first API request.",
+        keywords: [],
       },
       {
         id: "pricing",
         title: "Pricing",
         href: href,
+        keywords: [],
       },
       {
         id: "models",
@@ -66,28 +54,33 @@ export const guides: Guide[] = [
         id: "text-generation",
         title: "Text Generation",
         href: href,
+        keywords: [],
       },
       {
         id: "audio-generation",
         title: "Audio Generation",
         href: href,
+        keywords: [],
       },
 
       {
         id: "image-generation",
         title: "Image Generation",
         href: href,
+        keywords: [],
       },
       {
         id: "video-generation",
         title: "Video Generation",
         href: href,
+        keywords: [],
       },
 
       {
         id: "file-uploads",
         title: "Attachments",
         href: href,
+        keywords: [],
       },
     ],
   },
@@ -165,139 +158,10 @@ export const guides: Guide[] = [
   },
 ];
 
-// user guides
-
-export const userGuides: userGuides[] = [
-  {
-    title: "Get Started",
-    id: "get-started",
-    section: [
-      {
-        id: "overview",
-        href: "/docs/user-guides",
-        title: "Platform overview",
-        searchParams: [
-          {
-            section_id: "get_started",
-            keywords: ["get started", "Alle AI"],
-            title: "Getting Started",
-          },
-          {
-            section_id: "capabilities",
-            keywords: [
-              "audio generation",
-              "text generation",
-              "video generation",
-              "audio generation",
-            ],
-            title: "Platform Capabilities",
-            description: "A summary of our platform Overview",
-          },
-          {
-            section_id: "quick_start",
-            keywords: [],
-            title: "Quick Start",
-            description: "Set up Everything",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Using the Platform",
-    id: "using-platform",
-    section: [
-      {
-        id: "chat",
-        title: "Text generation",
-        href: "",
-        searchParams: [],
-      },
-      {
-        id: "image",
-        title: "Image generation",
-        href: "",
-        searchParams: [],
-      },
-      {
-        id: "audio",
-        title: "Audio generation",
-        href: "",
-        searchParams: [],
-      },
-      {
-        id: "video",
-        title: "Video generation",
-        href: "",
-        searchParams: [],
-      },
-      {
-        id: "advance-concepts",
-        title: "Advanced Guides",
-        href: "",
-        searchParams: [],
-      },
-    ],
-  },
-  {
-    title: "Interactions ",
-    id: "chat-interactions",
-    section: [
-      {
-        id: "history",
-        title: "Managing Chat History",
-        href: "",
-      },
-      {
-        id: "prompts",
-        title: "Using Prompts Effectively",
-        href: "",
-      },
-    ],
-  },
-  {
-    title: "Help and support",
-    id: "support",
-    section: [
-      {
-        id: "faq",
-        title: "FAQ",
-        href: "/collection",
-      },
-      {
-        id: "contact-us",
-        title: "Contact Us",
-        href: "/contact-us",
-      },
-      {
-        id: "model_glossary",
-        title: "Model Glossary",
-        href: "/model-glossary",
-      },
-    ],
-  },
-  {
-    id: "devs",
-    title: "Developer Guides",
-    section: [
-      {
-        id: "api-ref",
-        title: "API Reference",
-        href: "",
-      },
-      {
-        id: "api-limt",
-        title: "Rate Limits",
-        href: "",
-      },
-    ],
-  },
-];
-
 // main api reference
 interface endPointProps {
   id: string;
-  keywords: [];
+  keywords: keywordsProps[];
   title: string;
   href: string;
 }
@@ -306,6 +170,15 @@ interface sectionProps {
   title: string;
   href: string;
   sections?: endPointProps[];
+  keywords?: keywordsProps[];
+}
+interface searchtermsprops {
+  hash: string;
+  words: [];
+}
+interface keywordsProps {
+  BaseUrl: string;
+  searchTerms: searchtermsprops[];
 }
 interface apiREfprops {
   title: string;
@@ -322,21 +195,25 @@ export const apiReference: apiREfprops[] = [
         id: "introduction",
         title: "Introduction",
         href: "introduction",
+        keywords: [],
       },
       {
         id: "authentication",
         title: "Authentication",
         href: "authentication",
+        keywords: [],
       },
       {
         id: "streaming",
         title: "Streaming",
         href: "streaming",
+        keywords: [],
       },
       {
         id: "sdk",
         title: "SDK & Libraries",
         href: "sdk",
+        keywords: [],
       },
     ],
   },
@@ -593,7 +470,6 @@ export const basicResponse = `
 }
 
 `;
-
 
 export const requestBody = `
 {
