@@ -133,13 +133,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
             return;
           } else if (response.data.to === 'chat' && response.plan) {
-            // Check for return URL when redirecting from auth
-            if (returnUrl) {
-              sessionStorage.removeItem('returnUrl');
-              setGenerationType('load');
-              router.replace(returnUrl);
-              return;
-            }
+            setGenerationType('load');
             router.replace('/chat');
             return;
           } else if (!response.plan) {
