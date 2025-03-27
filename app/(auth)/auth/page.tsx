@@ -32,9 +32,9 @@ function AuthPageInner() {
 
   const headingTexts = [
     "Your All-in-One AI Platform",
-    "Combine AI models",
-    "Your All-in-One AI Platform",
-    "Your All-in-One AI Platform",
+    "Combine & Compare AI models",
+    "Goodbye to AI Hallucinations",
+    "Fact-Check AI Response",
   ];
 
   useEffect(() => {

@@ -27,7 +27,7 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
       const response = await authApi.forgotPassword(email);
       
       if (response.status) {
-        console.log('res  ', response);
+        // // console.log('res  ', response);
         toast({
           title: "Success",
           description: "Password reset link have been sent to your email",

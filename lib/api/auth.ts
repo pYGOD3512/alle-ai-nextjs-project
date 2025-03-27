@@ -106,13 +106,13 @@ export interface User {
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await api.post('/login', credentials);
-    console.log('login response data', response.data);
+    // // console.log('login response data', response.data);
     return response.data;
   },
 
   register: async (credentials: RegisterCredentials): Promise<RegisterResponse> => {
     const response = await api.post('/register', credentials);
-    console.log('register data', response.data);
+    // // console.log('register data', response.data);
     return response.data;
   },
 
@@ -121,34 +121,33 @@ export const authApi = {
       const response = await api.get(`/auth/google`);
       return response.data;
     } catch (error) {
-      console.error('Error handling Google callback:', error);
+      // console.error('Error handling Google callback:', error);
       throw error;
     }
   },
 
   logout: async () => {
     const response = await api.post('/logout');
-    console.log(response,'logged out')
+    // // console.log(response,'logged out')
     return response.data;
   },
 
   getUser: async (): Promise<AuthResponse> => {
     const response = await api.post('/auth');
-    console.log('getuser response')
     return response.data;
   },
 
   verifyEmail: async (data: { code: string }) => {
     try {
       const response = await api.post('/email/verify', data);
-      console.log('verification data', response);
+      // // console.log('verification data', response);
       return response.data;
     } catch (error: any) {
-      console.error('Verification API error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        code: data.code
-      });
+      // console.error('Verification API error:', {
+      //   status: error.response?.status,
+      //   data: error.response?.data,
+      //   code: data.code
+      // });
       throw error;
     }
   },

@@ -19,10 +19,10 @@ export const feedbackApi = {
         rating: params.rating,
         anonymous: params.anonymous
       });
-      console.log('Response from submitFeedback:', response.data);
+      // // console.log('Response from submitFeedback:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      // console.error('Error submitting feedback:', error);
       throw error;
     }
   }

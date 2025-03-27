@@ -149,7 +149,7 @@ export function AudioArea() {
         });
       }, 0);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      // console.error('Failed to copy text: ', err);
       setTimeout(() => {
         toast({
           variant: "destructive",
@@ -211,7 +211,7 @@ export function AudioArea() {
           }, 100);
 
           const { text } = await processFile(file);
-          console.log('content', text);
+          // // console.log('content', text);
 
           clearInterval(progressInterval);
           
@@ -421,7 +421,7 @@ export function AudioArea() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Download failed:', error);
+      // console.error('Download failed:', error);
     }
   };
 
@@ -528,7 +528,7 @@ export function AudioArea() {
 
       // Process the file
       const { text } = await processFile(file);
-      console.log('content', text);
+      // // console.log('content', text);
 
       // Clear interval and set progress to 100%
       clearInterval(progressInterval);
@@ -584,7 +584,7 @@ export function AudioArea() {
       }, 200);
 
       const { text } = await processFile(file);
-      console.log('content', text);
+      // // console.log('content', text);
 
       // Clear interval and set progress to 100%
       clearInterval(progressInterval);

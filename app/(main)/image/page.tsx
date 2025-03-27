@@ -7,13 +7,15 @@ import RenderPageContent from "@/components/RenderPageContent";
 import { useHistoryStore } from "@/stores";
 import { useModelsStore } from "@/stores/models";
 import { historyApi } from "@/lib/api/history";
-import { modelsApi } from "@/lib/api/models";
+import { Model, modelsApi } from "@/lib/api/models";
+import { useToast } from "@/hooks/use-toast";
 
 
 
 export default function ImageGenerationPage() {
   const { isOpen } = useSidebarStore();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
+  const { toast } = useToast();
   const { imageModels, setImageModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const { 
     selectedModels,
@@ -31,13 +33,13 @@ export default function ImageGenerationPage() {
       const loadImageModels = async () => {
         // Skip if models are already loaded
         if (imageModels && imageModels.length > 0) return;
-        
-        console.log('Loading image models this code is running');
+        setLoadingLatest(true);
         setModelsLoading(true);
         try {
           const models = await modelsApi.getModels('image');
           setImageModels(models);
-          console.log('Image models loaded', models);
+          // // console.log('Image models loaded', models);
+          await loadLatestSelectedModels();
         } catch (err) {
           setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
         } finally {
@@ -45,11 +47,11 @@ export default function ImageGenerationPage() {
         }
       };
   
-      loadImageModels();
-    }, [setImageModels, setModelsLoading, setModelsError]);
+    //   loadImageModels();
+    // }, [setImageModels, setModelsLoading, setModelsError]);
 
   // Load previously selected models
-  useEffect(() => {
+  // useEffect(() => {
     const loadLatestSelectedModels = async () => {
       if (selectedModels.image && selectedModels.image.length > 0) return;
 
@@ -59,15 +61,30 @@ export default function ImageGenerationPage() {
         const modelUids = latestModels.map(model => model.model_uid);
         setTempSelectedModels(modelUids);
         saveSelectedModels('image');
-      } catch (err) {
-        console.log('Error: ', err);
+
+        // Toggle inactive models using toggleModelActive
+        latestModels.forEach((model: Model) => {
+          if (model.active === 0) {
+            useSelectedModelsStore.getState().toggleModelActive(model.model_uid);
+          }
+        });
+      } catch (err: any) {
+        if(err.response?.status === 404) {
+          return;
+        } else {
+          toast({
+            title: 'Failed',
+            description: 'Error loading latest selected models',
+            variant: 'destructive',
+          });
+        }
       } finally {
         setLoadingLatest(false);
       }
     };
 
-    loadLatestSelectedModels();
-  }, []);
+    loadImageModels();
+  }, [setImageModels, setModelsLoading, setModelsError, selectedModels.image]);
   
   return ;
 }

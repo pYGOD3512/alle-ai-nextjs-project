@@ -429,7 +429,7 @@ const VideoArea = () => {
           }, 100);
 
           const { text } = await processFile(file);
-          console.log('content', text);
+          // // console.log('content', text);
 
           clearInterval(progressInterval);
           
@@ -808,7 +808,7 @@ const VideoArea = () => {
 
       // Process the file
       const { text } = await processFile(file);
-      console.log('content', text);
+      // // console.log('content', text);
 
       // Complete the progress animation
       clearInterval(progressInterval);
@@ -888,7 +888,7 @@ const VideoArea = () => {
       }, 100);
 
       const { text } = await processFile(file);
-      console.log('content', text);
+      // // console.log('content', text);
       setPrompt(text);
 
       // Complete the progress animation

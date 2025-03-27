@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { Pencil, Check, X } from "lucide-react";
 import { useAuthStore } from "@/stores";
 import { ModelResponse } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { MessageAttachment } from "./MessageAttachment";
 
 
 interface Message {
@@ -32,6 +34,12 @@ interface ChatMessageProps {
   currentBranch?: number;
   onBranchChange?: (branchIndex: number) => void;
   branches?: Branch[]; // Add this prop
+  attachment?: {
+    name: string;
+    type: string;
+    size: number;
+    url: string;
+  } | null; // Add this prop
 }
 
 interface MessageTree {
@@ -50,12 +58,14 @@ export function ChatMessage({
   totalBranches = 1,
   currentBranch = 0,
   onBranchChange,
-  branches = []
+  branches = [],
+  attachment = null
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthStore();
+  const { toast } = useToast();
 
   const [x, y] = position;
   
@@ -169,7 +179,11 @@ export function ChatMessage({
     }
   };
 
-  return (
+  return (<>
+  {attachment && (
+    <MessageAttachment file={attachment} />
+  )}
+
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
         <Card className="flex items-start gap-3 p-3 rounded-2xl bg-backgroundSecondary">
@@ -213,13 +227,20 @@ export function ChatMessage({
               <div className="flex-1 pr-2">
                 <p className="text-sm whitespace-pre-wrap break-words">{content}</p>
               </div>
-              <button
-                onClick={handleEditClick}
+              {/* <button
+                onClick={()=>{
+                  toast({
+                    title: "Coming Soon !!",
+                    variant: "info",
+                    description: "This feature will be available soon",
+                  });
+                  // handleEditClick();
+                }}
                 className="text-muted-foreground hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"
                 aria-label="Edit message"
               >
                 <Pencil size={16} />
-              </button>
+              </button> */}
             </div>
           )}
         </Card>
@@ -247,5 +268,6 @@ export function ChatMessage({
         )} */}
       </div>
     </div>
+    </>
   );
 }

@@ -405,140 +405,140 @@ export const helpCategories: HelpCategories = {
     ],
   },
 
-  "3742473-others": {
-    id: "3742473",
-    iconName: "FileText",
-    title: "Others",
-    description: "Anything else",
-    sections: [
-      {
-        title: "Others",
-        articles: [
-          {
-            id: "subscription-discounts",
-            title: "Do you offer any discounts?",
-            description:
-              "Information on available promotions or pricing discounts.",
-            readingTime: "3 min read",
-            keywords: [],
-          },
-          {
-            id: "models-selection",
-            title: "Why Can't You Select Just One Model?",
-            description:
-              "Learn why selecting multiple models gives you more flexibility and options.",
-            readingTime: "2 min read",
-            keywords: [],
-          },
-        ],
-      },
-    ],
-  },
-  "7835004-alle-ai-custom": {
-    id: "7835004",
-    iconName: "FolderCog",
-    title: "Alle-AI Custom",
-    description: "All things about Alle-AI Custom plan",
-    sections: [
-      {
-        title: "Alle-AI Custom",
-        articles: [
-          {
-            id: "1",
-            title: "API",
-            description: "Read our apis",
-            readingTime: "10 min read",
-            keywords: [
-              "custom API",
-              "API documentation",
-              "custom integration",
-              "API access",
-              "custom features",
-              "API endpoints",
-              "custom plan",
-              "API usage",
-              "custom implementation",
-              "API reference",
-              "custom setup",
-              "API guide",
-              "custom configuration",
-              "enterprise API",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  "5688074-alle-ai-teams": {
-    id: "5688074",
-    iconName: "Users",
-    title: "Alle-AI Teams",
-    description:
-      "A self-serve subscription plan designed for organizations and businesses wishing to adopt ChatGPT for use among their teams",
-    sections: [
-      {
-        title: "Teams",
-        articles: [
-          {
-            id: "1",
-            title: "API",
-            description: "Read our apis",
-            readingTime: "10 min read",
-            keywords: [
-              "team API",
-              "team integration",
-              "collaborative features",
-              "team management",
-              "team access",
-              "group features",
-              "team subscription",
-              "team setup",
-              "organization API",
-              "team configuration",
-              "multi-user access",
-              "team permissions",
-              "business teams",
-              "team collaboration",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  "11106745-alle-ai-enterprise": {
-    id: "11106745",
-    iconName: "Building2",
-    title: "Alle-AI Enterprise",
-    description: "All things about Alle-AI Enterprise",
-    sections: [
-      {
-        title: "Alle-AI Enterprise",
-        articles: [
-          {
-            id: "1",
-            title: "API",
-            description: "Read our apis",
-            readingTime: "10 min read",
-            keywords: [
-              "enterprise API",
-              "enterprise integration",
-              "enterprise features",
-              "enterprise access",
-              "large scale deployment",
-              "enterprise setup",
-              "enterprise configuration",
-              "corporate implementation",
-              "enterprise management",
-              "business integration",
-              "enterprise security",
-              "enterprise customization",
-              "enterprise solutions",
-              "enterprise support",
-            ],
-          },
-        ],
-      },
-    ],
-  },
+  // "3742473-others": {
+  //   id: "3742473",
+  //   iconName: "FileText",
+  //   title: "Others",
+  //   description: "Anything else",
+  //   sections: [
+  //     {
+  //       title: "Others",
+  //       articles: [
+  //         {
+  //           id: "subscription-discounts",
+  //           title: "Do you offer any discounts?",
+  //           description:
+  //             "Information on available promotions or pricing discounts.",
+  //           readingTime: "3 min read",
+  //           keywords: [],
+  //         },
+  //         {
+  //           id: "models-selection",
+  //           title: "Why Can't You Select Just One Model?",
+  //           description:
+  //             "Learn why selecting multiple models gives you more flexibility and options.",
+  //           readingTime: "2 min read",
+  //           keywords: [],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+  // "7835004-alle-ai-custom": {
+  //   id: "7835004",
+  //   iconName: "FolderCog",
+  //   title: "Alle-AI Custom",
+  //   description: "All things about Alle-AI Custom plan",
+  //   sections: [
+  //     {
+  //       title: "Alle-AI Custom",
+  //       articles: [
+  //         {
+  //           id: "1",
+  //           title: "API",
+  //           description: "Read our apis",
+  //           readingTime: "10 min read",
+  //           keywords: [
+  //             "custom API",
+  //             "API documentation",
+  //             "custom integration",
+  //             "API access",
+  //             "custom features",
+  //             "API endpoints",
+  //             "custom plan",
+  //             "API usage",
+  //             "custom implementation",
+  //             "API reference",
+  //             "custom setup",
+  //             "API guide",
+  //             "custom configuration",
+  //             "enterprise API",
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+  // "5688074-alle-ai-teams": {
+  //   id: "5688074",
+  //   iconName: "Users",
+  //   title: "Alle-AI Teams",
+  //   description:
+  //     "A self-serve subscription plan designed for organizations and businesses wishing to adopt ChatGPT for use among their teams",
+  //   sections: [
+  //     {
+  //       title: "Teams",
+  //       articles: [
+  //         {
+  //           id: "1",
+  //           title: "API",
+  //           description: "Read our apis",
+  //           readingTime: "10 min read",
+  //           keywords: [
+  //             "team API",
+  //             "team integration",
+  //             "collaborative features",
+  //             "team management",
+  //             "team access",
+  //             "group features",
+  //             "team subscription",
+  //             "team setup",
+  //             "organization API",
+  //             "team configuration",
+  //             "multi-user access",
+  //             "team permissions",
+  //             "business teams",
+  //             "team collaboration",
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+  // "11106745-alle-ai-enterprise": {
+  //   id: "11106745",
+  //   iconName: "Building2",
+  //   title: "Alle-AI Enterprise",
+  //   description: "All things about Alle-AI Enterprise",
+  //   sections: [
+  //     {
+  //       title: "Alle-AI Enterprise",
+  //       articles: [
+  //         {
+  //           id: "1",
+  //           title: "API",
+  //           description: "Read our apis",
+  //           readingTime: "10 min read",
+  //           keywords: [
+  //             "enterprise API",
+  //             "enterprise integration",
+  //             "enterprise features",
+  //             "enterprise access",
+  //             "large scale deployment",
+  //             "enterprise setup",
+  //             "enterprise configuration",
+  //             "corporate implementation",
+  //             "enterprise management",
+  //             "business integration",
+  //             "enterprise security",
+  //             "enterprise customization",
+  //             "enterprise solutions",
+  //             "enterprise support",
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
   // Add other categories...
 };

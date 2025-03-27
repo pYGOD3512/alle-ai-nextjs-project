@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from "@/components/ui/card";
-import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe, ZoomIn, X, ChevronLeft, ChevronRight, Circle } from 'lucide-react';
+import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe, ZoomIn, X, ChevronLeft, ChevronRight, Circle, Brain, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,13 @@ import { SUMMARY_DATA } from "@/lib/constants";
 import { useSettingsStore } from "@/stores";
 import { chatApi, LikeState } from "@/lib/api/chat";
 import { useTextSizeStore } from "@/stores/index";
+
+// Import the Shadcn Collapsible components
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface ModelResponseProps {
   model: string;
@@ -124,6 +131,20 @@ function extractImagesFromMarkdown(content: string): { src: string; alt: string;
   return images;
 }
 
+// Add this helper function to extract think content from markdown
+function extractThinkContent(content: string): { thinkContent: string | null, restContent: string } {
+  const thinkRegex = /<think>([\s\S]*?)<\/think>/;
+  const match = content?.match(thinkRegex);
+  
+  if (match) {
+    const thinkContent = match[1];
+    const restContent = content.replace(thinkRegex, '');
+    return { thinkContent, restContent };
+  }
+  
+  return { thinkContent: null, restContent: content || '' };
+}
+
 export function ModelResponse({ 
   model, 
   content, 
@@ -147,6 +168,7 @@ export function ModelResponse({
   const [showAllImages, setShowAllImages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textSize = useTextSizeStore((state) => state.size);
+  const [isThinkingOpen, setIsThinkingOpen] = useState(false);
 
   useEffect(() => {
     // Initialize voices when component mounts
@@ -166,7 +188,34 @@ export function ModelResponse({
       setIsSpeaking(false);
     } else {
       setIsSpeaking(true);
-      const utterance = new SpeechSynthesisUtterance(content);
+
+    // Remove markdown formatting
+    const textToSpeak = content && content
+      // Remove image syntax
+      .replace(/!\[(.*?)\]\((.*?)\)/g, '')
+      // Remove link syntax but keep link text
+      .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+      // Remove headers
+      .replace(/#{1,6}\s+/g, '')
+      // Remove bold/italic
+      .replace(/(\*\*|__)(.*?)(\*\*|__)/g, '$2')
+      .replace(/(\*|_)(.*?)(\*|_)/g, '$2')
+      // Remove code blocks
+      .replace(/```[\s\S]*?```/g, '')
+      // Remove inline code
+      .replace(/`([^`]+)`/g, '$1')
+      // Remove blockquotes
+      .replace(/^\s*>\s+/gm, '')
+      // Remove HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Remove think blocks
+      .replace(/<think>[\s\S]*?<\/think>/g, '')
+      // Replace multiple newlines with a single one
+      .replace(/\n\s*\n/g, '\n')
+      // Trim whitespace
+      .trim();
+
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
       
       // Apply voice settings
       if (voiceSettings.voice) {
@@ -185,7 +234,31 @@ export function ModelResponse({
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(content || '' );
+     // Remove markdown formatting
+  const textToCopy = content && content
+  // Remove image syntax
+  .replace(/!\[(.*?)\]\((.*?)\)/g, '')
+  // Remove link syntax but keep link text
+  .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+  // Remove headers (but keep the text)
+  .replace(/^#{1,6}\s+(.*?)$/gm, '$1')
+  // Remove bold/italic but keep the text
+  .replace(/(\*\*|__)(.*?)(\*\*|__)/g, '$2')
+  .replace(/(\*|_)(.*?)(\*|_)/g, '$2')
+  // Remove code block syntax but keep the code
+  .replace(/```(?:\w+)?\n([\s\S]*?)\n```/g, '$1')
+  // Remove inline code backticks but keep the code
+  .replace(/`([^`]+)`/g, '$1')
+  // Remove blockquotes marker but keep the text
+  .replace(/^\s*>\s+(.*?)$/gm, '$1')
+  // Remove HTML tags
+  .replace(/<[^>]*>/g, '')
+  // Remove think blocks
+  .replace(/<think>[\s\S]*?<\/think>/g, '')
+  // Clean up extra whitespace
+  .replace(/\n\s*\n/g, '\n\n')
+  .trim();
+    await navigator.clipboard.writeText(textToCopy || '' );
     toast({
       title: "Copied to clipboard",
       description: "The response has been copied to your clipboard.",
@@ -201,7 +274,7 @@ export function ModelResponse({
       const state = newState === feedback ? 'none' : newState;
       
       const response = await chatApi.updateLikeState(responseId || '', state as LikeState);
-      console.log('Response from updateLikeState:', response);
+      // // console.log('Response from updateLikeState:', response);
       
       if (response.status) {
         onFeedbackChange(responseId || '', state === 'none' ? null : state as 'liked' | 'disliked');
@@ -339,8 +412,14 @@ export function ModelResponse({
     return 2; // Default (sm and below)
   };
 
-  // Extract images from content
-  const images = useMemo(() => extractImagesFromMarkdown(content || ''), [content]);
+  // Extract think content and regular content
+  const { thinkContent, restContent } = useMemo(() => 
+    extractThinkContent(content || ''), 
+    [content]
+  );
+
+  // Extract images from content (use restContent to avoid extracting from think blocks)
+  const images = useMemo(() => extractImagesFromMarkdown(restContent || ''), [restContent]);
   
   // Calculate visible images and remaining count
   const displayLimit = getDisplayLimit();
@@ -349,8 +428,8 @@ export function ModelResponse({
 
   // Remove images from content to prevent double rendering
   const textContent = useMemo(() => {
-    return content?.replace(/!\[(.*?)\]\((.*?)\)/g, '');
-  }, [content]);
+    return restContent?.replace(/!\[(.*?)\]\((.*?)\)/g, '');
+  }, [restContent]);
 
   return (
     <Card className="bg-transparent border-none shadow-none p-4">
@@ -363,7 +442,7 @@ export function ModelResponse({
                 .map((img, index) => (
                   <Image 
                     key={index}
-                    className="rounded-full hidden sm:flex ring-1 ring-background"
+                    className="rounded-full hidden sm:flex"
                     src={img} 
                     alt={`${model} model ${index + 1}`}
                     width={32} 
@@ -388,7 +467,33 @@ export function ModelResponse({
           )}
         </div>
         <div className="flex flex-col flex-1">
-          <span className={`hidden sm:flex font-medium text-sm text-semibold mb-4 ${Array.isArray(model_img) ? model_img.length > 3 ? "ml-4 mt-1" : "" : ""}`}>{model}</span>
+          <span className={` sm:flex font-medium text-sm text-semibold mb-2 ${Array.isArray(model_img) ? model_img.length > 3 ? "ml-4 mt-1" : "" : ""}`}>{model}</span>
+          
+          {/* Render think content if it exists */}
+          {thinkContent && (
+            <Collapsible
+              open={isThinkingOpen}
+              onOpenChange={setIsThinkingOpen}
+              className="my-2 border rounded-md"
+            >
+              <CollapsibleTrigger className="flex items-center gap-2 p-3 w-full text-left bg-blue-100/50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-t-md transition-colors">
+                <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
+                  <Brain className="h-5 w-5" />
+                  <h3 className="text-sm font-medium">Thinking Process</h3>
+                </div>
+                <div className="ml-auto">
+                  {isThinkingOpen ? (
+                    <ChevronDown className="h-4 w-4 text-blue-800 dark:text-blue-300" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4 text-blue-800 dark:text-blue-300" />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="p-3 text-xs italic text-muted-foreground bg-blue-50 dark:bg-blue-900/20 rounded-b-md">
+                {thinkContent}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
           
           {/* Render images grid if there are images */}
           {images.length > 0 && (
@@ -434,7 +539,7 @@ export function ModelResponse({
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none relative space-y-4">
               <ReactMarkdown
-                key={`${responseId}-${content}`}
+                key={`${responseId}-${textContent}`}
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw, rehypeSanitize]}
                 components={components}
@@ -506,14 +611,14 @@ export function ModelResponse({
               <Copy className="h-4 w-4" />
             </Button>
             
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="rounded-full h-8 w-8 text-muted-foreground"
               onClick={() => onRegenerate?.(responseId || '')}
             >
               <RefreshCw className="h-4 w-4" />
-            </Button>
+            </Button> */}
 
             {sources && sources.length > 0 && (
             <div className="">

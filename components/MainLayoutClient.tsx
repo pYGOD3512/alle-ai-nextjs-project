@@ -10,6 +10,8 @@ import * as Frigade from '@frigade/react';
 import { FooterText } from '@/components/FooterText';
 import { useSidebarStore } from "@/stores";
 import { usePathname } from 'next/navigation';
+import { usePageTitle } from '@/hooks/use-page-title';
+
 
 const isMaintenance = false;
 
@@ -20,6 +22,7 @@ export function MainLayoutClient({
 }) {
   const { isOpen } = useSidebarStore();
   const pathname = usePathname();
+  usePageTitle(); 
 
   if (isMaintenance) {
     return (

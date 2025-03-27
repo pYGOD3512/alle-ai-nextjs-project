@@ -104,7 +104,7 @@ export function CreateApiKeys() {
     setIsLoading(true);
     try {
       const response = await keysApi.getAllApiKeys();
-      console.log('Fetched API keys:', response);
+      // // console.log('Fetched API keys:', response);
 
       // Clear all existing keys first
       clearKeys();
@@ -127,7 +127,7 @@ export function CreateApiKeys() {
       });
 
     } catch (error) {
-      console.error('Error fetching API keys:', error);
+      // console.error('Error fetching API keys:', error);
       toast({
         title: "Error",
         description: "Failed to load API keys",
@@ -166,7 +166,7 @@ export function CreateApiKeys() {
     setDeletingKeys(prev => new Set(prev).add(key.id));
     try {
       const response = await keysApi.deleteApiKey(key.id);
-      console.log('Delete response:', response);
+      // // console.log('Delete response:', response);
       
       if (response.deleted_at) {
         removeKey(key.id);
@@ -184,7 +184,7 @@ export function CreateApiKeys() {
       }
       
     } catch (error) {
-      console.error('Error deleting API key:', error);
+      // console.error('Error deleting API key:', error);
       toast({
         title: "Error",
         description: "Failed to delete API key",
@@ -214,7 +214,7 @@ export function CreateApiKeys() {
         description: response.message,
       });
     } catch (error) {
-      console.error('Error toggling API key status:', error);
+      // console.error('Error toggling API key status:', error);
       toast({
         title: "Error",
         description: `Failed to ${key.isDisabled ? 'enable' : 'disable'} API key`,

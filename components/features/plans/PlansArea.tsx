@@ -267,7 +267,7 @@ const PlansArea = () => {
       <div className="text-center mt-8 sm:mt-12 text-sm text-muted-foreground">
         Need more Capabilities?{" "}
         <button 
-          onClick={() => setShowOrgPlans(true)} 
+          // onClick={() => setShowOrgPlans(true)} 
           className="text-primary hover:underline"
         >
           See Alle-AI Team & Enterprise plans

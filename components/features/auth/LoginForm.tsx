@@ -35,7 +35,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       const result = await login(email, password);
       
       // Only handle verification if needed
-      if (!result.data.user.email_verified_at) {
+      if (result.data.to === 'verify-email') {
         onVerify(email);
         return;
       }
@@ -44,9 +44,11 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       setPassword("");
       toast({
         title: "Login failed",
-        description: `${error}`,
+        // description: `${error}`,
+        description: `Check your credentials and try again`,
         variant: "destructive",
       });
+      // console.log(error)
     } finally {
       setIsLoading(false);
     }

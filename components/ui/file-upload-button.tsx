@@ -17,10 +17,18 @@ import { useToast } from "@/hooks/use-toast";
 import { dropboxService } from "@/lib/services/dropboxServices";
 import { oneDriveService, OneDriveResponse } from '@/lib/services/onedriveServices';
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 interface FileUploadButtonProps {
   onUploadFromComputer: () => void;
   onUploadFromDrive: (file: File) => void; 
   buttonIcon?: React.ReactNode;
+  disabled?: boolean;
 }
 
 interface DriveFile { 
@@ -35,7 +43,8 @@ interface DriveFile {
 export function FileUploadButton({ 
   onUploadFromComputer, 
   onUploadFromDrive,
-  buttonIcon
+  buttonIcon,
+  disabled = false
 }: FileUploadButtonProps) {
   const [showDriveModal, setShowDriveModal] = useState(false);
   const { toast } = useToast();
@@ -62,7 +71,7 @@ export function FileUploadButton({
       
       // Special handling for PDFs
       const isPDF = file.mimeType === 'application/pdf';
-      console.log('Downloading file:', { name: file.name, type: file.mimeType, isPDF });
+      // console.log('Downloading file:', { name: file.name, type: file.mimeType, isPDF });
 
       const response = await fetch(
         `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
@@ -80,7 +89,7 @@ export function FileUploadButton({
 
       // Get the file data as ArrayBuffer
       const arrayBuffer = await response.arrayBuffer();
-      console.log('File downloaded, size:', arrayBuffer.byteLength);
+      // console.log('File downloaded, size:', arrayBuffer.byteLength);
 
       // For PDFs, verify the file signature
       if (isPDF) {
@@ -98,11 +107,11 @@ export function FileUploadButton({
         { type: file.mimeType }
       );
 
-      console.log('File created:', { 
-        name: driveFile.name, 
-        type: driveFile.type, 
-        size: driveFile.size 
-      });
+      // console.log('File created:', { 
+      //   name: driveFile.name, 
+      //   type: driveFile.type, 
+      //   size: driveFile.size 
+      // });
 
       // Validate the file
       const validation = validateFile(driveFile);
@@ -122,12 +131,12 @@ export function FileUploadButton({
         description: `${file.name} has been added successfully`,
       });
     } catch (error) {
-      console.error('Error processing Drive file:', error);
+      // console.error('Error processing Drive file:', error);
       // Add more detailed error information
       const errorMessage = error instanceof Error 
         ? `${error.message}\n${error.stack}` 
         : "Failed to process file";
-      console.error('Detailed error:', errorMessage);
+      // console.error('Detailed error:', errorMessage);
       
       toast({
         variant: "destructive",
@@ -164,7 +173,7 @@ export function FileUploadButton({
 
               // Get the file data as ArrayBuffer
               const arrayBuffer = await response.arrayBuffer();
-              console.log('File downloaded, size:', arrayBuffer.byteLength);
+              // console.log('File downloaded, size:', arrayBuffer.byteLength);
 
               // Create a regular File object
               const dropboxFile = new File(
@@ -207,7 +216,7 @@ export function FileUploadButton({
         sizeLimit: 100 * 1024 * 1024 // 100MB
       });
     } catch (error) {
-      console.error('Error processing Dropbox file:', error);
+      // console.error('Error processing Dropbox file:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -240,11 +249,20 @@ export function FileUploadButton({
 
   return (
     <>
+          <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {buttonIcon ? buttonIcon : (
-            <Button variant="ghost2" className="flex-shrink-0 focus-visible:outline-none border-none p-0" aria-label="Upload File">
-              <Plus size={28} className="border border-borderColorPrimary rounded-full p-[0.3rem]" />
+            <Button 
+            variant="ghost2" 
+            className={`flex-shrink-0 focus-visible:outline-none border-none p-0 ${disabled ? 'cursor-pointer' : ''}`} 
+            aria-label="Upload File"
+            disabled={disabled}
+            >
+              <Plus size={28} className={`border border-borderColorPrimary rounded-full p-[0.3rem]`} />
             </Button>
           )}
         </DropdownMenuTrigger>
@@ -287,10 +305,20 @@ export function FileUploadButton({
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onUploadFromComputer} className="gap-2">
             <HardDrive className="h-4 w-4" />
-            <span>Upload from computer</span>
+            <span>Upload from Computer</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
+      </TooltipTrigger>
+      <TooltipContent>
+            {disabled 
+              ? <p>File upload disabled for web search</p>
+              : <p>Upload a file</p>
+            }
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       <GoogleDriveModal 
         isOpen={showDriveModal} 

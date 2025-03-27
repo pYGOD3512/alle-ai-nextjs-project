@@ -10,13 +10,20 @@ import { driveService } from '@/lib/services/driveServices';
 
 import { useModelsStore } from "./models";
 
+export interface Attachment {
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
+
 type ContentKey = "input" | "voice" | "attachment";
 type ContentType = "chat" | "image" | "audio" | "video";
 
 interface ContentValue {
   input: string;
   voice: File | null;
-  attachment: File | null;
+  attachment: Attachment | null;
 }
 
 interface ContentStore {
@@ -111,6 +118,8 @@ export const useSidebarStore = create<SidebarState>()(
 );
 
 interface SelectedModelsStore {
+  initialized: boolean;
+  setInitialized: (value: boolean) => void;
   selectedModels: {
     chat: string[];
     image: string[];
@@ -129,6 +138,8 @@ interface SelectedModelsStore {
 }
 
 export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => ({
+  initialized: false,
+  setInitialized: (value) => set({ initialized: value }),
   selectedModels: {
     chat: [],
     image: [],
@@ -140,15 +151,13 @@ export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => 
   lastUpdate: Date.now(),
   isLoadingLatest: false,
   setTempSelectedModels: (models) => set({ tempSelectedModels: models }),
-  saveSelectedModels: (type) => {
-    set((state) => ({
-      selectedModels: {
-        ...state.selectedModels,
-        [type]: state.tempSelectedModels
-      },
-      lastUpdate: Date.now()
-    }));
-  },
+  saveSelectedModels: (type) => set((state) => ({
+    selectedModels: {
+      ...state.selectedModels,
+      [type]: state.tempSelectedModels
+    },
+    lastUpdate: Date.now()
+  })),
   toggleModelActive: (modelId) => {
     set((state) => ({
       inactiveModels: state.inactiveModels.includes(modelId)
@@ -266,11 +275,13 @@ interface HistoryStore {
   renameHistory: (id: string, newTitle: string) => void;
   updateHistoryTitle: (id: string, newTitle: string) => void;
   getHistoryByType: (type: HistoryItem['type']) => HistoryItem[];
+  getHistoryItemById: (id: string) => HistoryItem | undefined;
   setLoading: (status: boolean) => void;
   setError: (error: string | null) => void;
   setPage: (page: number) => void;
   setHasMore: (hasMore: boolean) => void;
   clearHistory: () => void;
+  addHistoryItems: (items: HistoryItem[]) => void;
 }
 
 export const useHistoryStore = create<HistoryStore>((set, get) => ({
@@ -307,11 +318,24 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
   getHistoryByType: (type) => {
     return get().history.filter((item) => item.type === type);
   },
+  getHistoryItemById: (id) => {
+    return get().history.find((item) => item.session === id || item.id === id);
+  },
   setLoading: (status) => set({ isLoading: status }),
   setError: (error) => set({ error }),
   setPage: (page) => set({ currentPage: page }),
   setHasMore: (hasMore) => set({ hasMore }),
   clearHistory: () => set({ history: [], currentPage: 1, hasMore: true }),
+  addHistoryItems: (items) => 
+    set((state) => {
+      // Filter out any duplicates based on session ID
+      const existingIds = new Set(state.history.map(item => item.session));
+      const newItems = items.filter(item => !existingIds.has(item.session));
+      
+      return { 
+        history: [...state.history, ...newItems] 
+      };
+    }),
 }));
 
 export interface LikedMediaItem {
@@ -432,7 +456,7 @@ export const useDriveAuthStore = create<DriveAuthStore>()(
           state.clearAuth();
           return false;
         } catch (error) {
-          console.error('Failed to refresh auth:', error);
+          // console.error('Failed to refresh auth:', error);
           state.clearAuth();
           return false;
         }
@@ -599,7 +623,7 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       personalization: {
         summary: false,
-        personalizedAds: true,
+        personalizedAds: false,
       },
       setPersonalizationSetting: (key, value) =>
         set((state) => ({

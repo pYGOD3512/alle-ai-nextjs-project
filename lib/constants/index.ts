@@ -107,20 +107,20 @@ export const navItems = [
     label: "Text size",
     interactionType: "modal",
     onClick: () => {
-      // console.log("Opening Text Size Modal");
+      // // // console.log("Opening Text Size Modal");
     },
   },
-  {
-    type: HelpCircle,
-    label: "Help",
-    interactionType: "function",
-  },
+  // {
+  //   type: HelpCircle,
+  //   label: "Help",
+  //   interactionType: "function",
+  // },
   {
     type: MessagesSquare,
     label: "Feedback",
     interactionType: "modal",
     onClick: () => {
-      // console.log("Opening Feedback Modal");
+      // // // console.log("Opening Feedback Modal");
     },
   },
   {
@@ -131,7 +131,7 @@ export const navItems = [
       {
         label: "All Notifications",
         icon: Bell,
-        // onClick: () => console.log("All Notifications")
+        // onClick: () => // // console.log("All Notifications")
       },
     ],
   },
@@ -265,14 +265,14 @@ export const videoHistory = [
 ];
 
 export const userMenuItems = [
-  {
-    label: "Organization",
-    icon: Users,
-    interactionType: "modal",
-    shortcut: "O",
-    onClick: () => {
-    },
-  },
+  // {
+  //   label: "Organization",
+  //   icon: Users,
+  //   interactionType: "modal",
+  //   shortcut: "O",
+  //   onClick: () => {
+  //   },
+  // },
   {
     label: "Developer",
     icon: Braces,
@@ -291,7 +291,7 @@ export const userMenuItems = [
     icon: Heart,
     interactionType: "modal",
     onClick: () => {
-      // console.log('Opening Refer Modal');
+      // // // console.log('Opening Refer Modal');
     },
   },
   {
@@ -299,7 +299,7 @@ export const userMenuItems = [
     icon: Settings,
     interactionType: "modal",
     onClick: () => {
-      // console.log('Opening Settings Modal');
+      // // // console.log('Opening Settings Modal');
     },
   },
   {
@@ -307,7 +307,7 @@ export const userMenuItems = [
     icon: LogOut,
     interactionType: "function",
     onClick: () => {
-      // console.log('Logging out...');
+      // // // console.log('Logging out...');
     },
   },
 ];

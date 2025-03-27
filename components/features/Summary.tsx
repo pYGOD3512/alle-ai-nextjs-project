@@ -15,6 +15,11 @@ interface SummaryProps {
 export function Summary({ isGenerating = false, isActive = false, onClick }: SummaryProps) {
   const { resolvedTheme } = useTheme();
 
+  if (isGenerating){
+    // console.log('Generating the summray')
+  }
+  // console.log('testing')
+
   return (
     <AnimatePresence mode="wait">
       {isGenerating ? (

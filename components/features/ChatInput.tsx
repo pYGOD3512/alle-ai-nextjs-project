@@ -19,6 +19,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { FooterText } from "../FooterText";
 import { useSelectedModelsStore, useWebSearchStore, useCombinedModeStore } from "@/stores";
 import { ModelSelectionModal, PromptModal } from "@/components/ui/modals";
+import { ContentLengthWarning } from "../ui/content-length-warning";
+import { useModelsStore } from "@/stores/models";
 
 declare global {
   interface Window {
@@ -40,6 +42,7 @@ interface ChatInputProps {
   }) => void;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   isLoading: boolean;
+  isSending?: boolean;
   isWeb?: boolean;
   isCombined?: boolean;
   onWebSearchToggle?: (enabled: boolean) => void;
@@ -53,6 +56,7 @@ export function ChatInput({
   onSend,
   inputRef,
   isLoading,
+  isSending,
   isWeb,
   isCombined,
   onWebSearchToggle,
@@ -65,16 +69,20 @@ export function ChatInput({
   const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
+  const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
   const [fileContent, setFileContent] = useState<{
     uploaded_files: Array<{
       file_name: string;
       file_size: string;
       file_type: string;
-      file_content: string;
+      file_content: any;
     }>;
   } | null>(null);
   const [showCombinedPrompt, setShowCombinedPrompt] = useState(false);
+  const [contentPercentage, setContentPercentage] = useState<number>(0);
+  const [incompatibleModels, setIncompatibleModels] = useState<string[]>([]);
+  const [incompatibleModelNames, setIncompatibleModelNames] = useState<string[]>([]);
 
   const pathname = usePathname();
 
@@ -84,6 +92,129 @@ export function ChatInput({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // const MAX_CONTENT_LENGTH = 40;
+  const MAX_CONTENT_LENGTH = 400000;
+  const IMAGE_COMPATIBLE_MODELS = [
+    'gpt-4o',
+    'gemini-1-5-pro',
+    'gemini-2-0-flash',
+    'gpt-4',
+    'gpt-4-5',
+    'gpt-4o-mini',
+    'grok-2-vision',
+    'claude-3-7-sonnet'
+  ];
+
+  useEffect(() => {
+    // Only check if there's an uploaded image file
+    if (uploadedFile && uploadedFile.type.startsWith('image/')) {
+      // Get active models (models that are selected but not inactive)
+      const activeModelIds = selectedModels.chat.filter(
+        modelId => !inactiveModels.includes(modelId)
+      );
+      
+      // Find which active models don't support images
+      const incompatibleModelsList = activeModelIds.filter(
+        modelId => !IMAGE_COMPATIBLE_MODELS.includes(modelId)
+      );
+      
+      // Update state with incompatible models
+      setIncompatibleModels(incompatibleModelsList);
+      
+      // Get model names for display
+      const modelNames = incompatibleModelsList.map(modelId => {
+        const model = chatModels.find(m => m.model_uid === modelId);
+        return model?.model_name || modelId;
+      });
+
+      setIncompatibleModelNames(modelNames);
+    } else {
+      // Clear incompatible models if no image is uploaded
+      setIncompatibleModels([]);
+      setIncompatibleModelNames([]);
+    }
+  }, [uploadedFile, selectedModels.chat, inactiveModels, chatModels, toast]);
+
+
+   // Function to check if all active models support image uploads
+   const checkImageCompatibility = (file: File) => {
+    // Only check for image files
+    if (!file.type.startsWith('image/')) {
+      setIncompatibleModels([]);
+      return { compatible: true, incompatibleModels: [] };
+    }
+    
+    // Get active models (models that are selected but not inactive)
+    const activeModelIds = selectedModels.chat.filter(
+      modelId => !inactiveModels.includes(modelId)
+    );
+    
+    // Find which active models don't support images
+    const incompatibleModelsList = activeModelIds.filter(
+      modelId => !IMAGE_COMPATIBLE_MODELS.includes(modelId)
+    );
+
+    setIncompatibleModels(incompatibleModelsList);
+    
+    return {
+      compatible: incompatibleModelsList.length === 0,
+      incompatibleModels: incompatibleModelsList
+    };
+  };
+  
+
+  const calculateContentPercentage = (fileContent: any = '', textareaContent: string = ''): number => {
+    // If there's no content, return 0
+    if (!fileContent && !textareaContent) return 0;
+    
+      // If fileContent is a File object (image), don't include it in calculation
+    if (fileContent instanceof File) {
+      return Math.round((textareaContent.length / MAX_CONTENT_LENGTH) * 100);
+    }
+  
+    // For string content
+    if (typeof fileContent === 'string') {
+      const contentToCount =  fileContent;
+      const totalLength = contentToCount.length + textareaContent.length;
+      return Math.round((totalLength / MAX_CONTENT_LENGTH) * 100);
+    }
+
+    // Default case - just count the textarea content
+    return Math.round((textareaContent.length / MAX_CONTENT_LENGTH) * 100);
+  };
+
+
+  // effect to watch both content sources
+  useEffect(() => {
+    const fileContentLength = fileContent?.uploaded_files?.[0]?.file_content?.length || 0;
+    const textareaContentLength = value.length;
+    const newPercentage = calculateContentPercentage(
+      fileContent?.uploaded_files?.[0]?.file_content || '',
+      value
+    );
+    setContentPercentage(newPercentage);
+  }, [fileContent, value]);
+
+  // Add this helper function to check if content is over limit
+  const isContentOverLimit = (percentage: number): boolean => {
+    return percentage > 100;
+  };
+
+  // Add this helper function at the top of your file
+  function generateUUID(): string {
+  // Check if native crypto.randomUUID is available
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  
+  // Fallback implementation for browsers without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
   const handlePaste = async (event: React.ClipboardEvent) => {
     const items = event.clipboardData.items;
@@ -113,7 +244,7 @@ export function ChatInput({
           }
 
           const newUploadedFile: UploadedFile = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             name: `IMG ${new Date().toISOString()}.${file.type.split('/')[1]}`,
             type: file.type,
             size: file.size,
@@ -135,7 +266,7 @@ export function ChatInput({
           }, 100);
 
           const { text } = await processFile(file);
-          console.log('content', text);
+          // // console.log('content', text);
 
           clearInterval(progressInterval);
           
@@ -185,6 +316,9 @@ export function ChatInput({
         return;
       }
 
+      const compatibility = checkImageCompatibility(file);
+      // console.log("Initial compatibility check:", compatibility);
+
       const fileUrl = URL.createObjectURL(file);
       
       if (uploadedFile?.url) {
@@ -192,13 +326,14 @@ export function ChatInput({
       }
 
       const newUploadedFile: UploadedFile = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         name: file.name,
         type: file.type,
         size: file.size,
         url: fileUrl,
         status: 'loading',
-        progress: 0
+        progress: 0,
+        timestamp: Date.now()
       };
 
       setUploadedFile(newUploadedFile);
@@ -229,10 +364,10 @@ export function ChatInput({
 
         await handleProcessFile(file, text);
 
-        toast({
-          title: "File Processed",
-          description: `${file.name} has been added successfully`,
-        });
+        // toast({
+        //   title: "File Processed",
+        //   description: `${file.name} has been added successfully`,
+        // });
       }
     } catch (error) {
       if (uploadedFile?.url) {
@@ -246,6 +381,7 @@ export function ChatInput({
       });
     }
   };
+  
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -261,10 +397,14 @@ export function ChatInput({
       return;
     }
 
+    // Check image compatibility
+    const compatibility = checkImageCompatibility(file);
+    // console.log("Initial compatibility check:", compatibility);
+
     try {
       const { text } = await processFile(file);
-      await handleProcessFile(file, text);
-      console.log('uploaded file content is', text);
+      const processedContent = await handleProcessFile(file, text);
+      // console.log('uploaded file content is', processedContent);
 
       const fileUrl = URL.createObjectURL(file);
       
@@ -273,13 +413,14 @@ export function ChatInput({
       }
 
       const newUploadedFile: UploadedFile = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         name: file.name,
         type: file.type,
         size: file.size,
         url: fileUrl,
         status: 'loading',
-        progress: 0
+        progress: 0,
+        timestamp: Date.now()
       };
 
       setUploadedFile(newUploadedFile);
@@ -305,10 +446,10 @@ export function ChatInput({
         prev ? { ...prev, status: 'ready' } : null
       );
 
-      toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-      });
+      // toast({
+      //   title: "File Processed",
+      //   description: `${file.name} has been added successfully`,
+      // });
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
@@ -332,6 +473,11 @@ export function ChatInput({
       setUploadedFile(null);
     }
     setFileContent(null);
+    setContentPercentage(0);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   useEffect(() => {
@@ -347,13 +493,20 @@ export function ChatInput({
   const handleWebSearchToggle = () => {
     const newValue = !isWebSearch;
     setIsWebSearch(newValue);
+    
+    // If enabling web search, disable combined mode
+    if (newValue && isCombinedMode) {
+      setIsCombinedMode(false);
+      onCombinedToggle?.(false);
+    }
+    
     onWebSearchToggle?.(newValue);
-    toast({
-      title: newValue ? "Web Search Enabled" : "Web Search Disabled",
-      description: newValue 
-        ? "Your messages will now include web search results"
-        : "Messages will be processed without web search",
-    });
+    // toast({
+    //   title: newValue ? "Web Search Enabled" : "Web Search Disabled",
+    //   description: newValue 
+    //     ? "Your messages will now include web search results"
+    //     : "Messages will be processed without web search",
+    // });
   };
 
   const handleCombinedToggle = () => {
@@ -364,14 +517,21 @@ export function ChatInput({
     }
 
     const newValue = !isCombinedMode;
+    
+    // If enabling combined mode, disable web search
+    if (newValue && isWebSearch) {
+      setIsWebSearch(false);
+      onWebSearchToggle?.(false);
+    }
+    
     setIsCombinedMode(newValue);
     onCombinedToggle?.(newValue);
-    toast({
-      title: newValue ? "Combined Mode Enabled" : "Combined Mode Disabled",
-      description: newValue 
-        ? "Your messages will now be processed in combined mode"
-        : "Messages will be processed normally",
-    });
+    // toast({
+    //   title: newValue ? "Combined Mode Enabled" : "Combined Mode Disabled",
+    //   description: newValue 
+    //     ? "Your messages will now be processed in combined mode"
+    //     : "Messages will be processed normally",
+    // });
   };
 
   const handleSendClick = () => {
@@ -380,19 +540,39 @@ export function ChatInput({
       return;
     }
     onSend(fileContent || undefined);
+    handleRemoveFile();
   };
 
   const handleProcessFile = async (file: File, text: string) => {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    setFileContent({
+    const isImage = file.type.startsWith('image/') || 
+                 /\.(jpg|jpeg|png|gif|webp|svg|bmp|tiff)$/i.test(file.name);
+
+    const fileTypeForBackend = isImage ? "image" : (fileExtension || 'unknown');
+
+    let fileContent: any;
+
+    // Calculate content percentage for non-image files
+    if (isImage) {
+      fileContent = file;
+      setContentPercentage(0);
+    } else {
+      fileContent = text;
+      const percentage = calculateContentPercentage(text, value);
+      setContentPercentage(percentage);
+    }
+
+    const content = {
       uploaded_files: [{
         file_name: file.name,
         file_size: `${(file.size / 1024).toFixed(1)}KB`,
-        // file_type: file.type.split('/')[1],
-        file_type: fileExtension || 'unknown',
-        file_content: text
+        file_type: fileTypeForBackend,
+        file_content: fileContent,
       }]
-    });
+    };
+
+    setFileContent(content);
+    return content; 
   };
 
     // Determine current content type based on pathname
@@ -450,8 +630,8 @@ export function ChatInput({
       
       // Show notification
       toast({
-        title: "Combined Mode Disabled",
-        description: "Combined mode has been disabled due to insufficient active models (minimum 2 required).",
+        title: "Combine Disabled",
+        description: "Combined has been disabled due to insufficient active models (minimum 2 required).",
         variant: "default"
       });
     }
@@ -460,12 +640,30 @@ export function ChatInput({
   return (
     <>
       <div className="p-2 bg-background/95 backdrop-blur transition-all duration-300">
+
         {uploadedFile && (
           <div className="max-w-xl md:max-w-3xl mx-auto mb-2">
             <FilePreview file={uploadedFile} onRemove={handleRemoveFile} />
           </div>
         )}
         
+        {contentPercentage > 100 && (
+          <div className="max-w-xl md:max-w-3xl mx-auto">
+            <ContentLengthWarning percentage={contentPercentage} />
+          </div>
+        )}
+
+         {/* Show incompatible models warning if needed */}
+        {uploadedFile?.type.startsWith('image/') && incompatibleModels.length > 0 && (
+          <div className="max-w-xl md:max-w-3xl mx-auto mb-2">
+            <ContentLengthWarning 
+              type="incompatible-models"
+              message="The following models don't support image uploads:"
+              models={incompatibleModelNames}
+            />
+          </div>
+        )}
+
         <div className="max-w-xl md:max-w-3xl mx-auto">
           <div className="flex flex-col p-1 border bg-backgroundSecondary border-borderColorPrimary rounded-xl focus-within:border-borderColorPrimary">
             <Textarea 
@@ -479,9 +677,15 @@ export function ChatInput({
                 const newHeight = Math.min(target.scrollHeight, 150);
                 target.style.height = `${newHeight}px`;
                 onChange(e.target.value);
+                const fileContentLength = fileContent?.uploaded_files?.[0]?.file_content?.length || 0;
+                const newPercentage = calculateContentPercentage(
+                  fileContent?.uploaded_files?.[0]?.file_content || '',
+                  e.target.value
+                );
+                setContentPercentage(newPercentage);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !isInputEmpty) {
+                if (e.key === "Enter" && !e.shiftKey && !isInputEmpty && !isLoading && !isSending && contentPercentage < 100 && incompatibleModels.length < 1) {
                   e.preventDefault();
                   handleSendClick();
                   if (inputRef?.current) {
@@ -498,30 +702,36 @@ export function ChatInput({
             
             <div className="flex items-center justify-between px-3">
               <div className="flex items-center gap-1">
-                <FileUploadButton
-                  onUploadFromComputer={handleUploadFromComputer}
-                  onUploadFromDrive={handleUploadFromDrive}
-                />
+                {pathname.startsWith('/chat') && 
+                  <FileUploadButton
+                    onUploadFromComputer={handleUploadFromComputer}
+                    onUploadFromDrive={handleUploadFromDrive}
+                    disabled={isWebSearch}
+                  />
+                }
                 
                 {isWeb && (
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          disabled={ isLoading }
+                          disabled={isLoading || !!uploadedFile}
                           onClick={handleWebSearchToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                             isWebSearch 
                               ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
                               : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
-                          }`}
+                          } ${!!uploadedFile ? 'opacity-50 cursor-pointer' : ''}`}
                         >
                           <Globe size={14} />
                           <span className="text-[12px]">Search</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{isWebSearch ? "Search the web" : "Search the web"}</p>
+                        {!!uploadedFile 
+                          ? <p>Web search disabled for file upload</p>
+                          : <p>{isWebSearch ? "Search the web" : "Search the web"}</p>
+                        }
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -532,7 +742,7 @@ export function ChatInput({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        disabled={ isLoading}
+                        disabled={ isLoading || isSending }
                         onClick={handleCombinedToggle}
                         className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                           isCombinedMode 
@@ -556,10 +766,9 @@ export function ChatInput({
                 <MicButton 
                   isListening={isListening} 
                   onClick={toggleListening}
-                  className={`text-white dark:text-black bg-bodyColor hover:bg-opacity-70 transition-all duration-200 ${
-                    !isInputEmpty
-                      && "hidden"
-                      }`}
+                  className={`text-white dark:text-black bg-bodyColor hover:bg-opacity-70 transition-all duration-200 
+                    ${ !isInputEmpty && ""}
+                      `}
                 />
                 
                 <Button
@@ -567,10 +776,11 @@ export function ChatInput({
                   size= {pathname.startsWith('/chat') ? `icon` : `default`}
                   className={`flex-shrink-0 h-8 ${pathname.startsWith('/chat') ? "rounded-full w-8" : "rounded-full"} ${
                     isInputEmpty
-                      ? "bg-gray-300 text-gray-500 hover:bg-gray-300"
+                      ? ""
                       : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
                   }`}
-                  disabled={isInputEmpty || isLoading}
+                  disabled={isInputEmpty || isLoading || isSending || isContentOverLimit(contentPercentage) || (uploadedFile?.type.startsWith('image/') && 
+                    incompatibleModels.length > 0)}
                 >
                   {pathname.startsWith('/chat') ? <ArrowUp className="h-4 w-4" /> : 'Generate' }
                 </Button>

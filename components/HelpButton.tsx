@@ -41,11 +41,11 @@ useEffect(() => {
       label: 'Help & FAQ',
       onClick: () => window.open('/collection', '_blank')
     },
-    {
-      icon: FileText,
-      label: 'Release notes',
-      onClick: () => window.open('/release-notes', '_blank')
-    },
+    // {
+    //   icon: FileText,
+    //   label: 'Release notes',
+    //   onClick: () => window.open('/release-notes', '_blank')
+    // },
     {
       icon: FileText,
       label: 'Terms & policies',
@@ -56,15 +56,15 @@ useEffect(() => {
       label: 'Keyboard shortcuts',
       onClick: () => {setShortcutsModalOpen(true)}
     },
-    {
-      icon: AlertTriangle,
-      label: 'Report Illegal Content',
-      onClick: () => {setReportModalOpen(true)}
-    },
+    // {
+    //   icon: AlertTriangle,
+    //   label: 'Report Illegal Content',
+    //   onClick: () => {setReportModalOpen(true)}
+    // },
   ];
 
   return (
-    <div className="fixed bottom-4 right-4">
+    <div className="fixed hidden md:block bottom-4 right-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

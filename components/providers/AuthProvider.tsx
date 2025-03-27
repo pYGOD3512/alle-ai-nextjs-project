@@ -81,11 +81,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authApi.login({ email, password });
       
       // Always set the basic auth state
-      setAuth(response.data.user, response.data.token); //I'll make Dickson add plans to the login response
+      setAuth(response.data.user, response.data.token);
       
       // Handle routing based on response
-      if (!response.data.user.email_verified_at) {
-        // User needs to verify email
+      if (response.data.to === 'verify-email') {
+        // Handling of email verification will happen on the sign-in form.
         return response;
       }
 
@@ -107,7 +107,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return response;
     } catch (error) {
-      console.error('Login failed:', error);
       throw error;
     }
   };
@@ -128,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // New registrations always need verification
       return response.data;
     } catch (error) {
-      console.error('Registration failed:', error);
+      // console.error('Registration failed:', error);
       throw error;
     }
   };
@@ -147,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Use replace instead of push to prevent back navigation
       router.replace('/auth');
     } catch (error) {
-      console.error('Logout failed:', error);
+      // console.error('Logout failed:', error);
       throw error;
     } finally {
       setLoading(false);

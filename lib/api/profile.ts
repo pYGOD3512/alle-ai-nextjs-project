@@ -18,6 +18,7 @@ interface ProfileUpdateParams {
 
 export const profileApi = {
   updateProfile: async (params: ProfileUpdateParams): Promise<ProfileUpdateResponse> => {
+    // console.log(params.profile_photo, 'This is the profile photo of the user')
     try {
       // Create FormData object to handle file upload
       const formData = new FormData();
@@ -33,10 +34,10 @@ export const profileApi = {
         },
       });
       
-      console.log('Profile update response:', response.data);
+      // // console.log('Profile update response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // console.error('Error updating profile:', error);
       throw error;
     }
   },
