@@ -16,7 +16,7 @@ interface Guide {
 }
 
 const href = "/docs/api";
-
+const BaseUrl = "/docs/api-reference";
 // user guides guides
 
 export const guides: Guide[] = [
@@ -174,7 +174,7 @@ interface sectionProps {
 }
 interface searchtermsprops {
   hash: string;
-  words: [];
+  words: string[];
 }
 interface keywordsProps {
   BaseUrl: string;
@@ -195,7 +195,25 @@ export const apiReference: apiREfprops[] = [
         id: "introduction",
         title: "Introduction",
         href: "introduction",
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: `${BaseUrl}/introduction`,
+            searchTerms: [
+              {
+                hash: "introduction",
+                words: [
+                  "API Reference",
+                  "HTTP",
+                  "WebSocket",
+                  "Python bindings",
+                  "Node.js library",
+                  "Install",
+                  "Command",
+                ],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "authentication",
