@@ -792,6 +792,10 @@ const userPlan = React.useMemo(() => {
         message: `Your current plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
         type: "warning",
         metadata: {
+          link: {
+            url: '/collection/3742473-others/limits',
+            text: 'Learn more'
+          },
           plan: planUpgrade,
           models: [...tempSelectedModels.map(id => {
             const model = getModelsForPage().find(m => m.model_uid === id);
@@ -5073,10 +5077,10 @@ export function PromptModal({
                 <div className="text-center space-y-2">
                   <p className="text-sm text-muted-foreground">
                     <a 
-                      href="/hub/getting-started" target="_blank"
+                      href={metadata.link ? metadata.link.url : '/hub/getting-started'} target="_blank"
                       className="inline-flex items-center gap-1 text-primary hover:underline"
                     >
-                      Learn why
+                      {metadata.link ? metadata.link.text : 'Learn more'}
                       <ChevronRight className="h-3 w-3 inline-block" />
                     </a>
                     {' '}
@@ -5092,18 +5096,6 @@ export function PromptModal({
                     <span className="text-sm font-medium text-primary">{metadata.requiredTokens}</span>
                   </div>
                 </div>
-              )}
-
-              {metadata.link && (
-                <a
-                  href={metadata.link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  {metadata.link.text}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
               )}
             </div>
           )}

@@ -110,8 +110,11 @@ function RouteGuardInner({ children }: RouteGuardProps) {
         return;
       }
 
-      // CASE 2: Has token and trying to access auth routes or /plans
+      // CASE 2: Has token and trying to access other routs aside auth
       if (token && (!authRoutes.includes(pathname))) {
+        const response = await authApi.getUser();
+        setAuth(response.data.user, token, response.plan);
+        
         if (returnUrl) {
           sessionStorage.removeItem('returnUrl');
           setGenerationType('load');
@@ -125,6 +128,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
       // CASE 3: Has token and trying to access auth route
       if (token && authRoutes.includes(pathname)) {
         try {
+          storeCurrentPath();
           // Validate token when on auth route
           const response = await authApi.getUser();
           setAuth(response.data.user, token, response.plan);
@@ -133,7 +137,13 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
             return;
           } else if (response.data.to === 'chat' && response.plan) {
-            setGenerationType('load');
+            // Check for return URL when redirecting from auth
+            if (returnUrl) {
+              sessionStorage.removeItem('returnUrl');
+              setGenerationType('load');
+              router.replace(returnUrl);
+              return;
+            }
             router.replace('/chat');
             return;
           } else if (!response.plan) {
@@ -149,6 +159,8 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           clearAuth();
           setAuthState('authorized');
           return;
+        } finally {
+          sessionStorage.removeItem('returnUrl');
         }
       }
 

@@ -52,6 +52,27 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   const { user, verifyEmail, logout } = useAuth();
   const router = useRouter();
 
+  // Add beforeunload event handler
+  // useEffect(() => {
+  //   // Function to handle beforeunload event
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     // Cancel the event
+  //     e.preventDefault();
+  //     // Chrome requires returnValue to be set
+  //     e.returnValue = '';
+  //     // Custom message (note: most modern browsers show their own generic message instead)
+  //     return 'You have a pending verification. Are you sure you want to leave?';
+  //   };
+
+  //   // Add event listener
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+
+  //   // Clean up event listener on component unmount
+  //   return () => {
+  //     window.removeEventListener('beforeunload', handleBeforeUnload);
+  //   };
+  // }, []);
+
   // Handle countdown timer
   useEffect(() => {
     if (countdown > 0) {

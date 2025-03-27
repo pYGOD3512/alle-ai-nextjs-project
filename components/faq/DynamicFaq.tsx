@@ -37,6 +37,9 @@ const faqComponents = {
   "models-selection": dynamic(
     () => import("@/components/faq/others/models-selection")
   ),
+  "limits": dynamic(
+    () => import("@/components/faq/others/model-limits")
+  ),
 };
 
 interface DynamicFaqProps {

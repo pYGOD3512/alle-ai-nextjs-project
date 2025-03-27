@@ -810,10 +810,10 @@ export function ChatInput({
         title="No Models Selected"
         message="Please select at least 2 models to start a conversation"
         metadata={{
-          // link: {
-          //   text: "Learn why",
-          //   url: "/hub/getting-started"
-          // }
+          link: {
+            text: "Learn why",
+            url: "/collection/3742473-others/models-selection"
+          }
         }}
         actions={[
           {

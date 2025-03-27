@@ -405,35 +405,43 @@ export const helpCategories: HelpCategories = {
     ],
   },
 
-  // "3742473-others": {
-  //   id: "3742473",
-  //   iconName: "FileText",
-  //   title: "Others",
-  //   description: "Anything else",
-  //   sections: [
-  //     {
-  //       title: "Others",
-  //       articles: [
-  //         {
-  //           id: "subscription-discounts",
-  //           title: "Do you offer any discounts?",
-  //           description:
-  //             "Information on available promotions or pricing discounts.",
-  //           readingTime: "3 min read",
-  //           keywords: [],
-  //         },
-  //         {
-  //           id: "models-selection",
-  //           title: "Why Can't You Select Just One Model?",
-  //           description:
-  //             "Learn why selecting multiple models gives you more flexibility and options.",
-  //           readingTime: "2 min read",
-  //           keywords: [],
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
+  "3742473-others": {
+    id: "3742473",
+    iconName: "FileText",
+    title: "Others",
+    description: "Anything else",
+    sections: [
+      {
+        title: "Others",
+        articles: [
+          {
+            id: "subscription-discounts",
+            title: "Do you offer any discounts?",
+            description:
+              "Information on available promotions or pricing discounts.",
+            readingTime: "3 min read",
+            keywords: [],
+          },
+          {
+            id: "models-selection",
+            title: "Why Can't You Select Just One Model?",
+            description:
+              "Learn why selecting multiple models gives you more flexibility and options.",
+            readingTime: "2 min read",
+            keywords: ["model", "free plan", "standard plan", "plus plan", "model selection", "AI models", "plan comparison", "upgrade benefits"],
+          },
+          {
+            id: "limits",
+            title: "How Many Models Can I Select?",
+            description:
+              "Understanding model selection limits for different subscription plans.",
+            readingTime: "2 min read",
+            keywords: ["model limits", "subscription plans", "free plan", "standard plan", "plus plan", "model selection", "AI models", "plan comparison", "upgrade benefits"],
+          },
+        ],
+      },
+    ],
+  },
   // "7835004-alle-ai-custom": {
   //   id: "7835004",
   //   iconName: "FolderCog",

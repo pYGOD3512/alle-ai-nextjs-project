@@ -180,7 +180,7 @@ Getting Started | Alle-AI"
                 <p className="text-lg leading-relaxed mb-8">
                   In the world of AI, no single model has all the answers. Each has unique strengths, weaknesses, and biases. 
                   By comparing responses from multiple models, you get more reliable information, diverse perspectives, and 
-                  protection against AI hallucinations—those convincing but incorrect answers that can lead you astray.
+                  protection against AI hallucinations: those convincing but incorrect answers that can lead you astray.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">

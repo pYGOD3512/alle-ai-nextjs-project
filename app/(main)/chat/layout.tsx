@@ -86,10 +86,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
-      setGenerationType('new');
-      setContent("chat", "input", input);
-      setInput("");
-
+      
       
       // Restructure the fileContent to match the expected format
       const options = fileContent && fileContent.uploaded_files && fileContent.uploaded_files.length > 0 ? {
@@ -109,9 +106,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         [0, 0],
         options
       );
+      setContent("chat", "input", input);
+      setGenerationType('new');
       router.push(`/chat/res/${conversationId}`);
+      setInput("");
 
-
+      
       // Add all required properties when adding to history
       addHistory({
         // id: conversationId,
@@ -141,7 +141,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       // router.push(`/chat/res/${conversationId}`);
       // setContent("chat", "input", input);
       
-      setInput("");
 
       // Get actual title based on prompt
       historyApi.getConversationTitle(conversationId, input, 'chat')

@@ -145,6 +145,9 @@ export function ChatArea() {
   const [loadConversationError, setLoadConversationError] = useState(false);
   const [chatModelsLoaded, setChatModelsLoaded] = useState(false);
 
+  const { token, setAuth, clearAuth } = useAuthStore();
+
+
   const webSearchSourcesRef = useRef<Source[]>([]);
 
   const createPosition = (x: number = 0, y: number = 0): [number, number] => {
@@ -295,6 +298,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
           size: content.chat.attachment.size,
           url: content.chat.attachment.url
         } : undefined;
+
 
       setBranches(prev => prev.map(branch => ({
         ...branch,
@@ -1178,6 +1182,8 @@ useEffect(() => {
     }>;
   }) => {
     if (!input.trim() || !conversationId) return;
+
+    console.log(token, 'call with this token')
     
     setIsSending(true);
     try {

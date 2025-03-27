@@ -249,7 +249,7 @@ export default function AuthLayout({
       </div>
       
       {/* Updated right side - hidden on mobile */}
-      <div className="hidden md:block xl:w-2/3 relative overflow-hidden bg-background cursor-none">
+      <div className="hidden md:block xl:w-2/3 relative overflow-hidden bg-background pointer-events-none">
         <AnimatedBackground />
         
         {/* Content wrapper with glassmorphism */}
