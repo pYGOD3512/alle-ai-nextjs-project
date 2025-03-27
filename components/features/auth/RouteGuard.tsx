@@ -150,3 +150,5 @@ export function RouteGuard({ children }: RouteGuardProps) {
     </Suspense>
   );
 }
+
+//I think the suspense is causing the loading issues
