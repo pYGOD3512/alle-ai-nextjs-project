@@ -109,7 +109,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
       }
 
       // CASE 2: Has token and trying to access auth routes or /plans
-      if (token && (authRoutes.includes(pathname))) {
+      if (token && (!authRoutes.includes(pathname))) {
         if (returnUrl) {
           sessionStorage.removeItem('returnUrl');
           setGenerationType('load');
@@ -117,6 +117,8 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           // Important: Don't set authState to 'authorized' here
           // We want to keep showing the loading screen until navigation completes
           router.replace(returnUrl);
+      setAuthState('authorized');
+
           return;
         }
       }

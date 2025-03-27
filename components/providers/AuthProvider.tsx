@@ -79,6 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
       const response = await authApi.login({ email, password });
+
+      console.log(response, 'user data')
       
       // Always set the basic auth state
       setAuth(response.data.user, response.data.token);
