@@ -12,7 +12,7 @@ interface RouteGuardProps {
   children: ReactNode;
 }
 
-const authRoutes = ['/auth', '/plans'];
+const authRoutes = ['/auth'];
 
 const publicRoutes = [
   '/model-glossary',
@@ -71,6 +71,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   
         try {
           const response = await authApi.getUser();
+          console.log(response, 'google auth response')
           setAuth(response.data.user, tokenFromUrl, response.plan);
   
           if (!response.plan) {
@@ -80,6 +81,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           }
         } catch (error) {
           clearAuth();
+          router.replace('/');
         } finally {
           setIsLoading(false);
         }
@@ -114,16 +116,49 @@ function RouteGuardInner({ children }: RouteGuardProps) {
           sessionStorage.removeItem('returnUrl');
           setGenerationType('load');
           
-          // Important: Don't set authState to 'authorized' here
-          // We want to keep showing the loading screen until navigation completes
           router.replace(returnUrl);
-      setAuthState('authorized');
-
+          setAuthState('authorized');
           return;
         }
       }
 
-      // CASE 3: Has token and accessing protected/public routes
+      // CASE 3: Has token and trying to access auth route
+      if (token && authRoutes.includes(pathname)) {
+        try {
+          // Validate token when on auth route
+          const response = await authApi.getUser();
+          setAuth(response.data.user, token, response.plan);
+
+          if (response.data.to === 'verify-email') {
+            router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
+            return;
+          } else if (response.data.to === 'chat' && response.plan) {
+            // Check for return URL when redirecting from auth
+            if (returnUrl) {
+              sessionStorage.removeItem('returnUrl');
+              setGenerationType('load');
+              router.replace(returnUrl);
+              return;
+            }
+            router.replace('/chat');
+            return;
+          } else if (!response.plan) {
+            // Only allow rendering plans page if user needs to select a plan
+            if (pathname === '/plans') {
+              setAuthState('authorized');
+              return;
+            }
+            router.replace('/plans');
+            return;
+          }
+        } catch (error) {
+          clearAuth();
+          setAuthState('authorized');
+          return;
+        }
+      }
+
+      // CASE 4: Has token and accessing protected/public routes
       setAuthState('authorized');
     };
 
