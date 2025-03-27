@@ -171,6 +171,7 @@ interface sectionProps {
   href: string;
   sections?: endPointProps[];
   keywords?: keywordsProps[];
+  description?: string;
 }
 interface searchtermsprops {
   hash: string;
@@ -195,22 +196,19 @@ export const apiReference: apiREfprops[] = [
         id: "introduction",
         title: "Introduction",
         href: "introduction",
+        description: "Get started with Alle-AI's API. Learn about our HTTP and WebSocket endpoints, authentication, and available SDKs.",
         keywords: [
           {
             BaseUrl: `${BaseUrl}/introduction`,
             searchTerms: [
               {
-                hash: "introduction",
+                hash: "alle-ai",
                 words: [
-                  "API Reference",
-                  "HTTP",
-                  "WebSocket",
-                  "Python bindings",
-                  "Node.js library",
-                  "Install",
-                  "Command",
+                  "introduction", "overview", "getting started", "api", 
+                  "alle ai", "documentation", "HTTP", "WebSocket",
+                  "Python bindings", "Node.js library"
                 ],
-              },
+              }
             ],
           },
         ],
@@ -219,19 +217,64 @@ export const apiReference: apiREfprops[] = [
         id: "authentication",
         title: "Authentication",
         href: "authentication",
-        keywords: [],
+        description: "Learn how to authenticate your API requests using project keys and manage API credentials securely.",
+        keywords: [
+          {
+            BaseUrl: `${BaseUrl}/introduction`,
+            searchTerms: [
+              {
+                hash: "authentication",
+                words: [
+                "auth", "api key", "project key", "security", 
+                "token", "credentials", "authentication",
+                "project keys", "user keys", "secure"
+              ],
+              }
+            ],
+          },
+        ],
       },
       {
         id: "streaming",
         title: "Streaming",
         href: "streaming",
-        keywords: [],
+        description: "Implement real-time data streaming using WebSocket connections and handle continuous data updates efficiently.",
+        keywords: [
+          {
+            BaseUrl: `${BaseUrl}/introduction`,
+            searchTerms: [
+              {
+                hash: "streaming",
+                words: [
+                "stream", "real-time", "streaming response", 
+                "live", "continuous", "data stream",
+                "websocket", "events", "sse"
+              ],
+              }
+            ],
+          },
+        ],
       },
       {
         id: "sdk",
         title: "SDK & Libraries",
         href: "sdk",
-        keywords: [],
+        description: "Explore our official SDKs and libraries for Python, Node.js, and other platforms to integrate Alle-AI into your applications.",
+        keywords: [
+          {
+            BaseUrl: `${BaseUrl}/introduction`,
+            searchTerms: [
+              {
+                hash: "sdks-and-libraries",
+                words: [
+                "sdk", "library", "package", "npm", "pip", 
+                "installation", "python", "javascript", "node",
+                "bindings", "client libraries", "packages"
+              ],
+              }
+            ],
+          },
+        ],
       },
     ],
   },

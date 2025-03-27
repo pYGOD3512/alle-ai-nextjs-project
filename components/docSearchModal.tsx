@@ -14,12 +14,23 @@ import ListItemText from "@mui/material/ListItemText";
 import Backdrop from "@mui/material/Backdrop";
 import { useTheme } from "next-themes";
 import { Book, Code, Video, ChevronDown } from "lucide-react";
+import { apiReference } from "@/lib/constants/docs";
+
+// Interface for search results
+interface SearchResult {
+  title: string;
+  section: string;
+  hash: string;
+  baseUrl: string;
+  matchedKeywords?: string[];
+  description?: string;
+}
 
 const SearchModal = ({ isOpen, onClose }) => {
   const { resolvedTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [filter, setFilter] = useState("all");
   const inputRef = useRef(null);
 
@@ -34,47 +45,61 @@ const SearchModal = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    const trimmedQuery = searchQuery.trim();
+    const trimmedQuery = searchQuery.trim().toLowerCase();
 
-    if (trimmedQuery !== "") {
-      setIsLoading(true);
+    if (trimmedQuery === "") {
+      setIsLoading(false);
+      setSearchResults([]);
+      return;
     }
 
+    setIsLoading(true);
     const timeout = setTimeout(() => {
-      if (trimmedQuery === "") {
-        setIsLoading((prev) => (prev !== false ? false : prev));
-        setSearchResults((prev) => (prev.length > 0 ? [] : prev));
-      } else {
-        let mockResults = [];
-        if (filter === "all") {
-          mockResults = [
-            `User Guides: Result for "${searchQuery}"`,
-            `API Documentation: Result for "${searchQuery}"`,
-            `Tutorials: Result for "${searchQuery}"`,
-          ];
-        } else if (filter === "user-guides") {
-          mockResults = [
-            `User Guides: Result 1 for "${searchQuery}"`,
-            `User Guides: Result 2 for "${searchQuery}"`,
-          ];
-        } else if (filter === "api-documentation") {
-          mockResults = [
-            `API Documentation: Result 1 for "${searchQuery}"`,
-            `API Documentation: Result 2 for "${searchQuery}"`,
-          ];
-        } else if (filter === "tutorials") {
-          mockResults = [
-            `Tutorials: Result 1 for "${searchQuery}"`,
-            `Tutorials: Result 2 for "${searchQuery}"`,
-          ];
-        }
-        setSearchResults(mockResults);
-        setIsLoading(false);
+      const results: SearchResult[] = [];
+
+      if (filter === "api-documentation" || filter === "all") {
+        // Search through API reference sections
+        apiReference.forEach((ref) => {
+          ref.sections.forEach((section) => {
+            let matchedKeywords: string[] = [];
+
+            // Search in keywords
+            section.keywords?.forEach((keyword) => {
+              keyword.searchTerms.forEach((term) => {
+                const matches = term.words.filter((word) =>
+                  word.toLowerCase().includes(trimmedQuery)
+                );
+                matchedKeywords.push(...matches);
+              });
+            });
+
+            // Search in title
+            const matchesTitle = section.title.toLowerCase().includes(trimmedQuery);
+
+            if (matchedKeywords.length > 0 || matchesTitle) {
+              const hash =
+                section.keywords?.[0]?.searchTerms[0]?.hash || section.id;
+              results.push({
+                title: section.title,
+                section: ref.title,
+                hash: hash,
+                baseUrl:
+                  section.keywords?.[0]?.baseUrl || `/docs/api-reference/${section.href}`,
+                matchedKeywords: [...new Set(matchedKeywords)], // Remove duplicates
+                description: section.description
+              });
+            }
+          });
+        });
       }
-    }, 1000);
+
+      setSearchResults(results);
+      setIsLoading(false);
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [searchQuery, filter]);
+
   const spinnerColor =
     resolvedTheme === "dark"
       ? "rgba(255, 255, 255, 0.7)" // Subtle white for dark mode
@@ -94,11 +119,51 @@ const SearchModal = ({ isOpen, onClose }) => {
   const modalBackground = resolvedTheme === "dark" ? "#252525" : "#FFFFFF";
   const textColor = resolvedTheme === "dark" ? "#E0E0E0" : "#333333";
   const secondaryTextColor = resolvedTheme === "dark" ? "#A0A0A0" : "#666666";
+  const highlightedTextColor = resolvedTheme === "dark" ? "#9CA3AF" : "#6B7280"; // Mid gray for highlights
   const hoverBackground = resolvedTheme === "dark" ? "#353535" : "#F5F5F5";
   const selectBackground = resolvedTheme === "dark" ? "#202020" : "#FFFFFF";
   const menuBackground = resolvedTheme === "dark" ? "#202020" : "#FFFFFF";
   const menuItemHoverBackground =
     resolvedTheme === "dark" ? "#353535" : "#F5F5F5";
+
+  const primaryColor = resolvedTheme === 'dark' ? '#2563eb' : '#3b82f6'; // Blue primary color
+
+  // Helper function to highlight matched text
+  const HighlightedText = ({ text, query, isKeyword = false }: { text: string; query: string; isKeyword?: boolean }) => {
+    if (!query.trim()) return <>{text}</>;
+
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+
+    return (
+      <>
+        {parts.map((part, i) => (
+          part.toLowerCase() === query.toLowerCase() ? (
+            <Box
+              key={i}
+              component="span"
+              sx={
+                isKeyword ? {
+                  backgroundColor: `${primaryColor}10`,
+                  color: primaryColor,
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: '9999px',
+                  fontSize: '0.75rem',
+                } : {
+                  color: highlightedTextColor,
+                  fontWeight: 500
+                }
+              }
+            >
+              {part}
+            </Box>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        ))}
+      </>
+    );
+  };
 
   return (
     <Modal
@@ -238,46 +303,146 @@ const SearchModal = ({ isOpen, onClose }) => {
             }}
             InputProps={{
               sx: { bgcolor: modalBackground },
+              endAdornment: isLoading ? (
+                <CircularProgress
+                  size={20}
+                  sx={{
+                    color: spinnerColor,
+                    mr: 1
+                  }}
+                />
+              ) : null
             }}
           />
-          {isLoading && (
-            <CircularProgress
-              size={24}
-              sx={{
-                position: "absolute",
-                right: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: { spinnerColor },
-                bottom: "50%",
-              }}
-            />
-          )}
         </Box>
 
-        <Box sx={{ maxHeight: 256, overflowY: "auto" }}>
-          {searchResults.length > 0 ? (
-            <List>
+        <Box
+          sx={{
+            maxHeight: "60vh",
+            overflowY: "auto",
+            mt: 2,
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: secondaryTextColor,
+              borderRadius: "4px",
+            },
+          }}
+        >
+          {searchQuery.trim() !== "" && searchResults.length === 0 ? (
+            <Typography
+              variant="body1"
+              sx={{
+                color: secondaryTextColor,
+                textAlign: "center",
+                py: 4,
+              }}
+            >
+              No results found
+            </Typography>
+          ) : searchResults.length > 0 ? (
+            <List sx={{ py: 0 }}>
               {searchResults.map((result, index) => (
                 <ListItem
                   key={index}
+                  component="div"
                   sx={{
-                    borderBottom: `1px solid ${secondaryTextColor}`,
-                    "&:hover": { bgcolor: hoverBackground },
+                    borderRadius: 1,
+                    mb: 1,
+                    cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: hoverBackground,
+                    },
                     transition: "background-color 0.2s",
+                    py: 1.5, // Reduced padding
+                  }}
+                  onClick={() => {
+                    // TODO: Implement navigation using result.baseUrl and result.hash
+                    console.log("Navigate to:", result.baseUrl, "#" + result.hash);
+                    onClose();
                   }}
                 >
-                  <ListItemText
-                    primary={result}
-                    primaryTypographyProps={{ style: { color: textColor } }}
-                  />
+                  <Box sx={{ width: '100%' }}>
+                    {/* Breadcrumb-style header */}
+                    <Typography
+                      variant="body2"
+                      sx={{ 
+                        color: secondaryTextColor,
+                        fontSize: "0.75rem",
+                        mb: 0.5
+                      }}
+                    >
+                      {result.section} <span style={{ margin: '0 4px' }}>›</span> <HighlightedText text={result.title} query={searchQuery} />
+                    </Typography>
+
+                    {/* Description */}
+                    {result.description && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: textColor,
+                          fontSize: "0.8rem",
+                          mb: 0.5,
+                          lineHeight: 1.4,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        <HighlightedText text={result.description} query={searchQuery} />
+                      </Typography>
+                    )}
+
+                    {/* Keywords row */}
+                    {result.matchedKeywords && result.matchedKeywords.length > 0 && (
+                      <Box 
+                        sx={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 0.5,
+                          mt: 0.5
+                        }}
+                      >
+                        {result.matchedKeywords.slice(0, 3).map((keyword, i) => (
+                          <Box 
+                            key={i} 
+                            component="span"
+                            sx={{
+                              backgroundColor: `${primaryColor}10`,
+                              fontSize: '0.75rem', // text-xs
+                              color: primaryColor,
+                              px: 1,
+                              py: 0.25,
+                              borderRadius: '9999px', // rounded-full
+                            }}
+                          >
+                            {keyword}
+                          </Box>
+                        ))}
+                        {result.matchedKeywords.length > 3 && (
+                          <Box 
+                            component="span"
+                            sx={{
+                              fontSize: '0.75rem',
+                              color: secondaryTextColor,
+                              alignSelf: 'center'
+                            }}
+                          >
+                            +{result.matchedKeywords.length - 3}
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
                 </ListItem>
               ))}
             </List>
-          ) : searchQuery.trim() !== "" && !isLoading ? (
-            <Typography sx={{ color: secondaryTextColor }}>
-              No results found.
-            </Typography>
           ) : null}
         </Box>
       </Box>
