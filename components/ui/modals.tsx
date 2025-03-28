@@ -1840,15 +1840,20 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            if (setting.action === "Delete") {
-                              setDeleteAccountModalOpen(true);
-                            } else if (setting.action === "Export") {
-                              setExportModalOpen(true);
-                            } else if (setting.action === "Manage") {
-                              // setManageSharedLinksOpen(true);
-                            } else if (setting.action === "View") {
-                              setIsTransactionHistoryOpen(true);
-                            }
+                            toast({
+                              title: "Coming Soon",
+                              description: "This feature will be available soon!",
+                              variant: "info",
+                            });
+                            // if (setting.action === "Delete") {
+                            //   setDeleteAccountModalOpen(true);
+                            // } else if (setting.action === "Export") {
+                            //   setExportModalOpen(true);
+                            // } else if (setting.action === "Manage") {
+                            //   // setManageSharedLinksOpen(true);
+                            // } else if (setting.action === "View") {
+                            //   setIsTransactionHistoryOpen(true);
+                            // }
                           }}
                         >
                           {setting.action}
@@ -1875,10 +1880,25 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           size="sm"
                           onClick={() => {
                             if (key === "google_drive") {
-                              handleGoogleDriveAction();
+                              toast({
+                                title: "Coming Soon",
+                                description: "This feature will be available soon!",
+                                variant: "info",
+                              });
+                              // handleGoogleDriveAction();
                             } else if (key === "one_drive"){
+                              toast({
+                                title: "Coming Soon",
+                                description: "This feature will be available soon!",
+                                variant: "info",
+                              });
                               // // console.log('One Drive')
                             } else if (key === "dropbox"){
+                              toast({
+                                title: "Coming Soon",
+                                description: "This feature will be available soon!",
+                                variant: "info",
+                              });
                               // // console.log('Dropbox')
                             }
                           }}

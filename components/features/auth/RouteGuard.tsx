@@ -57,7 +57,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
     const storeCurrentPath = () => {
       if (pathname !== '/auth') {
         sessionStorage.setItem('returnUrl', pathname + window.location.search);
-        console.log(pathname + window.location.search,'this is the resolved return url');
+        // console.log(pathname + window.location.search,'this is the resolved return url');
       }
     };
 
@@ -71,7 +71,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   
         try {
           const response = await authApi.getUser();
-          console.log(response, 'google auth response')
+          // console.log(response, 'google auth response')
           setAuth(response.data.user, tokenFromUrl, response.plan);
   
           if (!response.plan) {
@@ -96,13 +96,12 @@ function RouteGuardInner({ children }: RouteGuardProps) {
       }
 
       // Get stored return URL
-      const returnUrl = sessionStorage.getItem('returnUrl');
+      // const returnUrl = sessionStorage.getItem('returnUrl');
 
       // CASE 1: No token - only allow access to auth routes and public routes
       if (!token) {
         if (!authRoutes.includes(pathname) && !isPublicRoute(pathname)) {
           // Save current path before redirecting to auth
-          storeCurrentPath();
           router.replace('/auth');
           return;
         }
@@ -110,60 +109,21 @@ function RouteGuardInner({ children }: RouteGuardProps) {
         return;
       }
 
-      // CASE 2: Has token and trying to access other routs aside auth
-      if (token && (!authRoutes.includes(pathname))) {
-        const response = await authApi.getUser();
-        setAuth(response.data.user, token, response.plan);
-        
-        if (returnUrl) {
-          sessionStorage.removeItem('returnUrl');
-          setGenerationType('load');
-          
-          router.replace(returnUrl);
-          setAuthState('authorized');
-          return;
-        }
-      }
-
-      // CASE 3: Has token and trying to access auth route
-      if (token && authRoutes.includes(pathname)) {
-        try {
+      // CASE 2: Has token and trying to access other routes aside auth
+      if (token && !authRoutes.includes(pathname)) {
+          console.log('Token exits fast refresh');
           storeCurrentPath();
-          // Validate token when on auth route
-          const response = await authApi.getUser();
-          setAuth(response.data.user, token, response.plan);
-
-          if (response.data.to === 'verify-email') {
-            router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
-            return;
-          } else if (response.data.to === 'chat' && response.plan) {
-            // Check for return URL when redirecting from auth
-            if (returnUrl) {
-              sessionStorage.removeItem('returnUrl');
-              setGenerationType('load');
-              router.replace(returnUrl);
-              return;
-            }
-            router.replace('/chat');
-            return;
-          } else if (!response.plan) {
-            // Only allow rendering plans page if user needs to select a plan
-            if (pathname === '/plans') {
-              setAuthState('authorized');
-              return;
-            }
-            router.replace('/plans');
+          const returnUrl = sessionStorage.getItem('returnUrl');
+          if (returnUrl) {
+            sessionStorage.removeItem('returnUrl');
+            setGenerationType('load');
+            
+            router.replace(returnUrl);
+            setAuthState('authorized');
             return;
           }
-        } catch (error) {
-          clearAuth();
-          setAuthState('authorized');
-          return;
-        } finally {
-          sessionStorage.removeItem('returnUrl');
-        }
       }
-
+              
       // CASE 4: Has token and accessing protected/public routes
       setAuthState('authorized');
     };

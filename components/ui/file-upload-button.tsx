@@ -267,7 +267,7 @@ export function FileUploadButton({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 bg-backgroundSecondary border-borderColorPrimary">
-          <DropdownMenuItem 
+          {/* <DropdownMenuItem 
             onClick={() => setShowDriveModal(true)} 
             className="gap-2"
           >
@@ -302,7 +302,7 @@ export function FileUploadButton({
               className="w-4 h-4"
             />
             <span>Add from OneDrive</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem onClick={onUploadFromComputer} className="gap-2">
             <HardDrive className="h-4 w-4" />
             <span>Upload from Computer</span>

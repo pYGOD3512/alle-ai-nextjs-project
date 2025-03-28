@@ -34,6 +34,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // console.log(error, 'axios error code');
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       if (currentPath !== '/auth') {

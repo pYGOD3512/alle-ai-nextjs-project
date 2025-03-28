@@ -47,6 +47,8 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
         password_confirmation: confirmPassword,
       });
 
+      // console.log(result, 'This is the response for register');
+
       if (result && result.to === 'verify-email') {
         onRegister(email);
         setIsLoading(false);

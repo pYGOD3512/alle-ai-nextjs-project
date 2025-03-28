@@ -899,7 +899,7 @@ useEffect(() => {
   const getConversationModels = (conversationId: string) => {
     chatApi.getModelsForConversation(conversationId)
       .then(response => {
-        console.log('Models used in conversation:', response);
+        // console.log('Models used in conversation:', response);
         const modelUids = response.map((model: Model) => model.model_uid);
 
         setConversationModels(modelUids);
@@ -1183,7 +1183,7 @@ useEffect(() => {
   }) => {
     if (!input.trim() || !conversationId) return;
 
-    console.log(token, 'call with this token')
+    // console.log(token, 'call with this token')
     
     setIsSending(true);
     try {

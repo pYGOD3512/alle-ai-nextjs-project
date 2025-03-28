@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import { LoginForm } from "@/components/features/auth/LoginForm";
@@ -11,10 +10,8 @@ import { ForgotPasswordForm } from "@/components/features/auth/ForgotPasswordFor
 import { ResetPasswordSuccess } from "@/components/features/auth/ResetPasswordSuccess";
 import { VerificationCodeForm } from "@/components/features/auth/VerificationCodeForm";
 import { useTheme } from 'next-themes';
-import { useAuth } from '@/components/providers/AuthProvider';
 import { useAuthStore } from '@/stores';
 import { authApi } from "@/lib/api/auth";
-// import { useAuthCheck } from "@/hooks/use-auth-check";
 import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
@@ -33,7 +30,6 @@ function AuthPageInner() {
   const [isLoading, setIsLoading] = useState(true);
   const [shouldRender, setShouldRender] = useState(false);
 
-
   const headingTexts = [
     "Your All-in-One AI Platform",
     "Combine & Compare AI models",
@@ -41,55 +37,55 @@ function AuthPageInner() {
     "Fact-Check AI Response",
   ];
 
-// Initial auth check - runs before rendering anything
-useEffect(() => {
-  const checkAuth = async () => {
-    if (token) {
-      try {
-        // console.log('Token exists, checking authentication...');
-        const response = await authApi.getUser();
-        // console.log('Auth check response:', response);
-        
-        // Update auth state with user data
-        setAuth(response.data.user, token, response.plan);
-        
-        // Handle specific redirects from API
-        if (response.data.to === 'verify-email') {
-          // Stay on auth page but switch to verification mode
-          setAuthMode('verify-email');
-          setEmail(response.data.user.email);
-          setShouldRender(true);
-        } else if (response.data.to === 'chat' && response.plan) {
-          // User is authenticated and has a plan, redirect to chat or return URL
-          const returnUrl = sessionStorage.getItem('returnUrl');
-          if (returnUrl) {
-            sessionStorage.removeItem('returnUrl');
-            router.replace(returnUrl);
-          } else {
-            router.replace('/chat');
+  // Initial auth check - runs before rendering anything
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (token) {
+        try {
+        //   console.log('Token exists, checking authentication...');
+          const response = await authApi.getUser();
+        //   console.log('Auth check response:', response);
+          
+          // Update auth state with user data
+          setAuth(response.data.user, token, response.plan);
+          
+          // Handle specific redirects from API
+          if (response.data.to === 'verify-email') {
+            // Stay on auth page but switch to verification mode
+            setAuthMode('verify-email');
+            setEmail(response.data.user.email);
+            setShouldRender(true);
+          } else if (response.data.to === 'chat' && response.plan) {
+            // User is authenticated and has a plan, redirect to chat or return URL
+            const returnUrl = sessionStorage.getItem('returnUrl');
+            if (returnUrl) {
+              sessionStorage.removeItem('returnUrl');
+              router.replace(returnUrl);
+            } else {
+              router.replace('/chat');
+            }
+            return; // Don't render auth page
+          } else if (!response.plan) {
+            // User needs to select a plan
+            router.replace('/plans');
+            return; // Don't render auth page
           }
-          return; // Don't render auth page
-        } else if (!response.plan) {
-          // User needs to select a plan
-          router.replace('/plans');
-          return; // Don't render auth page
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          // Token is invalid, show auth page
+          setShouldRender(true);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        // Token is invalid, show auth page
+      } else {
+        // No token, show the auth page
         setShouldRender(true);
-      } finally {
         setIsLoading(false);
       }
-    } else {
-      // No token, show the auth page
-      setShouldRender(true);
-      setIsLoading(false);
-    }
-  };
+    };
 
-  checkAuth();
-}, []);
+    checkAuth();
+  }, [token, router, setAuth]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -118,24 +114,27 @@ useEffect(() => {
       }
     };
 
-
+    if (shouldRender) {
       typeText();
+    }
 
     return () => clearTimeout(timeout);
-  }, [currentTextIndex, shouldRender]);
+  }, [currentTextIndex, shouldRender, headingTexts]);
 
   useEffect(() => {
     setMounted(true);
 
     // Get URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('mode');
-    const emailParam = params.get('email');
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get('mode');
+      const emailParam = params.get('email');
 
-    // Set auth mode and email if provided in URL
-    if (mode === 'verify-email' && emailParam) {
-      setAuthMode('verify-email');
-      setEmail(emailParam);
+      // Set auth mode and email if provided in URL
+      if (mode === 'verify-email' && emailParam) {
+        setAuthMode('verify-email');
+        setEmail(emailParam);
+      }
     }
   }, []);
 
@@ -200,13 +199,13 @@ useEffect(() => {
     ? "/svgs/logo-desktop-full.png" 
     : "/svgs/logo-desktop-dark-full.png";
 
-    if (isLoading) {
-      return <LoadingScreen />;
-    }
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
-    if (!shouldRender) {
-      return null; 
-    }
+  if (!shouldRender) {
+    return null; // Don't render anything if we're redirecting
+  }
 
   return (
     <div className="max-w-md mx-auto">
