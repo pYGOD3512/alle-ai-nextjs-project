@@ -8,6 +8,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores';
+import { authApi } from "@/lib/api/auth";
+import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 
 // Define the slides interface
@@ -191,9 +194,42 @@ export default function AuthLayout({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFirstAnimationComplete, setIsFirstAnimationComplete] = useState(false);
   const [isSecondAnimationComplete, setIsSecondAnimationComplete] = useState(false);
+  const { token } = useAuthStore();
+  const [authState, setAuthState] = useState<'checking' | 'show-auth' | 'redirect'>('checking');
 
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+
+  // Check auth on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (token) {
+        try {
+          const response = await authApi.getUser();
+          
+          // Handle specific redirects from API
+          if (response.data.to === 'verify-email') {
+            // Stay on auth page but switch to verification mode
+            setAuthState('show-auth');
+          } else if (response.data.to === 'chat' && response.plan) {
+            // User is authenticated and has a plan, redirect
+            setAuthState('redirect');
+          } else if (!response.plan) {
+            // User needs to select a plan
+            setAuthState('redirect');
+          }
+        } catch (error) {
+          // Token is invalid, show auth page
+          setAuthState('show-auth');
+        }
+      } else {
+        // No token, show the auth page
+        setAuthState('show-auth');
+      }
+    };
+
+    checkAuth();
+  }, []);
   
   // Define your slides with the new prop
   const slides: Slide[] = [
@@ -240,6 +276,15 @@ export default function AuthLayout({
       return () => clearTimeout(timer);
     }
   }, [isFirstAnimationComplete, isSecondAnimationComplete, currentSlide]);
+
+  if (authState === 'checking') {
+    return <LoadingScreen />;
+  }
+
+  if (authState === 'redirect') {
+    return <div>{children}</div>; // Just render children without the layout
+  }
+
 
   return (
     <div className="flex min-h-screen">

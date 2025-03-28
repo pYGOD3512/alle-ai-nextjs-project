@@ -111,7 +111,7 @@ function RouteGuardInner({ children }: RouteGuardProps) {
 
       // CASE 2: Has token and trying to access other routes aside auth
       if (token && !authRoutes.includes(pathname)) {
-          console.log('Token exits fast refresh');
+          // console.log('Token exits fast refresh');
           storeCurrentPath();
           const returnUrl = sessionStorage.getItem('returnUrl');
           if (returnUrl) {

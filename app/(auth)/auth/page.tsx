@@ -19,6 +19,60 @@ import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
 
+export function useAuthCheck() {
+  const [authState, setAuthState] = useState<'checking' | 'show-auth' | 'redirect'>('checking');
+  const [verifyEmail, setVerifyEmail] = useState<string | null>(null);
+  const router = useRouter();
+  const { token, setAuth } = useAuthStore();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (token) {
+        try {
+          console.log('Token exists, checking authentication...');
+          const response = await authApi.getUser();
+          console.log('Auth check response:', response);
+          
+          // Update auth state with user data
+          setAuth(response.data.user, token, response.plan);
+          
+          // Handle specific redirects from API
+          if (response.data.to === 'verify-email') {
+            // Stay on auth page but switch to verification mode
+            setVerifyEmail(response.data.user.email);
+            setAuthState('show-auth');
+          } else if (response.data.to === 'chat' && response.plan) {
+            // User is authenticated and has a plan, redirect to chat or return URL
+            const returnUrl = sessionStorage.getItem('returnUrl');
+            if (returnUrl) {
+              sessionStorage.removeItem('returnUrl');
+              router.replace(returnUrl);
+            } else {
+              router.replace('/chat');
+            }
+            setAuthState('redirect');
+          } else if (!response.plan) {
+            // User needs to select a plan
+            router.replace('/plans');
+            setAuthState('redirect');
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          // Token is invalid, show auth page
+          setAuthState('show-auth');
+        }
+      } else {
+        // No token, show the auth page
+        setAuthState('show-auth');
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  return { authState, verifyEmail };
+}
+
 // Create an inner component for the auth page logic
 function AuthPageInner() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
@@ -32,6 +86,7 @@ function AuthPageInner() {
   const { token, setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [shouldRender, setShouldRender] = useState(false);
+  const { authState, verifyEmail } = useAuthCheck();
 
 
   const headingTexts = [
@@ -42,54 +97,54 @@ function AuthPageInner() {
   ];
 
 // Initial auth check - runs before rendering anything
-useEffect(() => {
-  const checkAuth = async () => {
-    if (token) {
-      try {
-        // console.log('Token exists, checking authentication...');
-        const response = await authApi.getUser();
-        // console.log('Auth check response:', response);
+// useEffect(() => {
+//   const checkAuth = async () => {
+//     if (token) {
+//       try {
+//         // console.log('Token exists, checking authentication...');
+//         const response = await authApi.getUser();
+//         // console.log('Auth check response:', response);
         
-        // Update auth state with user data
-        setAuth(response.data.user, token, response.plan);
+//         // Update auth state with user data
+//         setAuth(response.data.user, token, response.plan);
         
-        // Handle specific redirects from API
-        if (response.data.to === 'verify-email') {
-          // Stay on auth page but switch to verification mode
-          setAuthMode('verify-email');
-          setEmail(response.data.user.email);
-          setShouldRender(true);
-        } else if (response.data.to === 'chat' && response.plan) {
-          // User is authenticated and has a plan, redirect to chat or return URL
-          const returnUrl = sessionStorage.getItem('returnUrl');
-          if (returnUrl) {
-            sessionStorage.removeItem('returnUrl');
-            router.replace(returnUrl);
-          } else {
-            router.replace('/chat');
-          }
-          return; // Don't render auth page
-        } else if (!response.plan) {
-          // User needs to select a plan
-          router.replace('/plans');
-          return; // Don't render auth page
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        // Token is invalid, show auth page
-        setShouldRender(true);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // No token, show the auth page
-      setShouldRender(true);
-      setIsLoading(false);
-    }
-  };
+//         // Handle specific redirects from API
+//         if (response.data.to === 'verify-email') {
+//           // Stay on auth page but switch to verification mode
+//           setAuthMode('verify-email');
+//           setEmail(response.data.user.email);
+//           setShouldRender(true);
+//         } else if (response.data.to === 'chat' && response.plan) {
+//           // User is authenticated and has a plan, redirect to chat or return URL
+//           const returnUrl = sessionStorage.getItem('returnUrl');
+//           if (returnUrl) {
+//             sessionStorage.removeItem('returnUrl');
+//             router.replace(returnUrl);
+//           } else {
+//             router.replace('/chat');
+//           }
+//           return; // Don't render auth page
+//         } else if (!response.plan) {
+//           // User needs to select a plan
+//           router.replace('/plans');
+//           return; // Don't render auth page
+//         }
+//       } catch (error) {
+//         console.error('Auth check failed:', error);
+//         // Token is invalid, show auth page
+//         setShouldRender(true);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     } else {
+//       // No token, show the auth page
+//       setShouldRender(true);
+//       setIsLoading(false);
+//     }
+//   };
 
-  checkAuth();
-}, []);
+//   checkAuth();
+// }, []);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -122,7 +177,7 @@ useEffect(() => {
       typeText();
 
     return () => clearTimeout(timeout);
-  }, [currentTextIndex, shouldRender]);
+  }, [currentTextIndex]);
 
   useEffect(() => {
     setMounted(true);
@@ -135,9 +190,13 @@ useEffect(() => {
     // Set auth mode and email if provided in URL
     if (mode === 'verify-email' && emailParam) {
       setAuthMode('verify-email');
-      setEmail(emailParam);
+      setEmail(emailParam)
+    } else if (verifyEmail) {
+      // Set verification mode from auth check
+      setAuthMode('verify-email');
+      setEmail(verifyEmail);
     }
-  }, []);
+  }, [verifyEmail]);
 
   const handleForgotPassword = () => {
     setAuthMode('forgot-password');
@@ -200,11 +259,11 @@ useEffect(() => {
     ? "/svgs/logo-desktop-full.png" 
     : "/svgs/logo-desktop-dark-full.png";
 
-    if (isLoading) {
-      return <LoadingScreen />;
+    if (authState === 'checking') {
+      return '';
     }
 
-    if (!shouldRender) {
+    if (authState === 'redirect') {
       return null; 
     }
 

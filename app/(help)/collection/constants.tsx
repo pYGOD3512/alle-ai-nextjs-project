@@ -409,7 +409,7 @@ export const helpCategories: HelpCategories = {
     id: "3742473",
     iconName: "FileText",
     title: "Others",
-    description: "Anything else",
+    description: "Limits & Subscribtions",
     sections: [
       {
         title: "Others",
