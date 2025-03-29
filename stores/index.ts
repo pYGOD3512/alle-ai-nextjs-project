@@ -774,11 +774,12 @@ interface AuthStore {
   clearAuth: () => void;
   setLoading: (status: boolean) => void;
   setPlan: (plan: string | null) => void;
+  refreshPlan: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -811,6 +812,22 @@ export const useAuthStore = create<AuthStore>()(
       setPlan: (plan) => {
         set({ plan });
       },
+
+      refreshPlan: async () => {
+        try {
+          const token = get().token;
+          if (!token) return;
+          
+          const response = await authApi.getUser();
+          // console.log(response.plan, 'user from zutsand');
+          if (response && response.plan) {
+            set({ plan: response.plan });
+          }
+        } catch (error) {
+          console.error('Failed to refresh plan data:', error);
+        }
+      },
+
     }),
     {
       name: 'auth-storage',

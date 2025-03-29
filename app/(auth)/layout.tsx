@@ -6,12 +6,10 @@ import { useTheme } from 'next-themes';
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores';
 import { authApi } from "@/lib/api/auth";
 import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
-
 
 // Define the slides interface
 interface Slide {
@@ -194,36 +192,54 @@ export default function AuthLayout({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFirstAnimationComplete, setIsFirstAnimationComplete] = useState(false);
   const [isSecondAnimationComplete, setIsSecondAnimationComplete] = useState(false);
-  const { token } = useAuthStore();
-  const [authState, setAuthState] = useState<'checking' | 'show-auth' | 'redirect'>('checking');
-
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { token, setAuth, clearAuth } = useAuthStore();
+  const [authState, setAuthState] = useState<'checking' | 'show-auth' | 'redirect'>('checking');
+  const [verifyEmail, setVerifyEmail] = useState<string | null>(null);
 
   // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
         try {
+          console.log('Token exists, checking authentication...');
           const response = await authApi.getUser();
+          console.log('Auth check response:', response);
+          
+          // Update auth state with user data
+          setAuth(response.data.user, token, response.plan);
           
           // Handle specific redirects from API
           if (response.data.to === 'verify-email') {
             // Stay on auth page but switch to verification mode
             setAuthState('show-auth');
+            
+            // Update URL to include verification parameters
+            const url = new URL(window.location.href);
+            url.searchParams.set('mode', 'verify-email');
+            url.searchParams.set('email', response.data.user.email);
+            window.history.replaceState({}, '', url.toString());
           } else if (response.data.to === 'chat' && response.plan) {
-            // User is authenticated and has a plan, redirect
+            // User is authenticated and has a plan, redirect to chat or return URL
+            const returnUrl = sessionStorage.getItem('returnUrl');
+            if (returnUrl) {
+              sessionStorage.removeItem('returnUrl');
+              router.replace(returnUrl);
+            } else {
+              router.replace('/chat');
+            }
             setAuthState('redirect');
           } else if (!response.plan) {
             // User needs to select a plan
+            router.replace('/plans');
             setAuthState('redirect');
           }
         } catch (error) {
-          // Token is invalid, show auth page
+          console.error('Auth check failed:', error);
+          clearAuth();
           setAuthState('show-auth');
         }
       } else {
-        // No token, show the auth page
         setAuthState('show-auth');
       }
     };
@@ -277,14 +293,10 @@ export default function AuthLayout({
     }
   }, [isFirstAnimationComplete, isSecondAnimationComplete, currentSlide]);
 
-  if (authState === 'checking') {
+  // Don't render anything while checking auth
+  if (authState === 'checking' || authState === 'redirect') {
     return <LoadingScreen />;
   }
-
-  if (authState === 'redirect') {
-    return <div>{children}</div>; // Just render children without the layout
-  }
-
 
   return (
     <div className="flex min-h-screen">
@@ -295,10 +307,10 @@ export default function AuthLayout({
       
       {/* Updated right side - hidden on mobile */}
       <div className="hidden md:block xl:w-2/3 relative overflow-hidden bg-background pointer-events-none">
-        <AnimatedBackground />
+        {/* <AnimatedBackground /> */}
         
         {/* Content wrapper with glassmorphism */}
-        <div className="absolute inset-0 backdrop-blur-[1px]">
+        {/* <div className="absolute inset-0 backdrop-blur-[1px]">
           <div className="absolute inset-0">
             <AnimatePresence mode="wait">
               <motion.div
@@ -313,10 +325,10 @@ export default function AuthLayout({
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        </div> */}
 
         {/* Updated navigation dots */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+        {/* <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {slides.map((slide) => (
             <button
               key={slide.id}
@@ -329,7 +341,7 @@ export default function AuthLayout({
               aria-label={`Go to slide ${slide.id + 1}`}
             />
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

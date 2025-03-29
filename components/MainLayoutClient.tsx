@@ -1,7 +1,7 @@
 "use client";
 
 import '@/app/globals.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { HelpButton } from '@/components/HelpButton';
@@ -23,6 +23,7 @@ export function MainLayoutClient({
   const { isOpen } = useSidebarStore();
   const pathname = usePathname();
   usePageTitle(); 
+
 
   if (isMaintenance) {
     return (

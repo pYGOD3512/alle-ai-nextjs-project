@@ -73,8 +73,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuth, 
     clearAuth, 
     isLoading,
-    setLoading
+    setLoading,
+    refreshPlan
+
   } = useAuthStore();
+
+  useEffect(()=>{
+    refreshPlan();
+  },[])
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
