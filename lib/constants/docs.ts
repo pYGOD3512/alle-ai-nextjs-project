@@ -30,13 +30,35 @@ export const guides: Guide[] = [
         title: "Quickstart",
         href: href,
         description: "Learn how to make your first API request.",
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "pricing",
         title: "Pricing",
         href: href,
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "models",
@@ -54,33 +76,88 @@ export const guides: Guide[] = [
         id: "text-generation",
         title: "Text Generation",
         href: href,
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "audio-generation",
         title: "Audio Generation",
         href: href,
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
 
       {
         id: "image-generation",
         title: "Image Generation",
         href: href,
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "video-generation",
         title: "Video Generation",
         href: href,
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
 
       {
         id: "file-uploads",
         title: "Attachments",
         href: href,
-        keywords: [],
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -148,11 +225,35 @@ export const guides: Guide[] = [
         id: "new-features",
         title: "New Features & Updates",
         href: href,
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "release-notes",
         title: "Release Notes",
         href: href,
+        keywords: [
+          {
+            BaseUrl: "",
+            searchTerms: [
+              {
+                hash: "",
+                description: "",
+                words: [],
+              },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -677,6 +778,7 @@ export const tutorial = [
         description: `Welcome to Alle-ai! We’re happy to have you. Alle-ai brings together the world’s
                leading AI models for chat, image, video, and audio generation in one unified platform designed 
                to power creativity and productivity. To get started, check out the guide below for a quick tour.`,
+               
       },
 
       {

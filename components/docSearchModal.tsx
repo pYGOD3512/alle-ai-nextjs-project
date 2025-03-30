@@ -23,6 +23,7 @@ interface SearchResult {
   baseUrl: string;
   matchedKeywords?: string[];
   description?: string;
+  path?: string; // For hierarchical display
 }
 
 const SearchModal = ({ isOpen, onClose }) => {
@@ -60,39 +61,69 @@ const SearchModal = ({ isOpen, onClose }) => {
         // Search through API reference sections
         apiReference.forEach((ref) => {
           ref.sections.forEach((section) => {
-            let matchedKeywords: string[] = [];
-
-            // Search in keywords
+            // First check main section keywords
             section.keywords?.forEach((keyword) => {
               keyword.searchTerms.forEach((term) => {
-                const matches = term.words.filter((word) =>
+                const matchedWords = term.words.filter((word) =>
                   word.toLowerCase().includes(trimmedQuery)
                 );
-                matchedKeywords.push(...matches);
+
+                if (matchedWords.length > 0) {
+                  results.push({
+                    title: section.title,
+                    section: ref.title,
+                    hash: term.hash,
+                    baseUrl: keyword.BaseUrl,
+                    matchedKeywords: matchedWords,
+                    description: term.description || section.description,
+                    path: `${ref.title}>${section.title}`,
+                  });
+                }
               });
             });
 
-            // Search in title
-            const matchesTitle = section.title.toLowerCase().includes(trimmedQuery);
+            // Then check subsections if they exist
+            section.sections?.forEach((subsection) => {
+              subsection.keywords?.forEach((keyword) => {
+                keyword.searchTerms.forEach((term) => {
+                  const matchedWords = term.words.filter((word) =>
+                    word.toLowerCase().includes(trimmedQuery)
+                  );
 
-            if (matchedKeywords.length > 0 || matchesTitle) {
-              const hash =
-                section.keywords?.[0]?.searchTerms[0]?.hash || section.id;
-              results.push({
-                title: section.title,
-                section: ref.title,
-                hash: hash,
-                baseUrl:
-                  section.keywords?.[0]?.baseUrl || `/docs/api-reference/${section.href}`,
-                matchedKeywords: [...new Set(matchedKeywords)], // Remove duplicates
-                description: section.description
+                  if (matchedWords.length > 0) {
+                    results.push({
+                      title: subsection.title,
+                      section: `${ref.title}>${section.title}`,
+                      hash: term.hash,
+                      baseUrl: keyword.BaseUrl,
+                      matchedKeywords: matchedWords,
+                      description: term.description,
+                      path: `${ref.title}>${section.title}>${subsection.title}`,
+                    });
+                  }
+                });
               });
-            }
+            });
           });
         });
       }
 
-      setSearchResults(results);
+      // Remove duplicates based on title and section
+      const uniqueResults = results.filter((result, index, self) =>
+        index === self.findIndex((r) =>
+          r.title === result.title && r.section === result.section
+        )
+      );
+
+      // Sort results by number of matched keywords
+      uniqueResults.sort((a, b) => {
+        const aKeywords = a.matchedKeywords?.length || 0;
+        const bKeywords = b.matchedKeywords?.length || 0;
+        if (bKeywords !== aKeywords) return bKeywords - aKeywords;
+        return a.title.localeCompare(b.title);
+      });
+
+      setSearchResults(uniqueResults);
       setIsLoading(false);
     }, 300);
 
@@ -163,6 +194,101 @@ const SearchModal = ({ isOpen, onClose }) => {
       </>
     );
   };
+
+ const renderSearchResult = (result: SearchResult) => (
+   <ListItem
+     key={`${result.section}-${result.title}-${result.hash}`}
+     sx={{
+       cursor: "pointer",
+       "&:hover": { backgroundColor: hoverBackground },
+     }}
+     onClick={() => {
+       console.log("Navigate to:", result.baseUrl, "#" + result.hash);
+       onClose();
+     }}
+   >
+     <Box sx={{ width: "100%" }}>
+       <Typography
+         variant="body2"
+         sx={{
+           color: secondaryTextColor,
+           fontSize: "0.75rem",
+           mb: 0.5,
+           fontWeight: 500,
+         }}
+       >
+         {result.path.split(">>").map((part, index, array) => (
+           <span key={index}>
+             <strong>{part.trim()}</strong>
+             {index < array.length - 1 && (
+               <span style={{ margin: "0 6px" }}>{">"}</span>
+             )}
+           </span>
+         ))}
+       </Typography>
+       <Typography variant="body1" sx={{ color: textColor }}>
+         <HighlightedText text={result.title} query={searchQuery} />
+       </Typography>
+       {result.description && (
+         <Typography
+           variant="body2"
+           sx={{
+             color: textColor,
+             fontSize: "0.8rem",
+             mb: 0.5,
+             lineHeight: 1.4,
+             display: "-webkit-box",
+             WebkitLineClamp: 2,
+             WebkitBoxOrient: "vertical",
+             overflow: "hidden",
+             textOverflow: "ellipsis",
+           }}
+         >
+           <HighlightedText text={result.description} query={searchQuery} />
+         </Typography>
+       )}
+       {result.matchedKeywords && result.matchedKeywords.length > 0 && (
+         <Box
+           sx={{
+             display: "flex",
+             flexWrap: "wrap",
+             gap: 0.5,
+             mt: 0.5,
+           }}
+         >
+           {result.matchedKeywords.slice(0, 3).map((keyword, i) => (
+             <Box
+               key={i}
+               component="span"
+               sx={{
+                 backgroundColor: `${primaryColor}10`,
+                 fontSize: "0.75rem",
+                 color: primaryColor,
+                 px: 1,
+                 py: 0.25,
+                 borderRadius: "9999px",
+               }}
+             >
+               {keyword}
+             </Box>
+           ))}
+           {result.matchedKeywords.length > 3 && (
+             <Box
+               component="span"
+               sx={{
+                 fontSize: "0.75rem",
+                 color: secondaryTextColor,
+                 alignSelf: "center",
+               }}
+             >
+               +{result.matchedKeywords.length - 3}
+             </Box>
+           )}
+         </Box>
+       )}
+     </Box>
+   </ListItem>
+ );
 
   return (
     <Modal
@@ -345,102 +471,7 @@ const SearchModal = ({ isOpen, onClose }) => {
             </Typography>
           ) : searchResults.length > 0 ? (
             <List sx={{ py: 0 }}>
-              {searchResults.map((result, index) => (
-                <ListItem
-                  key={index}
-                  component="div"
-                  sx={{
-                    borderRadius: 1,
-                    mb: 1,
-                    cursor: "pointer",
-                    "&:hover": {
-                      backgroundColor: hoverBackground,
-                    },
-                    transition: "background-color 0.2s",
-                    py: 1.5, // Reduced padding
-                  }}
-                  onClick={() => {
-                    // TODO: Implement navigation using result.baseUrl and result.hash
-                    console.log("Navigate to:", result.baseUrl, "#" + result.hash);
-                    onClose();
-                  }}
-                >
-                  <Box sx={{ width: '100%' }}>
-                    {/* Breadcrumb-style header */}
-                    <Typography
-                      variant="body2"
-                      sx={{ 
-                        color: secondaryTextColor,
-                        fontSize: "0.75rem",
-                        mb: 0.5
-                      }}
-                    >
-                      {result.section} <span style={{ margin: '0 4px' }}>›</span> <HighlightedText text={result.title} query={searchQuery} />
-                    </Typography>
-
-                    {/* Description */}
-                    {result.description && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: textColor,
-                          fontSize: "0.8rem",
-                          mb: 0.5,
-                          lineHeight: 1.4,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        <HighlightedText text={result.description} query={searchQuery} />
-                      </Typography>
-                    )}
-
-                    {/* Keywords row */}
-                    {result.matchedKeywords && result.matchedKeywords.length > 0 && (
-                      <Box 
-                        sx={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 0.5,
-                          mt: 0.5
-                        }}
-                      >
-                        {result.matchedKeywords.slice(0, 3).map((keyword, i) => (
-                          <Box 
-                            key={i} 
-                            component="span"
-                            sx={{
-                              backgroundColor: `${primaryColor}10`,
-                              fontSize: '0.75rem', // text-xs
-                              color: primaryColor,
-                              px: 1,
-                              py: 0.25,
-                              borderRadius: '9999px', // rounded-full
-                            }}
-                          >
-                            {keyword}
-                          </Box>
-                        ))}
-                        {result.matchedKeywords.length > 3 && (
-                          <Box 
-                            component="span"
-                            sx={{
-                              fontSize: '0.75rem',
-                              color: secondaryTextColor,
-                              alignSelf: 'center'
-                            }}
-                          >
-                            +{result.matchedKeywords.length - 3}
-                          </Box>
-                        )}
-                      </Box>
-                    )}
-                  </Box>
-                </ListItem>
-              ))}
+              {searchResults.map((result, index) => renderSearchResult(result))}
             </List>
           ) : null}
         </Box>
