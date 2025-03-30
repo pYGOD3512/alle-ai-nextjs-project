@@ -176,6 +176,7 @@ interface sectionProps {
 interface searchtermsprops {
   hash: string;
   words: string[];
+  description?: string;
 }
 interface keywordsProps {
   BaseUrl: string;
@@ -196,7 +197,7 @@ export const apiReference: apiREfprops[] = [
         id: "introduction",
         title: "Introduction",
         href: "introduction",
-        description: "Get started with Alle-AI's API. Learn about our HTTP and WebSocket endpoints, authentication, and available SDKs.",
+
         keywords: [
           {
             BaseUrl: `${BaseUrl}/introduction`,
@@ -204,11 +205,20 @@ export const apiReference: apiREfprops[] = [
               {
                 hash: "alle-ai",
                 words: [
-                  "introduction", "overview", "getting started", "api", 
-                  "alle ai", "documentation", "HTTP", "WebSocket",
-                  "Python bindings", "Node.js library"
+                  "introduction",
+                  "overview",
+                  "getting started",
+                  "api",
+                  "alle ai",
+                  "documentation",
+                  "HTTP",
+                  "WebSocket",
+                  "Python bindings",
+                  "Node.js library",
                 ],
-              }
+                description:
+                  "Get started with Alle-AI's API. Learn about our HTTP and WebSocket endpoints, authentication, and available SDKs.",
+              },
             ],
           },
         ],
@@ -217,7 +227,7 @@ export const apiReference: apiREfprops[] = [
         id: "authentication",
         title: "Authentication",
         href: "authentication",
-        description: "Learn how to authenticate your API requests using project keys and manage API credentials securely.",
+
         keywords: [
           {
             BaseUrl: `${BaseUrl}/introduction`,
@@ -225,11 +235,20 @@ export const apiReference: apiREfprops[] = [
               {
                 hash: "authentication",
                 words: [
-                "auth", "api key", "project key", "security", 
-                "token", "credentials", "authentication",
-                "project keys", "user keys", "secure"
-              ],
-              }
+                  "auth",
+                  "api key",
+                  "project key",
+                  "security",
+                  "token",
+                  "credentials",
+                  "authentication",
+                  "project keys",
+                  "user keys",
+                  "secure",
+                ],
+                description:
+                  "Learn how to authenticate your API requests using project keys and manage API credentials securely.",
+              },
             ],
           },
         ],
@@ -238,7 +257,7 @@ export const apiReference: apiREfprops[] = [
         id: "streaming",
         title: "Streaming",
         href: "streaming",
-        description: "Implement real-time data streaming using WebSocket connections and handle continuous data updates efficiently.",
+
         keywords: [
           {
             BaseUrl: `${BaseUrl}/introduction`,
@@ -246,11 +265,19 @@ export const apiReference: apiREfprops[] = [
               {
                 hash: "streaming",
                 words: [
-                "stream", "real-time", "streaming response", 
-                "live", "continuous", "data stream",
-                "websocket", "events", "sse"
-              ],
-              }
+                  "stream",
+                  "real-time",
+                  "streaming response",
+                  "live",
+                  "continuous",
+                  "data stream",
+                  "websocket",
+                  "events",
+                  "sse",
+                ],
+                description:
+                  "Implement real-time data streaming using WebSocket connections and handle continuous data updates efficiently.",
+              },
             ],
           },
         ],
@@ -259,7 +286,7 @@ export const apiReference: apiREfprops[] = [
         id: "sdk",
         title: "SDK & Libraries",
         href: "sdk",
-        description: "Explore our official SDKs and libraries for Python, Node.js, and other platforms to integrate Alle-AI into your applications.",
+
         keywords: [
           {
             BaseUrl: `${BaseUrl}/introduction`,
@@ -267,11 +294,22 @@ export const apiReference: apiREfprops[] = [
               {
                 hash: "sdks-and-libraries",
                 words: [
-                "sdk", "library", "package", "npm", "pip", 
-                "installation", "python", "javascript", "node",
-                "bindings", "client libraries", "packages"
-              ],
-              }
+                  "sdk",
+                  "library",
+                  "package",
+                  "npm",
+                  "pip",
+                  "installation",
+                  "python",
+                  "javascript",
+                  "node",
+                  "bindings",
+                  "client libraries",
+                  "packages",
+                ],
+                description:
+                  "Explore our official SDKs and libraries for Python, Node.js, and other platforms to integrate Alle-AI into your applications.",
+              },
             ],
           },
         ],
@@ -286,35 +324,253 @@ export const apiReference: apiREfprops[] = [
         id: "chat",
         title: "Chat",
         href: "endpoints-chat",
+        description:
+          "Endpoints for multi-model AI chat interactions, enabling users to send messages and receive responses from multiple AI models within a single request.",
         sections: [
           {
             id: "chat",
             title: "Completion",
-            keywords: [],
+            keywords: [
+              {
+                BaseUrl: `${BaseUrl}/chat-endpoints`,
+                searchTerms: [
+                  {
+                    hash: "",
+                    words: [
+                      "Chat Completion",
+                      "API Endpoint",
+                      "ChatGPT",
+                      "Claude",
+                      "Gemini",
+                      "Text Generation",
+                      "HTTPS",
+                      "AI Models",
+                      "Base URL",
+                      "OpenAI",
+                      "Anthropic",
+                      "Google",
+                    ],
+                    description:
+                      "Learn how to use the Chat Completion endpoint, a single API to access AI models like ChatGPT, Claude, and Gemini for generating human-like text over HTTPS, with example calls in Node.js, Python, and more.",
+                  },
+                  {
+                    hash: "",
+                    description:
+                      "Set up request parameters for the Chat Completion endpoint with a JSON example showing names, types, and required fields.",
+                    words: [
+                      "Request Parameters",
+                      "Chat Completion",
+                      "API Request",
+                      "JSON",
+                      "Parameters",
+                      "Required Fields",
+                      "Keywords",
+                    ],
+                  },
+                  {
+                    hash: "",
+                    description:
+                      "Add required headers like Authorization and Content-Type to Chat Completion requests, with examples in cURL, Python, and Node.js",
+                    words: [
+                      "Request Headers",
+                      "Authorization",
+                      "Content-Type",
+                      "API Key",
+                      "JSON",
+                      "HTTPS",
+                      "cURL",
+                      "Python",
+                      "Node.js",
+                    ],
+                  },
+                  {
+                    hash: "",
+                    words: [
+                      "Response Fields",
+                      "Response Format",
+                      "JSON",
+                      "Chat Completion",
+                      "Text Generation",
+                      "Field Types",
+                    ],
+                    description:
+                      "Check the response fields from the Chat Completion endpoint, including types and a JSON format example.",
+                  },
+                ],
+              },
+            ],
             href: "chat-endpoints",
           },
           {
             id: "web-search",
             title: "Search",
-            keywords: [],
+            keywords: [
+              {
+                BaseUrl: `${BaseUrl}/chat-search`,
+                searchTerms: [
+                  {
+                    hash: "",
+                    words: [
+                      "Chat Completion",
+                      "Web Search",
+                      "web_search",
+                      "API Request",
+                      "JSON",
+                      "Boolean",
+                      "web_search_results",
+                      "Search Query",
+                      "Search Results",
+                      "Response Format",
+                    ],
+                    description:
+                      "Enable web search in the Chat Completion endpoint by setting the web_search boolean in your JSON request, and get enhanced responses with web_search_results including queries and search result details.",
+                  },
+                  {
+                    hash: "",
+                    words: [
+                      "Web Search Endpoint",
+                      "Dedicated Endpoint",
+                      "messages",
+                      "response_format",
+                      "max_tokens",
+                      "Web Search Results",
+                      "cURL",
+                      "Python",
+                      "Node.js",
+                      "Base URL",
+                    ],
+                    description:
+                      "Use the dedicated web search endpoint to get web search results directly, with parameters like messages and response_format, plus example requests in cURL, Python, and Node.js.",
+                  },
+                ],
+              },
+            ],
             href: "chat-search",
           },
           {
             id: "comparison",
             title: "Comparison",
-            keywords: [],
+            keywords: [
+              {
+                BaseUrl: `${BaseUrl}/chat-comparison`,
+                searchTerms: [
+                  {
+                    hash: "",
+                    words: [
+                      "Model Comparison",
+                      "comparison",
+                      "API Request",
+                      "Comparison Types",
+                      "text",
+                      "audio_url",
+                      "models",
+                      "JSON",
+                      "Response Format",
+                      "GPT-4",
+                      "Claude",
+                      "Deepseek",
+                    ],
+                    description:
+                      "Add the optional comparison field to your API request to compare outputs from models like GPT-4, Claude, and Deepseek, with types like text or audio_url, and get results in JSON.",
+                  },
+                ],
+              },
+            ],
             href: "chat-comparison",
           },
           {
             id: "summary",
             title: "Summary",
-            keywords: [],
+            keywords: [
+              {
+                BaseUrl: `${BaseUrl}/chat-summary`,
+                searchTerms: [
+                  {
+                    hash: "",
+                    words: [
+                      "Chat Completion",
+                      "summary",
+                      "API Request",
+                      "JSON",
+                      "models",
+                      "GPT-4",
+                      "Claude",
+                      "messages",
+                      "response_format",
+                      "max_tokens",
+                    ],
+                    description:
+                      "Add the optional summary parameter to your Chat Completion request in JSON to get both full model outputs from GPT-4 or Claude and a concise summary, using messages, response_format, and max_tokens.",
+                  },
+                  {
+                    hash: "",
+                    words: [
+                      "Summary Endpoint",
+                      "Dedicated Endpoint",
+                      "summary",
+                      "messages",
+                      "response_format",
+                      "temperature",
+                      "Base URL",
+                      "cURL",
+                      "Python",
+                      "Node.js",
+                    ],
+                    description:
+                      "Use the dedicated summary endpoint at [baseUrl]/summary to get only a summary of model responses, with messages, response_format, and temperature, plus examples in cURL, Python, and Node.js.",
+                  },
+                ],
+              },
+            ],
             href: "chat-summary",
           },
           {
             id: "compare",
             title: "Combination",
-            keywords: [],
+            keywords: [
+              {
+                BaseUrl: `${BaseUrl}/chat-combinations`,
+                searchTerms: [
+                  {
+                    hash: "",
+                    words: [
+                      "Chat Completion",
+                      "combination",
+                      "API Request",
+                      "JSON",
+                      "models",
+                      "GPT-4",
+                      "Deepseek",
+                      "Claude",
+                      "text",
+                      "audio_url",
+                      "messages",
+                      "response_format",
+                      "max_tokens",
+                    ],
+                    description:
+                      "Add the optional combination parameter to your Chat Completion request in JSON to merge outputs from models like GPT-4, Deepseek, and Claude into a single result for text or audio_url, alongside individual responses, using messages, response_format, and max_tokens.",
+                  },
+                  {
+                    hash: "",
+                    words: [
+                      "Combination Endpoint",
+                      "Dedicated Endpoint",
+                      "combination",
+                      "messages",
+                      "response_format",
+                      "temperature",
+                      "Base URL",
+                      "cURL",
+                      "Python",
+                      "Node.js",
+                    ],
+                    description:
+                      "Use the dedicated combination endpoint at [baseUrl]/combinations to get only a merged result from specified models, with messages, response_format, and temperature, plus examples in cURL, Python, and Node.js.",
+                  },
+                ],
+              },
+            ],
             href: "chat-combination",
           },
         ],

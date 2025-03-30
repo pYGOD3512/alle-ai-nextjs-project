@@ -40,7 +40,7 @@ export default function ApiTextGenerationDocs() {
   return (
     <div className="min-h-[80vh] py-4">
       <div className=" space-y-16">
-        {/* Chat Completion Section */}
+        {/* ............................................................... Chat Completion Section starts ...............................................................  */}
         <section className="min-h-[80vh]">
           <h2 data-section="chat-endpoints" className="text-4xl font-bold mb-6">
             Chat Completion
@@ -52,7 +52,7 @@ export default function ApiTextGenerationDocs() {
               <ApiDocLayout
                 leftContent={
                   <div className="space-y-8">
-                    {/* Header */}
+                    {/* chat completions endpoint */}
                     <div>
                       <div className="text-muted-foreground space-y-4">
                         <p>
@@ -64,7 +64,6 @@ export default function ApiTextGenerationDocs() {
                         </p>
                       </div>
                     </div>
-                    {/* Overview */}
                     <div className="space-y-4">
                       <h3 className="text-2xl font-semibold">Overview</h3>
                       <div className="text-muted-foreground space-y-4">
@@ -185,7 +184,6 @@ export default function ApiTextGenerationDocs() {
 
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
 
-        {/* split layout */}
         <section>
           <ApiDocLayout
             leftContent={
@@ -334,8 +332,9 @@ export default function ApiTextGenerationDocs() {
             </div>
           }
         />
+{/* .............................................................. chat completion endpoints ends here ......................................................................... */}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
-        {/* Api search : enabling web search  */}
+        {/*.................................... Api search : enabling web search starts  ........................   */}
         <div className="mt-10 ">
           <h2 className="text-3xl mb-4 font-semibold text-gray-800 dark:text-gray-200">
             Using &nbsp;
@@ -578,8 +577,9 @@ export default function ApiTextGenerationDocs() {
             }
           />
         </div>
+        {/* ......................... web search ends docs page content ends  here ............................... */}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
-        {/*model  comparison  */}
+        {/* ................. comparison docs page starts here .........................*/}
 
         <div className="mt-10 ">
           <h2
@@ -760,7 +760,8 @@ export default function ApiTextGenerationDocs() {
             }
           />
         </div>
-        {/*  summary  */}
+        {/* ...............comparison docs page ends here  */}
+        {/* ............................... summary docs page starts here */}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
 
         <div className="mt-10">
@@ -875,8 +876,9 @@ export default function ApiTextGenerationDocs() {
             }
           />
         </div>
+        {/* .............. summary docs page ends here ................... */}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
-        {/* Combinations */}
+        {/* ...................................... Combinations docs page starts here ....................... */}
         <div className="mt-10">
           <h2
             data-section="chat-combination"
@@ -991,6 +993,7 @@ export default function ApiTextGenerationDocs() {
         </div>
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200  " />
       </div>
+      {/* ...................... combinations end ................... */}
     </div>
   );
 }

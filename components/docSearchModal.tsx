@@ -10,7 +10,6 @@ import InputLabel from "@mui/material/InputLabel";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import Backdrop from "@mui/material/Backdrop";
 import { useTheme } from "next-themes";
 import { Book, Code, Video, ChevronDown } from "lucide-react";
