@@ -47,6 +47,7 @@ export interface AuthResponse {
 export interface LoginResponse {
   status: boolean;
   data: {
+    plan: string | null;
     to: string;
     token: string;
     user: {

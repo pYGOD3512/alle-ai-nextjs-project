@@ -47,7 +47,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useConversationStore } from "@/stores/models";
 import { historyApi } from "@/lib/api/history";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 
 
 
@@ -68,7 +69,7 @@ export function Sidebar() {
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const { user, plan } = useAuthStore();
   const { setGenerationType, conversationId, clearConversation } = useConversationStore();
-  const { toast } = useToast();
+  ;
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -370,11 +371,7 @@ export function Sidebar() {
                       onClick={() => {
                         (isMobile && isOpen) ? toggle() : '';
                         if (item.href === "/audio" || item.href === "/video") {
-                          toast({
-                            title: "Coming Soon !!",
-                            variant: "info",
-                            description: "This feature will be available soon",
-                          });
+                          toast.info('This feature will be available soon');
                         }
                       }}
                     >
@@ -410,11 +407,7 @@ export function Sidebar() {
                         onClick={() => {
                           // setProjectModalOpen(true);
                           (isMobile && isOpen) ? toggle() : '';
-                          toast({
-                            title: "Coming Soon !!",
-                            variant: "info",
-                            description: "This feature will be available soon",
-                          });
+                          toast.info('This feature will be available soon');
                         }}
                         aria-label="New Project"
                       >
@@ -719,11 +712,7 @@ export function Sidebar() {
                     ${styles.hoverBg}`}
                   onClick={() => {
                     if (item.href === "/audio" || item.href === "/video") {
-                      toast({
-                        title: "Coming Soon !!",
-                        variant: "info",
-                        description: "This feature will be available soon",
-                      });
+                      toast.info('This feature will be available soon');
                     }
                   }}
                 >
@@ -748,11 +737,7 @@ export function Sidebar() {
               size="icon"
               className="w-full"
               onClick={() => {
-                toast({
-                  title: "Coming Soon !!",
-                  variant: "info",
-                  description: "This feature will be available soon",
-                });
+                toast.info('This feature will be available soon');
                 // setProjectModalOpen(true)}
               }}
             >

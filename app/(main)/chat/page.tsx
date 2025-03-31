@@ -5,10 +5,11 @@ import { useSidebarStore } from "@/stores";
 import { useSelectedModelsStore } from "@/stores";
 import { Model, modelsApi } from "@/lib/api/models";
 import { useModelsStore } from "@/stores/models";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 
 export default function ChatPage() {
-  const { toast } = useToast();
+  ;
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
   const { 
     selectedModels,

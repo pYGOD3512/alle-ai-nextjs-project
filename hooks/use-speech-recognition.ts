@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 
 interface UseSpeechRecognitionProps {
   onTranscript: (text: string) => void;
@@ -12,7 +13,7 @@ export function useSpeechRecognition({
 }: UseSpeechRecognitionProps) {
   const [isListening, setIsListening] = useState(false);
   const recognition = useRef<SpeechRecognition | null>(null);
-  const { toast } = useToast();
+  ;
 
   useEffect(() => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
@@ -39,11 +40,7 @@ export function useSpeechRecognition({
 
       recognition.current.onerror = () => {
         setIsListening(false);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to access microphone. Please check your permissions.",
-        });
+        toast.error('Failed to access microphone. Please check your permissions.')
       };
 
       recognition.current.onend = () => {
@@ -60,11 +57,7 @@ export function useSpeechRecognition({
 
   const toggleListening = () => {
     if (!recognition.current) {
-      toast({
-        variant: "destructive",
-        title: "Not Supported",
-        description: "Speech recognition is not supported in your browser.",
-      });
+      toast.error('Speech recognition is not supported in your browser.')
       return;
     }
 
@@ -78,10 +71,7 @@ export function useSpeechRecognition({
       if (inputRef?.current) {
         inputRef.current.focus();
       }
-      toast({
-        title: "Listening...",
-        description: "Speak now to convert your speech to text.",
-      });
+      toast.info('Listening...')
     }
   };
 

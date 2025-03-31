@@ -8,13 +8,14 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Check, Loader2, Users, Building2, Shield, Zap } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 
 const OrganizationPlansArea = () => {
   const [isYearly, setIsYearly] = useState(false);
   const [teamSize, setTeamSize] = useState(50);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
-  const { toast } = useToast();
+  ;
 
   const calculatePrice = (basePrice: number) => {
     const pricePerUser = basePrice;
@@ -23,11 +24,9 @@ const OrganizationPlansArea = () => {
   };
 
   const handleContactSales = () => {
-    toast({
-      title: "Contact Sales",
-      description: "Our team will reach out to you shortly!",
-      variant: "default",
-    });
+    toast.message('Contact Sales', {
+      description: 'Our team will reach out to you shortly!',
+    })
   };
 
   const plans = [

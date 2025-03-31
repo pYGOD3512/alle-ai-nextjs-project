@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -19,18 +20,14 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { toast } = useToast();
+  ;
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== passwordConfirmation) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      });
+      toast.error(`Passwords don't match`);
       return;
     }
 
@@ -44,19 +41,12 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
         password_confirmation: passwordConfirmation,
       });
 
-      toast({
-        title: "Password Reset Successful",
-        description: "Your password has been reset. You can now log in with your new password.",
-      });
+      toast.success(`Password Reset Successful`);
 
       // Don't reset isLoading - keep button disabled during navigation
       router.push('/auth');
     } catch (error: any) {
-      toast({
-        title: "Failed to reset password",
-        description: error.response?.data?.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+        toast.error(`${error.response?.data?.message || "Something went wrong. Please try again."}`)
       setIsLoading(false); // Reset only on error
     }
   };

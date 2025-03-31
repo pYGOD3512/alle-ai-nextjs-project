@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
 import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader2 } from "lucide-react";
 import { IMAGE_MODELS } from '@/lib/constants';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import {
   Dialog,
   DialogContent,
@@ -113,7 +114,7 @@ const ImageArea = () => {
   const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
   const { conversationId, promptId, generationType, setConversationId } = useConversationStore();
   const { imageModels } = useModelsStore();
-  const { toast } = useToast();
+  ;
   const params = useParams();
   const loadConversationId = params.chatId as string;
 
@@ -210,11 +211,7 @@ const [imageModelsLoaded, setImageModelsLoaded] = useState(false);
 
       } catch (error) {
         // console.error('Error loading conversation:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load conversation",
-          variant: "destructive",
-        });
+        toast.error('Failed to load conversation');
       } finally {
         setIsLoadingConversation(false);
       }
@@ -301,35 +298,20 @@ const [imageModelsLoaded, setImageModelsLoaded] = useState(false);
           setSelectedImage(prev => prev ? { ...prev, liked: !prev.liked } : null);
         }
 
-        toast({
-          title: newLikedState === 'liked' ? "Liked" : "Unliked",
-          description: `${modelInfo?.name} image ${newLikedState === 'liked' ? 'liked' : 'unliked'}`,
-          duration: 3000,
-        });
+        toast.success(`${modelInfo?.name} image ${newLikedState === 'liked' ? 'liked' : 'unliked'}`)
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to update like status",
-          variant: "destructive",
-        });
+        toast.error('Ooops! something went wrong')
       }
     } catch (error) {
       // console.error('Error updating like state:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update like status",
-        variant: "destructive",
-      });
+      toast.error('Ooops! something went wrong')
+
     }
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content.image.input);
-    toast({
-      title: "Copied",
-      description: "Image URL copied to clipboard",
-      duration: 3000,
-    });
+    toast.success('Copied');
   };
 
   const handleDownload = async (imageUrl: string, modelName: string) => {
@@ -345,19 +327,10 @@ const [imageModelsLoaded, setImageModelsLoaded] = useState(false);
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast({
-        title: "Success",
-        description: "Image downloaded successfully",
-        duration: 3000,
-      });
+      toast.success('Image downloaded');
     } catch (error) {
       // console.error('Error downloading image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to download image",
-        variant: "destructive",
-        duration: 3000,
-      });
+      toast.error('Failed to download image');
     }
   };
 

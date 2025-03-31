@@ -1,5 +1,5 @@
 import { gapi } from 'gapi-script';
-import { toast as showToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 import { useDriveAuthStore } from '@/stores';
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
@@ -60,11 +60,7 @@ class GoogleDriveService {
       try {
         await this.init();
       } catch (error) {
-        showToast({
-          title: "Error",
-          description: "Failed to initialize Google Drive service",
-          variant: 'destructive'
-        });
+        toast.error('Something went wrong, please try agian')
         return false;
       }
     }
@@ -83,21 +79,11 @@ class GoogleDriveService {
       );
       
       this.isAuthenticated = true;
-      showToast({
-        title: "Success",
-        description: "Successfully signed in to Google Drive",
-        duration: 3000,
-      });
+      toast.success('Signed into Google Drive');
       return true;
     } catch (error) {
       this.isAuthenticated = false;
-      showToast({
-        title: "Error",
-        description: `Failed to sign in to Google Drive`,
-        variant: 'destructive',
-        duration: 3000,
-        className: "text-foreground"
-      });
+      toast.error('Failed to sign in to Google Drive')
       return false;
     }
   }
@@ -110,11 +96,7 @@ class GoogleDriveService {
       this.isAuthenticated = false;
       useDriveAuthStore.getState().clearAuth();
     } catch (error) {
-      showToast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: 'destructive'
-      });
+      toast.error('Failed to sign out');
     }
   }
 

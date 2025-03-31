@@ -32,7 +32,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal, LogoutModal, OrganizationModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 
 import { useAuth } from '@/components/providers/AuthProvider';
 import { NotificationsPanel } from "@/components/NotificationWindow";
@@ -72,7 +73,6 @@ export function Header() {
   const [organizationModalOpen, setOrganizationModalOpen] = useState(false);
   const [loadingModels, setLoadingModels] = useState<string[]>([]);
   const conversationId = pathname.includes('/chat/res/') ? pathname.split('/').pop() : null;
-  const { toast } = useToast();
 
   // Add this state to track if the models dropdown is open
   const [modelsDropdownOpen, setModelsDropdownOpen] = useState(false);
@@ -307,22 +307,15 @@ export function Header() {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
           // setReferModalOpen(true);
-          toast({
-            title: "Coming Soon !!",
-            variant: "info",
-            description: "This feature will be available soon",
-          });
+          toast.info('This feature will be available soon');
+
         } else if (item.label === 'Favorites') {
           setAlbumModalOpen(true);
         }
         break;
       case 'link':
         if (item.label === 'Developer') {
-          toast({
-            title: "Coming Soon !!",
-            variant: "info",
-            description: "This feature will be available soon",
-          });
+          toast.info('This feature will be available soon');
         } else {
           window.open(item.href, '_blank');
         }
@@ -360,11 +353,7 @@ export function Header() {
   
 
   const handleTour = () => {
-    toast({
-      title: "Coming Soon !!",
-      variant: "info",
-      description: "This feature will be available soon",
-    });
+    toast.info('This feature will be available soon');
   };
   const handleLogOut = () => {
     setIsLogoutModalOpen(true);
@@ -397,13 +386,10 @@ export function Header() {
       if (response.status) {
         toggleModelActive(model.uid);
       } else {
-        // If status is false, show error message
-        // console.error('Failed to toggle model:', response.message);
-        // Optionally show an error toast/notification here
+        toast.error('Failed to toggle model');
       }
     } catch (error) {
-      // console.error('Failed to toggle model:', error);
-      // Optionally show an error toast/notification here
+      toast.error('Failed to toggle model');
     } finally {
       setLoadingModels(prev => prev.filter(id => id !== model.uid));
     }

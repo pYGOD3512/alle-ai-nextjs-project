@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Facebook, Twitter, Youtube, Instagram, Mail } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 
 const footerLinks = [
   // {
@@ -48,7 +48,6 @@ export default function AboutLayout({
   children: React.ReactNode;
 }) {
   const { resolvedTheme } = useTheme();
-  const { toast } = useToast();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -157,11 +156,7 @@ export default function AboutLayout({
               <Link href="#"  className="inline-block"
               onClick={(e) => {
                 e.preventDefault();
-                toast({
-                  title: "Coming Soon !!",
-                  variant: "info",
-                  description: "Alle-AI will be available on playstore soon!",
-                });
+                toast.info('Alle-AI will be available on playstore soon!')
               }}
               >
                 <div className="flex items-center gap-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-6 py-3 rounded-lg hover:opacity-90 transition duration-300">

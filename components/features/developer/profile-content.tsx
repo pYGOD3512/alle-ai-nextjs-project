@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Mail, User, Zap } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/stores";
 
@@ -15,7 +16,7 @@ export function DeveloperProfile() {
   const [name, setName] = useState(user?.first_name);
   const [editedName, setEditedName] = useState(name);
   const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
+  ;
 
 
   // Check if name has been modified
@@ -27,11 +28,7 @@ export function DeveloperProfile() {
     if (!editedName?.trim()) return;
     setName(editedName);
     setIsEditing(false);
-    toast({
-      title: "Profile updated",
-      description: "Your name has been successfully updated.",
-      duration: 3000,
-    });
+    toast.success('Profile updated');
   };
 
   const handleCancel = () => {

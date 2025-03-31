@@ -20,6 +20,7 @@ import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { UploadedFile } from "@/lib/types";
 import { processFile } from "@/lib/fileProcessing";
 import { FilePreview } from "@/components/ui/file-preview";
+import { toast } from "sonner";
 
 
 interface AudioResponse {
@@ -65,7 +66,7 @@ export function AudioArea() {
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
 
-  const { toast } = useToast();
+  ;
   const [credits, setCredits] = useState(50);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -142,22 +143,11 @@ export function AudioArea() {
     try {
       await navigator.clipboard.writeText(submittedPrompt);
       setTimeout(() => {
-        toast({
-          title: "Copied!",
-          description: "Prompt copied to clipboard",
-          duration: 3000,
-        });
+        toast.success('Copied');
       }, 0);
     } catch (err) {
       // console.error('Failed to copy text: ', err);
-      setTimeout(() => {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to copy prompt",
-          duration: 3000,
-        });
-      }, 0);
+      toast.error('Failed to copy prompt');
     }
   };
 
@@ -173,11 +163,7 @@ export function AudioArea() {
 
         const validation = validateFile(file);
         if (!validation.isValid) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: validation.error
-          });
+          toast.error(`${validation.error}`)
           return;
         }
 
@@ -224,20 +210,14 @@ export function AudioArea() {
             prev ? { ...prev, status: 'ready' } : null
           );
 
-          toast({
-            title: "Image Uploaded",
-            description: "Image has been uploaded successfully",
-          });
+          toast.success('Image uploaded');
+
         } catch (error) {
           if (uploadedFile?.url) {
             URL.revokeObjectURL(uploadedFile.url);
           }
           setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-          toast({
-            variant: "destructive",
-            title: "Processing Failed",
-            description: error instanceof Error ? error.message : "Failed to process file"
-          });
+          toast.error(`${error instanceof Error ? error.message : "Failed to process file"}`)
         }
       }
     }
@@ -449,10 +429,7 @@ export function AudioArea() {
         liked: true
       });
 
-      toast({
-        title: "Audio Liked",
-        description: `You liked ${modelInfo.name}'s audio generation`,
-      });
+      toast.success('Liked')
     } else {
       // Remove from liked media store
       const likedItems = useLikedMediaStore.getState().getLikedMediaByType('audio');
@@ -464,10 +441,8 @@ export function AudioArea() {
         removeLikedMedia(likedItem.id);
       }
 
-      toast({
-        title: "Audio Unliked",
-        description: `You unliked ${modelInfo.name}'s audio generation`,
-      });
+      toast.success('Unliked')
+
     }
   }, [responses, submittedPrompt, addLikedMedia, removeLikedMedia, toast]);
 
@@ -492,11 +467,7 @@ export function AudioArea() {
 
     const validation = validateFile(file);
     if (!validation.isValid) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: validation.error
-      });
+      toast.error(`${validation.error}`);
       return;
     }
 
@@ -539,10 +510,7 @@ export function AudioArea() {
         setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
       }, 500);
 
-      toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded');
     } catch (error) {
       handleFileError(error);
     }
@@ -552,11 +520,7 @@ export function AudioArea() {
     try {
       const validation = validateFile(file);
       if (!validation.isValid) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: validation.error
-        });
+        toast.error(`${validation.error}`);
         return;
       }
 
@@ -595,10 +559,7 @@ export function AudioArea() {
         setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
       }, 500);
 
-      toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded');
     } catch (error) {
       handleFileError(error);
     }
@@ -616,11 +577,7 @@ export function AudioArea() {
       URL.revokeObjectURL(uploadedFile.url);
     }
     setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-    toast({
-      variant: "destructive",
-      title: "Processing Failed",
-      description: error instanceof Error ? error.message : "Failed to process file"
-    });
+    toast.error(`${error instanceof Error ? error.message : "Failed to process file"}`)
   };
 
   useEffect(() => {

@@ -14,7 +14,8 @@ import { chatApi } from '@/lib/api/chat';
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { SourcesWindow } from "../SourcesWindow";
 import { Summary } from "./Summary";
 import { Model } from "@/lib/api/models";
@@ -104,7 +105,7 @@ interface LoadedResponse {
 }
 
 export function ChatArea() {
-  const { toast } = useToast();
+  ;
   const { content, setContent } = useContentStore();
   const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
   const { chatModels } = useModelsStore();
@@ -351,11 +352,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
           })));
         } catch (error) {
           // console.error('Error in web search:', error);
-          toast({
-            title: "Web Search Error",
-            description: "Failed to complete web search, falling back to model responses.",
-            variant: "destructive"
-          });
+          toast.error('Error searching the web');
         } finally {
           setWebSearchLoading(prev => ({ ...prev, [promptId]: false }));
         }
@@ -473,11 +470,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
           }));
         } catch (error) {
           // console.error('Error generating summary:', error);
-          toast({
-            title: "Error",
-            description: "Failed to generate summary",
-            variant: "destructive"
-          });
+          toast.error('Error generating summary');
         } finally {
           setGeneratingSummary(prev => {
             const newState = { ...prev, [promptId]: false };
@@ -566,7 +559,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
       const historyItem = getHistoryItemById(loadConversationId);
       if (historyItem && historyItem.created_at) {
         const timestamp = new Date(historyItem.created_at);
-        const cutoffDate = new Date('2025-03-12');
+        const cutoffDate = new Date('2025-03-23');
 
         
         if (timestamp < cutoffDate) {
@@ -589,11 +582,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
       } catch (error) {
         // console.error('Error loading conversation:', error);
         setLoadConversationError(true);
-        toast({
-          title: "Error",
-          description: "Failed to load conversation",
-          variant: "destructive",
-        });
+        toast.error('Failed to load conversation');
       } finally {
         setIsLoadingConversation(false);
         // setGenerationType('new');
@@ -1084,11 +1073,7 @@ useEffect(() => {
         }));
       } catch (error) {
         // console.error('Error generating summary:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate summary",
-          variant: "destructive"
-        });
+        toast.error('Error generating summary')
       } finally {
         setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: false }));
       }
@@ -1165,11 +1150,7 @@ useEffect(() => {
 
     } catch (error) {
       // console.error('Error editing message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to edit message",
-        variant: "destructive"
-      });
+      toast.error('Failed to edit message')
     }
   };
 
@@ -1300,11 +1281,7 @@ useEffect(() => {
           ));
         } catch (error) {
           // console.error('Error in web search:', error);
-          toast({
-            title: "Web Search Error",
-            description: "Failed to complete web search, falling back to model responses.",
-            variant: "destructive"
-          });
+          toast.error('Error searching the web');
         } finally {
           setWebSearchLoading(prev => ({ ...prev, [promptResponse.id]: false }));
         }
@@ -1426,11 +1403,8 @@ useEffect(() => {
             }));
           } catch (error) {
             // console.error('Error generating summary:', error);
-            toast({
-              title: "Error",
-              description: "Failed to generate summary",
-              variant: "destructive"
-            });
+            toast.error('Error generating summary')
+
           } finally {
             setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: false }));
           }
@@ -1511,11 +1485,7 @@ useEffect(() => {
       // setInput("");
     } catch (error) {
       // console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive"
-      });
+      toast.error('Something went wrong, please try again');
     } finally {
       setIsLoading(false);
       setCompleted(true);

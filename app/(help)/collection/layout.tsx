@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { ScrollText, Search, Globe, Home, Router } from "lucide-react";
 import Providers from "@/components/ProgressBar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 
 import {
   DropdownMenu,
@@ -46,7 +46,6 @@ export default function HelpLayout({
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -177,11 +176,7 @@ export default function HelpLayout({
                   href="#" 
                   onClick={(e) => {
                     e.preventDefault();
-                    toast({
-                      title: "Coming Soon !!",
-                      variant: "info",
-                      description: "This feature will be available soon",
-                    });
+                    toast.info('This feature will be available soon');
                   }}
                 >
                   API Docs

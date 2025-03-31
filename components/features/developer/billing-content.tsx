@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Rocket, CreditCard, Plus, Trash2 } from "lucide-react";
 import { BuyCreditsModal, CardPaymentMethodModal, PaymentOptionsModal, PromptModal } from "@/components/ui/modals";
 import { usePaymentStore } from "@/stores";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { motion } from "framer-motion";
 
 
@@ -17,7 +18,7 @@ export function BillingContent() {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isBuyCreditsOpen, setIsBuyCreditsOpen] = useState(false);
 
-  const { toast } = useToast();
+  ;
 
 
   const [deletePrompt, setDeletePrompt] = useState<{

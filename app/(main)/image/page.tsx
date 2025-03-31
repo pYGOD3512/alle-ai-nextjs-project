@@ -8,14 +8,15 @@ import { useHistoryStore } from "@/stores";
 import { useModelsStore } from "@/stores/models";
 import { historyApi } from "@/lib/api/history";
 import { Model, modelsApi } from "@/lib/api/models";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 
 
 
 export default function ImageGenerationPage() {
   const { isOpen } = useSidebarStore();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
-  const { toast } = useToast();
+  ;
   const { imageModels, setImageModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const { 
     selectedModels,
@@ -72,11 +73,7 @@ export default function ImageGenerationPage() {
         if(err.response?.status === 404) {
           return;
         } else {
-          toast({
-            title: 'Failed',
-            description: 'Error loading latest selected models',
-            variant: 'destructive',
-          });
+          toast.error('Error loading last used models');
         }
       } finally {
         setLoadingLatest(false);

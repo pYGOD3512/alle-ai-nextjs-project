@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { GoogleDriveModal } from "@/components/ui/modals";
 import { driveService } from '@/lib/services/driveServices';
 import { validateFile } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast"; 
+import { toast } from "sonner"
+ 
 import { dropboxService } from "@/lib/services/dropboxServices";
 import { oneDriveService, OneDriveResponse } from '@/lib/services/onedriveServices';
 
@@ -47,7 +48,7 @@ export function FileUploadButton({
   disabled = false
 }: FileUploadButtonProps) {
   const [showDriveModal, setShowDriveModal] = useState(false);
-  const { toast } = useToast();
+  ;
 
   const handleDriveFileSelect = async (file: DriveFile) => {
     try {
@@ -126,10 +127,7 @@ export function FileUploadButton({
       onUploadFromDrive(driveFile);
       setShowDriveModal(false);
 
-      toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded');
     } catch (error) {
       // console.error('Error processing Drive file:', error);
       // Add more detailed error information
@@ -137,12 +135,7 @@ export function FileUploadButton({
         ? `${error.message}\n${error.stack}` 
         : "Failed to process file";
       // console.error('Detailed error:', errorMessage);
-      
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process file"
-      });
+      toast.error(`${error instanceof Error ? error.message : "Failed to process file"}`)
     }
   };
 
@@ -194,20 +187,14 @@ export function FileUploadButton({
               // Process file
               onUploadFromDrive(dropboxFile);
 
-              toast({
-                title: "File Processed",
-                description: `${file.name} has been added successfully`,
-              });
+              toast.success('File uploaded');
             } catch (error) {
               throw error;
             }
           }
         },
         cancel: () => {
-          toast({
-            title: "Cancelled",
-            description: `File upload cancelled`,
-          });
+          toast.info('File upload cancelled')
         },
         linkType: 'direct',
         multiselect: false,
@@ -217,19 +204,13 @@ export function FileUploadButton({
       });
     } catch (error) {
       // console.error('Error processing Dropbox file:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process file"
-      });
+
+      toast.error(`${error instanceof Error ? error.message : "Failed to process file"}`)
     }
   };
 
   const handleOneDriveSelect = () => {
-    toast({
-      title: "Almost There",
-      description: "Client ID required",
-    });
+    toast.success('Almost there, Client ID required');
   }
   
   const getMimeType = (filename: string): string => {

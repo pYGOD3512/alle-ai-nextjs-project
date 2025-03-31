@@ -5,7 +5,8 @@ import { Volume2, VolumeX, ThumbsUp, ThumbsDown, Copy, RefreshCw, Globe, ZoomIn,
 import Image from 'next/image';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { AdCard } from "@/components/features/AdCard";
 import { SAMPLE_ADS } from "@/lib/constants"
 import { useVoiceStore } from "@/stores/index";
@@ -160,7 +161,7 @@ export function ModelResponse({
   settings
 }: ModelResponseProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const { toast } = useToast();
+  ;
   const voiceSettings = useVoiceStore((state) => state.settings);
   const availableVoices = useVoiceStore((state) => state.availableVoices);
   const initVoices = useVoiceStore((state) => state.initVoices);
@@ -259,10 +260,7 @@ export function ModelResponse({
   .replace(/\n\s*\n/g, '\n\n')
   .trim();
     await navigator.clipboard.writeText(textToCopy || '' );
-    toast({
-      title: "Copied to clipboard",
-      description: "The response has been copied to your clipboard.",
-    });
+    toast.success('Copied');
   };
 
   const handleFeedback = async (newState: 'liked' | 'disliked' | null) => {
@@ -280,18 +278,11 @@ export function ModelResponse({
         onFeedbackChange(responseId || '', state === 'none' ? null : state as 'liked' | 'disliked');
         
         if (state !== 'none') {
-          toast({
-            title: "Success",
-            description: `Response ${state === 'liked' ? 'liked' : 'disliked'}`,
-          });
+          toast.success(`Response ${state === 'liked' ? 'liked' : 'disliked'}`);
         }
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong, please try again",
-        variant: "destructive",
-      });
+      toast.error('Something went wrong, please try again')
     } finally {
       setIsSubmitting(false);
     }

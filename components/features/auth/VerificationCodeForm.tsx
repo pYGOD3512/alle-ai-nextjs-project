@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(30);
   const [isResending, setIsResending] = useState(false);
-  const { toast } = useToast();
+  ;
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   
   // Add useAuth to handle verification state
@@ -121,23 +121,14 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
 
       const formattedCode = `A-${verificationCode}`;
       await verifyEmail(formattedCode);
-      
-      toast({
-        title: "Success",
-        description: "Email verified successfully!",
-        variant: "default",
-      });
+      toast.success('Email verified');
       
       onSuccess();
       
     } catch (error: any) {
       // console.error('Verification error:', error);
       setError(error.message || 'Verification failed. Please try again.');
-      toast({
-        title: "Verification failed",
-        description: error.message || "Please check your code and try again",
-        variant: "destructive",
-      });
+      toast.error(`${error.message || "Please check your code and try again"}`)
       
       setCode(['', '', '', '', '', '']);
       inputs.current[0]?.focus();
@@ -153,22 +144,14 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
       const response = await authApi.resendVerification();
       
       setCountdown(30);
-      toast({
-        title: "Success",
-        description: response.message || "Verification code sent successfully!",
-        variant: "default",
-      });
+      toast.success('Verification code sent');
       
       setCode(['', '', '', '', '', '']);
       inputs.current[0]?.focus();
       setIsResending(false);
       
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to send code. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(`${error.response?.data?.message || "Failed to send code. Please try again."}`);
       setIsResending(false);
     }
   };
@@ -176,18 +159,9 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
   const handleLogout = async () => {
     try {
       await logout();
-      // toast({
-      //   title: "Logged out",
-      //   description: "You have been successfully logged out",
-      //   variant: "default",
-      // });
       onBackToLogin();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Failed to log out. Please try again.');
     }
   };
 

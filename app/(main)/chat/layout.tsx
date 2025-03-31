@@ -10,7 +10,7 @@ import { chatApi } from '@/lib/api/chat';
 import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 import { modelsApi } from '@/lib/api/models';
 import { useModelsStore } from "@/stores/models";
 
@@ -64,7 +64,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle, getHistoryByType, setHistory, setLoading: setHistoryLoading, setError: setHistoryError } = useHistoryStore();
   const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
-  const { toast } = useToast();
 
   // Calculate number of active models
   const activeModelsCount = selectedModels.chat.filter(
@@ -150,11 +149,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         })
         .catch(error => {
           // // console.error('Error getting conversation title:', error);
-          toast({
-            title: 'Failed',
-            description: 'Error getting conversation title',
-            variant: 'destructive',
-          });
+          toast.error('Error getting conversation title');
         });
 
       setConversationId(conversationId);
@@ -162,11 +157,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     } catch (error) {
       // // console.error('Error in chat flow:', error);
-      toast({
-        title: 'Failed',
-        description: 'Error in chat flow',
-        variant: 'destructive',
-      });
+      toast('Failed to create conversation', {
+        action: {
+          label: 'New Chat',
+          onClick: () => router.replace('/chat')
+        },
+      })
+
     } finally {
       setIsLoading(false);
     }

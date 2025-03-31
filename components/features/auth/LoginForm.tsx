@@ -8,7 +8,8 @@ import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +24,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
-  const { toast } = useToast();
+  ;
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,12 +43,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
       // Login function will handle other redirects
     } catch (error: any) {
       setPassword("");
-      toast({
-        title: "Login failed",
-        // description: `${error}`,
-        description: `Check your credentials and try again`,
-        variant: "destructive",
-      });
+      toast.error('Login failed, please try again');
       // console.log(error)
     } finally {
       setIsLoading(false);

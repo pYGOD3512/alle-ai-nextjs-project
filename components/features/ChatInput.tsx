@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import { ArrowUp, Paperclip, Globe , X, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "../ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { MicButton } from "@/components/ui/MicButton";
 import { FileUploadButton } from "@/components/ui/file-upload-button";
@@ -64,7 +65,7 @@ export function ChatInput({
   disableCombined
 }: ChatInputProps) {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-  const { toast } = useToast();
+  ;
   const { isWebSearch, setIsWebSearch } = useWebSearchStore();
   const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
@@ -228,11 +229,7 @@ export function ChatInput({
 
         const validation = validateFile(file);
         if (!validation.isValid) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: validation.error
-          });
+          toast.error(`Error ${validation.error}`);
           return;
         }
 
@@ -281,20 +278,13 @@ export function ChatInput({
 
           await handleProcessFile(file, text);
 
-          toast({
-            title: "Image Uploaded",
-            description: "Image has been uploaded successfully",
-          });
+          toast.success('file uploaded');
         } catch (error) {
           if (uploadedFile?.url) {
             URL.revokeObjectURL(uploadedFile.url);
           }
           setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-          toast({
-            variant: "destructive",
-            title: "Processing Failed",
-            description: error instanceof Error ? error.message : "Failed to process file"
-          });
+          toast.error(`${error instanceof Error ? error.message : "Failed to upload file"}`);
         }
       }
     }
@@ -308,11 +298,8 @@ export function ChatInput({
     try {
       const validation = validateFile(file);
       if (!validation.isValid) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: validation.error
-        });
+        toast.error(`${validation.error}`);
+
         return;
       }
 
@@ -364,21 +351,16 @@ export function ChatInput({
 
         await handleProcessFile(file, text);
 
-        // toast({
-        //   title: "File Processed",
-        //   description: `${file.name} has been added successfully`,
-        // });
+      toast.success(`file uploaded`);
+
       }
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
       setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-      toast({
-        variant: "destructive",
-        title: "Processing Failed",
-        description: error instanceof Error ? error.message : "Failed to process file"
-      });
+      toast.error(`${error instanceof Error ? error.message : "Failed to upload file"}`);
+
     }
   };
   
@@ -389,11 +371,8 @@ export function ChatInput({
 
     const validation = validateFile(file);
     if (!validation.isValid) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: validation.error
-      });
+      toast.error(`${validation.error}`);
+
       return;
     }
 
@@ -446,20 +425,14 @@ export function ChatInput({
         prev ? { ...prev, status: 'ready' } : null
       );
 
-      // toast({
-      //   title: "File Processed",
-      //   description: `${file.name} has been added successfully`,
-      // });
+      toast.success(`file uploaded`);
+
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
       setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-      toast({
-        variant: "destructive",
-        title: "Processing Failed",
-        description: error instanceof Error ? error.message : "Failed to process file"
-      });
+      toast.error(`${error instanceof Error ? error.message : "Failed to upload file"}`);
     }
   };
 
@@ -501,12 +474,6 @@ export function ChatInput({
     }
     
     onWebSearchToggle?.(newValue);
-    // toast({
-    //   title: newValue ? "Web Search Enabled" : "Web Search Disabled",
-    //   description: newValue 
-    //     ? "Your messages will now include web search results"
-    //     : "Messages will be processed without web search",
-    // });
   };
 
   const handleCombinedToggle = () => {
@@ -526,12 +493,6 @@ export function ChatInput({
     
     setIsCombinedMode(newValue);
     onCombinedToggle?.(newValue);
-    // toast({
-    //   title: newValue ? "Combined Mode Enabled" : "Combined Mode Disabled",
-    //   description: newValue 
-    //     ? "Your messages will now be processed in combined mode"
-    //     : "Messages will be processed normally",
-    // });
   };
 
   const handleSendClick = () => {
@@ -629,11 +590,7 @@ export function ChatInput({
       onCombinedToggle?.(false);
       
       // Show notification
-      toast({
-        title: "Combine Disabled",
-        description: "Combined has been disabled due to insufficient active models (minimum 2 required).",
-        variant: "default"
-      });
+      toast.warning('Combine disabled: Minimum of 2 active models required');
     }
   }, [activeModelsCount, isCombinedMode, onCombinedToggle]);
 
@@ -665,11 +622,11 @@ export function ChatInput({
         )}
 
         <div className="max-w-xl md:max-w-3xl mx-auto">
-          <div className="flex flex-col p-1 border bg-backgroundSecondary border-borderColorPrimary rounded-xl focus-within:border-borderColorPrimary">
+          <div className="flex flex-col p-1 border bg-backgroundSecondary border-borderColorPrimary rounded-2xl focus-within:border-borderColorPrimary">
             <Textarea 
               ref={inputRef}
               placeholder={"Message multiple models..."}
-              className={`w-full bg-transparent ${(pathname === '/chat' || pathname === '/image') ? 'min-h-[3.5rem]': 'min-h-[2.5rem]' }  max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300`}
+              className={`w-full bg-transparent ${(pathname === '/chat' || pathname === '/image') ? 'min-h-[3.5rem]': 'min-h-[3rem]' }  max-h-[10rem] border-none text-base resize-none focus-visible:outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300`}
               value={value}
               onChange={(e) => {
                 const target = e.target;

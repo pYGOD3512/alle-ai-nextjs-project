@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { Pencil, Check, X } from "lucide-react";
 import { useAuthStore } from "@/stores";
 import { ModelResponse } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { MessageAttachment } from "./MessageAttachment";
 
 
@@ -65,7 +66,7 @@ export function ChatMessage({
   const [editedContent, setEditedContent] = useState(content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthStore();
-  const { toast } = useToast();
+  ;
 
   const [x, y] = position;
   
@@ -229,11 +230,7 @@ export function ChatMessage({
               </div>
               {/* <button
                 onClick={()=>{
-                  toast({
-                    title: "Coming Soon !!",
-                    variant: "info",
-                    description: "This feature will be available soon",
-                  });
+                  toast.info('This feature will be available soon')
                   // handleEditClick();
                 }}
                 className="text-muted-foreground hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"

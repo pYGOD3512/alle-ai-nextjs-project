@@ -143,7 +143,7 @@ import { enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 
 import { NotificationItem } from "@/lib/types";
 import { driveService } from '@/lib/services/driveServices';
@@ -392,7 +392,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [feedback, setFeedback] = React.useState("");
   const [wantsFutureContact, setWantsFutureContact] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
+  ;
 
   const emojis = [
     { rating: 1, emoji: "😟" },
@@ -404,11 +404,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
 
   const handleSubmit = async () => {
     if (!selectedRating) {
-      toast({
-        title: "Rating Required",
-        description: "Please select a rating before submitting your feedback.",
-        variant: "destructive",
-      });
+      toast.error('Please select a rating and submit');
       return;
     }
 
@@ -420,11 +416,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
         anonymous: wantsFutureContact
       });
 
-      toast({
-        title: "Thank you!",
-        description: "Your feedback has been submitted successfully.",
-      });
-
+      toast.success('Your feedback has been submitted')
       // Reset form
       setSelectedRating(null);
       setFeedback("");
@@ -432,11 +424,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
       onClose();
     } catch (error) {
       // console.error('Error submitting feedback:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit feedback. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Failed to submit feedback, try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -734,7 +722,7 @@ const userPlan = React.useMemo(() => {
       }
     } catch (error) {
       // console.error('Failed to toggle favorite:', error);
-      // Optionally show an error toast/notification
+      toast.error('Failed to favorite model');
     } finally {
       setFavoriteLoading(null); // Clear loading state
     }
@@ -1133,7 +1121,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false);
   const [logoutAllModalOpen, setLogoutAllModalOpen] = React.useState(false);
   const [manageSharedLinksOpen, setManageSharedLinksOpen] = React.useState(false);
-  const { toast } = useToast();
+  ;
   const { isAuthenticated } = useDriveAuthStore();
   const [showDriveModal, setShowDriveModal] = useState(false);
   const [isTransactionHistoryOpen, setIsTransactionHistoryOpen] = useState(false);
@@ -1385,17 +1373,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         await driveService.signOut();
         useDriveAuthStore.getState().clearAuth();
         
-        toast({
-          title: "Success",
-          description: "Google Drive has been unlinked successfully",
-        });
+        toast.success('Google Drive unlinked');
       } catch (error) {
         // console.error('Failed to unlink Google Drive:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to unlink Google Drive"
-        });
+        toast.error('Failed to unlinked Google Drive');
+
       }
     } else {
       setShowDriveModal(true);
@@ -1444,11 +1426,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         }
       } catch (error) {
         setPersonalizationSetting(key, !checked);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to update summary preference",
-        });
+        toast.error('Failed to toggle summary');
       }
     } else {
       // Handle other personalization settings
@@ -1840,11 +1818,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            toast({
-                              title: "Coming Soon",
-                              description: "This feature will be available soon!",
-                              variant: "info",
-                            });
+                            toast.info('This feature will be available soon!')
                             // if (setting.action === "Delete") {
                             //   setDeleteAccountModalOpen(true);
                             // } else if (setting.action === "Export") {
@@ -1880,25 +1854,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           size="sm"
                           onClick={() => {
                             if (key === "google_drive") {
-                              toast({
-                                title: "Coming Soon",
-                                description: "This feature will be available soon!",
-                                variant: "info",
-                              });
+                            toast.info('This feature will be available soon!')
                               // handleGoogleDriveAction();
                             } else if (key === "one_drive"){
-                              toast({
-                                title: "Coming Soon",
-                                description: "This feature will be available soon!",
-                                variant: "info",
-                              });
+                              toast.info('This feature will be available soon!')
                               // // console.log('One Drive')
                             } else if (key === "dropbox"){
-                              toast({
-                                title: "Coming Soon",
-                                description: "This feature will be available soon!",
-                                variant: "info",
-                              });
+                              toast.info('This feature will be available soon!')
                               // // console.log('Dropbox')
                             }
                           }}
@@ -2112,7 +2074,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  ;
   
   // Form state
   const [formData, setFormData] = useState({
@@ -2139,21 +2101,14 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
       // Validate file type
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif'];
       if (!validTypes.includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload a valid image file (JPEG, PNG, JPG, WEBP, or GIF).",
-          variant: "destructive",
-        });
+
+        toast.error('Invalid file type. Supported files(JPEG, PNG, JPG, WEBP, or GIF)');
         return;
       }
 
       // Validate file size (2MB)
       if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please upload an image smaller than 2MB.",
-          variant: "destructive",
-        });
+        toast.error('File too large, less than 2MB required');
         return;
       }
 
@@ -2186,20 +2141,13 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
             plan
           );
         }
-        
-        toast({
-          title: "Success",
-          description: response.message || "Profile updated successfully",
-        });
+
+        toast.success('Profile updated')
         
         setIsEditing(false);
       } catch (error) {
         // console.error('Profile update error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update profile",
-          variant: "destructive",
-        });
+        toast.error('Faild to update profile');
       } finally {
         setIsSubmitting(false);
       }
@@ -2402,7 +2350,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
 export function ReferModal({ isOpen, onClose }: ModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const { toast } = useToast();
+  ;
 
   const { user } = useAuthStore();
 
@@ -2442,11 +2390,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
-    toast({
-      title: "Copied",
-      description: `Referral link copied to clipboard`,
-      duration: 3000,
-    });
+    toast.success('Copied');
   };
 
   const platforms = [
@@ -2625,11 +2569,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
           currentBalance={stats.cashEarned}
           onConfirm={() => {
             // // console.log(`Subscription confirmed for ${selectedPlan}`);
-            toast({
-              title: "Success",
-              description: `You've subscribed to Alle-AI ${selectedPlan}`,
-              duration: 3000,
-            });
+            toast.success(`You've subscribed to Alle-AI ${selectedPlan}`);
             onClose();
           }}
         />
@@ -2716,24 +2656,19 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const [showOrgPlans, setShowOrgPlans] = useState(false);
   const [teamSize, setTeamSize] = useState(50);
-  const { toast } = useToast();
+  ;
   const router = useRouter();
   const userPlan = useAuthStore((state) => state.plan);
 
   const handleCustomPlan = () => {
-    toast({
-      title: "Coming Soon",
-      description: "This plan is coming soon!",
-      variant: "default",
-    });
+    toast.info('This plan will be available soon!')
   };
 
+
   const handleContactSales = () => {
-    toast({
-      title: "Contact Sales",
-      description: "Our team will reach out to you shortly!",
-      variant: "default",
-    });
+    toast.message('Contact Sales', {
+      description: 'Our team will reach out to you shortly!',
+    })
   };
 
   const calculatePrice = (basePrice: number) => {
@@ -2766,11 +2701,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
         throw new Error(response.message || 'Checkout failed');
       }
     } catch (error: any) {
-      toast({
-        title: "Checkout Failed",
-        description: error.message || "An error occurred. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(`${error.message || "An error occurred. Please try again."}`)
     } finally {
       setProcessingPlan(null);
     }
@@ -3465,15 +3396,11 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
 export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialogProps) {
   const { theme } = useTheme();
   const dark = theme === "dark";
-  const { toast } = useToast();
+  ;
 
   const handleShare = (platform: typeof socialMediaOptions[0]) => {
     window.open(platform.handler(imageUrl), '_blank');
-    toast({
-      title: "Shared!",
-      description: `Your creation has been shared to ${platform.name}`,
-      duration: 3000,
-    });
+    toast.success(`Your creation has been shared to ${platform.name}`)
     onClose();
   };
 
@@ -3918,7 +3845,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
   const [filteredFiles, setFilteredFiles] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  ;
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -3961,11 +3888,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
       setLastRefresh(new Date());
     } catch (error) {
       // console.error('Failed to load folder contents:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load folder contents"
-      });
+      toast.error('Failed to load folder contents')
     } finally {
       setLoading(false);
     }
@@ -4196,7 +4119,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
   const [isNewlyCreated, setIsNewlyCreated] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
-  const { toast } = useToast();
+  ;
   const { currentConversationLink, setCurrentConversationLink } = useSidebarStore();
   const { sectionIds } = useSidebarStore();
   const { addSharedLink, updateSharedLink, getSharedLink } = useSharedLinksStore();
@@ -4214,10 +4137,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
     
     if (!currentTypeEntry || !currentTypeEntry[1]) {
-      toast({
-        variant: "destructive",
-        description: "Please select a conversation to share",
-      });
+      toast.info('Please select a conversation to share');
       setIsLoading(false);
       return;
     }
@@ -4231,10 +4151,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     const history = getHistoryByType(historyType).find(item => item.id === historyId);
 
     if (!history) {
-      toast({
-        variant: "destructive",
-        description: "Conversation not found",
-      });
+      toast.error('Conversation not found')
       setIsLoading(false);
       return;
     }
@@ -4249,15 +4166,11 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     if (existingLink) {
       // Update existing link
       updateSharedLink(existingLink.id, newLink);
-      toast({
-        description: "Share link has been updated",
-      });
+      toast.info('Share link has been updated');
     } else {
       // Create new link
       addSharedLink(historyId, history.title, newLink);
-      toast({
-        description: "Share link has been created",
-      });
+      toast.info('Share link has been created');
     }
 
     setCurrentConversationLink(newLink);
@@ -4270,15 +4183,9 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     
     try {
       await navigator.clipboard.writeText(currentConversationLink);
-      toast({
-        title: "Copied",
-        description: "Link copied to clipboard",
-      });
+      toast.success('Copied');
     } catch (err) {
-      toast({
-        variant: "destructive",
-        description: "Failed to copy link",
-      });
+      toast.error('Failed to copy link')
     }
   };
 
@@ -4448,7 +4355,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
 
 export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   const { sharedLinks, removeSharedLink } = useSharedLinksStore();
-  const { toast } = useToast();
+  ;
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredLinks = useMemo(() => {
@@ -4460,12 +4367,10 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   const copyToClipboard = async (link: string) => {
     try {
       await navigator.clipboard.writeText(link);
-      toast({ description: "Link copied to clipboard" });
+      toast.success('Copied');
     } catch (err) {
-      toast({
-        variant: "destructive",
-        description: "Failed to copy link"
-      });
+      toast.error('Failed to copy link');
+
     }
   };
 
@@ -4750,14 +4655,11 @@ export function ReportContentModal({
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [includeContent, setIncludeContent] = useState(true);
-  const { toast } = useToast();
+  ;
 
   const handleSubmit = async () => {
     if (!selectedCategory) {
-      toast({
-        title: "Please select a category",
-        variant: "destructive",
-      });
+      toast.info('Please select a category')
       return;
     }
 
@@ -4766,18 +4668,11 @@ export function ReportContentModal({
       // Simulated API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast({
-        title: "Report submitted",
-        description: "Thank you for helping keep our platform safe.",
-      });
+      toast.success('Thank you for helping keep our platform safe.')
       onClose();
       setSelectedCategory('');
     } catch (error) {
-      toast({
-        title: "Error submitting report",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      toast.error('Something went wrong, try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -5164,7 +5059,7 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
   const [keyName, setKeyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const addKey = useApiKeyStore((state) => state.addKey);
-  const { toast } = useToast();
+  ;
   const { user } = useAuthStore();
 
   const handleCreateKey = async () => {
@@ -5190,21 +5085,14 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
         email: user?.email,
         cost: "$0.00"
       });
-      
-      toast({
-        title: "API Key Created",
-        description: "Your new API key has been created successfully.",
-      });
+
+      toast.success('API Key Created')
       
       setKeyName('');
       onClose();
     } catch (error) {
       // console.error('Error creating API key:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create API key",
-        variant: "destructive",
-      });
+      toast.error('Failed to create key');
     } finally {
       setIsLoading(false);
     }
@@ -5257,7 +5145,7 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
 export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalProps & { keyId: string; initialName: string }) {
   const [keyName, setKeyName] = useState(initialName);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  ;
   const { keys, updateKeyName } = useApiKeyStore();
 
   const handleEditKey = async () => {
@@ -5275,20 +5163,12 @@ export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalPr
       if (response.status) {
         // Update the key name in the store
         updateKeyName(keyId, response.api_key.name);
-        
-        toast({
-          title: "Success",
-          description: response.message || "API key name updated successfully",
-        });
+        toast.success('API key name updated')
         onClose();
       }
     } catch (error) {
       // console.error('Error editing API key:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update API key name",
-        variant: "destructive",
-      });
+      toast.error('Failed to update key name');
     } finally {
       setIsLoading(false);
     }
@@ -5356,7 +5236,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
   const { addPaymentMethod } = usePaymentStore();
   const [isLoading, setIsLoading] = useState(false);
   const [saveCard, setSaveCard] = useState(mode === 'add');
-  const { toast } = useToast();
+  ;
 
   const [errors, setErrors] = useState({
     cardNumber: '',
@@ -5709,10 +5589,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
               disabled={isLoading}
               onClick={()=>{
                 mode === 'add' && (
-                  toast({
-                    title: "Success",
-                    description: "Payment method has been added",
-                  })
+                  toast.success('Payment method added')
                 )
               }}
             >
@@ -6057,7 +5934,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
   const { currentProject, addProjectFile, removeProjectFile } = useProjectStore();
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const { toast } = useToast();
+  ;
 
   useEffect(() => {
     if (currentProject) {
@@ -6076,16 +5953,9 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
 
       await addProjectFile(currentProject.id, file);
 
-      toast({
-        title: "File uploaded",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded')
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Failed to upload file"
-      });
+      toast.error('Failed to upload file');
     }
   };
 
@@ -6109,11 +5979,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
 
   const handleDownload = (file: ProjectFile) => {
     if (!file.content) {
-      toast({
-        variant: "destructive",
-        title: "Download failed",
-        description: "File content not available"
-      });
+      toast.error('Downlaod failed, please try again');
       return;
     }
 
@@ -6134,11 +6000,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Download failed",
-        description: "Failed to download file"
-      });
+      toast.error('Download failed, please try again')
     }
   };
 
@@ -6196,10 +6058,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
                       onClick={() => {
                         if (!currentProject?.id) return;
                         removeProjectFile(currentProject.id, file.id);
-                        toast({
-                          title: "File removed",
-                          description: `${file.name} removed from project`
-                        });
+                        toast.success('File removed');
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -6329,7 +6188,7 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
   const [view, setView] = useState<'list' | 'create'>('list');
   const [orgName, setOrgName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  ;
   const router = useRouter();
 
   // Mock data - Replace with your actual data fetching
@@ -6367,21 +6226,13 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       // Add your organization creation logic here
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast({
-        title: "Organization Created",
-        description: "Your organization has been created successfully.",
-        variant: "default",
-      });
+      toast.success('Organization Created');
       
       // Open the new organization page in a new tab
       router.push(`/organization/${newOrgId}`);
       onClose();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create organization. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Error creating organization');
     } finally {
       setIsSubmitting(false);
     }
@@ -6392,18 +6243,9 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       // Add your organization selection logic here
       await new Promise(resolve => setTimeout(resolve, 500)); // Mock API call
       router.push(`/organization/${orgId}`);
-      toast({
-        title: "Organization Selected",
-        description: "Switched to selected organization.",
-        variant: "default",
-      });
       onClose();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to switch organization. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Error, switching organization');
     }
   };
 
