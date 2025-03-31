@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { DocsHeader } from "@/components/docs/docsHeader";
 import { SidebarNav } from "@/components/docs/SidebarNav";
 import { OnThisPage } from "@/components/docs/OnThisPage";
-import MobileNav from "@/components/docs/MobileNav";
+import { MobileNav } from "@/components/docs/MobileNav";
 
 const hheading = [
   { id: "Random test", href: "" },

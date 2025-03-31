@@ -13,7 +13,7 @@ import { SearchCommand } from "@/components/features/developer/search-command";
 import { apiReference, guides, tutorial } from "@/lib/constants/docs";
 import SearchModal from "../docSearchModal";
 
-export default function MobileNav() {
+export function MobileNav() {
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
