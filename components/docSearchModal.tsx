@@ -26,13 +26,18 @@ interface SearchResult {
   path?: string; // For hierarchical display
 }
 
-const SearchModal = ({ isOpen, onClose }) => {
+interface SearchModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const { resolvedTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [filter, setFilter] = useState("all");
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -217,7 +222,7 @@ const SearchModal = ({ isOpen, onClose }) => {
            fontWeight: 500,
          }}
        >
-         {result.path.split(">>").map((part, index, array) => (
+         {(result.path || `${result.section}>${result.title}`).split(">").map((part, index, array) => (
            <span key={index}>
              <strong>{part.trim()}</strong>
              {index < array.length - 1 && (
