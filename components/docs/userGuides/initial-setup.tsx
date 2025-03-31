@@ -128,7 +128,7 @@ export default function Quickstart() {
           Make your first API request
         </h2>
         <p className="mb-6">
-          With your Alle-AI API key set as an environment variable, you're ready
+          With your Alle-AI API key set as an environment variable, you&apos;re ready
           to start using our platform. For now, we only support access through{" "}
           <span className="text-blue-600 font-semibold">Our official SDK</span>,
           as shown below.
@@ -167,7 +167,7 @@ export default function Quickstart() {
           Next Steps
         </h2>
         <p className="text-muted-foreground text-lg mb-6">
-          Now that you've made your first Alle-AI API request, you can explore
+          Now that you&apos;ve made your first Alle-AI API request, you can explore
           the following resources:
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

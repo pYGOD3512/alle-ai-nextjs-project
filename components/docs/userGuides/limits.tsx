@@ -239,7 +239,15 @@ const errorMitigationSteps = [
 ];
 
 // Reusable Components
-const Table = ({ headers, children, className = "" }) => (
+const Table = ({ 
+  headers, 
+  children, 
+  className = "" 
+}: { 
+  headers: string[]; 
+  children: React.ReactNode; 
+  className?: string 
+}) => (
   <div className={`overflow-x-auto mb-8 ${className}`}>
     <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
       <thead className="">
@@ -259,8 +267,14 @@ const Table = ({ headers, children, className = "" }) => (
   </div>
 );
 
-const ModelLimitsTable = ({ modelType, data }) => {
-  const renderRow = (model) => {
+const ModelLimitsTable = ({ data }: { 
+  data: { 
+    title: string; 
+    headers: string[]; 
+    models: Array<Record<string, any>>; 
+  } 
+}) => {
+  const renderRow = (model: Record<string, any>) => {
     const values = Object.values(model);
     return (
       <tr key={model.name} className="hover:bg-accent">
@@ -286,7 +300,12 @@ const ModelLimitsTable = ({ modelType, data }) => {
   );
 };
 
-const ListSection = ({ items }) => (
+const ListSection = ({ items }: { 
+  items: Array<{ 
+    title: string; 
+    description: string 
+  }> 
+}) => (
   <ul className="text-muted-foreground mb-8 space-y-4">
     {items.map((item, index) => (
       <li key={index}>
@@ -308,7 +327,7 @@ const RateLimits = () => {
 
       <h2 className="text-3xl mb-4">Why Do We Have Rate Limits?</h2>
       <p className="text-muted-foreground mb-8">
-        Rate limits are a common practice for APIs, and they're put in place for
+        Rate limits are a common practice for APIs, and they&apos;re put in place for
         a few key reasons:
       </p>
       <ListSection items={rateProtectionReasons} />
@@ -324,7 +343,7 @@ const RateLimits = () => {
 
       <h2 className="text-3xl mb-4">Usage Tiers</h2>
       <p className="text-muted-foreground mb-8">
-        As your usage increases, you'll automatically graduate to higher usage
+        As your usage increases, you&apos;ll automatically graduate to higher usage
         tiers, which come with increased rate limits. Below is a summary of our
         tiers:
       </p>
@@ -351,7 +370,7 @@ const RateLimits = () => {
       </p>
 
       {Object.entries(modelLimitsData).map(([type, data]) => (
-        <ModelLimitsTable key={type} modelType={type} data={data} />
+        <ModelLimitsTable key={type} data={data} />
       ))}
 
       <h2 className="text-3xl mb-4">Rate Limits in Headers</h2>

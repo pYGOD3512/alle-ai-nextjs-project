@@ -13,17 +13,13 @@ const useScrollSpy = ({
   const [activeSection, setActiveSection] = useState("");
 
   const updateActiveSection = useCallback(
-    (newSection) => {
+    (newSection: string) => {
       if (newSection !== activeSection) {
         setActiveSection(newSection);
         if (newSection) {
-          router.replace(`/docs/api-reference/${newSection}`, undefined, {
-            shallow: true,
-          });
+          router.replace(`/docs/api-reference/${newSection}`);
         } else {
-          router.replace("/docs/api-reference/introduction", undefined, {
-            shallow: true,
-          });
+          router.replace("/docs/api-reference/introduction");
         }
       }
     },

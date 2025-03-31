@@ -388,7 +388,7 @@ ${installSdks.javascript}`}
             </li>
             <li>
               <strong className="font-medium">TypeScript Support:</strong> If
-              you're using Node.js, consider using TypeScript for better type
+              you&apos;re using Node.js, consider using TypeScript for better type
               safety and autocompletion.
             </li>
             <li>
