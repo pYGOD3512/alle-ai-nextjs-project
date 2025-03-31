@@ -162,17 +162,17 @@ export default function HelpLayout({
                       ? "/svgs/logo-desktop-full.png"
                       : "/svgs/logo-desktop-dark-full.png"
                   }
-                  alt="all-ai"
+                  alt="all-ai"s
                   height={100}
                   width={100}
                 />
               </Link>
 
               <div className="right-10 flex items-center gap-5 text-sm">
-                {/* <Link href={"/docs/developer-guides"} target="_blank">
+                <Link href={"/docs/getting-started"} target="_blank">
                   API Docs
-                </Link> */}
-                <a 
+                </Link>
+                {/* <a 
                   href="#" 
                   onClick={(e) => {
                     e.preventDefault();
@@ -180,7 +180,7 @@ export default function HelpLayout({
                   }}
                 >
                   API Docs
-                </a>
+                </a> */}
                 {/* <Link href={"/release-notes"}>Release Notes</Link> */}
                 <ThemeToggle />
                 <DropdownMenu>

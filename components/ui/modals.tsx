@@ -781,7 +781,7 @@ const userPlan = React.useMemo(() => {
         type: "warning",
         metadata: {
           link: {
-            url: '/collection/3742473-others/limits',
+            url: '/collection/3742473-others/model-limits',
             text: 'Learn more'
           },
           plan: planUpgrade,

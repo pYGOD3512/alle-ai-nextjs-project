@@ -18,8 +18,6 @@ export function BillingContent() {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isBuyCreditsOpen, setIsBuyCreditsOpen] = useState(false);
 
-  ;
-
 
   const [deletePrompt, setDeletePrompt] = useState<{
     isOpen: boolean;

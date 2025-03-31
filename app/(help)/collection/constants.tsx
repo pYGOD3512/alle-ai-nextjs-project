@@ -431,7 +431,7 @@ export const helpCategories: HelpCategories = {
             keywords: ["model", "free plan", "standard plan", "plus plan", "model selection", "AI models", "plan comparison", "upgrade benefits"],
           },
           {
-            id: "limits",
+            id: "model-limits",
             title: "How Many Models Can I Select?",
             description:
               "Understanding model selection limits for different subscription plans.",
