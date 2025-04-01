@@ -583,7 +583,7 @@ export function Header() {
                 className="h-8 w-8 rounded-full mx-auto cursor-pointer select-none"
               />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-background">
+              <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-background dark:bg-backgroundSecondary shadow-lg">
               {pathname.includes('/plans') ? (
                 <DropdownMenuItem
                 className="flex items-start p-2 gap-4 cursor-pointer">

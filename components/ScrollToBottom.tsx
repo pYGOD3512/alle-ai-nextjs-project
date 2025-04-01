@@ -92,7 +92,7 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
       variant="default"
       size="icon"
       className={cn(
-        ` bg-foreground border border-borderColorPrimary fixed bottom-32 ${isOpen ? "right-[43%]" : "right-[50%]"} rounded-full shadow-md opacity-90 hover:opacity-100 transition-all duration-300`,
+        ` bg-foreground border border-borderColorPrimary fixed bottom-36 ${isOpen ? "right-[43%]" : "right-[50%]"} rounded-full shadow-md opacity-90 hover:opacity-100 transition-all duration-300`,
         className
       )}
       onClick={handleManualScrollToBottom}
