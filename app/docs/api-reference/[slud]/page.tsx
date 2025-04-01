@@ -20,8 +20,29 @@ export default function Page() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const isManualNavigation = useRef(false);
   const currentSection = useRef<string | null>(null);
+  const lastScrollPosition = useRef(0);
 
-  // Handle manual navigation (e.g., sidebar clicks) - unchanged from new code
+  useEffect(() => {
+    const handleScroll = () => {
+      lastScrollPosition.current = window.scrollY;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!pathname) return;
+
+    const section =
+      pathname.replace("/docs/api-reference/", "") || "introduction";
+    const element = document.querySelector(`[data-section="${section}"]`);
+    if (element && section !== currentSection.current) {
+      // Disable smooth scrolling on initial load
+      element.scrollIntoView({ behavior: "instant" });
+      currentSection.current = section;
+    }
+  }, [pathname]);
+
   useEffect(() => {
     if (!pathname) return;
 
@@ -30,7 +51,8 @@ export default function Page() {
       isManualNavigation.current = true;
       const element = document.querySelector(`[data-section="${section}"]`);
       if (element) {
-        router.replace(`/docs/api-reference/${section}`, { scroll: false });
+        // Use `window.history.replaceState` to avoid Next.js scroll reset
+        window.history.replaceState(null, "", `/docs/api-reference/${section}`);
         currentSection.current = section;
       }
 
@@ -40,29 +62,38 @@ export default function Page() {
 
       return () => clearTimeout(timer);
     }
-  }, [pathname, router]);
+  }, [pathname]);
 
-  // Set up Intersection Observer with old code’s logic
+  // Set up Intersection Observer with scroll preservation
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (isManualNavigation.current) return;
 
         entries.forEach((entry) => {
-          // Extracted from old code: check visibility with threshold
           if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
             const section = entry.target.getAttribute("data-section");
             if (section && section !== currentSection.current) {
+              // Save current scroll position before URL update
+              const scrollPos = window.scrollY;
               currentSection.current = section;
-              // New code’s scroll preservation
-              router.replace(`/docs/api-reference/${section}`, { scroll: false });
+
+              // Use `window.history.replaceState` to avoid scroll reset
+              window.history.replaceState(
+                null,
+                "",
+                `/docs/api-reference/${section}`
+              );
+
+              // Restore scroll position immediately
+              window.scrollTo(0, scrollPos);
             }
           }
         });
       },
       {
-        threshold: 0.75, // From old code: section must be 75% visible
-        rootMargin: "-100px 0px", // From old code: stricter trigger zone
+        threshold: 0.75,
+        rootMargin: "-100px 0px",
       }
     );
 
@@ -72,7 +103,7 @@ export default function Page() {
 
     observerRef.current = observer;
     return () => observer.disconnect();
-  }, [router]);
+  }, []);
 
   return (
     <div className="space-y-32 ml-10">
