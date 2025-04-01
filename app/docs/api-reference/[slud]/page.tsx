@@ -22,14 +22,16 @@ export default function Page() {
   const currentSection = useRef<string | null>(null);
   const lastScrollPosition = useRef(0);
 
+  // Minimal scroll position tracking
   useEffect(() => {
     const handleScroll = () => {
       lastScrollPosition.current = window.scrollY;
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Handle initial load
   useEffect(() => {
     if (!pathname) return;
 
@@ -37,12 +39,13 @@ export default function Page() {
       pathname.replace("/docs/api-reference/", "") || "introduction";
     const element = document.querySelector(`[data-section="${section}"]`);
     if (element && section !== currentSection.current) {
-      // Disable smooth scrolling on initial load
-      element.scrollIntoView({ behavior: "instant" });
       currentSection.current = section;
+      // Disable any smooth scrolling
+      element.scrollIntoView({ behavior: "instant" });
     }
   }, [pathname]);
 
+  // Handle manual navigation
   useEffect(() => {
     if (!pathname) return;
 
@@ -51,9 +54,9 @@ export default function Page() {
       isManualNavigation.current = true;
       const element = document.querySelector(`[data-section="${section}"]`);
       if (element) {
-        // Use `window.history.replaceState` to avoid Next.js scroll reset
-        window.history.replaceState(null, "", `/docs/api-reference/${section}`);
         currentSection.current = section;
+       
+        window.history.replaceState(null, "", `/docs/api-reference/${section}`);
       }
 
       const timer = setTimeout(() => {
@@ -64,7 +67,7 @@ export default function Page() {
     }
   }, [pathname]);
 
-  // Set up Intersection Observer with scroll preservation
+  // Intersection Observer logics
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -74,19 +77,16 @@ export default function Page() {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
             const section = entry.target.getAttribute("data-section");
             if (section && section !== currentSection.current) {
-              // Save current scroll position before URL update
-              const scrollPos = window.scrollY;
+              const currentScroll = lastScrollPosition.current;
               currentSection.current = section;
 
-              // Use `window.history.replaceState` to avoid scroll reset
               window.history.replaceState(
                 null,
                 "",
                 `/docs/api-reference/${section}`
               );
 
-              // Restore scroll position immediately
-              window.scrollTo(0, scrollPos);
+              window.scrollTo(0, currentScroll);
             }
           }
         });
