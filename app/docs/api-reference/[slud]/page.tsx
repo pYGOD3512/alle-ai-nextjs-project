@@ -3,14 +3,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-// pages (assuming these are React components)
 import ApiIntroduction from "@/components/docs/api-reference/introduction";
 import ApiAudioGenerationDocs from "@/components/docs/api-reference/audioGenerations";
 import ApiImageGenerationDocs from "@/components/docs/api-reference/imageGenerations";
 import ApiVideoGenerationDocs from "@/components/docs/api-reference/videoGenerations";
 import ApiTextGenerationDocs from "@/components/docs/api-reference/chat";
 
-// Define valid section names as a union type
 type SectionName =
   | "introduction"
   | "text-generation"
@@ -58,7 +56,7 @@ export default function Page() {
         });
       },
       {
-        threshold: 0.6, // Trigger when 60% of section is visible
+        threshold: 0.6, 
         rootMargin: "-150px 0px -150px 0px", // Adjusted for smoother transitions
       }
     );
