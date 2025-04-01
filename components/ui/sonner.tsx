@@ -23,7 +23,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
           title: 'flex items-center gap-2',
           loader: 'flex items-center',
-          icon: 'mr-2',
+          icon: 'ml-2 mr-2',
         },
       }}
       {...props}

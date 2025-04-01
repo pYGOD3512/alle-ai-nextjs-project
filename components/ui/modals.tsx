@@ -262,7 +262,7 @@ interface LogoutModalProps extends ModalProps {
 
 const shortcuts: ShortcutItem[] = [
   {
-    action: "Open new chat",
+    action: "Start new conversation",
     shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
   },
   {
@@ -2828,7 +2828,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   return (
     <div className="overflow-auto">
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[90%] overflow-y-auto max-h-[90vh]">
+        <DialogContent className="sm:max-w-[90%] lg:max-w-[80%] overflow-y-auto max-h-[90vh]">
           {showOrgPlans ? (
             <>
               <DialogHeader className="text-center space-y-4 relative">
@@ -4623,7 +4623,7 @@ export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
 
 function getIconForAction(action: string) {
   switch (action) {
-    case "Open new chat":
+    case "Start new conversation":
       return <MessageSquare className="h-4 w-4" />;
     case "Focus chat input":
       return <Type className="h-4 w-4" />;

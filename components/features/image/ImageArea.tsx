@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
 import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader2 } from "lucide-react";
-import { IMAGE_MODELS } from '@/lib/constants';
 import { toast } from "sonner"
 
 import {

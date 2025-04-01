@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, forwardRef, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -709,7 +708,8 @@ export function Sidebar() {
                 <div
                   className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
                     ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                    ${styles.hoverBg}`}
+                    ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
+                    ${styles.hoverBg} cursor-pointer`}
                   onClick={() => {
                     if (item.href === "/audio" || item.href === "/video") {
                       toast.info('This feature will be available soon');
@@ -741,7 +741,7 @@ export function Sidebar() {
                 // setProjectModalOpen(true)}
               }}
             >
-              <Folder className="h-4 w-4" />
+              <Folder className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
         )}

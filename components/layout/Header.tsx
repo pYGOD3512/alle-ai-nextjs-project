@@ -6,8 +6,7 @@ import { Text } from "@radix-ui/themes";
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { 
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
   Bell,
   ALargeSmall,
   MessagesSquare,
@@ -17,6 +16,7 @@ import {
   Crown,
   Gem,
   Loader2,
+  PanelRightClose,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -24,7 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { navItems, userMenuItems, notifications as notificationData, CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS} from '@/lib/constants';
+import { navItems, userMenuItems, notifications as notificationData, AUDIO_MODELS, VIDEO_MODELS} from '@/lib/constants';
 import { NotificationItem } from "@/lib/types";
 import { useSidebarStore, useSelectedModelsStore, useAuthStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
@@ -408,37 +408,43 @@ export function Header() {
         >
           {isOpen ? (
             mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
-                alt="Logo"
-                width={100}
-                height={100}
-                className={`rounded mx-auto`}
-              />
+              <div className="h-8 w-32 flex items-center justify-center overflow-hidden">
+                <Image 
+                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+                  alt="Logo"
+                  width={100}
+                  height={30}
+                  className="rounded object-contain"
+                  priority
+                />
+              </div>
             )
           ) : (
             mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
-                alt="Logo"
-                width={100}
-                height={100}
-                className="rounded mx-auto"
-              />
+              <div className="h-8 w-8 flex items-center justify-center overflow-hidden">
+                <Image 
+                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="rounded object-contain"
+                  priority
+                />
+              </div>
             )
           )}
           {!pathname.includes('/organization') && (
             <Button 
-            variant="secondary" 
+            variant="outline" 
             size="icon" 
             onClick={toggle}
-            className={`h-6 w-6 absolute -right-3 transition-all duration-300 ${isMobile ? ( isOpen ? '-right-3' : 'right-[-2.5rem]') : "-right-3" }`}
+            className={`h-8 w-8 absolute p-0 -right-3 transition-all duration-300 bg-transparent border-none text-muted-foreground ${isMobile ? ( isOpen ? '-right-3' : 'right-[-2.5rem]') : "-right-8" }`}
             aria-label="Toggle Sidebar"
           >
             {isOpen ? (
-              <ChevronLeft className="h-5 w-5" />
+              <PanelLeftClose className="h-6 w-6" />
             ) : (
-              <ChevronRight className="h-5 w-5" />
+              <PanelRightClose className="h-6 w-6" />
             )}
           </Button>
           )}
@@ -453,7 +459,7 @@ export function Header() {
         >
           {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
             isLoadingLatest ? (
-              <div className={`flex items-center ml-8 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 px-3 ${selectedModelNames.length > 0 ? 'w-2/5 sm:w-fit' : 'w-fit'}`}>
+              <div className={`flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 px-3 ${selectedModelNames.length > 0 ? 'w-2/5 sm:w-fit' : 'w-fit'}`}>
                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 <span className="text-xs text-muted-foreground"></span>
               </div>
@@ -462,7 +468,7 @@ export function Header() {
               <DropdownMenu open={modelsDropdownOpen} onOpenChange={setModelsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <div 
-                    className={`w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-8 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}
+                    className={`w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}
                   >
                     {selectedModelNames.map((model, index) => (
                       <span 
@@ -577,7 +583,7 @@ export function Header() {
                 className="h-8 w-8 rounded-full mx-auto cursor-pointer select-none"
               />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-backgroundSecondary">
+              <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-background">
               {pathname.includes('/plans') ? (
                 <DropdownMenuItem
                 className="flex items-start p-2 gap-4 cursor-pointer">
