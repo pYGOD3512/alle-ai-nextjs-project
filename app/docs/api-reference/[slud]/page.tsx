@@ -21,72 +21,48 @@ export default function Page() {
   const isManualNavigation = useRef(false);
   const currentSection = useRef<string | null>(null);
 
-  // Sync scroll position with URL on page load/refresh
+  // Handle manual navigation (e.g., sidebar clicks) - unchanged from new code
   useEffect(() => {
-    const sectionFromUrl = pathname.replace("/docs/api-reference/", "");
-    if (sectionFromUrl && sectionFromUrl !== "api-reference") {
-      const element = document.querySelector(
-        `[data-section="${sectionFromUrl}"]`
-      );
+    if (!pathname) return;
+
+    const section = pathname.replace("/docs/api-reference/", "");
+    if (section) {
+      isManualNavigation.current = true;
+      const element = document.querySelector(`[data-section="${section}"]`);
       if (element) {
-        element.scrollIntoView({ behavior: "instant" });
-        currentSection.current = sectionFromUrl;
+        router.replace(`/docs/api-reference/${section}`, { scroll: false });
+        currentSection.current = section;
       }
-    } else {
-      currentSection.current = "introduction"; // Default to introduction
+
+      const timer = setTimeout(() => {
+        isManualNavigation.current = false;
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
-  }, [pathname]);
+  }, [pathname, router]);
 
-  // Set up Intersection Observer
+  // Set up Intersection Observer with old code’s logic
   useEffect(() => {
-    let previousScrollY = window.scrollY;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (isManualNavigation.current) return;
 
-        const currentScrollY = window.scrollY;
-        const isScrollingUp = currentScrollY < previousScrollY;
-        previousScrollY = currentScrollY;
-
-        let targetSection: string | null = null;
-        let highestTop = Infinity;
-        let lowestBottom = -Infinity;
-
         entries.forEach((entry) => {
-          const section = entry.target.getAttribute("data-section");
-          const rect = entry.target.getBoundingClientRect();
-          const isVisible = entry.intersectionRatio > 0;
-
-          if (!isVisible || !section) return;
-
-          if (isScrollingUp) {
-            // When scrolling up, prioritize the section we're entering from the bottom
-            if (rect.bottom <= window.innerHeight && rect.bottom > 0) {
-              if (rect.bottom > lowestBottom) {
-                lowestBottom = rect.bottom;
-                targetSection = section;
-              }
-            }
-          } else {
-            // When scrolling down, prioritize the section closest to the top
-            if (rect.top >= 0 && rect.top < highestTop) {
-              highestTop = rect.top;
-              targetSection = section;
+          // Extracted from old code: check visibility with threshold
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
+            const section = entry.target.getAttribute("data-section");
+            if (section && section !== currentSection.current) {
+              currentSection.current = section;
+              // New code’s scroll preservation
+              router.replace(`/docs/api-reference/${section}`, { scroll: false });
             }
           }
         });
-
-        if (targetSection && targetSection !== currentSection.current) {
-          currentSection.current = targetSection;
-          router.replace(`/docs/api-reference/${targetSection}`, {
-            scroll: false,
-          });
-        }
       },
       {
-        threshold: [0], // Trigger as soon as any part of the section is visible
-        rootMargin: "0px", // No offset
+        threshold: 0.75, // From old code: section must be 75% visible
+        rootMargin: "-100px 0px", // From old code: stricter trigger zone
       }
     );
 
@@ -97,27 +73,6 @@ export default function Page() {
     observerRef.current = observer;
     return () => observer.disconnect();
   }, [router]);
-
-  // Handle manual navigation (e.g., sidebar clicks)
-  useEffect(() => {
-    if (!pathname) return;
-
-    const section = pathname.replace("/docs/api-reference/", "");
-    if (section && section !== currentSection.current) {
-      isManualNavigation.current = true;
-      const element = document.querySelector(`[data-section="${section}"]`);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-        currentSection.current = section;
-      }
-
-      const timer = setTimeout(() => {
-        isManualNavigation.current = false;
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [pathname]);
 
   return (
     <div className="space-y-32 ml-10">
