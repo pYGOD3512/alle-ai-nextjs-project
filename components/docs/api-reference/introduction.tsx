@@ -50,7 +50,7 @@ export default function ApiIntroduction() {
           className="min-h-[80vh]  space-y-8"
           data-section="introduction"
         >
-          <div   className="space-y-6">
+          <div className="space-y-6">
             <h2 className="text-4xl text-white font-bold">Alle-AI</h2>
             <h3 className="text-2xl text-muted-foreground font-semibold">
               API Reference
@@ -388,7 +388,7 @@ ${installSdks.javascript}`}
             </li>
             <li>
               <strong className="font-medium">TypeScript Support:</strong> If
-              you&apos;re using Node.js, consider using TypeScript for better type
+              you're using Node.js, consider using TypeScript for better type
               safety and autocompletion.
             </li>
             <li>

@@ -4,13 +4,7 @@ import { cn } from "@/lib/utils";
 import { List } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-export function OnThisPage({ 
-  usePassedData = false, 
-  sections = [] 
-}: { 
-  usePassedData?: boolean; 
-  sections?: Array<{ hash: string; title: string }> 
-}) {
+export function OnThisPage({ usePassedData = false, sections = [] }) {
   const [dynamicSections, setDynamicSections] = useState<
     Array<{ id: string; title: string }>
   >([]);
@@ -89,7 +83,7 @@ export function OnThisPage({
 
   // Scroll Handler for Both Implementations
   // Handles scrolling to sections, works with either dynamic IDs or passed hashes
-  const handleButtonClick = useCallback((targetId: string) => {
+  const handleButtonClick = useCallback((targetId) => {
     const element = document.getElementById(targetId);
     if (!element) {
       console.warn(`Element with ID ${targetId} not found`);
