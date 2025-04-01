@@ -163,7 +163,7 @@ const SearchModal = ({ isOpen, onClose }: modalProps) => {
 
   const primaryColor = resolvedTheme === "dark" ? "#2563eb" : "#3b82f6"; // Blue primary color
 
-  // Helper function to highlight matched text
+  // Helper function to highlight matched text will later use fuzz search if we will go by this implementations
   const HighlightedText = ({
     text,
     query,

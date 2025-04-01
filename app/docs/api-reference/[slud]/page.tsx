@@ -1,8 +1,6 @@
 "use client";
-
-import { useEffect, useState, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
-
+import { useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import ApiIntroduction from "@/components/docs/api-reference/introduction";
 import ApiAudioGenerationDocs from "@/components/docs/api-reference/audioGenerations";
 import ApiImageGenerationDocs from "@/components/docs/api-reference/imageGenerations";
@@ -17,68 +15,81 @@ type SectionName =
   | "video-generation";
 
 export default function Page() {
-  const pathname: string = usePathname();
+  const pathname = usePathname();
   const router = useRouter();
-  const currentSection: SectionName = (pathname.replace(
-    "/docs/api-reference/",
-    ""
-  ) || "introduction") as SectionName;
-  const [activeSection, setActiveSection] =
-    useState<SectionName>(currentSection);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isManualNavigation = useRef(false);
+  const lastScrollPosition = useRef(0);
 
-  // Intersection Observer for section tracking
+  // Store scroll position before any navigation
   useEffect(() => {
-    // Debounce function to limit route updates
-    const debounceRouteUpdate = (section: SectionName) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        if (section !== activeSection) {
-          setActiveSection(section);
-          router.replace(`/docs/api-reference/${section}`, { scroll: false }); // Silent URL update
-        }
-      }, 150); // 150ms debounce
+    const handleScroll = () => {
+      lastScrollPosition.current = window.scrollY;
     };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    // Set up observer once
-    observerRef.current = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        entries.forEach((entry: IntersectionObserverEntry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-            const section = entry.target.getAttribute(
-              "data-section"
-            ) as SectionName | null;
+  // Handle manual navigation (sidebar clicks)
+  useEffect(() => {
+    if (!pathname) return;
+
+    const section = pathname.replace("/docs/api-reference/", "");
+    if (section) {
+      isManualNavigation.current = true;
+      const element = document.querySelector(`[data-section="${section}"]`);
+      if (element) {
+        // Only update URL, no scrolling
+        router.replace(`/docs/api-reference/${section}`, { scroll: false });
+        // Restore previous scroll position
+        window.scrollTo(0, lastScrollPosition.current);
+      }
+
+      const timer = setTimeout(() => {
+        isManualNavigation.current = false;
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+        isManualNavigation.current = false;
+      };
+    }
+  }, [pathname, router]);
+
+  // Set up intersection observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isManualNavigation.current) return;
+
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const section = entry.target.getAttribute("data-section");
             if (section) {
-              debounceRouteUpdate(section);
+              // Store current position before route change
+              const currentPosition = window.scrollY;
+              // Update URL without triggering scroll
+              router.replace(`/docs/api-reference/${section}`, {
+                scroll: false,
+              });
+              // Immediately restore position
+              window.scrollTo(0, currentPosition);
             }
           }
         });
       },
       {
-        threshold: 0.6, 
-        rootMargin: "-150px 0px -150px 0px", // Adjusted for smoother transitions
+        threshold: 0.5,
+        rootMargin: "-100px 0px -100px 0px",
       }
     );
 
-    // Observe all sections
-    const sections: NodeListOf<HTMLElement> =
-      document.querySelectorAll("[data-section]");
-    sections.forEach((section: HTMLElement) =>
-      observerRef.current?.observe(section)
-    );
+    document.querySelectorAll("[data-section]").forEach((section) => {
+      observer.observe(section);
+    });
 
-    // Cleanup
-    return () => {
-      if (observerRef.current) {
-        sections.forEach((section: HTMLElement) =>
-          observerRef.current?.unobserve(section)
-        );
-        observerRef.current.disconnect();
-      }
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []); // Run only on mount
+    return () => observer.disconnect();
+  }, [router]);
 
   return (
     <div className="space-y-32 ml-10">
