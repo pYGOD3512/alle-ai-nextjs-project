@@ -1,30 +1,54 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { cn } from "@/lib/utils"; // Assuming cn returns a string
+import { cn } from "@/lib/utils";
 import { List } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-// Define the shape of a section
 interface Section {
-  hash: string; // Using 'id' instead of 'hash' for consistency, but can revert if needed
+  hash: string;
   title: string;
   baseUrl?: string;
 }
 
-// Define props type for the component
 interface OnThisPageProps {
-  sections?: Section[]; // Optional array of sections
+  sections?: Section[];
 }
 
 export function OnThisPage({ sections = [] }: OnThisPageProps) {
   const [activeSection, setActiveSection] = useState<string>("");
-  const currentPathname: string = usePathname();
+  const currentPathname = usePathname();
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const hasMounted = useRef(false);
 
-  // Intersection Observer to track active section
+  const scrollToInitialHash = useCallback(() => {
+    if (!hasMounted.current) return; // Prevent running on initial render
+
+    const hash = window.location.hash.replace("#", "");
+    if (hash && sections.length > 0) {
+      const targetSection = sections.find((section) => section.hash === hash);
+      if (targetSection) {
+        const element = document.getElementById(hash);
+        if (element) {
+          const headerHeight = 100;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition =
+            elementPosition + window.pageYOffset - headerHeight;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+          setActiveSection(hash);
+          window.history.pushState({}, "", `#${hash}`);
+        }
+      }
+    }
+  }, [sections]);
+
+  // Intersection Observer setup
   useEffect(() => {
-    if (!sections.length) return; // Skip if no sections provided
+    if (!sections.length) return;
 
     if (observerRef.current) {
       observerRef.current.disconnect();
@@ -36,19 +60,16 @@ export function OnThisPage({ sections = [] }: OnThisPageProps) {
       threshold: 0,
     };
 
-    observerRef.current = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        entries.forEach((entry: IntersectionObserverEntry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      options
-    );
+    observerRef.current = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, options);
 
-    sections.forEach((section: Section) => {
-      const element: HTMLElement | null = document.getElementById(section.hash);
+    sections.forEach((section) => {
+      const element = document.getElementById(section.hash);
       if (element && observerRef.current) {
         observerRef.current.observe(element);
       }
@@ -61,15 +82,20 @@ export function OnThisPage({ sections = [] }: OnThisPageProps) {
     };
   }, [sections]);
 
-  // Scroll handler to navigate to sections
+  // Handle initial mount and hash scrolling
+  useEffect(() => {
+    hasMounted.current = true;
+    scrollToInitialHash();
+  }, [scrollToInitialHash]);
+
   const handleButtonClick = useCallback((targetId: string) => {
-    const element: HTMLElement | null = document.getElementById(targetId);
+    const element = document.getElementById(targetId);
     if (!element) {
       console.warn(`Element with ID ${targetId} not found`);
       return;
     }
 
-    const headerHeight = 100; // Adjust based on your layout
+    const headerHeight = 100;
     const elementPosition = element.getBoundingClientRect().top;
     const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
 
@@ -82,23 +108,14 @@ export function OnThisPage({ sections = [] }: OnThisPageProps) {
     window.history.pushState({}, "", `#${targetId}`);
   }, []);
 
-  // Handle initial hash from URL
-  useEffect(() => {
-    const hash: string = window.location.hash.replace("#", "");
-    if (hash && sections.length > 0) {
-      const targetSection: Section | undefined = sections.find(
-        (section: Section) => section.hash === hash
-      );
-      if (targetSection) {
-        handleButtonClick(hash);
-      }
-    }
-  }, [sections, handleButtonClick]);
-
   return (
     <aside className="hidden xl:sticky xl:top-14 xl:block xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto bg-background/90 p-4 rounded-lg">
       <div className="py-6 pl-4">
-        <div className="flex mb-3 gap-2 items-center">
+        <div
+          className="flex mb
+
+-3 gap-2 items-center"
+        >
           <List className="h-6 w-5" />
           <h4 className="text-sm font-medium text-foreground/80">
             On this page
@@ -108,7 +125,7 @@ export function OnThisPage({ sections = [] }: OnThisPageProps) {
         <nav className="text-sm">
           <div className="space-y-1">
             {sections.length > 0 ? (
-              sections.map((section: Section) => (
+              sections.map((section) => (
                 <button
                   key={section.hash}
                   onClick={() => handleButtonClick(section.hash)}
@@ -123,7 +140,7 @@ export function OnThisPage({ sections = [] }: OnThisPageProps) {
                 </button>
               ))
             ) : (
-              <p className="text-foreground/60 italic px-3">
+              <p className="text-foreground/60 italic px-3" key="no-sections">
                 No sections available
               </p>
             )}
