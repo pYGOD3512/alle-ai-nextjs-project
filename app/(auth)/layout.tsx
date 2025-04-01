@@ -240,7 +240,9 @@ export default function AuthLayout({
           setAuthState('show-auth');
         }
       } else {
-        setAuthState('show-auth');
+        // setAuthState('show-auth');
+            router.replace("/docs/getting-started");
+
       }
     };
 

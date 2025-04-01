@@ -452,12 +452,12 @@ export const apiReference: apiREfprops[] = [
                       "Google",
                     ],
                     description:
-                      "Learn how to use the Chat Completion endpoint, a single API to access AI models like ChatGPT, Claude, and Gemini for generating human-like text over HTTPS, with example calls in Node.js, Python, and more.",
+                      "Learn how to use the Chat Completion endpoint, a single API to access multiple AI models like ChatGPT, Claude, and many more for generating human like text.",
                   },
                   {
                     hash: "",
                     description:
-                      "Set up request parameters for the Chat Completion endpoint with a JSON example showing names, types, and required fields.",
+                      "Set up request parameters for the Chat Completion endpoint with a JSON example  and required fields.",
                     words: [
                       "Request Parameters",
                       "Chat Completion",
@@ -524,7 +524,7 @@ export const apiReference: apiREfprops[] = [
                       "Response Format",
                     ],
                     description:
-                      "Enable web search in the Chat Completion endpoint by setting the web_search boolean in your JSON request, and get enhanced responses with web_search_results including queries and search result details.",
+                      "Enable web search in the Chat Completion , and get enhanced responses with web_search_results including queries and search result details.",
                   },
                   {
                     hash: "",
@@ -541,7 +541,7 @@ export const apiReference: apiREfprops[] = [
                       "Base URL",
                     ],
                     description:
-                      "Use the dedicated web search endpoint to get web search results directly, with parameters like messages and response_format, plus example requests in cURL, Python, and Node.js.",
+                      "Use the dedicated web search endpoint to get web search results directly,",
                   },
                 ],
               },
@@ -563,7 +563,6 @@ export const apiReference: apiREfprops[] = [
                       "API Request",
                       "Comparison Types",
                       "text",
-                      "audio_url",
                       "models",
                       "JSON",
                       "Response Format",
@@ -644,10 +643,8 @@ export const apiReference: apiREfprops[] = [
                       "Deepseek",
                       "Claude",
                       "text",
-                      "audio_url",
                       "messages",
                       "response_format",
-                      "max_tokens",
                     ],
                     description:
                       "Add the optional combination parameter to your Chat Completion request in JSON to merge outputs from models like GPT-4, Deepseek, and Claude into a single result for text or audio_url, alongside individual responses, using messages, response_format, and max_tokens.",
@@ -778,7 +775,6 @@ export const tutorial = [
         description: `Welcome to Alle-ai! We’re happy to have you. Alle-ai brings together the world’s
                leading AI models for chat, image, video, and audio generation in one unified platform designed 
                to power creativity and productivity. To get started, check out the guide below for a quick tour.`,
-               
       },
 
       {

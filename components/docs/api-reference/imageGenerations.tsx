@@ -185,8 +185,6 @@ const EditRequestBody = [
   },
 ];
 
-
-
 export default function ApiImageGenerationDocs() {
   return (
     <div className=" ml-10">
