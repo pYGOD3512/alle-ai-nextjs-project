@@ -622,7 +622,7 @@ export function ChatInput({
         )}
 
         <div className="max-w-xl md:max-w-3xl mx-auto">
-          <div className="flex flex-col p-3 border border-foreground shadow-xl bg-background dark:bg-backgroundSecondary rounded-3xl focus-within:border-borderColorPrimary">
+          <div className="flex flex-col p-3 border dark:border-none shadow-xl bg-background dark:bg-backgroundSecondary rounded-3xl focus-within:border-borderColorPrimary">
             <Textarea 
               ref={inputRef}
               placeholder={"Message multiple models..."}
