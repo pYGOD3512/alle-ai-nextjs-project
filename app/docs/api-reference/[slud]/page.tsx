@@ -1,63 +1,90 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter, usePathname } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
-// pages
+// pages (assuming these are React components)
 import ApiIntroduction from "@/components/docs/api-reference/introduction";
-
 import ApiAudioGenerationDocs from "@/components/docs/api-reference/audioGenerations";
 import ApiImageGenerationDocs from "@/components/docs/api-reference/imageGenerations";
 import ApiVideoGenerationDocs from "@/components/docs/api-reference/videoGenerations";
 import ApiTextGenerationDocs from "@/components/docs/api-reference/chat";
 
+// Define valid section names as a union type
+type SectionName =
+  | "introduction"
+  | "text-generation"
+  | "image-generation"
+  | "audio-generation"
+  | "video-generation";
+
 export default function Page() {
-  const pathname = usePathname();
+  const pathname: string = usePathname();
   const router = useRouter();
-  const currentSection = pathname.replace("/docs/api-reference/", "");
-  const [activeSection, setActiveSection] = useState(currentSection);
+  const currentSection: SectionName = (pathname.replace(
+    "/docs/api-reference/",
+    ""
+  ) || "introduction") as SectionName;
+  const [activeSection, setActiveSection] =
+    useState<SectionName>(currentSection);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Intersection Observer for section tracking
   useEffect(() => {
-    // Initial scroll to section from URL
-    const element = document.querySelector(`[data-section="${currentSection}"]`);
-    if (element) {
-      element.scrollIntoView({ block: "start" });
-    }
-  }, [currentSection]);
+    // Debounce function to limit route updates
+    const debounceRouteUpdate = (section: SectionName) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        if (section !== activeSection) {
+          setActiveSection(section);
+          router.replace(`/docs/api-reference/${section}`, { scroll: false }); // Silent URL update
+        }
+      }, 150); // 150ms debounce
+    };
 
-  useEffect(() => {
-    // Set up intersection observer with more strict settings
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
-            const section = entry.target.getAttribute("data-section");
-            if (section && section !== activeSection) {
-              setActiveSection(section);
-              router.push(`/docs/api-reference/${section}`, { scroll: false });
+    // Set up observer once
+    observerRef.current = new IntersectionObserver(
+      (entries: IntersectionObserverEntry[]) => {
+        entries.forEach((entry: IntersectionObserverEntry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            const section = entry.target.getAttribute(
+              "data-section"
+            ) as SectionName | null;
+            if (section) {
+              debounceRouteUpdate(section);
             }
           }
         });
       },
       {
-        threshold: 0.75, // Increased threshold - section must be more visible
-        rootMargin: "-100px 0px" // Increased margin to prevent early triggers
+        threshold: 0.6, // Trigger when 60% of section is visible
+        rootMargin: "-150px 0px -150px 0px", // Adjusted for smoother transitions
       }
     );
 
     // Observe all sections
-    const sections = document.querySelectorAll("[data-section]");
-    sections.forEach((section) => observer.observe(section));
+    const sections: NodeListOf<HTMLElement> =
+      document.querySelectorAll("[data-section]");
+    sections.forEach((section: HTMLElement) =>
+      observerRef.current?.observe(section)
+    );
 
+    // Cleanup
     return () => {
-      sections.forEach((section) => observer.unobserve(section));
+      if (observerRef.current) {
+        sections.forEach((section: HTMLElement) =>
+          observerRef.current?.unobserve(section)
+        );
+        observerRef.current.disconnect();
+      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [activeSection, router]);
+  }, []); // Run only on mount
 
   return (
-    <div className="space-y-32 ml-10"> {/* Added more vertical spacing between sections */}
-      {/* stacking up pages here  */}
-      <section data-section="introduction" className="min-h-[80vh]"> {/* Increased minimum height */}
+    <div className="space-y-32 ml-10">
+      <section data-section="introduction" className="min-h-[80vh]">
         <ApiIntroduction />
       </section>
       <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
