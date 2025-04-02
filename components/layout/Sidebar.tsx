@@ -47,6 +47,7 @@ import {
 import { useConversationStore } from "@/stores/models";
 import { historyApi } from "@/lib/api/history";
 import { toast } from "sonner"
+import { authApi } from "@/lib/api/auth";
 
 
 
@@ -77,6 +78,7 @@ export function Sidebar() {
   const [historyPage, setHistoryPage] = useState(1);
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const historyScrollRef = useRef<HTMLDivElement>(null);
+  const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -294,6 +296,27 @@ export function Sidebar() {
       };
     }
   }, [handleHistoryScroll]);
+
+  // Add this function to handle billing portal redirection
+  const handleManageSubscription = async () => {
+    try {
+      setIsLoadingBillingPortal(true);
+      const response = await authApi.getBillingPortal(window.location.href);
+      if (response.status && response.url) {
+        window.location.href = response.url;
+      } else {
+        toast.error('Something went wrong, please try again');
+      }
+    } catch (error) {
+      toast.error('Something went wrong, check your internet connection');
+    } finally {
+      setIsLoadingBillingPortal(false);
+    }
+  };
+
+  // const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
+  const isPaidPlan = plan === 'free';
+  console.log(plan, 'this is the user plan');
 
   return (
     <>
@@ -669,10 +692,17 @@ export function Sidebar() {
                 size="sm"
                 variant="outline"
                 className="gap-1 w-full text-xs relative overflow-hidden group border-none dark:bg-white dark:text-black bg-black text-white"
-                onClick={() => setPlansModalOpen(true)}
+                onClick={isPaidPlan ? handleManageSubscription : () => setPlansModalOpen(true)}
+                disabled={isLoadingBillingPortal}
               >
-                <Gem className="h-4 w-4" />
-                UPGRADE
+                {isLoadingBillingPortal ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Gem className="h-4 w-4" />
+                    {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
+                  </>
+                )}
               </Button>
             </div>
           </>

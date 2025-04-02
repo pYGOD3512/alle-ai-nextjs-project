@@ -77,6 +77,12 @@ interface CheckoutResponse {
   message?: string;
 }
 
+interface BillingPortalResponse {
+  status: boolean;
+  url?: string;
+  message?: string;
+}
+
 export interface User {
   id: number;
   first_name: string;
@@ -180,5 +186,15 @@ export const authApi = {
   }): Promise<CheckoutResponse> => {
     const response = await api.post('/checkout', data);
     return response.data;
+  },
+
+  getBillingPortal: async (returnUrl: string): Promise<BillingPortalResponse> => {
+    try {
+      const response = await api.post('/billing-portal', { return_url: returnUrl });
+      return response.data;
+    } catch (error) {
+      console.error('Error accessing billing portal:', error);
+      throw error;
+    }
   },
 };
