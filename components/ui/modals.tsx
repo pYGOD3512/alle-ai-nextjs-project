@@ -2188,12 +2188,14 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                         {plan.split('-')[0]}
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[0.6rem] h-3 w-10 flex justify-center items-center">
-                        <span className="animate-pulse flex space-x-0.5">
-                          <span className="h-1 w-1 rounded-full bg-current"></span>
-                          <span className="h-1 w-1 rounded-full bg-current"></span>
-                          <span className="h-1 w-1 rounded-full bg-current"></span>
-                        </span>
+                      <Badge 
+                        variant="outline" 
+                        className="text-[0.6rem] h-3 flex justify-center items-center relative overflow-hidden"
+                      >
+                        <span className="relative z-10">Plan</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
+                              style={{ backgroundSize: '200% 100%' }}
+                        />
                       </Badge>
                     )}
                   </div>
