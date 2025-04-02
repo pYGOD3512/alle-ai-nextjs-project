@@ -314,9 +314,8 @@ export function Sidebar() {
     }
   };
 
-  // const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
-  const isPaidPlan = plan === 'free';
-  console.log(plan, 'this is the user plan');
+  const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
+  // const isPaidPlan = plan === 'free';
 
   return (
     <>
