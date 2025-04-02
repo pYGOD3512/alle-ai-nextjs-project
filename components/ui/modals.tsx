@@ -262,7 +262,7 @@ interface LogoutModalProps extends ModalProps {
 
 const shortcuts: ShortcutItem[] = [
   {
-    action: "Open new chat",
+    action: "Start new conversation",
     shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
   },
   {
@@ -2183,7 +2183,21 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                   </Avatar>
                   {!isEditing && (
                   <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                    <Badge variant="default">{plan?.toString().split('-')[0] || "Plan"}</Badge>
+                    {plan ? (
+                      <Badge variant="default" className="text-[0.6rem] h-3">
+                        {plan.split('-')[0]}
+                      </Badge>
+                    ) : (
+                      <Badge 
+                        variant="outline" 
+                        className="text-[0.6rem] h-3 flex justify-center items-center relative overflow-hidden"
+                      >
+                        <span className="relative z-10">Plan</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
+                              style={{ backgroundSize: '200% 100%' }}
+                        />
+                      </Badge>
+                    )}
                   </div>
                   )}
                   
@@ -2828,7 +2842,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   return (
     <div className="overflow-auto">
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[90%] overflow-y-auto max-h-[90vh]">
+        <DialogContent className="sm:max-w-[90%] lg:max-w-[80%] overflow-y-auto max-h-[90vh]">
           {showOrgPlans ? (
             <>
               <DialogHeader className="text-center space-y-4 relative">
@@ -4623,7 +4637,7 @@ export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
 
 function getIconForAction(action: string) {
   switch (action) {
-    case "Open new chat":
+    case "Start new conversation":
       return <MessageSquare className="h-4 w-4" />;
     case "Focus chat input":
       return <Type className="h-4 w-4" />;

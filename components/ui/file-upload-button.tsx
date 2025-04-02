@@ -1,6 +1,6 @@
 'use client'; 
 
-import { Plus, HardDrive, Cloud } from "lucide-react";
+import { Plus, FilePlus2 , Cloud } from "lucide-react";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -243,11 +243,11 @@ export function FileUploadButton({
             aria-label="Upload File"
             disabled={disabled}
             >
-              <Plus size={28} className={`border border-borderColorPrimary rounded-full p-[0.3rem]`} />
+              <Plus size={32} className={`border border-borderColorPrimary rounded-full p-[0.3rem]`} />
             </Button>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-backgroundSecondary border-borderColorPrimary">
+        <DropdownMenuContent align="start" className="w-56 bg-backgroundSecondary rounded-xl border-borderColorPrimary">
           {/* <DropdownMenuItem 
             onClick={() => setShowDriveModal(true)} 
             className="gap-2"
@@ -285,7 +285,7 @@ export function FileUploadButton({
             <span>Add from OneDrive</span>
           </DropdownMenuItem> */}
           <DropdownMenuItem onClick={onUploadFromComputer} className="gap-2">
-            <HardDrive className="h-4 w-4" />
+            <FilePlus2  className="h-4 w-4" />
             <span>Upload from Computer</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

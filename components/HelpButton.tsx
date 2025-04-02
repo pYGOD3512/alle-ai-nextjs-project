@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ReportContentModal, ShortcutsModal } from './ui/modals';
 import { useSidebarStore, useSelectedModelsStore } from "@/stores";
+import { usePathname, useRouter } from "next/navigation";
 
 
 export function HelpButton() {
@@ -17,6 +18,8 @@ export function HelpButton() {
 const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 const [reportModalOpen, setReportModalOpen] = useState(false);
 const { isOpen, toggle } = useSidebarStore();
+const pathname = usePathname();
+const router = useRouter();
 
 
 useEffect(() => {
@@ -28,6 +31,25 @@ useEffect(() => {
     if (e.ctrlKey && e.shiftKey && (e.key === 's' || e.key === 'S')) {
       e.preventDefault();
       toggle();
+    }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'o' || e.key === 'O')) {
+      e.preventDefault();
+      switch (true) {
+        case pathname.startsWith("/chat"):
+          router.push("/chat");
+          break;
+        case pathname.startsWith("/image"):
+          router.push("/image");
+          break;
+        case pathname.startsWith("/audio"):
+          router.push("/audio");
+          break;
+        case pathname.startsWith("/video"):
+          router.push("/video");
+          break;
+        default:
+          router.push("/chat");
+      }
     }
   };
 

@@ -622,7 +622,7 @@ export function ChatInput({
         )}
 
         <div className="max-w-xl md:max-w-3xl mx-auto">
-          <div className="flex flex-col p-1 border bg-backgroundSecondary border-borderColorPrimary rounded-2xl focus-within:border-borderColorPrimary">
+          <div className="flex flex-col p-3 border dark:border-none shadow-xl bg-background dark:bg-backgroundSecondary rounded-3xl focus-within:border-borderColorPrimary">
             <Textarea 
               ref={inputRef}
               placeholder={"Message multiple models..."}
@@ -680,8 +680,8 @@ export function ChatInput({
                               : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
                           } ${!!uploadedFile ? 'opacity-50 cursor-pointer' : ''}`}
                         >
-                          <Globe size={14} />
-                          <span className="text-[12px]">Search</span>
+                          <Globe size={16} />
+                          <span className="text-[0.8rem]">Search</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -707,8 +707,8 @@ export function ChatInput({
                             : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
                         }`}
                       >
-                        <Layers size={14} />
-                        <span className="text-[12px]">Combine</span>
+                        <Layers size={16} />
+                        <span className="text-[0.8rem]">Combine</span>
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -731,7 +731,7 @@ export function ChatInput({
                 <Button
                   onClick={handleSendClick}
                   size= {pathname.startsWith('/chat') ? `icon` : `default`}
-                  className={`flex-shrink-0 h-8 ${pathname.startsWith('/chat') ? "rounded-full w-8" : "rounded-full"} ${
+                  className={`flex-shrink-0 h-9 ${pathname.startsWith('/chat') ? "rounded-full w-9" : "rounded-full"} ${
                     isInputEmpty
                       ? ""
                       : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"

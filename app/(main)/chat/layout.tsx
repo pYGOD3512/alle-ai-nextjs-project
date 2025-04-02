@@ -250,7 +250,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
       {pathname === "/chat" && (
-        <div className={`flex-1 flex flex-col`}>
+        <div className={`flex-1 flex flex-col sm:mb-32`}>
           <div className="flex-1 flex flex-col justify-center items-center gap-8">
             <GreetingMessage
               options={options}

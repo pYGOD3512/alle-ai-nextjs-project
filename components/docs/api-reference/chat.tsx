@@ -94,8 +94,8 @@ export default function ApiTextGenerationDocs() {
                         isLink={true}
                       />
                       <p className="text-sm text-muted-foreground">
-                        All completions API requests should be made to this  URL using
-                        HTTPS.
+                        All completions API requests should be made to this URL
+                        using HTTPS.
                       </p>
                     </div>
                   </div>
@@ -332,7 +332,7 @@ export default function ApiTextGenerationDocs() {
             </div>
           }
         />
-{/* .............................................................. chat completion endpoints ends here ......................................................................... */}
+        {/* .............................................................. chat completion endpoints ends here ......................................................................... */}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 " />
         {/*.................................... Api search : enabling web search starts  ........................   */}
         <div className="mt-10 ">
@@ -670,7 +670,7 @@ export default function ApiTextGenerationDocs() {
                     </li>
                     <li>
                       <code className="bg-gray-100 dark:bg-gray-700  px-2 py-1 rounded font-mono">
-                      &quot;selected_model_one
+                        &quot;selected_model_one
                         <span className="text-red-600">+</span>
                         yet-another-model&quot;
                       </code>
@@ -800,7 +800,7 @@ export default function ApiTextGenerationDocs() {
                     className="text-muted-foreground text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
-                        "For a streamlined summary without individual model outputs, use the dedicated summary endpoints at [baseUrl]/summary. These endpoints mirror the completion request structure using messages for your query, response_format to define the output (text, audio URL, etc.), and settings like temperature for fine-tuning but focus solely on delivering summary results from the models. Unlike the completion endpoint, you won't get per-model responses here; it's just the distilled summary, ideal for scenarios where you want a lightweight, essential take without the extra detail.",
+                        "For a streamlined summary without individual model outputs, use the dedicated summary endpoints at [baseUrl]/summary. These endpoints mirror the completion request structure using messages for your query, response_format to define the output (text, audio URL, etc.), and settings like temperature for fine-tuning but focus solely on delivering summary results from the models. Unlike the completion endpoint, you won’t get per-model responses here; it’s just the distilled summary, ideal for scenarios where you want a lightweight, essential take without the extra detail.",
                         [
                           "summary",
                           "messages",
@@ -917,7 +917,7 @@ export default function ApiTextGenerationDocs() {
                     className="text-muted-foreground text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
-                        `For a focused result that skips individual model outputs, use the dedicated combination endpoint at [baseUrl]/combinations. This endpoint mirrors the completion request body, messages for your query, response_format for output style, and temperature for adjustments, but this only delivers the combined results from the models you specify. Using the same combination array (e.g., "combination": [{"type": "text", "models": ["gpt-4o<span class=" font-bold">+</span>deepseek-r1<span class=" font-bold">+</span>claude-3.5-sonnet"]}, {"type": "audio_url", "models": ["gpt-4o<span class=" font-bold">+</span>claude-3.5-sonnet"]}), you pick which models to blend with the + notation, and that's all you get back no separate responses. It's a clean, efficient way to get a synthesized output when you don't need the raw model-by-model breakdown.`,
+                        `For a focused result that skips individual model outputs, use the dedicated combination endpoint at [baseUrl]/combinations. This endpoint mirrors the completion request body, messages for your query, response_format for output style, and temperature for adjustments, but this only delivers the combined results from the models you specify. Using the same combination array (e.g., "combination": [{"type": "text", "models": ["gpt-4o<span class=" font-bold">+</span>deepseek-r1<span class=" font-bold">+</span>claude-3.5-sonnet"]}, {"type": "audio_url", "models": ["gpt-4o<span class=" font-bold">+</span>claude-3.5-sonnet"]}), you pick which models to blend with the + notation, and that’s all you get back no separate responses. It’s a clean, efficient way to get a synthesized output when you don’t need the raw model-by-model breakdown.`,
                         [
                           "combination",
                           "messages",

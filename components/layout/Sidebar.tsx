@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, forwardRef, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +47,7 @@ import {
 import { useConversationStore } from "@/stores/models";
 import { historyApi } from "@/lib/api/history";
 import { toast } from "sonner"
+import { authApi } from "@/lib/api/auth";
 
 
 
@@ -78,6 +78,7 @@ export function Sidebar() {
   const [historyPage, setHistoryPage] = useState(1);
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const historyScrollRef = useRef<HTMLDivElement>(null);
+  const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -295,6 +296,26 @@ export function Sidebar() {
       };
     }
   }, [handleHistoryScroll]);
+
+  // Add this function to handle billing portal redirection
+  const handleManageSubscription = async () => {
+    try {
+      setIsLoadingBillingPortal(true);
+      const response = await authApi.getBillingPortal(window.location.href);
+      if (response.status && response.url) {
+        window.location.href = response.url;
+      } else {
+        toast.error('Something went wrong, please try again');
+      }
+    } catch (error) {
+      toast.error('Something went wrong, check your internet connection');
+    } finally {
+      setIsLoadingBillingPortal(false);
+    }
+  };
+
+  const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
+  // const isPaidPlan = plan === 'free';
 
   return (
     <>
@@ -659,7 +680,21 @@ export function Sidebar() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-sm">{user?.first_name}</div>
-                    <Badge variant="default" className="text-[0.6rem] h-3">{plan?.split('-')[0] || "Plan"}</Badge>
+                    {plan ? (
+                      <Badge variant="default" className="text-[0.6rem] h-3">
+                        {plan.split('-')[0]}
+                      </Badge>
+                    ) : (
+                      <Badge 
+                        variant="outline" 
+                        className="text-[0.6rem] h-3 p-1 flex justify-center items-center relative overflow-hidden"
+                      >
+                        <span className="relative z-10">Plan</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
+                              style={{ backgroundSize: '200% 100%' }}
+                        />
+                      </Badge>
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {user?.email}
@@ -670,10 +705,17 @@ export function Sidebar() {
                 size="sm"
                 variant="outline"
                 className="gap-1 w-full text-xs relative overflow-hidden group border-none dark:bg-white dark:text-black bg-black text-white"
-                onClick={() => setPlansModalOpen(true)}
+                onClick={isPaidPlan ? handleManageSubscription : () => setPlansModalOpen(true)}
+                disabled={isLoadingBillingPortal}
               >
-                <Gem className="h-4 w-4" />
-                UPGRADE
+                {isLoadingBillingPortal ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Gem className="h-4 w-4" />
+                    {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
+                  </>
+                )}
               </Button>
             </div>
           </>
@@ -709,7 +751,8 @@ export function Sidebar() {
                 <div
                   className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
                     ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                    ${styles.hoverBg}`}
+                    ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
+                    ${styles.hoverBg} cursor-pointer`}
                   onClick={() => {
                     if (item.href === "/audio" || item.href === "/video") {
                       toast.info('This feature will be available soon');
@@ -741,7 +784,7 @@ export function Sidebar() {
                 // setProjectModalOpen(true)}
               }}
             >
-              <Folder className="h-4 w-4" />
+              <Folder className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
         )}

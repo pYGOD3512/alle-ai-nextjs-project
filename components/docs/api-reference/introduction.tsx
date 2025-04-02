@@ -1,56 +1,27 @@
-// @ts-nocheck
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import RenderCode from "@/components/RenderCode";
-import { useActiveSectionStore } from "@/stores/ui";
-import { OnThisPage } from "@/components/docs/OnThisPage";
-import { ChevronRight, ChevronLeft } from "lucide-react";
 import {
   introCodes,
   installSdks,
 } from "@/lib/constants/code-snippets-docs/apiDocs";
-const hheading = [
-  {
-    id: "Random test",
-    href: "",
-  },
-  {
-    id: "Random heading 2 ",
-    href: "",
-  },
-  {
-    id: "test heading 3",
-    href: "",
-  },
-];
 
 export default function ApiIntroduction() {
   const router = useRouter();
   const pathname = usePathname();
   // Define the sections manually for this page
-  const baseUrl = "/docs/api-reference/introduction";
-  const customSections = [
-    { title: "Alle-AI", hash: "alle-ai", baseUrl: pathname },
-    { title: "Authentication", hash: "authentication", baseUrl: pathname },
-    { title: "Streaming", hash: "streaming", baseUrl: pathname },
-    {
-      title: "SDKs and Libraries",
-      hash: "sdks-and-libraries",
-      baseUrl: pathname,
-    },
-  ];
+
   return (
     <main className="flex gap-2">
       {/* Main content */}
-      <div className="w-3/4">
+      <div className="lg:w-3/4  w-full">
         {/* Introduction Section */}
         <section
           className="min-h-[80vh]  space-y-8"
           data-section="introduction"
         >
-          <div   className="space-y-6">
+          <div className="space-y-6">
             <h2 className="text-4xl text-white font-bold">Alle-AI</h2>
             <h3 className="text-2xl text-muted-foreground font-semibold">
               API Reference
@@ -388,7 +359,7 @@ ${installSdks.javascript}`}
             </li>
             <li>
               <strong className="font-medium">TypeScript Support:</strong> If
-              you&apos;re using Node.js, consider using TypeScript for better type
+              you're using Node.js, consider using TypeScript for better type
               safety and autocompletion.
             </li>
             <li>
@@ -400,8 +371,8 @@ ${installSdks.javascript}`}
         </section>
       </div>
       {/* Right Side - On This Page */}
-      <aside className="w-1/4 sticky ">
-        <OnThisPage pathname={pathname} sections={customSections} />
+      <aside className="hidden lg:block lg:w-1/4 sticky ">
+        {/* <OnThisPage pathname={pathname} sections={customSections} /> */}
       </aside>
     </main>
   );

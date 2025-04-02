@@ -116,19 +116,35 @@ interface ImageGroup {
 let currentGroup: ImageGroup | null = null;
 const imageGroups = new Map<string, ImageGroup>();
 
-// Add this helper function to extract images from markdown
-function extractImagesFromMarkdown(content: string): { src: string; alt: string; }[] {
-  const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-  const images: { src: string; alt: string; }[] = [];
-  let match;
+// Modify the isImageUrl function to be more robust
+function isImageUrl(url: string): boolean {
+  // Check for common image file extensions
+  return /\.(jpeg|jpg|gif|png|svg|webp|bmp|tiff)(\?.*)?$/i.test(url);
+}
 
+// Modify the extractImagesFromMarkdown function to also find linked images
+function extractImagesFromMarkdown(content: string): { src: string; alt: string; }[] {
+  const images: { src: string; alt: string; }[] = [];
+  
+  // Extract standard markdown images ![alt](url)
+  const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+  let match;
   while ((match = imageRegex.exec(content)) !== null) {
     images.push({
       alt: match[1] || '',
       src: match[2] || ''
     });
   }
-
+  
+  // Extract linked images [alt](image-url)
+  const linkRegex = /\[([^\]]+)\]\(([^)]+\.(jpeg|jpg|gif|png|svg|webp|bmp|tiff)(\?[^)]*)?)\)/gi;
+  while ((match = linkRegex.exec(content)) !== null) {
+    images.push({
+      alt: match[1] || '',
+      src: match[2] || ''
+    });
+  }
+  
   return images;
 }
 
@@ -293,6 +309,7 @@ export function ModelResponse({
     a: ({ children, href, ...props }: LinkProps) => {
       if (!href) return <>{children}</>;
       
+      // Check if the link is a YouTube video
       if (href.match(/youtube\.com|youtu\.be/)) {
         return (
           <>
@@ -303,6 +320,17 @@ export function ModelResponse({
         );
       }
       
+      // Check if the link points to an image
+      if (isImageUrl(href)) {
+        return (
+          <MarkdownImage 
+            src={href} 
+            alt={typeof children === 'string' ? children : 'Image'} 
+          />
+        );
+      }
+      
+      // Default link rendering
       return <CustomLink href={href} {...props}>{children}</CustomLink>;
     },
     
@@ -419,7 +447,12 @@ export function ModelResponse({
 
   // Remove images from content to prevent double rendering
   const textContent = useMemo(() => {
-    return restContent?.replace(/!\[(.*?)\]\((.*?)\)/g, '');
+    let processedContent = restContent;
+    // Remove markdown image syntax
+    processedContent = processedContent?.replace(/!\[(.*?)\]\((.*?)\)/g, '');
+    // Remove links to images (but keep other links)
+    processedContent = processedContent?.replace(/\[([^\]]+)\]\(([^)]+\.(jpeg|jpg|gif|png|svg|webp|bmp|tiff)(\?[^)]*)?)\)/gi, '');
+    return processedContent;
   }, [restContent]);
 
   return (
