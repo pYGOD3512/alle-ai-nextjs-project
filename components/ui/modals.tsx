@@ -2183,7 +2183,19 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                   </Avatar>
                   {!isEditing && (
                   <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                    <Badge variant="default">{plan?.toString().split('-')[0] || "Plan"}</Badge>
+                    {plan ? (
+                      <Badge variant="default" className="text-[0.6rem] h-3">
+                        {plan.split('-')[0]}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[0.6rem] h-3 w-10 flex justify-center items-center">
+                        <span className="animate-pulse flex space-x-0.5">
+                          <span className="h-1 w-1 rounded-full bg-current"></span>
+                          <span className="h-1 w-1 rounded-full bg-current"></span>
+                          <span className="h-1 w-1 rounded-full bg-current"></span>
+                        </span>
+                      </Badge>
+                    )}
                   </div>
                   )}
                   
