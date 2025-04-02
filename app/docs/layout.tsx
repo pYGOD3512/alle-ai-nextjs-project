@@ -6,12 +6,6 @@ import { SidebarNav } from "@/components/docs/SidebarNav";
 import { OnThisPage } from "@/components/docs/OnThisPage";
 import { MobileNav } from "@/components/docs/mobileNav";
 
-const hheading = [
-  { id: "Random test", href: "" },
-  { id: "Random heading 2 ", href: "" },
-  { id: "test heading 3", href: "" },
-];
-
 export default function Layout({ children }) {
   const pathname = usePathname();
   const isThreeColumnLayout =
@@ -41,7 +35,7 @@ export default function Layout({ children }) {
             </div>
           </main>
           <aside className="hidden xl:block w-[250px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-background/90 border-l border-border/40">
-            <OnThisPage pathname={pathname} sections={hheading} />
+            <OnThisPage pathname={pathname} sections={[]} />
           </aside>
         </div>
       ) : isTwoColumnLayout ? (

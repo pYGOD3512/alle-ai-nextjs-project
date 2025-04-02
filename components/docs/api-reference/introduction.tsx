@@ -22,7 +22,7 @@ export default function ApiIntroduction() {
           data-section="introduction"
         >
           <div className="space-y-6">
-            <h2 className="text-4xl text-white font-bold">Alle-AI</h2>
+            <h2 className="text-4xl  font-bold">Alle-AI</h2>
             <h3 className="text-2xl text-muted-foreground font-semibold">
               API Reference
             </h3>
@@ -299,7 +299,7 @@ makeStreamingRequest();`}
         <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10 mt-5" />
 
         {/* SDKs and Libraries */}
-        <section className="mb-20">
+        <section className="mb-20 ">
           <h2 className="text-3xl mb-4" data-section="sdk">
             SDKs and Libraries
           </h2>

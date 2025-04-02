@@ -740,22 +740,22 @@ export const apiReference: apiREfprops[] = [
     ],
   },
   {
-    id: "analytics",
-    title: "Analytics & Monitoring",
+    id: "api-usage",
+    title: "API Usage",
     sections: [
       {
-        id: "usage-metrics",
-        title: "Usage Metrics",
+        id: "rate-limits",
+        title: "Rate Limits & Usage",
         href: "/docs/api-reference/analytics/usage-metrics",
       },
       {
-        id: "performance-monitoring",
-        title: "Performance Monitoring",
+        id: "changelogs",
+        title: "Changelog",
         href: "/docs/api-reference/analytics/performance-monitoring",
       },
       {
-        id: "logs",
-        title: "API Logs",
+        id: "faq",
+        title: "FAQ",
         href: "/docs/api-reference/analytics/logs",
       },
     ],

@@ -6,7 +6,6 @@ import ApiAudioGenerationDocs from "@/components/docs/api-reference/audioGenerat
 import ApiImageGenerationDocs from "@/components/docs/api-reference/imageGenerations";
 import ApiVideoGenerationDocs from "@/components/docs/api-reference/videoGenerations";
 import ApiTextGenerationDocs from "@/components/docs/api-reference/chat";
-
 type SectionName =
   | "introduction"
   | "text-generation"
@@ -21,12 +20,45 @@ export default function Page() {
   const isManualNavigation = useRef(false);
   const currentSection = useRef<string | null>(null);
   const lastScrollPosition = useRef(0);
+  const scrollDirection = useRef<"down" | "up">("down");
+  const sectionPositions = useRef<Record<string, number>>({});
 
-  // Minimal scroll position tracking
+  // Track scroll direction and section positions
   useEffect(() => {
-    const handleScroll = () => {
-      lastScrollPosition.current = window.scrollY;
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateSectionPositions = () => {
+      document.querySelectorAll("[data-section]").forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        const sectionName = section.getAttribute("data-section")!;
+        sectionPositions.current[sectionName] = rect.top + window.scrollY;
+      });
     };
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      lastScrollPosition.current = scrollY;
+
+      if (scrollY > lastScrollY + 5) {
+        scrollDirection.current = "down";
+      } else if (scrollY < lastScrollY - 5) {
+        scrollDirection.current = "up";
+      }
+
+      lastScrollY = scrollY > 0 ? scrollY : 0;
+
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateSectionPositions();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Initial position measurement
+    updateSectionPositions();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -40,7 +72,6 @@ export default function Page() {
     const element = document.querySelector(`[data-section="${section}"]`);
     if (element && section !== currentSection.current) {
       currentSection.current = section;
-      // Disable any smooth scrolling
       element.scrollIntoView({ behavior: "instant" });
     }
   }, [pathname]);
@@ -55,7 +86,6 @@ export default function Page() {
       const element = document.querySelector(`[data-section="${section}"]`);
       if (element) {
         currentSection.current = section;
-       
         window.history.replaceState(null, "", `/docs/api-reference/${section}`);
       }
 
@@ -67,33 +97,40 @@ export default function Page() {
     }
   }, [pathname]);
 
-  // Intersection Observer logics
+  // Improved Intersection Observer with scroll direction handling
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (isManualNavigation.current) return;
 
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.75) {
+          if (entry.isIntersecting) {
             const section = entry.target.getAttribute("data-section");
-            if (section && section !== currentSection.current) {
-              const currentScroll = lastScrollPosition.current;
-              currentSection.current = section;
+            const ratio = entry.intersectionRatio;
 
+            // More sensitive when scrolling up
+            const shouldUpdate =
+              scrollDirection.current === "up"
+                ? ratio >= 0.3 // Lower threshold when scrolling up
+                : ratio >= 0.7; // Higher threshold when scrolling down
+
+            if (section && shouldUpdate && section !== currentSection.current) {
+              currentSection.current = section;
               window.history.replaceState(
                 null,
                 "",
                 `/docs/api-reference/${section}`
               );
-
-              window.scrollTo(0, currentScroll);
             }
           }
         });
       },
       {
-        threshold: 0.75,
-        rootMargin: "-100px 0px",
+        threshold: [0.3, 0.5, 0.7, 0.9],
+        rootMargin:
+          scrollDirection.current === "down"
+            ? "-100px 0px"
+            : "0px 0px -60% 0px", // More area when scrolling up
       }
     );
 
@@ -103,6 +140,40 @@ export default function Page() {
 
     observerRef.current = observer;
     return () => observer.disconnect();
+  }, []);
+
+  // Additional scroll-based section detection for more responsiveness
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isManualNavigation.current) return;
+
+      const scrollY = window.scrollY;
+      const sections = Object.entries(sectionPositions.current).sort(
+        (a, b) => a[1] - b[1]
+      );
+
+      // Find which section we're in based on scroll position
+      let activeSection = sections[0][0];
+      for (let i = 0; i < sections.length; i++) {
+        if (scrollY >= sections[i][1] - 100) {
+          activeSection = sections[i][0];
+        } else {
+          break;
+        }
+      }
+
+      if (activeSection && activeSection !== currentSection.current) {
+        currentSection.current = activeSection;
+        window.history.replaceState(
+          null,
+          "",
+          `/docs/api-reference/${activeSection}`
+        );
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -126,6 +197,9 @@ export default function Page() {
       <section data-section="video-generation" className="min-h-[80vh]">
         <ApiVideoGenerationDocs />
       </section>
+      {/* <section data-section="rate-limits">
+        <ApiUsageDocs />
+      </section> */}
     </div>
   );
 }
