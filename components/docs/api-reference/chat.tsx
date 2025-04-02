@@ -22,7 +22,7 @@ import {
 } from "@/lib/constants/docs";
 import { chatCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
 import { Section } from "lucide-react";
-const highlightText = (text, keywords) => {
+const highlightText = (text: string, keywords: string[]) => {
   let result = text;
   keywords.forEach((keyword) => {
     const regex = new RegExp(`\\b${keyword}\\b`, "gi");
@@ -72,9 +72,9 @@ export default function ApiTextGenerationDocs() {
                           Choose from:
                         </p>
                         <ul className="list-disc pl-6 space-y-2">
-                          <li>OpenAI's ChatGPT (GPT-3.5, GPT-4)</li>
-                          <li>Anthropic's Claude</li>
-                          <li>Google's Gemini</li>
+                          <li>OpenAI&apos;s ChatGPT (GPT-3.5, GPT-4)</li>
+                          <li>Anthropic&apos;s Claude</li>
+                          <li>Google&apos;s Gemini</li>
                           <li>And more leading AI models</li>
                         </ul>
                       </div>
@@ -115,7 +115,7 @@ export default function ApiTextGenerationDocs() {
                   <div className="space-y-6">
                     {parameters.map((param) => {
                       // Function to highlight keywords in the description
-                      const highlightKeywords = (description, keywords) => {
+                      const highlightKeywords = (description: string, keywords: string[]) => {
                         let highlightedText = description;
                         keywords.forEach((keyword) => {
                           // Case-insensitive regex to match whole keyword and escape special chars
@@ -353,7 +353,7 @@ export default function ApiTextGenerationDocs() {
                   <Card className="p-4 bg-background">
                     <p className="text-muted-foreground mb-4">
                       The approach used in earlier examples demonstrated a
-                      simple request body. You can enhance the model's
+                      simple request body. You can enhance the model&apos;s
                       capabilities by enabling web search. To do this, include
                       the <code>web_search</code> field in your request body.
                       This field accepts a boolean value:
@@ -660,19 +660,19 @@ export default function ApiTextGenerationDocs() {
                   <ul className="list-disc ml-6 mt-2 text-muted-foreground">
                     <li>
                       <code className="bg-gray-200 dark:bg-gray-700  px-2 py-1 rounded font-mono">
-                        "gpt-4o<span className="text-red-600">+</span>
+                        &quot;gpt-4o<span className="text-red-600">+</span>
                         deepseek-r1
                         <span className="text-red-600">+</span>
-                        claude-3.5-sonnet"
+                        claude-3.5-sonnet&quot;
                       </code>
                       : This specifies a comparison involving GPT-4, Deepseek,
                       and Claude.
                     </li>
                     <li>
                       <code className="bg-gray-100 dark:bg-gray-700  px-2 py-1 rounded font-mono">
-                        "selected_model_one
+                        &quot;selected_model_one
                         <span className="text-red-600">+</span>
-                        yet-another-model"
+                        yet-another-model&quot;
                       </code>
                       : Another example with audio models.
                     </li>

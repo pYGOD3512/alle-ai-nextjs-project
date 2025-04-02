@@ -35,7 +35,7 @@ const SearchModal = ({ isOpen, onClose }: modalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [filter, setFilter] = useState("all");
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -232,7 +232,7 @@ const SearchModal = ({ isOpen, onClose }: modalProps) => {
             fontWeight: 500,
           }}
         >
-          {result.path.split(">>").map((part, index, array) => (
+          {(result.path || "").split(">").map((part, index, array) => (
             <span key={index}>
               <strong>{part.trim()}</strong>
               {index < array.length - 1 && (
