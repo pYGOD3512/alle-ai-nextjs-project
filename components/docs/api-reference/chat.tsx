@@ -23,7 +23,7 @@ import {
 import { chatCodes } from "@/lib/constants/code-snippets-docs/apiDocs";
 
 import { Section } from "lucide-react";
-const highlightText = (text, keywords) => {
+const highlightText = (text: string, keywords: string[]): string => {
   let result = text;
   keywords.forEach((keyword) => {
     const regex = new RegExp(`\\b${keyword}\\b`, "gi");
@@ -116,7 +116,7 @@ export default function ApiTextGenerationDocs() {
                   <div className="space-y-6">
                     {parameters.map((param) => {
                       // Function to highlight keywords in the description
-                      const highlightKeywords = (description, keywords) => {
+                      const highlightKeywords = (description: string, keywords: string[]) => {
                         let highlightedText = description;
                         keywords.forEach((keyword) => {
                           // Case-insensitive regex to match whole keyword and escape special chars
@@ -492,7 +492,7 @@ export default function ApiTextGenerationDocs() {
                     className="text-muted-foreground text-sm leading-relaxed mb-4"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
-                        "The web search endpoints take the same familiar parameters you’re used to, like messages for your query, response_format to dictate the output type (text, audio URL, etc.), and even max_tokens to cap the length, but with a key difference: the response contains only web search results, not the individual outputs from models specified in models.",
+                        "The web search endpoints take the same familiar parameters you're used to, like messages for your query, response_format to dictate the output type (text, audio URL, etc.), and even max_tokens to cap the length, but with a key difference: the response contains only web search results, not the individual outputs from models specified in models.",
                         [
                           "messages",
                           "response_format",
@@ -507,7 +507,7 @@ export default function ApiTextGenerationDocs() {
                     className="text-muted-foreground text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
-                        "To use these endpoints, simply send your request to the web search-specific route (e.g., /websearch instead of /completions), keeping the parameter structure intact.Define your query in messages, and set response_format to get results in your preferred style. The output skips model responses entirely, focusing solely on what’s pulled from the web. This keeps the process lightweight and targeted.",
+                        "To use these endpoints, simply send your request to the web search-specific route (e.g., /websearch instead of /completions), keeping the parameter structure intact.Define your query in messages, and set response_format to get results in your preferred style. The output skips model responses entirely, focusing solely on what's pulled from the web. This keeps the process lightweight and targeted.",
                         [
                           "web_search",
                           "messages",
@@ -801,7 +801,7 @@ export default function ApiTextGenerationDocs() {
                     className="text-muted-foreground text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
-                        "For a streamlined summary without individual model outputs, use the dedicated summary endpoints at [baseUrl]/summary. These endpoints mirror the completion request structure using messages for your query, response_format to define the output (text, audio URL, etc.), and settings like temperature for fine-tuning but focus solely on delivering summary results from the models. Unlike the completion endpoint, you won’t get per-model responses here; it’s just the distilled summary, ideal for scenarios where you want a lightweight, essential take without the extra detail.",
+                        "For a streamlined summary without individual model outputs, use the dedicated summary endpoints at [baseUrl]/summary. These endpoints mirror the completion request structure using messages for your query, response_format to define the output (text, audio URL, etc.), and settings like temperature for fine-tuning but focus solely on delivering summary results from the models. Unlike the completion endpoint, you won't get per-model responses here; it's just the distilled summary, ideal for scenarios where you want a lightweight, essential take without the extra detail.",
                         [
                           "summary",
                           "messages",
@@ -918,7 +918,7 @@ export default function ApiTextGenerationDocs() {
                     className="text-muted-foreground text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: highlightText(
-                        `For a focused result that skips individual model outputs, use the dedicated combination endpoint at [baseUrl]/combinations. This endpoint mirrors the completion request body, messages for your query, response_format for output style, and temperature for adjustments, but this only delivers the combined results from the models you specify. Using the same combination array (e.g., "combination": [{"type": "text", "models": ["gpt-4o<span class=" font-bold">+</span>deepseek-r1<span class=" font-bold">+</span>claude-3.5-sonnet"]}, {"type": "audio_url", "models": ["gpt-4o<span class=" font-bold">+</span>claude-3.5-sonnet"]}), you pick which models to blend with the + notation, and that’s all you get back no separate responses. It’s a clean, efficient way to get a synthesized output when you don’t need the raw model-by-model breakdown.`,
+                        `For a focused result that skips individual model outputs, use the dedicated combination endpoint at [baseUrl]/combinations. This endpoint mirrors the completion request body, messages for your query, response_format for output style, and temperature for adjustments, but this only delivers the combined results from the models you specify. Using the same combination array (e.g., "combination": [{"type": "text", "models": ["gpt-4o<span class=" font-bold">+</span>deepseek-r1<span class=" font-bold">+</span>claude-3.5-sonnet"]}, {"type": "audio_url", "models": ["gpt-4o<span class=" font-bold">+</span>claude-3.5-sonnet"]}), you pick which models to blend with the + notation, and that's all you get back no separate responses. It's a clean, efficient way to get a synthesized output when you don't need the raw model-by-model breakdown.`,
                         [
                           "combination",
                           "messages",

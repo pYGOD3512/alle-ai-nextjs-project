@@ -231,7 +231,7 @@ const SearchModal = ({ isOpen, onClose }: modalProps) => {
             fontWeight: 500,
           }}
         >
-          {result.path.split(">>").map((part, index, array) => (
+          {result.path?.split(">").map((part, index, array) => (
             <span key={index}>
               <strong>{part.trim()}</strong>
               {index < array.length - 1 && (

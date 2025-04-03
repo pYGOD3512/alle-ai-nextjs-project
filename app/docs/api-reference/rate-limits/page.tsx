@@ -60,7 +60,7 @@ export default function Page() {
                     <li>Number of requests per time interval</li>
                     <li>Token usage per request and cumulatively</li>
                     <li>Model-specific constraints</li>
-                    <li>Your account's service tier</li>
+                    <li>Your account&apos;s service tier</li>
                   </ul>
                 </div>
               </div>
