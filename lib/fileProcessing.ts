@@ -37,7 +37,7 @@ export async function processFile(file: File): Promise<{ text: string }> {
 
           return { text: fullText.trim() || `[PDF: ${file.name}]` };
         } catch (pdfError) {
-          console.error('PDF processing error:', pdfError);
+          // console.error('PDF processing error:', pdfError);
           return { text: `[Failed to process PDF: ${file.name}]` };
         }
 
@@ -58,7 +58,7 @@ export async function processFile(file: File): Promise<{ text: string }> {
         throw new Error(`Unsupported file type: ${file.type}`);
     }
   } catch (error) {
-    console.error('File processing error:', error);
+    // console.error('File processing error:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to process file');
   }
 }

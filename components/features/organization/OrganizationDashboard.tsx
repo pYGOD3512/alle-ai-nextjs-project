@@ -23,7 +23,8 @@ import {
   MoreVertical,
   Loader2
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { MembersTable } from "./MembersTable";
 import { AddMembersModal } from "@/components/ui/modals";
 
@@ -49,7 +50,7 @@ interface OrganizationDetails {
 export function OrganizationDashboard() {
   const params = useParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const { toast } = useToast();
+  ;
   const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
@@ -86,11 +87,7 @@ export function OrganizationDashboard() {
           ]
         });
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load organization details",
-          variant: "destructive",
-        });
+        toast.error('Faild to load organization details');
       } finally {
         setIsLoading(false);
       }

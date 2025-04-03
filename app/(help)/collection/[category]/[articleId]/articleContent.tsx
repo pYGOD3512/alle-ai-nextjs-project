@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { IconComponent } from "@/components/IconComponent";
 import DynamicFaq from "@/components/faq/DynamicFaq";
 import { languages } from "@/lib/constants";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 import CustomHead from "@/components/faq/CustomHead";
 type FeedbackType = "helpful" | "not-helpful" | null;
 
@@ -29,15 +29,11 @@ export function ArticleContent({
 }) {
   const [feedbackGiven, setFeedbackGiven] = useState<FeedbackType>(null);
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
-  const { toast } = useToast();
 
   useEffect(() => {
     // alert(article.id)
     if (selectedLanguage.code !== "en") {
-      toast({
-        title: "Coming soon!",
-        description: "This language translation will be available soon",
-      });
+      toast.info('This language translation will be available soon')
     }
   }, [selectedLanguage.code, toast]);
 

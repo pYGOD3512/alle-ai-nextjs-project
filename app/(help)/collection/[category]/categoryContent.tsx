@@ -6,7 +6,7 @@ import { HelpCategory, Article } from "@/lib/types";
 import { IconComponent } from "@/components/IconComponent";
 import { useEffect, useRef, useState } from "react";
 import { languages } from "@/lib/constants";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 
 export function CategoryContent({
   category,
@@ -15,17 +15,13 @@ export function CategoryContent({
   category: HelpCategory;
   categorySlug: string;
 }) {
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
 
   useEffect(() => {
     document.title = "Alle-AI | Help Center";
     if (selectedLanguage.code !== "en") {
-      toast({
-        title: "Coming soon!",
-        description: "This language translation will be available soon",
-      });
+      toast.info('This language translation will be available soon');
     }
   }, [selectedLanguage.code, toast]);
 

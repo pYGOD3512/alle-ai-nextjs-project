@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { ArrowRight, FileQuestion } from "lucide-react";
+import { ArrowRight, FileQuestion, CheckCircle2, AlertTriangle, Fingerprint, Scale, BrainCircuit, Layers, Zap, Shield, Sparkles, Users, Layers3, Lightbulb } from "lucide-react";
 import CustomHead from "@/components/faq/CustomHead";
 import Link from "next/link";
 const features = [
@@ -36,22 +36,28 @@ const features = [
 ];
 const benefits = [
   {
+    icon: <Zap className="h-10 w-10 text-blue-500" />,
     title: "Unified AI Power",
     description:
       "Access the combined expertise of industry-leading AI models in one seamless platform.",
-    gradient: "from-blue-50",
+    gradient: "from-blue-50/80 to-white",
+    darkGradient: "dark:from-blue-950/20 dark:to-zinc-900/80"
   },
   {
+    icon: <Layers3 className="h-10 w-10 text-purple-500" />,
     title: "Diverse Applications",
     description:
       "From text and image generation to audio and video, Alle-AI is designed for creators, researchers, and professionals alike.",
-    gradient: "from-purple-50",
+    gradient: "from-purple-50/80 to-white",
+    darkGradient: "dark:from-purple-950/20 dark:to-zinc-900/80"
   },
   {
+    icon: <Sparkles className="h-10 w-10 text-green-500" />,
     title: "Enhanced Productivity",
     description:
       "Smart summarization, deep customization, and collaborative tools ensure that Alle-AI adapts to your workflow.",
-    gradient: "from-green-50",
+    gradient: "from-green-50/80 to-white",
+    darkGradient: "dark:from-green-950/20 dark:to-zinc-900/80"
   },
 ];
 
@@ -78,6 +84,39 @@ const tips = [
   },
 ];
 
+const multiModelBenefits = [
+  {
+    icon: <AlertTriangle className="h-10 w-10 text-amber-500" />,
+    title: "Reduce Hallucinations",
+    description: "AI models can sometimes generate false or misleading information. Using multiple models helps identify inconsistencies and reduces the risk of hallucinations."
+  },
+  {
+    icon: <Scale className="h-10 w-10 text-blue-500" />,
+    title: "Balanced Perspectives",
+    description: "Different AI models have different training data and approaches. Multiple models provide diverse viewpoints and more balanced insights on complex topics."
+  },
+  {
+    icon: <CheckCircle2 className="h-10 w-10 text-green-500" />,
+    title: "Verify Accuracy",
+    description: "When multiple models agree on an answer, you can have higher confidence in its accuracy. Cross-verification is a powerful tool for quality assurance."
+  },
+  {
+    icon: <BrainCircuit className="h-10 w-10 text-purple-500" />,
+    title: "Complementary Strengths",
+    description: "Each AI model has unique strengths and specializations. One model might excel at creative writing while another provides more factual, concise responses."
+  },
+  {
+    icon: <Fingerprint className="h-10 w-10 text-rose-500" />,
+    title: "Identify Model Bias",
+    description: "All AI models contain some degree of bias from their training data. Using multiple models helps highlight and mitigate these biases for more objective results."
+  },
+  {
+    icon: <Layers className="h-10 w-10 text-indigo-500" />,
+    title: "Deeper Insights",
+    description: "Multiple perspectives lead to deeper understanding. When models approach a problem differently, you gain richer insights and more comprehensive solutions."
+  }
+];
+
 export default function Page() {
   return (
     <>
@@ -102,7 +141,7 @@ Getting Started | Alle-AI"
               className="w-full h-64 sm:h-80 md:h-96 rounded-lg transform transition-transform group-hover:scale-[1.01]"
               width="948"
               height="388"
-              src="https://www.youtube.com/embed/DZqTaE0AvVo?rel=0&showinfo=0"
+              src="https://www.youtube.com/embed/HkYy47ZLSK0?autoplay=1"
               title="Alle-AI"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -114,9 +153,9 @@ Getting Started | Alle-AI"
 
         {/* What is Alle-AI section */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-zinc-800 dark:to-zinc-850 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-transparet border-none transition-all duration-300 shadow-none">
             <CardContent className="pt-8 pb-8">
-              <h2 className="text-3xl font-semibold mb-4">What is Alle-AI?</h2>
+              <h2 className="text-3xl font-semibold mb-4 text-center">What is Alle-AI?</h2>
               <p className="text-lg leading-relaxed">
                 {`Alle-AI is the ultimate hub for cutting-edge AI capabilities. By
               integrating top models like ChatGPT, Claude, Gemini, and many
@@ -125,6 +164,53 @@ Getting Started | Alle-AI"
               or researching, Alle-AI empowers you to explore and innovate with
               the best tools AI has to offer.`}
               </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* NEW SECTION: Why At Least 2 Models */}
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="bg-transparent border-none transition-all duration-300 overflow-hidden shadow-none">
+            <CardContent className="pt-8 pb-8 relative">
+              {/* Background pattern */}
+              
+              <div className="relative z-10">
+              <h2 className="text-3xl font-semibold mb-12 text-center">Why Use At Least 2 Models?</h2>
+                
+                <p className="text-lg leading-relaxed mb-8">
+                  In the world of AI, no single model has all the answers. Each has unique strengths, weaknesses, and biases. 
+                  By comparing responses from multiple models, you get more reliable information, diverse perspectives, and 
+                  protection against AI hallucinations: those convincing but incorrect answers that can lead you astray.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                  {multiModelBenefits.map((benefit, index) => (
+                    <div 
+                      key={index} 
+                      className="bg-white dark:bg-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center text-center"
+                    >
+                      <div className="mb-4">
+                        {benefit.icon}
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">{benefit.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {benefit.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg flex items-start gap-3">
+                  <AlertTriangle className="h-6 w-6 text-amber-500 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-medium text-amber-800 dark:text-amber-300">Did you know?</h4>
+                    <p className="text-amber-700 dark:text-amber-400">
+                      Studies show that AI models can hallucinate facts up to 27% of the time when answering complex questions. 
+                      Using multiple models can reduce this error rate by identifying inconsistencies between responses.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </section>
@@ -139,7 +225,7 @@ Getting Started | Alle-AI"
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white dark:bg-zinc-800"
+                className="transition-all duration-300 bg-white dark:bg-zinc-800 hover:shadow-md"
               >
                 <CardHeader>
                   <h3 className="text-2xl font-semibold">{feature.title}</h3>
@@ -165,9 +251,12 @@ Getting Started | Alle-AI"
             {benefits.map((benefit, index) => (
               <Card
                 key={index}
-                className={`bg-gradient-to-br ${benefit.gradient} to-white dark:from-zinc-800 dark:to-zinc-850 hover:shadow-lg hover:scale-[1.02] transition-all duration-300`}
+                className={`bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 hover:shadow-lg hover:scale-[1.01] transition-all duration-300`}
               >
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 flex flex-col items-center text-center">
+                  <div className="mb-4 p-3 rounded-full bg-white dark:bg-zinc-800 shadow-sm">
+                    {benefit.icon}
+                  </div>
                   <h3 className="text-xl font-semibold mb-3">
                     {benefit.title}
                   </h3>
@@ -180,9 +269,9 @@ Getting Started | Alle-AI"
           </div>
 
           {/* Tips Section */}
-          <Card className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-800 dark:to-zinc-850 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-transparent shadow-none border-none transition-all duration-300">
             <CardHeader>
-              <h3 className="text-2xl font-semibold">
+              <h3 className="text-2xl font-semibold text-center">
                 Tips for Getting the Most Out of Alle-AI
               </h3>
             </CardHeader>
@@ -191,9 +280,12 @@ Getting Started | Alle-AI"
                 {tips.map((tip, index) => (
                   <div
                     key={index}
-                    className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
+                    className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-zinc-700/50"
                   >
-                    <h4 className="text-lg font-medium mb-3">{tip.title}</h4>
+                    <h4 className="text-lg font-medium mb-3 flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-amber-500" />
+                      {tip.title}
+                    </h4>
                     <p className="text-gray-600 dark:text-gray-300">
                       {tip.description}
                     </p>
@@ -205,13 +297,16 @@ Getting Started | Alle-AI"
         </section>
         {/* Learn more section */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 my-20">
-          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-zinc-800 dark:to-zinc-850">
-            <CardContent className="pt-8 pb-8">
+          <Card className="bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900/50 dark:to-zinc-800/50 border border-gray-100 dark:border-zinc-800/30 overflow-hidden relative shadow-md hover:shadow-xl transition-all duration-500">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/30 to-purple-100/30 dark:from-blue-900/10 dark:to-purple-900/10 rounded-full -mr-32 -mt-32 z-0"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-green-100/30 to-yellow-100/30 dark:from-green-900/10 dark:to-yellow-900/10 rounded-full -ml-32 -mb-32 z-0"></div>
+            
+            <CardContent className="pt-12 pb-12 relative z-10">
               <div className="text-center space-y-6">
-                <h2 className="text-3xl font-bold ">
-                  {` There's Always More to Learn`}
+                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+                  There&apos;s Always More to Learn
                 </h2>
-                <p className=" text-lg max-w-2xl mx-auto">
+                <p className="text-lg max-w-2xl mx-auto text-gray-700 dark:text-gray-300">
                   Explore our comprehensive FAQ section for detailed guides and
                   answers to common questions, or jump right in and experience
                   Alle-AI for yourself.
@@ -220,15 +315,15 @@ Getting Started | Alle-AI"
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
                   <Link
                     href="/collection"
-                    className="flex items-center gap-2 bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-400 text-white px-6 py-3 rounded-lg hover:bg-zinc-800 transition-all duration-300"
+                    className="flex items-center gap-2 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white px-6 py-3 rounded-lg border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all duration-300 shadow-sm"
                   >
-                    <FileQuestion className="w-5 h-5" />
+                    <FileQuestion className="w-5 h-5 text-blue-500" />
                     <span>Visit FAQ Page</span>
                   </Link>
 
                   <Link
                     href="/"
-                    className="flex items-center dark:bg-white dark:text-black dark:hover:bg-zinc-400 gap-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-zinc-800 transition-all duration-300 font-medium"
+                    className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-300 shadow-sm font-medium"
                   >
                     <span>Try Alle-AI Now</span>
                     <ArrowRight className="w-5 h-5" />

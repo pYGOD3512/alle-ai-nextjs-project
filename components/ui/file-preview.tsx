@@ -90,7 +90,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
 
         <button
           onClick={onRemove}
-          className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive/90 text-destructive-foreground transition-opacity"
           disabled={file.status === 'loading'}
         >
           <X className="w-3 h-3" />

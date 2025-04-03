@@ -45,16 +45,16 @@ class DropboxService {
         // Add load event listener to track initialization
         script.onload = () => {
           this.isInitialized = true;
-          // console.log('Dropbox SDK loaded successfully');
+          // // // console.log('Dropbox SDK loaded successfully');
         };
 
         script.onerror = (error) => {
-          // console.error('Failed to load Dropbox SDK:', error);
+          // // console.error('Failed to load Dropbox SDK:', error);
         };
 
         document.head.appendChild(script);
       } catch (error) {
-        // console.error('Error initializing Dropbox SDK:', error);
+        // // console.error('Error initializing Dropbox SDK:', error);
       }
     }
   }
@@ -77,10 +77,10 @@ class DropboxService {
   }): void {
     // Check if SDK is loaded and initialized
     if (typeof window === 'undefined' || !window.Dropbox) {
-      console.error('Dropbox Chooser not loaded. Please ensure:');
-      console.error('1. Your app key is correct');
-      console.error('2. Your domain is registered in the Dropbox App Console');
-      console.error('3. The Dropbox SDK has loaded properly');
+      // console.error('Dropbox Chooser not loaded. Please ensure:');
+      // console.error('1. Your app key is correct');
+      // console.error('2. Your domain is registered in the Dropbox App Console');
+      // console.error('3. The Dropbox SDK has loaded properly');
       return;
     }
 

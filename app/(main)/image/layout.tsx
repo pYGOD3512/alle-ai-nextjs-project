@@ -60,7 +60,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const handleSend = async () => {
     if (!input.trim()) return;
     
-    console.log('This is the negative prompt: ', negativePrompt);
     setIsLoading(true);
     try {
       const allSelectedModels = selectedModels.image;
@@ -93,7 +92,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           updateHistoryTitle(conversationId, response.title);
         })
         .catch(error => {
-          console.error('Error getting conversation title:', error);
+          // console.error('Error getting conversation title:', error);
         });
 
       // Get actual title based on prompt
@@ -101,7 +100,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setPromptId(promptResponse.id);
 
     } catch (error) {
-      console.error('Error in image generation flow:', error);
+      // console.error('Error in image generation flow:', error);
     } finally {
       setIsLoading(false);
     }
@@ -113,12 +112,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       // Skip if models are already loaded
       if (imageModels && imageModels.length > 0) return;
       
-      console.log('Loading image models this code is running');
       setModelsLoading(true);
       try {
         const models = await modelsApi.getModels('image');
         setImageModels(models);
-        console.log('Image models loaded', models);
+        // // console.log('Image models loaded', models);
       } catch (err) {
         setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
       } finally {
@@ -140,7 +138,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setHistoryLoading(true);
       try {
         const response = await historyApi.getHistory('image');
-        console.log("Fetched image history:", response.data);
+        // // console.log("Fetched image history:", response.data);
         setHistory(response.data);
       } catch (err) {
         setHistoryError(err instanceof Error ? err.message : 'Failed to load chat history');
@@ -160,7 +158,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
-        <div className="flex-1 flex flex-col">
+        <div className={`${pathname.startsWith('/image/res/') ? '' : 'flex-1'} flex flex-col`}>
           <div className="flex-1 flex flex-col justify-center items-center gap-8">
             {pathname === "/image" && (
             <GreetingMessage
@@ -177,7 +175,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 inputRef={inputRef}
                 isLoading={isLoading}
               />
-              <div className="flex items-center space-x-2 p-2">
+              {/* <div className="flex items-center space-x-2 p-2">
                 <Switch
                   variant="sm"
                   id="negative-prompt"
@@ -185,7 +183,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onCheckedChange={setShowNegativePrompt}
                 />
                 <Label htmlFor="negative-prompt">Negative Prompt</Label>
-              </div>
+              </div> */}
               {showNegativePrompt && (
                 <Textarea
                   placeholder="Enter negative prompt here..."

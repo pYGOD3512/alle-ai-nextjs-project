@@ -21,7 +21,7 @@ export function GoogleButton() {
       
       window.location.href = response.url;
     } catch (error) {
-      console.error("Google sign-in failed:", error);
+      // console.error("Google sign-in failed:", error);
     } finally {
       setIsLoading(false);
     }

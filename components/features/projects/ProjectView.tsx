@@ -92,7 +92,7 @@ export function ProjectView() {
 
   const handleSend = () => {
     // TODO: Implement send logic
-    console.log("Sending message:", inputValue);
+    // // console.log("Sending message:", inputValue);
   };
 
   const EmptyState = () => (

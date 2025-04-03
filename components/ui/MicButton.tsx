@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { AudioLines , MicOff } from "lucide-react";
+import { AudioLines , MicOff, Mic } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MicButtonProps {
@@ -17,9 +17,9 @@ export function MicButton({ isListening, onClick, className }: MicButtonProps) {
             <Button
               variant="default"
               size="icon"
-              className={`flex-shrink-0 rounded-full border-none h-8 w-8 focus-visible:outline-none transition-all duration-300 ${
+              className={`flex-shrink-0 rounded-full border-none h-9 w-9 focus-visible:outline-none transition-all duration-300 ${
                 isListening 
-                  ? 'bg-green-500/10 text-green-500 dark:bg-green-900/20' 
+                  ? 'bg-green-500/10 dark:bg-green-900/20' 
                   : ''
               } ${className}`}
               onClick={onClick}
@@ -27,11 +27,11 @@ export function MicButton({ isListening, onClick, className }: MicButtonProps) {
               {isListening ? (
                 <>
                   <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping"></span>
-                  <AudioLines  className="h-4 w-4 animate-pulse" />
-                  <span className="absolute inset-0 rounded-full border-2 border-green-500 animate-pulse"></span>
+                  <MicOff  className="h-4 w-4 animate-pulse text-white" />
+                  <span className="absolute inset-0 rounded-full border-2 border-borderColorPrimary animate-pulse"></span>
                 </>
               ) : (
-                <AudioLines  className="h-4 w-4" />
+                <Mic  className="h-4 w-4" />
               )}
             </Button>
           </div>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, forwardRef } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { useState, useEffect, forwardRef, useRef, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +17,7 @@ import Image from "next/image";
 import {
   sidebarMenuItems,
 } from "@/lib/constants";
-import { useSidebarStore, useHistoryStore, useProjectStore, Project, useAuthStore } from "@/stores";
+import { useSidebarStore, useHistoryStore, useProjectStore, Project, useAuthStore, useWebSearchStore, useCombinedModeStore } from "@/stores";
 import {
   Tooltip,
   TooltipContent,
@@ -47,6 +46,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useConversationStore } from "@/stores/models";
 import { historyApi } from "@/lib/api/history";
+import { toast } from "sonner"
+import { authApi } from "@/lib/api/auth";
+
+
 
 
 export function Sidebar() {
@@ -65,11 +68,17 @@ export function Sidebar() {
   const [historySearchModalOpen, setHistorySearchModalOpen] = useState(false);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const { user, plan } = useAuthStore();
-  const { setGenerationType, conversationId } = useConversationStore();
+  const { setGenerationType, conversationId, clearConversation } = useConversationStore();
+  ;
 
   // Add confirmation dialog state
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [historyToDelete, setHistoryToDelete] = useState<string | null>(null);
+
+  const [historyPage, setHistoryPage] = useState(1);
+  const [hasMoreHistory, setHasMoreHistory] = useState(false);
+  const historyScrollRef = useRef<HTMLDivElement>(null);
+  const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -80,6 +89,11 @@ export function Sidebar() {
   const handleNewChat = () => {
     // Clear the conversation link when starting a new chat
     setCurrentConversationLink(null);
+    clearConversation();
+
+      // Reset web search and combined mode
+      useWebSearchStore.getState().setIsWebSearch(false);
+      useCombinedModeStore.getState().setIsCombinedMode(false);
     
     // other logics later
     switch (true) {
@@ -106,10 +120,6 @@ export function Sidebar() {
      return pathname === "/chat" || pathname.startsWith("/chat/res");
    if (itemHref === "/image")
      return pathname === "/image" || pathname.startsWith("/image/res");
-   if (itemHref === "/audio")
-     return pathname === "/audio" || pathname.startsWith("/audio/res");
-   if (itemHref === "/video")
-     return pathname === "/video" || pathname.startsWith("/video/res");
    if (itemHref === "/changelog")
      return pathname === "/changelog" || pathname.startsWith("/changelog");
 
@@ -129,13 +139,13 @@ export function Sidebar() {
     if (editingTitle.trim()) {
       try {
         const response = await historyApi.renameConversation(id, editingTitle.trim());
-        console.log('Rename response:', response);
+        // // console.log('Rename response:', response);
         if (response.status && response.title) {
           setEditingTitle(response.title);
           renameItem(id, editingTitle.trim());
         }
       } catch (error) {
-        console.error('Error renaming conversation:', error);
+        // console.error('Error renaming conversation:', error);
       }
     }
     setEditingId(null);
@@ -160,24 +170,28 @@ export function Sidebar() {
       case 'image':
         return {
           bgColor: 'bg-purple-500/10',
+          darkBgColor: 'bg-purple-500/10',
           hoverBg: 'hover:bg-purple-500/20',
           iconColor: 'text-purple-500'
         };
       case 'audio':
         return {
           bgColor: 'bg-blue-500/10',
+          darkBgColor: 'bg-blue-500/10',
           hoverBg: 'hover:bg-blue-500/20',
           iconColor: 'text-blue-500'
         };
       case 'video':
         return {
           bgColor: 'bg-yellow-500/10',
+          darkBgColor: 'bg-yellow-500/10',
           hoverBg: 'hover:bg-yellow-500/20',
           iconColor: 'text-yellow-500'
         };
       default:
         return {
-          bgColor: 'bg-green-500/10',
+          bgColor: 'bg-green-500/20',
+          darkBgColor: 'bg-green-500/10',
           hoverBg: 'hover:bg-green-500/20',
           iconColor: 'text-green-500'
         };
@@ -194,7 +208,7 @@ export function Sidebar() {
       case pathname.startsWith("/video"):
         return Video;
       default:
-        return MessageSquare;
+        return Plus;
     }
   };
 
@@ -227,10 +241,10 @@ export function Sidebar() {
   };
 
   const handleDeleteHistory = async (sessionId: string) => {
-    console.log('Deleting history for conversationjj:', sessionId);
+    // // console.log('Deleting history for conversationjj:', sessionId);
     try {
       const response = await historyApi.deleteHistory(sessionId);
-      console.log('Delete history response:', response);
+      // // console.log('Delete history response:', response);
       if (response.status) {
         if(sessionId === conversationId){
           router.replace(`/${currentType}`);
@@ -238,10 +252,70 @@ export function Sidebar() {
         removeItem(sessionId);
       }
     } catch (error) {
-      console.error('Error deleting history item:', error);
+      // console.error('Error deleting history item:', error);
     }
     setHistoryToDelete(null);
   };
+
+  // Add this function to handle scroll events
+  const handleHistoryScroll = useCallback(() => {
+    if (!historyScrollRef.current || !hasMoreHistory || isLoading) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = historyScrollRef.current;
+    
+    // Check if scrolled to bottom (with a small threshold)
+    if (scrollHeight - scrollTop - clientHeight < 20) {
+      // Load more history
+      const nextPage = historyPage + 1;
+      setHistoryPage(nextPage);
+      
+      // Fetch more history items
+      historyApi.getHistory(currentType, nextPage)
+        .then((response) => {
+          if (response.data.length > 0) {
+            // Add new items to history
+            const { addHistoryItems } = useHistoryStore.getState();
+            addHistoryItems(response.data);
+          }
+          // Update if there are more items to load
+          setHasMoreHistory(response.data.length > 0);
+        })
+        .catch((error) => {
+          // console.error('Error loading more history:', error);
+        });
+    }
+  }, [historyPage, hasMoreHistory, isLoading, currentType]);
+
+  // Add effect to attach scroll listener
+  useEffect(() => {
+    const scrollContainer = historyScrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleHistoryScroll);
+      return () => {
+        scrollContainer.removeEventListener('scroll', handleHistoryScroll);
+      };
+    }
+  }, [handleHistoryScroll]);
+
+  // Add this function to handle billing portal redirection
+  const handleManageSubscription = async () => {
+    try {
+      setIsLoadingBillingPortal(true);
+      const response = await authApi.getBillingPortal(window.location.href);
+      if (response.status && response.url) {
+        window.location.href = response.url;
+      } else {
+        toast.error('Something went wrong, please try again');
+      }
+    } catch (error) {
+      toast.error('Something went wrong, check your internet connection');
+    } finally {
+      setIsLoadingBillingPortal(false);
+    }
+  };
+
+  const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
+  // const isPaidPlan = plan === 'free';
 
   return (
     <>
@@ -265,9 +339,12 @@ export function Sidebar() {
             <div className="p-2 flex-shrink-0">
               <div className="flex gap-2 px-2">
                 <Button
-                  onClick={handleNewChat}
+                  onClick={()=>{
+                    handleNewChat();
+                    (isMobile && isOpen) ? toggle() : '';
+                  }}
                   variant="outline"
-                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
+                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
                 >
                   <Plus className={`mr-2 h-4 w-4 ${getSectionStyles(currentType).iconColor} ${getSectionStyles(currentType).iconColor}`} />
                   NEW {currentType.toUpperCase()}
@@ -278,8 +355,11 @@ export function Sidebar() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className={`${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
-                        onClick={() => setModelSelectionModalOpen(true)}
+                        className={`${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
+                        onClick={() => {
+                          (isMobile && isOpen) ? toggle() : '';
+                          setModelSelectionModalOpen(true)
+                        }}
                         aria-label="Model Selection"
                         id="tooltip-select-selector"
                       >
@@ -302,16 +382,30 @@ export function Sidebar() {
                     : "video";
                   const styles = getSectionStyles(type);
                   
-                  return (
-                    <Link
-                      key={item.label}
-                      href={item.href}
+                  // Wrap the Link in a conditional
+                  const content = (
+                    <div
                       className={`w-full flex items-center justify-start h-8 text-sm rounded-md px-2 
                         ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                        ${styles.hoverBg}`}
+                        ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
+                        ${styles.hoverBg} cursor-pointer`}
+                      onClick={() => {
+                        (isMobile && isOpen) ? toggle() : '';
+                        if (item.href === "/audio" || item.href === "/video") {
+                          toast.info('This feature will be available soon');
+                        }
+                      }}
                     >
                       <item.icon className={`mr-2 h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
                       {item.label}
+                    </div>
+                  );
+
+                  return item.href === "/audio" || item.href === "/video" ? (
+                    <div key={item.label}>{content}</div>
+                  ) : (
+                    <Link key={item.label} href={item.href}>
+                      {content}
                     </Link>
                   );
                 })}
@@ -331,10 +425,14 @@ export function Sidebar() {
                       <Button
                         variant="ghost"
                         className="w-full p-0 gap-2 border-none justify-start px-2"
-                        onClick={() => setProjectModalOpen(true)}
+                        onClick={() => {
+                          // setProjectModalOpen(true);
+                          (isMobile && isOpen) ? toggle() : '';
+                          toast.info('This feature will be available soon');
+                        }}
                         aria-label="New Project"
                       >
-                        <Plus className="w-4 h-4"/>
+                        <Folder  className="w-4 h-4"/>
                         New project
                       </Button>
                     </div>
@@ -378,9 +476,10 @@ export function Sidebar() {
                           </ContextMenu>
                         ))
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-2 text-muted-foreground">
-                          <span className="text-xs">No projects</span>
-                        </div>
+                        // <div className="flex flex-col items-center justify-center py-2 text-muted-foreground">
+                        //   <span className="text-xs">No projects</span>
+                        // </div>
+                        ''
                       )}
                     </div>
                   </ScrollArea>
@@ -398,7 +497,10 @@ export function Sidebar() {
                     variant="ghost"
                     size="icon"
                     className="p-0 h-8 w-8"
-                    onClick={() => setHistorySearchModalOpen(true)}
+                    onClick={() => {
+                      setHistorySearchModalOpen(true);
+                      (isMobile && isOpen) ? toggle() : '';
+                    }}
                     aria-label="Search History"
                   >
                     <Search className="w-4 h-4"/>
@@ -407,7 +509,11 @@ export function Sidebar() {
               </div>
 
               {/* Scrollable history list */}
-              <ScrollArea className="flex-1">
+              <ScrollArea 
+                className="flex-1" 
+                scrollHideDelay={0}
+                ref={historyScrollRef}
+              >
                 <div className="px-4 space-y-0.5">
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
@@ -445,6 +551,7 @@ export function Sidebar() {
                                   setGenerationType('load');
                                   router.replace(`/${currentType}/res/${item.session}`);
                                   handleHistoryItemClick(item.session);
+                                  (isMobile && isOpen) ? toggle() : '';
                                 }}
                                 
                                 className="relative flex-1 min-w-0">
@@ -524,6 +631,13 @@ export function Sidebar() {
                       <span className="text-xs">No history available</span>
                     </div>
                   )}
+                  
+                  {/* Add loading indicator at the bottom when loading more */}
+                  {hasMoreHistory && !isLoading && currentHistory.length > 0 && (
+                    <div className="flex justify-center py-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
 
@@ -545,9 +659,9 @@ export function Sidebar() {
                         <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
                       </a>
                     </Link>
-                    <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
+                    {/* <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
                         <History  className="w-4 h-4 ml-4"/> Changelog
-                    </Link>
+                    </Link> */}
                   </CollapsibleContent>
                 </Collapsible>
               </div>
@@ -566,7 +680,21 @@ export function Sidebar() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-sm">{user?.first_name}</div>
-                    <Badge variant="default" className="text-[0.6rem] h-3">{plan || "Plan"}</Badge>
+                    {plan ? (
+                      <Badge variant="default" className="text-[0.6rem] h-3">
+                        {plan.split('-')[0]}
+                      </Badge>
+                    ) : (
+                      <Badge 
+                        variant="outline" 
+                        className="text-[0.6rem] h-3 p-1 flex justify-center items-center relative overflow-hidden"
+                      >
+                        <span className="relative z-10">Plan</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
+                              style={{ backgroundSize: '200% 100%' }}
+                        />
+                      </Badge>
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {user?.email}
@@ -577,10 +705,17 @@ export function Sidebar() {
                 size="sm"
                 variant="outline"
                 className="gap-1 w-full text-xs relative overflow-hidden group border-none dark:bg-white dark:text-black bg-black text-white"
-                onClick={() => setPlansModalOpen(true)}
+                onClick={isPaidPlan ? handleManageSubscription : () => setPlansModalOpen(true)}
+                disabled={isLoadingBillingPortal}
               >
-                <Gem className="h-4 w-4" />
-                UPGRADE
+                {isLoadingBillingPortal ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Gem className="h-4 w-4" />
+                    {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
+                  </>
+                )}
               </Button>
             </div>
           </>
@@ -590,13 +725,13 @@ export function Sidebar() {
               <Button
                 onClick={handleNewChat}
                 variant="outline"
-                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg}`}
+                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg} dark:${getSectionStyles(currentType).darkBgColor}`}
               >
                 <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
               </Button>
               <Button
                 variant="outline"
-                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}`}
+                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
                 onClick={() => setModelSelectionModalOpen(true)}
                 id="tooltip-select-selector"
               >
@@ -605,22 +740,37 @@ export function Sidebar() {
             </div>
             {sidebarMenuItems.map((item, i) => {
               const isActive = isActiveRoute(item.href, pathname);
-              const type = item.href === "/" ? "chat" 
+              const type = item.href === "/chat" ? "chat" 
                 : item.href === "/image" ? "image"
                 : item.href === "/audio" ? "audio"
                 : "video";
               const styles = getSectionStyles(type);
               
-              return (
+              // Wrap the Link in a conditional
+              const content = (
+                <div
+                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
+                    ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
+                    ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
+                    ${styles.hoverBg} cursor-pointer`}
+                  onClick={() => {
+                    if (item.href === "/audio" || item.href === "/video") {
+                      toast.info('This feature will be available soon');
+                    }
+                  }}
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
+                </div>
+              );
+
+              return item.href === "/audio" || item.href === "/video" ? (
+                <div key={item.label}>{content}</div>
+              ) : (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
-                    ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                    ${styles.hoverBg}`}
-                  id="tooltip-select-ais"
                 >
-                  <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
+                  {content}
                 </Link>
               );
             })}
@@ -629,9 +779,12 @@ export function Sidebar() {
               variant="ghost"
               size="icon"
               className="w-full"
-              onClick={() => setProjectModalOpen(true)}
+              onClick={() => {
+                toast.info('This feature will be available soon');
+                // setProjectModalOpen(true)}
+              }}
             >
-              <Plus className="h-4 w-4" />
+              <Folder className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
         )}

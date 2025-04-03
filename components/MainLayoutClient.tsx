@@ -1,7 +1,7 @@
 "use client";
 
 import '@/app/globals.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { HelpButton } from '@/components/HelpButton';
@@ -10,6 +10,8 @@ import * as Frigade from '@frigade/react';
 import { FooterText } from '@/components/FooterText';
 import { useSidebarStore } from "@/stores";
 import { usePathname } from 'next/navigation';
+import { usePageTitle } from '@/hooks/use-page-title';
+
 
 const isMaintenance = false;
 
@@ -20,6 +22,8 @@ export function MainLayoutClient({
 }) {
   const { isOpen } = useSidebarStore();
   const pathname = usePathname();
+  usePageTitle(); 
+
 
   if (isMaintenance) {
     return (

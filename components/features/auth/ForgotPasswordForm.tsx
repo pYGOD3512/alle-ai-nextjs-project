@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { authApi } from '@/lib/api/auth';
 
 interface ForgotPasswordFormProps {
@@ -17,7 +18,7 @@ interface ForgotPasswordFormProps {
 export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  ;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,21 +28,14 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
       const response = await authApi.forgotPassword(email);
       
       if (response.status) {
-        console.log('res  ', response);
-        toast({
-          title: "Success",
-          description: "Password reset link have been sent to your email",
-        });
+        // // console.log('res  ', response);
+        toast.success('Password reset link have been sent to your email');
         onSuccess(email);
       } else {
         throw new Error(response.message || 'Failed to send reset link');
       }
     } catch (error: any) {
-      toast({
-        title: "Failed to reset password",
-        description: "Please check your email and try again",
-        variant: "destructive",
-      });
+      toast.error('Failed to reset password');
     } finally {
       setIsLoading(false);
     }

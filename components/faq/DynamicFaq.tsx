@@ -3,6 +3,7 @@ import { FC } from "react";
 
 // available faq pages
 const faqComponents = {
+  // help center pages
   "reset-password": dynamic(
     () => import("@/components/faq/account/reset-password")
   ),
@@ -37,14 +38,70 @@ const faqComponents = {
   "models-selection": dynamic(
     () => import("@/components/faq/others/models-selection")
   ),
+
+  "model-limits": dynamic(
+    () => import("@/components/faq/others/model-limits")
+  ),
+
+  //api reference  pages
+  quickstart: dynamic(
+    () => import("@/components/docs/userGuides/initial-setup")
+  ),
+  "text-generation": dynamic(
+    () => import("@/components/docs/userGuides/text-generation")
+  ),
+  "image-generation": dynamic(
+    () => import("@/components/docs/userGuides/image-generation")
+  ),
+  limits: dynamic(() => import("@/components/docs/userGuides/limits")),
+  "audio-generation": dynamic(
+    () => import("@/components/docs/userGuides/audio-generation")
+  ),
+  "file-uploads": dynamic(
+    () => import("@/components/docs/userGuides/file-uploads")
+  ),
+  "video-generation": dynamic(
+    () => import("@/components/docs/userGuides/video-generation")
+  ),
+  pricing: dynamic(() => import("@/components/docs/userGuides/pricing")),
+  "error-codes": dynamic(() => import("@/components/docs/userGuides/Errors")),
+  "prompts-inputs": dynamic(
+    () => import("@/components/docs/userGuides/fine-tuning-inputs")
+  ),
+
+  // tutorials pages
+  "using-platform": dynamic(
+    () => import("@/components/docs/tutorials/Overview")
+  ),
+  "text-ai": dynamic(
+    () => import("@/components/docs/tutorials/text-generation")
+  ),
+  "audio-ai": dynamic(
+    () => import("@/components/docs/tutorials/audioGeneration")
+  ),
+  "video-ai": dynamic(
+    () => import("@/components/docs/tutorials/videoGeneration")
+  ),
+  "image-ai": dynamic(
+    () => import("@/components/docs/tutorials/image-generation")
+  ),
+  prompts: dynamic(() => import("@/components/docs/tutorials/prompts")),
+  history: dynamic(() => import("@/components/docs/tutorials/History")),
+
+  models: dynamic(() => import("@/components/docs/userGuides/models")),
+
+ 
 };
 
+type FaqName = keyof typeof faqComponents;
+
 interface DynamicFaqProps {
-  faqName: keyof typeof faqComponents; // get name of faq component
+  faqName: string;
 }
 
 const DynamicFaq: FC<DynamicFaqProps> = ({ faqName }) => {
-  const SelectedFAQ = faqComponents[faqName];
+  const SelectedFAQ =
+    faqName in faqComponents ? faqComponents[faqName as FaqName] : null;
 
   if (!SelectedFAQ) {
     return <p>FAQ not found!</p>;

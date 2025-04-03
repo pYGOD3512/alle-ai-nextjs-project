@@ -38,10 +38,17 @@ export function formatFileSize(bytes: number): string {
 }
 
 export function validateFile(file: File): { isValid: boolean; error?: string } {
-  if (file.size > MAX_FILE_SIZE) {
+  // Check if it's an image
+  const isImage = file.type.startsWith('image/');
+  
+  // Apply appropriate size limit
+  const sizeLimit = isImage ? 5 * 1024 * 1024 : 20 * 1024 * 1024; // 5MB for images, 20MB for other files
+  const readableLimit = isImage ? '5MB' : '20MB';
+  
+  if (file.size > sizeLimit) {
     return {
       isValid: false,
-      error: `File size exceeds ${formatFileSize(MAX_FILE_SIZE)}`
+      error: `File size exceeds ${readableLimit} limit`
     };
   }
 
@@ -89,4 +96,17 @@ export const getQueryParam = (name: string): string | null => {
 export const hasQueryParam = (name: string): boolean => {
   if (typeof window === 'undefined') return false;
   return new URLSearchParams(window.location.search).has(name);
+};
+
+export const PROTECTED_ROUTES = [
+  '/audio',
+  '/video',
+  '/project',
+  '/developer',
+  '/changelog',
+  
+];
+
+export const isProtectedRoute = (path: string): boolean => {
+  return PROTECTED_ROUTES.some(route => path.startsWith(route));
 };

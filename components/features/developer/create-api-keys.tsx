@@ -45,7 +45,8 @@ import {
 import { useState, useEffect } from "react";
 import { useApiKeyStore, ApiKey } from "@/stores";
 import { CreateApiKeyModal, EditApiKeyModal, PromptModalProps } from "@/components/ui/modals";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,7 +95,7 @@ export function CreateApiKeys() {
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [promptConfig, setPromptConfig] = useState<PromptModalProps | null>(null);
   const { keys, addKey, removeKey, toggleKeyStatus, clearKeys, toggleKeyVisibility } = useApiKeyStore();
-  const { toast } = useToast();
+  ;
   const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [togglingKeys, setTogglingKeys] = useState<Set<string>>(new Set());
@@ -104,7 +105,7 @@ export function CreateApiKeys() {
     setIsLoading(true);
     try {
       const response = await keysApi.getAllApiKeys();
-      console.log('Fetched API keys:', response);
+      // // console.log('Fetched API keys:', response);
 
       // Clear all existing keys first
       clearKeys();
@@ -127,12 +128,8 @@ export function CreateApiKeys() {
       });
 
     } catch (error) {
-      console.error('Error fetching API keys:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load API keys",
-        variant: "destructive",
-      });
+      // console.error('Error fetching API keys:', error);
+      toast.error('Failed to load keys')
     } finally {
       setIsLoading(false);
     }
@@ -148,17 +145,9 @@ export function CreateApiKeys() {
   const copyToClipboard = async (text: string, keyName: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast({
-        title: "Copied!",
-        description: `API key '${keyName}' copied to clipboard`,
-        duration: 2000,
-      });
+      toast.success('Copied')
     } catch (err) {
-      toast({
-        title: "Failed to copy",
-        description: "Please try again",
-        variant: "destructive",
-      });
+      toast.error('Failed to copy')
     }
   };
 
@@ -166,30 +155,19 @@ export function CreateApiKeys() {
     setDeletingKeys(prev => new Set(prev).add(key.id));
     try {
       const response = await keysApi.deleteApiKey(key.id);
-      console.log('Delete response:', response);
+      // // console.log('Delete response:', response);
       
       if (response.deleted_at) {
         removeKey(key.id);
-        
-        toast({
-          title: "Success",
-          description: response.message,
-        });
+        toast.success(`${response.message}`)
+      
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete API key",
-          variant: "destructive",
-        });
+        toast.error('Failed to delete key');
       }
       
     } catch (error) {
-      console.error('Error deleting API key:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete API key",
-        variant: "destructive",
-      });
+      // console.error('Error deleting API key:', error);
+      toast('Failed to delete key')
     } finally {
       setDeletingKeys(prev => {
         const newSet = new Set(prev);
@@ -208,18 +186,11 @@ export function CreateApiKeys() {
 
       // Pass both id and the isDisabled state based on !response.active
       toggleKeyStatus(key.id, !response.active);
-      
-      toast({
-        title: "Success",
-        description: response.message,
-      });
+  
+      toast.success(`${response.message}`)
     } catch (error) {
-      console.error('Error toggling API key status:', error);
-      toast({
-        title: "Error",
-        description: `Failed to ${key.isDisabled ? 'enable' : 'disable'} API key`,
-        variant: "destructive",
-      });
+      // console.error('Error toggling API key status:', error);
+      toast.error(`Failed to ${key.isDisabled ? 'enable' : 'disable'} API key`)
     } finally {
       setTogglingKeys(prev => {
         const newSet = new Set(prev);

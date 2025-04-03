@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useContentStore, useSelectedModelsStore, useLikedMediaStore } from "@/stores";
 import { VIDEO_MODELS } from "@/lib/constants";
@@ -354,7 +355,7 @@ const VideoArea = () => {
   const [videos, setVideos] = useState<VideoResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasResponse, setHasResponse] = useState(false);
-  const { toast } = useToast();
+  ;
   const [prompt, setPrompt] = useState("");
   const [settings, setSettings] = useState<VideoSettings>({
     aspectRatio: "16:9",
@@ -391,11 +392,7 @@ const VideoArea = () => {
 
         const validation = validateFile(file);
         if (!validation.isValid) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: validation.error
-          });
+          toast.error(`${validation.error}`)
           return;
         }
 
@@ -429,7 +426,7 @@ const VideoArea = () => {
           }, 100);
 
           const { text } = await processFile(file);
-          console.log('content', text);
+          // // console.log('content', text);
 
           clearInterval(progressInterval);
           
@@ -442,20 +439,13 @@ const VideoArea = () => {
             prev ? { ...prev, status: 'ready' } : null
           );
 
-          toast({
-            title: "Image Uploaded",
-            description: "Image has been uploaded successfully",
-          });
+          toast.success('Image uploaded')
         } catch (error) {
           if (uploadedFile?.url) {
             URL.revokeObjectURL(uploadedFile.url);
           }
           setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-          toast({
-            variant: "destructive",
-            title: "Processing Failed",
-            description: error instanceof Error ? error.message : "Failed to process file"
-          });
+          toast.error(`${error instanceof Error ? error.message : "Failed to process file"}`)
         }
       }
     }
@@ -693,10 +683,7 @@ const VideoArea = () => {
         liked: true
       });
 
-      toast({
-        title: "Video Liked",
-        description: `You liked ${modelInfo?.name}'s video generation`,
-      });
+      toast.success(`${modelInfo?.name}'s video liked`)
     } else {
       // Remove from liked media store - find the video's ID first
       const likedItems = useLikedMediaStore.getState().getLikedMediaByType('video');
@@ -708,10 +695,8 @@ const VideoArea = () => {
         removeLikedMedia(likedItem.id);
       }
 
-      toast({
-        title: "Video Unliked",
-        description: `You unliked ${modelInfo?.name}'s video generation`,
-      });
+      toast.success(`${modelInfo?.name}'s video unliked`)
+
     }
   }, [videos, toast, addLikedMedia, removeLikedMedia, prompt]);
 
@@ -767,11 +752,8 @@ const VideoArea = () => {
 
     const validation = validateFile(file);
     if (!validation.isValid) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: validation.error
-      });
+      toast.error(`${validation.error}`)
+
       return;
     }
 
@@ -808,7 +790,7 @@ const VideoArea = () => {
 
       // Process the file
       const { text } = await processFile(file);
-      console.log('content', text);
+      // // console.log('content', text);
 
       // Complete the progress animation
       clearInterval(progressInterval);
@@ -824,20 +806,13 @@ const VideoArea = () => {
         prev ? { ...prev, status: 'ready' } : null
       );
 
-      toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded');
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
       setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-      toast({
-        variant: "destructive",
-        title: "Processing Failed",
-        description: error instanceof Error ? error.message : "Failed to process file"
-      });
+      toast.error(`${error instanceof Error ? error.message : "Failed to upload file"}`)
     }
   };
 
@@ -849,11 +824,7 @@ const VideoArea = () => {
     try {
       const validation = validateFile(file);
       if (!validation.isValid) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: validation.error
-        });
+        toast.error(`${validation.error}`)
         return;
       }
 
@@ -888,7 +859,7 @@ const VideoArea = () => {
       }, 100);
 
       const { text } = await processFile(file);
-      console.log('content', text);
+      // // console.log('content', text);
       setPrompt(text);
 
       // Complete the progress animation
@@ -905,20 +876,15 @@ const VideoArea = () => {
         prev ? { ...prev, status: 'ready' } : null
       );
 
-      toast({
-        title: "File Processed",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded');
+      toast.success('File uploaded');
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
       }
       setUploadedFile(prev => prev ? { ...prev, status: 'error' } : null);
-      toast({
-        variant: "destructive",
-        title: "Processing Failed",
-        description: error instanceof Error ? error.message : "Failed to process file"
-      });
+      toast.error(`${error instanceof Error ? error.message : "Failed to upload file"}`)
+
     }
   };
 

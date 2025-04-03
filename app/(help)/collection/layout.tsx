@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { ScrollText, Search, Globe, Home, Router } from "lucide-react";
 import Providers from "@/components/ProgressBar";
+import { toast } from "sonner"
 
 import {
   DropdownMenu,
@@ -153,7 +154,7 @@ export default function HelpLayout({
       <div className="min-h-screen flex flex-col">
         <header className="w-full px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col">
-            <div className="flex justify-around items-center mb-4">
+            <div className="flex justify-around sm:justify-between items-center mb-4">
               <Link href={"/collection"}>
                 <Image
                   src={
@@ -161,17 +162,26 @@ export default function HelpLayout({
                       ? "/svgs/logo-desktop-full.png"
                       : "/svgs/logo-desktop-dark-full.png"
                   }
-                  alt="all-ai"
-                  height={150}
-                  width={150}
+                  alt="all-ai"s
+                  height={100}
+                  width={100}
                 />
               </Link>
 
               <div className="right-10 flex items-center gap-5 text-sm">
-                <Link href={"/docs/developer-guides"} target="_blank">
+                <Link href={"/docs/getting-started"} target="_blank">
                   API Docs
                 </Link>
-                <Link href={"/release-notes"}>Release Notes</Link>
+                {/* <a 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast.info('This feature will be available soon');
+                  }}
+                >
+                  API Docs
+                </a> */}
+                {/* <Link href={"/release-notes"}>Release Notes</Link> */}
                 <ThemeToggle />
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors">

@@ -12,7 +12,7 @@ interface RouteGuardProps {
   children: ReactNode;
 }
 
-const authRoutes = ['/', '/auth', '/plans'];
+const authRoutes = ['/auth'];
 
 const publicRoutes = [
   '/model-glossary',
@@ -25,7 +25,6 @@ const publicRoutes = [
   '/changelog',
   '/hub',
   '/404',
-  '/',
 ];
 
 // Create a separate component for the route guard logic
@@ -34,9 +33,8 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { token, setAuth, clearAuth } = useAuthStore();
-  const [isChecking, setIsChecking] = useState(true);
+  const [authState, setAuthState] = useState<'checking' | 'authorized' | 'unauthorized'>('checking');
   const [isLoading, setIsLoading] = useState(false);
-  const [canRender, setCanRender] = useState(false);
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
 
   // Helper function to check if current path is a public route
@@ -55,15 +53,25 @@ function RouteGuardInner({ children }: RouteGuardProps) {
   };
 
   useEffect(() => {
+    // Store the current path for potential restoration after auth
+    const storeCurrentPath = () => {
+      if (pathname !== '/auth') {
+        sessionStorage.setItem('returnUrl', pathname + window.location.search);
+        // console.log(pathname + window.location.search,'this is the resolved return url');
+      }
+    };
+
     const checkAuth = async () => {
       const callback = searchParams.get('callback');
       const tokenFromUrl = searchParams.get('token');
   
       if (callback === 'google' && tokenFromUrl) {
         setAuth({} as User, tokenFromUrl);
+        setIsLoading(true);
   
         try {
           const response = await authApi.getUser();
+          // console.log(response, 'google auth response')
           setAuth(response.data.user, tokenFromUrl, response.plan);
   
           if (!response.plan) {
@@ -72,8 +80,8 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             router.replace('/chat');
           }
         } catch (error) {
-
           clearAuth();
+          router.replace('/');
         } finally {
           setIsLoading(false);
         }
@@ -81,88 +89,56 @@ function RouteGuardInner({ children }: RouteGuardProps) {
         return;
       }
       
-      setIsChecking(true);
-      setCanRender(false);
-
       // Special case: If we're on the auth page with verify-email mode
       if (pathname === '/auth' && searchParams.get('mode') === 'verify-email') {
-        setCanRender(true);
-        setIsChecking(false);
+        setAuthState('authorized');
         return;
       }
 
       // Get stored return URL
-      const returnUrl = sessionStorage.getItem('returnUrl');
-      console.log('returnUrl', returnUrl);
+      // const returnUrl = sessionStorage.getItem('returnUrl');
 
       // CASE 1: No token - only allow access to auth routes and public routes
       if (!token) {
         if (!authRoutes.includes(pathname) && !isPublicRoute(pathname)) {
           // Save current path before redirecting to auth
-          if (pathname !== '/auth') {
-            sessionStorage.setItem('returnUrl', pathname);
-          }
           router.replace('/auth');
           return;
         }
-        setCanRender(true);
-        setIsChecking(false);
+        setAuthState('authorized');
         return;
       }
 
-      // CASE 2: Has token and trying to access auth routes or /plans
-      if (token && (authRoutes.includes(pathname))) {
-        try {
-          const response = await authApi.getUser();
-          setAuth(response.data.user, token, response.plan);
-
-          if (response.data.to === 'verify-email') {
-            router.replace(`/auth?mode=verify-email&email=${response.data.user.email}`);
-            return;
-          } else if (response.data.to === 'chat' && response.plan) {
-            // Check for return URL when redirecting from auth
-            if (returnUrl && pathname === '/auth') {
-              sessionStorage.removeItem('returnUrl');
-              setGenerationType('load');
-              router.replace(returnUrl);
-              return;
-            }
-            router.replace('/chat');
-            return;
-          } else if (!response.plan) {
-            // Only allow rendering plans page if user needs to select a plan
-            if (pathname === '/plans') {
-              setCanRender(true);
-              setIsChecking(false);
-              return;
-            }
-            router.replace('/plans');
+      // CASE 2: Has token and trying to access other routes aside auth
+      if (token && !authRoutes.includes(pathname)) {
+          // console.log('Token exits fast refresh');
+          storeCurrentPath();
+          const returnUrl = sessionStorage.getItem('returnUrl');
+          if (returnUrl) {
+            sessionStorage.removeItem('returnUrl');
+            setGenerationType('load');
+            
+            router.replace(returnUrl);
+            setAuthState('authorized');
             return;
           }
-        } catch (error) {
-          clearAuth();
-          if (pathname !== '/auth') {
-            sessionStorage.setItem('returnUrl', pathname);
-          }
-          router.replace('/auth');
-          return;
-        }
       }
-
-      // CASE 3: Has token and accessing protected/public routes
-      setCanRender(true);
-      setIsChecking(false);
+              
+      // CASE 4: Has token and accessing protected/public routes
+      setAuthState('authorized');
     };
 
+    setAuthState('checking');
     checkAuth();
   }, [pathname, token, searchParams]);
 
-  if (isLoading || isChecking) {
+  // Show loading screen while checking auth or during explicit loading states
+  if (isLoading || authState === 'checking') {
     return <LoadingScreen />;
   }
 
-  // Don't render anything until we've confirmed the user can access the route
-  if (!canRender) {
+  // Don't render anything if not authorized
+  if (authState !== 'authorized') {
     return null;
   }
 
@@ -177,3 +153,5 @@ export function RouteGuard({ children }: RouteGuardProps) {
     </Suspense>
   );
 }
+
+//I think the suspense is causing the loading issues
