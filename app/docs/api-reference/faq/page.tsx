@@ -17,87 +17,116 @@ type FAQItem = {
 const FAQ_DATA: FAQItem[] = [
   {
     id: "1",
-    question:
-      "Why am I seeing error messages for features I previously used without issues?",
+    question: "How do I choose which models to use in my API request?",
     answer: {
       description:
-        "If you're now seeing error messages for features like search_domain_filter, related_questions, images, or structured_outputs that previously worked, please note these features have always been reserved for Tier 3 users and above.",
+        "You can specify the AI models (e.g., ChatGPT, Claude, Gemini) you want in a single API request by including them in the request body.",
       points: [
-        "We recently added clearer error messaging to prevent confusion around feature access",
-        "This is not due to any change in access permissions, but rather improved transparency",
-        "For structured_outputs, schemas weren't previously enforced by the API",
-        "Similar results may still be possible using improved prompting techniques",
+        "Pass a single model for a simple request or multiple models for broader results.",
+        "The number of models you can include depends on your subscription tier—check the docs for details.",
+        "Available models span chat, audio, video, and image types.",
       ],
-      note: "We're happy to help advise on alternative approaches if you need support.",
+      note: "See our documentation at allea-ai.com/docs for examples and model lists.",
     },
   },
   {
     id: "2",
-    question: "How do I file a bug report and what happens afterward?",
+    question: "Why am I seeing errors for certain models or features?",
     answer: {
       description:
-        "To file a bug report, please use our GitHub repository and share the issue link with us via email at contact@alle-ai.com",
+        "Errors may pop up if you’re requesting models or features (e.g., advanced chat, audio, or video models) limited to higher subscription tiers.",
       points: [
-        "We appreciate your patience as we review reports",
-        "Response times may vary based on current volume",
-        "We track all reported issues internally",
+        "API v1 now includes clearer error messages to avoid confusion.",
+        "Tier 1 offers basic models; Tier 3+ unlocks more advanced options.",
+        "Check your plan in the dashboard to confirm what’s available.",
+        "You might get similar results with creative prompting on accessible models.",
       ],
+      note: "Email support@allea-ai.com for help with alternatives.",
     },
   },
   {
     id: "3",
-    question: "How can I track my spend/usage per API key?",
+    question: "How do I report a bug with the API?",
     answer: {
       description:
-        "You can monitor your API usage through the dashboard in your account settings:",
+        "If you hit issues like model timeouts or weird outputs, file a bug report via our GitHub repository and send the link to contact@allea-ai.com.",
       points: [
-        "Detailed usage metrics are available in real-time",
-        "Set up usage alerts to prevent unexpected charges",
-        "Export usage data for your records",
+        "Include your request body and model details for quicker fixes.",
+        "We prioritize based on impact and volume of reports.",
+        "You’ll get a tracking ID to follow progress.",
       ],
     },
   },
   {
     id: "4",
-    question: "What's the best way to stay up to date with API updates?",
+    question: "How can I track usage across multiple models?",
     answer: {
-      description: "We recommend these methods to stay informed:",
+      description:
+        "Monitor your API key’s usage for chat, audio, video, and image model requests through the dashboard.",
       points: [
-        "Subscribe to our API changelog",
-        "Join our developer Discord community",
-        "Follow our GitHub repository",
-        "Check the status page for incidents",
+        "Real-time stats break down usage by model type.",
+        "Set custom alerts to keep costs in check.",
+        "Export reports to analyze your multi-model usage.",
       ],
     },
   },
   {
     id: "5",
-    question:
-      "Will user data submitted through the API be used for model training?",
+    question: "How do I stay updated on new models or API changes?",
     answer: {
-      description: "We take data privacy seriously:",
+      description:
+        "Stay in the loop on Allea-AI’s growing model lineup and updates:",
       points: [
-        "API data is not used for model training by default",
-        "Enterprise plans can opt for complete data isolation",
-        "All data is encrypted in transit and at rest",
+        "Subscribe to our changelog for API and model news.",
+        "Join our Discord for dev chats and tips.",
+        "Follow our GitHub for code and feature updates.",
+        "Visit status.allea-ai.com for service status.",
       ],
-      note: "See our privacy policy for detailed information.",
     },
   },
   {
     id: "6",
-    question: "Does the API currently support web browsing?",
+    question: "Is my data used to train models?",
     answer: {
-      description: "Our API offers different levels of web access:",
+      description: "We prioritize your privacy at Allea-AI:",
       points: [
-        "Basic models have limited web access",
-        "Pro models include enhanced browsing capabilities",
-        "You can control web access through parameters",
+        "API request data isn’t used for training by default.",
+        "Enterprise tiers can opt for full data isolation.",
+        "All data is encrypted in transit and at rest.",
       ],
+      note: "Check allea-ai.com/privacy for the full policy.",
+    },
+  },
+  {
+    id: "7",
+    question: "Are there limits on API requests or model usage?",
+    answer: {
+      description:
+        "Yes, Allea-AI has limits to ensure fair usage, tailored to your subscription tier.",
+      points: [
+        "Basic tiers have caps on requests and model counts per call.",
+        "Higher tiers unlock more models and higher limits—details in the docs.",
+        "Monitor usage in the dashboard to stay within bounds.",
+      ],
+      note: "Contact us if you need a custom plan.",
+    },
+  },
+  {
+    id: "8",
+    question: "Can I compare or combine outputs from different models?",
+    answer: {
+      description:
+        "For chat models, Allea-AI lets you compare, combine, or summarize outputs in a single request.",
+      points: [
+        "Pass multiple chat models (e.g., ChatGPT, Claude) to see side-by-side results.",
+        "Use combination mode to blend responses into one output.",
+        "Summary option condenses multi-model answers into a quick read.",
+        "Audio, video, and image model comparisons are in development.",
+      ],
+      note: "Available in Tier 2 and above—see docs for setup.",
     },
   },
 ];
-
 export default function Page() {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {}
