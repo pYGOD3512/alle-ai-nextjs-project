@@ -32,34 +32,51 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
     message: "",
   });
 
-  const positiveOptions = [
-    { value: "Accurate", label: "Accurately describes the product or feature" },
-    { value: "Solved my problem", label: "Helped me resolve an issue" },
-    { value: "Easy to understand", label: "Easy to follow and comprehend" },
-    {
-      value: "Helped me decide",
-      label: "Convinced me to adopt the product or feature",
-    },
-    { value: "Another reason", label: "Another reason" },
-  ];
+ const positiveOptions = [
+   {
+     value: "Accurate",
+     label: "Accurately reflects the API’s multi-model capabilities",
+   },
+   {
+     value: "Solved my problem",
+     label: "Helped me achieve my goal with multiple models",
+   },
+   {
+     value: "Easy to understand",
+     label: "Made requesting multiple models simple and clear",
+   },
+   {
+     value: "Helped me decide",
+     label: "Showed me the value of comparing or combining model outputs",
+   },
+   {
+     value: "Another reason",
+     label: "Another reason",
+   },
+ ];
 
-  const negativeOptions = [
-    {
-      value: "Inaccurate",
-      label: "Doesn't accurately describe the product or feature",
-    },
-    {
-      value: "Couldn't find",
-      label: "Missing important information",
-    },
-    { value: "Hard to understand", label: "Too complicated or unclear" },
-    {
-      value: "Code sample errors",
-      label: "One or more code samples are incorrect",
-    },
-    { value: "Another reason", label: "Another reason" },
-  ];
-
+ const negativeOptions = [
+   {
+     value: "Inaccurate",
+     label: "Misrepresents how the API or models work",
+   },
+   {
+     value: "Couldn’t find",
+     label: "Lacks details on model limits or supported types",
+   },
+   {
+     value: "Hard to understand",
+     label: "Confusing to set up or use multiple models",
+   },
+   {
+     value: "Code sample errors",
+     label: "Code examples for API requests don’t work",
+   },
+   {
+     value: "Another reason",
+     label: "Another reason",
+   },
+ ];
   const handleInitialFeedback = (isHelpful: boolean): void => {
     if (feedback.isHelpful === null) {
       setFeedback({ isHelpful, reason: null });
