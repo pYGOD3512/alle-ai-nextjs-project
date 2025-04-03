@@ -4,29 +4,30 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Facebook, Twitter, Youtube, Instagram, Mail } from "lucide-react";
+import { toast } from "sonner"
 
 const footerLinks = [
-  {
-    title: "Product",
-    links: [
-      { name: "Features", href: "/" },
-      { name: "Pricing", href: "/" },
-      { name: "API", href: "/alle-ai-api" },
-    ],
-  },
+  // {
+  //   title: "Product",
+  //   links: [
+  //     { name: "Features", href: "/" },
+  //     { name: "Pricing", href: "/" },
+  //     { name: "API", href: "/alle-ai-api" },
+  //   ],
+  // },
   {
     title: "Company",
     links: [
-      { name: "About Us", href: "#" },
-      { name: "Careers", href: "hub/careers" },
+      { name: "About Us", href: "https://alle-ai.com" },
+      // { name: "Careers", href: "hub/careers" },
     ],
   },
   {
     title: "Support",
     links: [
       { name: "Help Center", href: "/collection" },
-      { name: "Community", href: "/hub/community" },
-      { name: "Contact Us", href: "/" },
+      // { name: "Community", href: "/hub/community" },
+      // { name: "Contact Us", href: "/" },
     ],
   },
 ];
@@ -51,7 +52,7 @@ export default function AboutLayout({
   return (
     <div className="min-h-screen flex flex-col">
       {/* header */}
-      <header className="w-full  px-4 sm:px-6 lg:px-10 py-6 bg-white dark:bg-zinc-800 shadow-md">
+      <header className="w-full  px-4 sm:px-2 lg:px-10 py-4 bg-white dark:bg-zinc-800 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link href={"/collection"}>
@@ -62,8 +63,8 @@ export default function AboutLayout({
                   : "/svgs/logo-desktop-dark-full.png"
               }
               alt="all-ai"
-              height={50}
-              width={150}
+              height={100}
+              width={100}
               className="h-auto"
             />
           </Link>
@@ -82,7 +83,7 @@ export default function AboutLayout({
             <ThemeToggle />
             <Link
               href={"/"}
-              className="p-3 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 hover:shadow-lg dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 dark:hover:shadow-lg transition-transform duration-300 transform hover:scale-105 font-semibold"
+              className="p-2 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 hover:shadow-lg dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 dark:hover:shadow-lg transition-transform duration-300 transform hover:scale-105 font-semibold"
             >
               Try Alle-AI
             </Link>
@@ -135,8 +136,10 @@ export default function AboutLayout({
                   {section.links.map((link) => (
                     <li key={link.name}>
                       <Link
+                        target="_blank"
                         href={link.href}
                         className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors duration-200 text-sm"
+                        rel="noopener noreferrer"
                       >
                         {link.name}
                       </Link>
@@ -150,7 +153,12 @@ export default function AboutLayout({
           {/* Download Section */}
           <div className="border-t border-zinc-100 dark:border-zinc-700 pt-8 mb-8">
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-              <Link href="#" className="inline-block">
+              <Link href="#"  className="inline-block"
+              onClick={(e) => {
+                e.preventDefault();
+                toast.info('Alle-AI will be available on playstore soon!')
+              }}
+              >
                 <div className="flex items-center gap-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-6 py-3 rounded-lg hover:opacity-90 transition duration-300">
                   <Image
                     width={40}
@@ -189,16 +197,16 @@ export default function AboutLayout({
               {[
                 {
                   icon: Facebook,
-                  href: "#",
+                  href: "https://web.facebook.com/AlleAIplatform?_rdc=1&_rdr",
                   hoverColor: "hover:text-blue-400",
                 },
-                { icon: Twitter, href: "#", hoverColor: "hover:text-blue-400" },
-                { icon: Youtube, href: "#", hoverColor: "hover:text-red-400" },
-                {
-                  icon: Instagram,
-                  href: "#",
-                  hoverColor: "hover:text-pink-400",
-                },
+                { icon: Twitter, href: "https://x.com/AlleAIplatform", hoverColor: "hover:text-blue-400" },
+                { icon: Youtube, href: "https://www.youtube.com/channel/UCa5wa1T7efaWCjMaqwZuiPQ", hoverColor: "hover:text-red-400" },
+                // {
+                //   icon: Instagram,
+                //   href: "#",
+                //   hoverColor: "hover:text-pink-400",
+                // },
               ].map((social, index) => (
                 <Link
                   key={index}
@@ -218,13 +226,13 @@ export default function AboutLayout({
             </p>
             <div className="flex space-x-6 mt-4 sm:mt-0">
               <Link
-                href="#"
+                href="/privacy-policy"
                 className="hover:text-zinc-900 dark:hover:text-white transition-colors duration-200"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="#"
+                href="/terms-of-service"
                 className="hover:text-zinc-900 dark:hover:text-white transition-colors duration-200"
               >
                 Terms of Service

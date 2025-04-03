@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Copy, Palette } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { Highlight, themes } from 'prism-react-renderer';
 import { useTheme } from 'next-themes';
 import { useCodeThemeStore } from "@/stores";
@@ -34,7 +35,7 @@ type ThemeKey = keyof typeof AVAILABLE_THEMES;
 type ThemeValue = typeof AVAILABLE_THEMES[ThemeKey];
 
 export function MarkdownCode({ children, className, inline }: MarkdownCodeProps) {
-  const { toast } = useToast();
+  ;
   const [copied, setCopied] = useState(false);
   const { theme: appTheme, systemTheme } = useTheme();
   const { theme: selectedTheme, setTheme: setCodeTheme } = useCodeThemeStore();
@@ -79,20 +80,14 @@ export function MarkdownCode({ children, className, inline }: MarkdownCodeProps)
     if (typeof children === 'string') {
       await navigator.clipboard.writeText(children);
       setCopied(true);
-      toast({
-        title: "Copied to clipboard",
-        description: "Code has been copied to your clipboard.",
-      });
+      toast.success('Copied')
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleThemeChange = (theme: ThemeKey) => {
     setCodeTheme(theme);
-    toast({
-      title: "Theme changed",
-      description: `Code theme set to ${theme}`,
-    });
+    toast.success(`Theme changed to ${theme}`);
   };
 
   return (

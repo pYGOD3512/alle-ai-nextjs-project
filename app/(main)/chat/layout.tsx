@@ -10,9 +10,10 @@ import { chatApi } from '@/lib/api/chat';
 import { historyApi } from '@/lib/api/history';
 import { useSelectedModelsStore } from '@/stores';
 import { useConversationStore } from '@/stores/models';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 import { modelsApi } from '@/lib/api/models';
 import { useModelsStore } from "@/stores/models";
+
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -63,7 +64,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle, getHistoryByType, setHistory, setLoading: setHistoryLoading, setError: setHistoryError } = useHistoryStore();
   const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
-  const { toast } = useToast();
 
   // Calculate number of active models
   const activeModelsCount = selectedModels.chat.filter(
@@ -86,10 +86,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'chat');
       const conversationId = conversationResponse.session;
+      
+      
+      // Restructure the fileContent to match the expected format
+      const options = fileContent && fileContent.uploaded_files && fileContent.uploaded_files.length > 0 ? {
+        input_content: {
+          uploaded_files: fileContent.uploaded_files.map(file => ({
+            file_name: file.file_name,
+            file_size: file.file_size,
+            file_type: file.file_type,
+            file_content: file.file_content,
+          }))
+        }
+      } : undefined;
+      
+      const promptResponse = await chatApi.createPrompt(
+        conversationId, 
+        input,
+        [0, 0],
+        options
+      );
+      setContent("chat", "input", input);
       setGenerationType('new');
       router.push(`/chat/res/${conversationId}`);
-      setContent("chat", "input", input);
+      setInput("");
 
+      
       // Add all required properties when adding to history
       addHistory({
         // id: conversationId,
@@ -99,17 +121,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+
+      // console.log(promptResponse,'This is prompt created in the handleSend in the Layout')
+
+
+    // Store file information in content store so ChatArea can access it
+    if (promptResponse.input_content?.uploaded_files && promptResponse.input_content.uploaded_files.length > 0) {
+      const file = promptResponse.input_content.uploaded_files[0];
+      const isImage = file.file_type === 'image';
       
-      const promptResponse = await chatApi.createPrompt(
-        conversationId, 
-        input,
-        [0, 0],
-        fileContent ? {
-          input_content: fileContent
-        } : undefined
-      );
+      setContent("chat", "attachment", {
+        name: file.file_name,
+        type: file.file_type,
+        size: parseInt(file.file_size),
+        url: isImage ? file.file_content : ''
+      });
+    }
+
+      // router.push(`/chat/res/${conversationId}`);
+      // setContent("chat", "input", input);
       
-      setInput("");
 
       // Get actual title based on prompt
       historyApi.getConversationTitle(conversationId, input, 'chat')
@@ -117,20 +148,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           updateHistoryTitle(conversationId, response.title);
         })
         .catch(error => {
-          console.error('Error getting conversation title:', error);
+          // // console.error('Error getting conversation title:', error);
+          toast.error('Error getting conversation title');
         });
 
       setConversationId(conversationId);
       setPromptId(promptResponse.id);
 
     } catch (error) {
-      console.error('Error in chat flow:', error);
+      // // console.error('Error in chat flow:', error);
+      toast('Failed to create conversation', {
+        action: {
+          label: 'New Chat',
+          onClick: () => router.replace('/chat')
+        },
+      })
+
     } finally {
       setIsLoading(false);
     }
   };
 
-  // const preferredOrder = ['gpt-4-5', 'o3-mini', 'deepseek-r1', 'gpt-3-5-turbo', 'claude-3-5-sonnet'];
+  const preferredOrder = ['gpt-4-5', 'o3-mini', 'deepseek-r1', 'grok-2-vision', 'o1', 'claude-3-5-sonnet', 'llama-3-1-70b-instruct', 'gpt-4o', 'claude-3-sonnet', 'grok-2', 'gemini-1-5-pro', 'llama-3-70b-instruct', 'deepseek-v3', 'mixtral-8x7b-instruct', 'gpt-4', 'o1-mini', 'phi-4'];
+
 
     // Load chat models on mount if not already loaded
     useEffect(() => {
@@ -141,26 +181,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         setModelsLoading(true);
         try {
           const models = await modelsApi.getModels('chat');
-          // const sortedChatModels = models.sort((a, b) => {
-          //   const indexA = preferredOrder.indexOf(a.model_uid);
-          //   const indexB = preferredOrder.indexOf(b.model_uid);
+          const sortedChatModels = models.sort((a, b) => {
+            const indexA = preferredOrder.indexOf(a.model_uid);
+            const indexB = preferredOrder.indexOf(b.model_uid);
           
-          //   // If both models are in the preferred order, sort by their index
-          //   if (indexA !== -1 && indexB !== -1) {
-          //     return indexA - indexB;
-          //   }
+            // If both models are in the preferred order, sort by their index
+            if (indexA !== -1 && indexB !== -1) {
+              return indexA - indexB;
+            }
             
-          //   // If only a is in the preferred order, it should come first
-          //   if (indexA !== -1) return -1;
+            // If only a is in the preferred order, it should come first
+            if (indexA !== -1) return -1;
             
-          //   // If only b is in the preferred order, it should come first
-          //   if (indexB !== -1) return 1;
+            // If only b is in the preferred order, it should come first
+            if (indexB !== -1) return 1;
           
-          //   // If neither are in the preferred order, maintain their original order
-          //   return 0;
-          // });
+            // If neither are in the preferred order, maintain their original order
+            return 0;
+          });
           // console.log('Chat models loaded', sortedChatModels);
-          setChatModels(models);
+          setChatModels(sortedChatModels);
         } catch (err) {
           setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
         } finally {
@@ -210,13 +250,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
       {pathname === "/chat" && (
-        <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col sm:mb-32`}>
           <div className="flex-1 flex flex-col justify-center items-center gap-8">
             <GreetingMessage
               options={options}
               handlePressed={handleClicked}
             />
-            <div className="w-full max-w-3xl px-4">
+            <div className="w-full fixed bottom-6 sm:relative max-w-3xl sm:px-4">
               <ChatInput
                 value={input}
                 onChange={setInput}
@@ -232,7 +272,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 sm:flex-none">{children}</div>
     </div>
   );
 }

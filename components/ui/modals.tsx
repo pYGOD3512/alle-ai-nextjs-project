@@ -139,10 +139,11 @@ import {
 } from "@/components/ui/tooltip";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { format, formatDistanceToNow } from "date-fns";
+import { enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 
 import { NotificationItem } from "@/lib/types";
 import { driveService } from '@/lib/services/driveServices';
@@ -261,7 +262,7 @@ interface LogoutModalProps extends ModalProps {
 
 const shortcuts: ShortcutItem[] = [
   {
-    action: "Open new chat",
+    action: "Start new conversation",
     shortcut: [{ keys: ["Ctrl", "Shift", "O"] }]
   },
   {
@@ -391,7 +392,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [feedback, setFeedback] = React.useState("");
   const [wantsFutureContact, setWantsFutureContact] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
+  ;
 
   const emojis = [
     { rating: 1, emoji: "😟" },
@@ -403,11 +404,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
 
   const handleSubmit = async () => {
     if (!selectedRating) {
-      toast({
-        title: "Rating Required",
-        description: "Please select a rating before submitting your feedback.",
-        variant: "destructive",
-      });
+      toast.error('Please select a rating and submit');
       return;
     }
 
@@ -419,23 +416,15 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
         anonymous: wantsFutureContact
       });
 
-      toast({
-        title: "Thank you!",
-        description: "Your feedback has been submitted successfully.",
-      });
-
+      toast.success('Your feedback has been submitted')
       // Reset form
       setSelectedRating(null);
       setFeedback("");
       setWantsFutureContact(false);
       onClose();
     } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit feedback. Please try again.",
-        variant: "destructive",
-      });
+      // console.error('Error submitting feedback:', error);
+      toast.error('Failed to submit feedback, try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -443,10 +432,10 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md sm:max-w-lg rounded-md">
+      <DialogContent className="max-w-[95%] xs:max-w-md rounded-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle>We value your feedback</DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="hidden lg:inline-flex absolute right-4 -top-4 pointer-events-none  h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
         </DialogHeader>
@@ -461,9 +450,9 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
                   key={rating}
                   onClick={() => setSelectedRating(rating)}
                   className={cn(
-                    "p-4 text-2xl rounded-lg border border-borderColorPrimary hover:bg-[#ad933470] transition-colors",
+                    "p-2 text-xl xs:p-4 xs:text-2xl rounded-lg border border-borderColorPrimary hover:bg-[#ad933470] transition-colors",
                     selectedRating === rating
-                      ? "border-2 border-borderColorPrimary bg-[#524310]"
+                      ? "border-2 border-borderColorPrimary bg-[#ad933470]"
                       : "border-input"
                   )}
                   whileTap={{ scale: 1.2, rotate: 10 }}
@@ -546,7 +535,7 @@ export function TextSizeModal({ isOpen, onClose }: ModalProps) {
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle className="text-sm">
             Font Options
-            <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">esc</span>
             </kbd>
           </DialogTitle>
@@ -594,7 +583,7 @@ export function LogoutModal({ isOpen, onClose, mode = 'current', deviceInfo }: L
       await logout();
       onClose();
     } catch (error) {
-      console.error('Logout failed:', error);
+      // console.error('Logout failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -610,7 +599,7 @@ export function LogoutModal({ isOpen, onClose, mode = 'current', deviceInfo }: L
       <DialogContent className="max-w-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle>{title}</DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="absolute right-4 -top-4 pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
         </DialogHeader>
@@ -648,7 +637,7 @@ export function LogoutModal({ isOpen, onClose, mode = 'current', deviceInfo }: L
                 if (mode === 'current') {
                   handleLogout();
                 } else if (deviceInfo) {
-                  console.log(`Logging out device: ${deviceInfo.id}`);
+                  // // console.log(`Logging out device: ${deviceInfo.id}`);
                 }
                 onClose();
               }}
@@ -672,7 +661,15 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
-  const userPlan = useAuthStore((state) => state.plan) as UserPlan;
+  // const userPlan = useAuthStore((state) => state.plan) as UserPlan;
+  const rawUserPlan = useAuthStore((state) => state.plan) as string;
+const userPlan = React.useMemo(() => {
+  // If the plan includes a hyphen, take only the part before it
+  if (rawUserPlan && rawUserPlan.includes('-')) {
+    return rawUserPlan.toString().split('-')[0] as UserPlan;
+  }
+  return rawUserPlan as UserPlan;
+}, [rawUserPlan]);
 
   const { 
     chatModels, 
@@ -689,7 +686,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
   // Plan limits
   const MODEL_LIMITS: Record<UserPlan, number> = {
-    free: 3,
+    free: 2,
     standard: 3,
     plus: 5
   };
@@ -724,8 +721,8 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
           break;
       }
     } catch (error) {
-      console.error('Failed to toggle favorite:', error);
-      // Optionally show an error toast/notification
+      // console.error('Failed to toggle favorite:', error);
+      toast.error('Failed to favorite model');
     } finally {
       setFavoriteLoading(null); // Clear loading state
     }
@@ -735,13 +732,18 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
     const model = getModelsForPage().find(m => m.model_uid === modelId);
     
     // Check for premium model restriction
-    if (model?.model_plan === 'standard' && userPlan === 'free') {
+    if ((model?.model_plan === 'standard' && userPlan === 'free') || 
+        (model?.model_plan === 'plus' && (userPlan === 'free' || userPlan === 'standard'))) {
+      
+      // Determine the required plan based on the model's plan
+      const requiredPlan = model?.model_plan === 'standard' ? 'Standard' : 'Plus';
+      
       setPromptConfig({
-        title: "Standard Model",
-        message: "Upgrade Plan to use this model",
+        title: `${requiredPlan} Model`,
+        message: `Upgrade Plan to use this model`,
         type: "upgrade",
         metadata: {
-          plan: "Plus",
+          plan: requiredPlan,
           models: [model.model_name],
         },
         actions: [
@@ -778,6 +780,10 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
         message: `Your current plan allows up to ${MODEL_LIMITS[userPlan]} models per conversation${userPlan !== 'plus' ? `. Upgrade to ${userPlan === 'free' ? 'Standard or Plus' : 'Plus'} to use more models` : '.'}`,
         type: "warning",
         metadata: {
+          link: {
+            url: '/collection/3742473-others/model-limits',
+            text: 'Learn more'
+          },
           plan: planUpgrade,
           models: [...tempSelectedModels.map(id => {
             const model = getModelsForPage().find(m => m.model_uid === id);
@@ -978,7 +984,7 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                 </Select>
               </div>
             </div>
-            <kbd className="absolute right-4 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <kbd className="absolute right-4 -top-[1.6rem] pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">esc</span>
             </kbd>
           </DialogHeader>
@@ -1010,13 +1016,31 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
                         "border-primary bg-accent"
                     )}
                   >
-                    {model.model_plan === 'standard' && (
+                    {model.model_plan === 'standard' ? (
                       <div className="absolute top-0 right-0">
-                        <div className="relative flex items-center gap-1 bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 text-[10px] font-medium text-white pl-2 pr-2 py-0.5 rounded-tr-md rounded-bl-lg">
-                          <Gem className="h-2.5 w-2.5" />
+                        <div className="relative flex items-center gap-1 bg-gradient-to-r from-gray-300/90 to-gray-400/90 text-[10px] font-medium text-white pl-2 pr-2 py-0.5 rounded-tr-md rounded-bl-lg">
+                          {/* <Gem className="h-2.5 w-2.5" /> */}
+                          <Image
+                            src={'/svgs/logo-desktop-mini.png'}
+                            height={10}
+                            width={10}
+                            alt="gold-alle-ai"
+                          />
                         </div>
                       </div>
-                    )}
+                    ): model.model_plan === 'plus' ? (
+                      <div className="absolute top-0 right-0">
+                        <div className="relative flex items-center gap-1 bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 text-[10px] font-medium text-white pl-2 pr-2 py-0.5 rounded-tr-md rounded-bl-lg">
+                          {/* <Gem className="h-2.5 w-2.5" /> */}
+                          <Image
+                            src={'/svgs/logo-desktop-mini.png'}
+                            height={10}
+                            width={10}
+                            alt="gold-alle-ai"
+                          />
+                        </div>
+                      </div>
+                    ): ''}
                     <Image
                       src={model.model_image}
                       height={8}
@@ -1089,14 +1113,15 @@ export function ModelSelectionModal({ isOpen, onClose }: ModalProps) {
 
 export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) {
   const { theme, setTheme } = useTheme();
-  const { selectedModels, inactiveModels } = useSelectedModelsStore();
+  const { selectedModels, inactiveModels, isLoadingLatest } = useSelectedModelsStore();
+  const { isLoading } = useModelsStore();
   const [textSize, setTextSize] = React.useState("16 px");
   const [disabled, setDisabled] = useState(true);
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
   const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false);
   const [logoutAllModalOpen, setLogoutAllModalOpen] = React.useState(false);
   const [manageSharedLinksOpen, setManageSharedLinksOpen] = React.useState(false);
-  const { toast } = useToast();
+  ;
   const { isAuthenticated } = useDriveAuthStore();
   const [showDriveModal, setShowDriveModal] = useState(false);
   const [isTransactionHistoryOpen, setIsTransactionHistoryOpen] = useState(false);
@@ -1106,7 +1131,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const { setVoice, setPitch, setRate, setVolume } = useVoiceStore();
   const [activeChart, setActiveChart] = useState<ChartType>('bar');
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
   const [isDevicesOpen, setIsDevicesOpen] = useState(true);
   const [showSummaryPrompt, setShowSummaryPrompt] = useState(false);
@@ -1125,9 +1150,17 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const isFreeUser = plan === 'free' || !plan;
 
   // Effect to handle summary toggle based on active models
-  useEffect(() => {
-    if (activeModelsCount < 2) {
+  useEffect(() => { 
 
+    
+    
+    if ( activeModelsCount < 2) {
+      
+      if(activeModelsCount === 0){
+        return;
+      }
+
+        // console.log('this is the active model count', activeModelsCount)
       if (useAuthStore.getState().user?.summary === 0) {
         return;
       }
@@ -1135,7 +1168,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         const AutoActivate = async () => {
           const response = await chatApi.updateSummaryPreference(false);
           if (response.status) {
-            console.log('autoactivation', response)
+            // console.log('autoactivation', response)
           useAuthStore.setState((state) => ({
             ...state,
             user: state.user ? {
@@ -1197,7 +1230,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     },
     personalization: {
       summary: {
-        title: "Alle-AI Summary",
+        title: "Alle-AI Summary & Comparison",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
         enabled: user?.summary===1,
@@ -1209,21 +1242,21 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       },
     },
     data_controls: {
-      sharedLinks: {
-        title: "Shared links",
-        description: "",
-        action: "Manage",
-      },
-      transactionHistory: {
-        title: "Transactions",
-        description: "",
-        action: "View",
-      },
-      extportMyData: {
-        title: "Export data",
-        description: "",
-        action: "Export",
-      },
+      // sharedLinks: {
+      //   title: "Shared links",
+      //   description: "",
+      //   action: "Manage",
+      // },
+      // transactionHistory: {
+      //   title: "Transactions",
+      //   description: "",
+      //   action: "View",
+      // },
+      // extportMyData: {
+      //   title: "Export data",
+      //   description: "",
+      //   action: "Export",
+      // },
       deleteMyAccount: {
         title: "Delete account",
         description: "",
@@ -1340,17 +1373,11 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         await driveService.signOut();
         useDriveAuthStore.getState().clearAuth();
         
-        toast({
-          title: "Success",
-          description: "Google Drive has been unlinked successfully",
-        });
+        toast.success('Google Drive unlinked');
       } catch (error) {
-        console.error('Failed to unlink Google Drive:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to unlink Google Drive"
-        });
+        // console.error('Failed to unlink Google Drive:', error);
+        toast.error('Failed to unlinked Google Drive');
+
       }
     } else {
       setShowDriveModal(true);
@@ -1364,10 +1391,10 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     }
 
     if (key === "summary") {
-      if (!isFreeUser) {
+      if (isFreeUser) {
         setPromptConfig({
           title: "Upgrade Required",
-          message: "Please upgrade your plan to enable the summary feature.",
+          message: "Please upgrade your plan to enable the Summary & Comparison feature.",
           actions: [
             {
               label: "Upgrade Plan",
@@ -1383,7 +1410,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       }
   
       try {
-        console.log(checked,'this is the initial state of the switch')
+        // // console.log(checked,'this is the initial state of the switch')
         const response = await chatApi.updateSummaryPreference(checked);
         if (response.status) {
 
@@ -1399,11 +1426,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         }
       } catch (error) {
         setPersonalizationSetting(key, !checked);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to update summary preference",
-        });
+        toast.error('Failed to toggle summary');
       }
     } else {
       // Handle other personalization settings
@@ -1414,6 +1437,14 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   // const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
   //   setPersonalizationSetting(key, checked);
   // };
+  function safeDisplayLanguageName(languageCode: string) {
+    try {
+      return new Intl.DisplayNames(['en'], { type: 'language' }).of(languageCode) || languageCode;
+    } catch (error) {
+      // console.error('Error displaying language name:', error);
+      return languageCode; // Fallback to just showing the language code
+    }
+  }
 
   return (
     <>
@@ -1521,7 +1552,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           <Switch
                             className="data-[state=unchecked]:bg-borderColorPrimary"
                             checked={setting.enabled}
-                            // disabled={key === "summary" && isFreeUser}
+                            disabled={key === "personalizedAds"}
                             onCheckedChange={(checked) => 
                               handleSwitchChange(
                                 key as "summary" | "personalizedAds",
@@ -1566,7 +1597,8 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                                 <SelectGroup key={category}>
                                   <SelectLabel className="flex items-center gap-2">
                                     <Globe className="h-3 w-3" />
-                                    {new Intl.DisplayNames([category], { type: 'language' }).of(category)}
+                                    {/* {new Intl.DisplayNames([category], { type: 'language' }).of(category)} */}
+                                    {/* {safeDisplayLanguageName(category)} */}
                                   </SelectLabel>
                                   {voices.map((voice) => (
                                     <SelectItem 
@@ -1786,15 +1818,16 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            if (setting.action === "Delete") {
-                              setDeleteAccountModalOpen(true);
-                            } else if (setting.action === "Export") {
-                              setExportModalOpen(true);
-                            } else if (setting.action === "Manage") {
-                              setManageSharedLinksOpen(true);
-                            } else if (setting.action === "View") {
-                              setIsTransactionHistoryOpen(true);
-                            }
+                            toast.info('This feature will be available soon!')
+                            // if (setting.action === "Delete") {
+                            //   setDeleteAccountModalOpen(true);
+                            // } else if (setting.action === "Export") {
+                            //   setExportModalOpen(true);
+                            // } else if (setting.action === "Manage") {
+                            //   // setManageSharedLinksOpen(true);
+                            // } else if (setting.action === "View") {
+                            //   setIsTransactionHistoryOpen(true);
+                            // }
                           }}
                         >
                           {setting.action}
@@ -1821,11 +1854,14 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           size="sm"
                           onClick={() => {
                             if (key === "google_drive") {
-                              handleGoogleDriveAction();
+                            toast.info('This feature will be available soon!')
+                              // handleGoogleDriveAction();
                             } else if (key === "one_drive"){
-                              console.log('One Drive')
+                              toast.info('This feature will be available soon!')
+                              // // console.log('One Drive')
                             } else if (key === "dropbox"){
-                              console.log('Dropbox')
+                              toast.info('This feature will be available soon!')
+                              // // console.log('Dropbox')
                             }
                           }}
                         >
@@ -1845,332 +1881,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                       <div className="space-y-1">
                         <h4 className="text-sm font-medium flex items-center gap-2">
                           <BarChart2 className="h-4 w-4 text-primary" />
-                          Model Usage Analytics
+                          Coming Soon !!
                         </h4>
                         <p className="text-[0.75rem] text-muted-foreground">
-                          Track your model usage and interactions
+                          Gain insights and track your usage with personalized analytics
                         </p>
                       </div>
                     </div>
-
-                    <ScrollArea className="h-[500px] pr-4">
-                      <div className="space-y-6">
-                        {/* Chart Controls */}
-                        <div className="flex items-center justify-between">
-                          <Select
-                            defaultValue="bar"
-                            onValueChange={(value: ChartType) => setActiveChart(value)}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select chart type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="bar" className="flex items-center gap-2">
-                                <BarChart2 className="h-4 w-4" />
-                                Bar Chart
-                              </SelectItem>
-                              <SelectItem value="pie" className="flex items-center gap-2">
-                                <PieChartIcon className="h-4 w-4" />
-                                Pie Chart
-                              </SelectItem>
-                              <SelectItem value="line" className="flex items-center gap-2">
-                                <LineChartIcon className="h-4 w-4" />
-                                Line Chart
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Select
-                            defaultValue="7d"
-                            onValueChange={(value: TimeRange) => setTimeRange(value)}
-                          >
-                            <SelectTrigger className="w-[120px]">
-                              <SelectValue placeholder="Time range" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="24h">Last 24 hours</SelectItem>
-                              <SelectItem value="7d">Last 7 days</SelectItem>
-                              <SelectItem value="30d">Last 30 days</SelectItem>
-                              <SelectItem value="90d">Last 90 days</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Charts Container */}
-                        <div className="relative h-[300px] w-full bg-muted/50 rounded-lg p-4">
-                          {activeChart === "bar" && (
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={modelUsageData} margin={{ top: 10, right: 10, bottom: 40, left: 40 }}>
-                                <CartesianGrid 
-                                  strokeDasharray="3 3" 
-                                  stroke="var(--border)"
-                                  opacity={0.3}
-                                />
-                                <XAxis 
-                                  dataKey="model" 
-                                  angle={-35} 
-                                  textAnchor="end"
-                                  height={40} 
-                                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                                  tickMargin={8}
-                                  axisLine={{ stroke: 'var(--border)' }}
-                                />
-                                <YAxis
-                                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                                  width={40}
-                                  axisLine                                  tickLine={{ stroke: 'hsl(var(--border))' }}
-                                />
-                                <ChartTooltip 
-                                  content={({ active, payload, label }) => {
-                                    if (active && payload && payload.length) {
-                                      return (
-                                        <div className="rounded-lg border bg-backgroundSecondary p-2 shadow-sm">
-                                          <div className="grid grid-cols-2 gap-2">
-                                            <div className="flex flex-col">
-                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                Model
-                                              </span>
-                                              <span className="font-semibold text-xs">{label}</span>
-                                            </div>
-                                            <div className="flex flex-col">
-                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                Usage
-                                              </span>
-                                              <span className="font-semibold text-xs">
-                                                                {payload[0].value}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )
-                                    }
-                                    return null
-                                  }}
-                                />
-                                <Bar 
-                                  dataKey="usage" 
-                                  fill="var(--primary)"
-                                  radius={[4, 4, 0, 0]}
-                                  maxBarSize={50}
-                                >
-                                  {/* Add different colors for each bar */}
-                                  {modelUsageData.map((entry, index) => (
-                                    <Cell 
-                                      key={`cell-${index}`} 
-                                      fill={`hsl(${index * 45}, 70%, 50%)`}
-                                      opacity={0.8}
-                                      style={{
-                                        filter: 'brightness(1.1)',
-                                        cursor: 'pointer',
-                                      }}
-                                    />
-                                  ))}
-                                </Bar>
-                              </BarChart>
-                            </ResponsiveContainer>
-                          )}
-
-                          {activeChart === "pie" && (
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-                                <Pie
-                                  data={categoryUsageData}
-                                  dataKey="value"
-                                  nameKey="label"
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius={45}
-                                  outerRadius={65}
-                                  paddingAngle={2}
-                                  label={({
-                                    cx,
-                                    cy,
-                                    midAngle,
-                                    innerRadius,
-                                    outerRadius,
-                                    percent,
-                                    index
-                                  }) => {
-                                    const RADIAN = Math.PI / 180;
-                                    const radius = outerRadius + 25;
-                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-                                    return (
-                                      <text
-                                        x={x}
-                                        y={y}
-                                        fill="hsl(var(--muted-foreground))"
-                                        textAnchor={x > cx ? 'start' : 'end'}
-                                        dominantBaseline="central"
-                                        className="text-xs"
-                                      >
-                                        {`${categoryUsageData[index].label} (${(percent * 100).toFixed(0)}%)`}
-                                      </text>
-                                    );
-                                  }}
-                                >
-                                  {categoryUsageData.map((entry, index) => (
-                                    <Cell
-                                      key={`cell-${index}`}
-                                      fill={`hsl(${index * 90}, 70%, 50%)`}
-                                      opacity={0.8}
-                                      style={{
-                                        filter: 'brightness(1.1)',
-                                        cursor: 'pointer',
-                                        stroke: 'hsl(var(--background))',
-                                        strokeWidth: 2,
-                                      }}
-                                    />
-                                  ))}
-                                </Pie>
-                                <ChartTooltip 
-                                  content={({ active, payload }) => {
-                                    if (active && payload && payload.length) {
-                                      return (
-                                        <div className="rounded-lg border bg-backgroundSecondary p-2 shadow-sm">
-                                          <div className="grid grid-cols-2 gap-2">
-                                            <div className="flex flex-col">
-                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                Category
-                                              </span>
-                                              <span className="font-bold text-sm">
-                                                {payload[0].name}
-                                              </span>
-                                            </div>
-                                            <div className="flex flex-col">
-                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                Usage
-                                              </span>
-                                              <span className="font-bold text-sm">
-                                                {payload[0].value}%
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )
-                                    }
-                                    return null
-                                  }}
-                                />
-                              </PieChart>
-                            </ResponsiveContainer>
-                          )}
-
-                          {activeChart === "line" && (
-                            <ResponsiveContainer width="100%" height="100%">
-                            <LineChart 
-                              data={timeSeriesData}
-                              margin={{ top: 10, right: 10, bottom: 40, left: 10 }} 
-                            >
-                              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                              <XAxis 
-                                dataKey="date" 
-                                angle={-35} 
-                                textAnchor="end"
-                                height={40} 
-                                tick={{ fontSize: 11 }}
-                                tickMargin={8}
-                              />
-                              <YAxis
-                                tick={{ fontSize: 11 }}
-                                width={40}
-                              />
-                              <ChartTooltip
-                                content={({ active, payload, label }) => {
-                                  if (active && payload && payload.length) {
-                                    return (
-                                      <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                        <div className="grid gap-2">
-                                          <div className="flex flex-col">
-                                            <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                              Date
-                                            </span>
-                                            <span className="font-bold text-sm">{label}</span>
-                                          </div>
-                                          {payload.map((series) => (
-                                            <div key={series.name} className="flex flex-col">
-                                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                {series.name}
-                                              </span>
-                                              <span className="font-bold text-sm">
-                                                {series.value}
-                                              </span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )
-                                  }
-                                  return null
-                                }}
-                              />
-                              <Legend 
-                                verticalAlign="top"
-                                height={36}
-                                iconSize={8}
-                                iconType="circle"
-                                wrapperStyle={{ fontSize: '11px' }}
-                              />
-                              {Object.keys(timeSeriesData[0])
-                                .filter(key => key !== 'date')
-                                .map((key, index) => (
-                                  <Line
-                                    key={key}
-                                    type="monotone"
-                                    dataKey={key}
-                                    stroke={`hsl(${index * 60}, 70%, 50%)`}
-                                    strokeWidth={1.5} 
-                                    dot={{ r: 2 }}
-                                  />
-                                ))}
-                            </LineChart>
-                          </ResponsiveContainer>
-                          )}
-
-                          {/* Loading State */}
-                          {isLoading && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-lg">
-                              <div className="flex flex-col items-center gap-2">
-                                <Loader className="h-8 w-8 animate-spin text-primary" />
-                                <span className="text-sm text-muted-foreground">Loading analytics...</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Stats Summary */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <StatCard
-                            title="Total Interactions"
-                            value="12,453"
-                            change="+12.5%"
-                            trend="up"
-                            icon={<MessageSquare className="h-4 w-4" />}
-                          />
-                          <StatCard
-                            title="Most Used Model"
-                            value="GPT-4"
-                            subtitle="32% of total usage"
-                            icon={<Crown className="h-4 w-4" />}
-                          />
-                          <StatCard
-                            title="Active Time"
-                            value="126h"
-                            change="+5.2%"
-                            trend="up"
-                            icon={<Clock className="h-4 w-4" />}
-                          />
-                          <StatCard
-                            title="Tokens Used"
-                            value="1.2M"
-                            change="-3.1%"
-                            trend="down"
-                            icon={<Coins className="h-4 w-4" />}
-                          />
-                        </div>
-                      </div>
-                    </ScrollArea>
                   </div>
                 </TabsContent>
 
@@ -2197,7 +1914,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                     </div>
 
                     {/* Advanced Section */}
-                    <Collapsible 
+                    {/* <Collapsible 
                       open={isDevicesOpen}
                       onOpenChange={setIsDevicesOpen}
                       className="space-y-2"
@@ -2280,7 +1997,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           ))}
                         </motion.div>
                       </CollapsibleContent>
-                    </Collapsible>
+                    </Collapsible> */}
                   </div>
                 </TabsContent>
               </div>
@@ -2351,12 +2068,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     </>
   );
 }
+
 export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   const { user, token, plan, setAuth } = useAuthStore();
   const [isEditing, setIsEditing] = React.useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  ;
   
   // Form state
   const [formData, setFormData] = useState({
@@ -2383,21 +2101,14 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
       // Validate file type
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif'];
       if (!validTypes.includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload a valid image file (JPEG, PNG, JPG, WEBP, or GIF).",
-          variant: "destructive",
-        });
+
+        toast.error('Invalid file type. Supported files(JPEG, PNG, JPG, WEBP, or GIF)');
         return;
       }
 
       // Validate file size (2MB)
       if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please upload an image smaller than 2MB.",
-          variant: "destructive",
-        });
+        toast.error('File too large, less than 2MB required');
         return;
       }
 
@@ -2415,7 +2126,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           ...(formData.profilePhoto && { profile_photo: formData.profilePhoto })
         });
 
-        console.log('Profile update response:', response);
+        // // console.log('Profile update response:', response);
         
         // Update the auth store with new user data
         if (response.status && response.user) {
@@ -2430,20 +2141,13 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
             plan
           );
         }
-        
-        toast({
-          title: "Success",
-          description: response.message || "Profile updated successfully",
-        });
+
+        toast.success('Profile updated')
         
         setIsEditing(false);
       } catch (error) {
-        console.error('Profile update error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update profile",
-          variant: "destructive",
-        });
+        // console.error('Profile update error:', error);
+        toast.error('Faild to update profile');
       } finally {
         setIsSubmitting(false);
       }
@@ -2479,7 +2183,21 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                   </Avatar>
                   {!isEditing && (
                   <div className="absolute -bottom-1 -right-2 text-white rounded-full">
-                    <Badge variant="default">{plan}</Badge>
+                    {plan ? (
+                      <Badge variant="default" className="text-[0.6rem] h-3">
+                        {plan.split('-')[0]}
+                      </Badge>
+                    ) : (
+                      <Badge 
+                        variant="outline" 
+                        className="text-[0.6rem] h-3 flex justify-center items-center relative overflow-hidden"
+                      >
+                        <span className="relative z-10">Plan</span>
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
+                              style={{ backgroundSize: '200% 100%' }}
+                        />
+                      </Badge>
+                    )}
                   </div>
                   )}
                   
@@ -2646,7 +2364,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
 export function ReferModal({ isOpen, onClose }: ModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const { toast } = useToast();
+  ;
 
   const { user } = useAuthStore();
 
@@ -2686,11 +2404,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
-    toast({
-      title: "Copied",
-      description: `Referral link copied to clipboard`,
-      duration: 3000,
-    });
+    toast.success('Copied');
   };
 
   const platforms = [
@@ -2724,7 +2438,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
               Refer & Earn{" "}
               <span className="text-sm text-infoColorPrimary">(coming soon)</span>
               </DialogTitle>
-            <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <kbd className="absolute right-4 -top-4 pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">esc</span>
             </kbd>
           </DialogHeader>
@@ -2868,12 +2582,8 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
           planPrice={eligiblePlans.find(p => p.name === selectedPlan)?.price || 0}
           currentBalance={stats.cashEarned}
           onConfirm={() => {
-            console.log(`Subscription confirmed for ${selectedPlan}`);
-            toast({
-              title: "Success",
-              description: `You've subscribed to Alle-AI ${selectedPlan}`,
-              duration: 3000,
-            });
+            // // console.log(`Subscription confirmed for ${selectedPlan}`);
+            toast.success(`You've subscribed to Alle-AI ${selectedPlan}`);
             onClose();
           }}
         />
@@ -2960,24 +2670,19 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const [showOrgPlans, setShowOrgPlans] = useState(false);
   const [teamSize, setTeamSize] = useState(50);
-  const { toast } = useToast();
+  ;
   const router = useRouter();
   const userPlan = useAuthStore((state) => state.plan);
 
   const handleCustomPlan = () => {
-    toast({
-      title: "Coming Soon",
-      description: "This plan is coming soon!",
-      variant: "default",
-    });
+    toast.info('This plan will be available soon!')
   };
 
+
   const handleContactSales = () => {
-    toast({
-      title: "Contact Sales",
-      description: "Our team will reach out to you shortly!",
-      variant: "default",
-    });
+    toast.message('Contact Sales', {
+      description: 'Our team will reach out to you shortly!',
+    })
   };
 
   const calculatePrice = (basePrice: number) => {
@@ -3010,11 +2715,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
         throw new Error(response.message || 'Checkout failed');
       }
     } catch (error: any) {
-      toast({
-        title: "Checkout Failed",
-        description: error.message || "An error occurred. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(`${error.message || "An error occurred. Please try again."}`)
     } finally {
       setProcessingPlan(null);
     }
@@ -3141,7 +2842,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   return (
     <div className="overflow-auto">
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[70rem]">
+        <DialogContent className="sm:max-w-[90%] lg:max-w-[80%] overflow-y-auto max-h-[90vh]">
           {showOrgPlans ? (
             <>
               <DialogHeader className="text-center space-y-4 relative">
@@ -3292,7 +2993,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
                     </Badge>
                   </div>
                 </div>
-                <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <kbd className="absolute right-5 -top-[1.6rem] pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
                   <span className="text-xs">esc</span>
                 </kbd>
               </DialogHeader>
@@ -3400,7 +3101,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
               <div className="text-center mt-6 text-sm text-muted-foreground">
                 Need more Capabilities?{" "}
                 <button 
-                  onClick={() => setShowOrgPlans(true)}
+                  // onClick={() => setShowOrgPlans(true)}
                   className="text-primary hover:underline"
                 >
                   See Alle-AI Team & Enterprise plans
@@ -3456,7 +3157,7 @@ export function DeleteAccountModal({ isOpen, onClose }: ModalProps) {
       <DialogContent className="max-w-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle>Delete account - are you sure?</DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="absolute right-4 -top-4 pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
         </DialogHeader>
@@ -3491,7 +3192,7 @@ export function DeleteAccountModal({ isOpen, onClose }: ModalProps) {
               className="w-full"
               onClick={() => {
                 // Handle refresh login logic
-                console.log("Refreshing login...");
+                // // console.log("Refreshing login...");
               }}
             >
               Login & Delete Forever
@@ -3504,12 +3205,27 @@ export function DeleteAccountModal({ isOpen, onClose }: ModalProps) {
 }
 
 export function LogoutAllDevicesModal({ isOpen, onClose }: ModalProps) {
+  const { logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      await logout();
+      onClose();
+    } catch (error) {
+      // console.error('Logout failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader className="flex flex-row items-center justify-between relative">
           <DialogTitle>Log out of all devices - are you sure?</DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="absolute right-4 -top-4 pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
         </DialogHeader>
@@ -3529,8 +3245,7 @@ export function LogoutAllDevicesModal({ isOpen, onClose }: ModalProps) {
             <Button
               variant="destructive"
               onClick={() => {
-                // Handle logout all devices logic here
-                console.log("Logging out all devices...");
+                handleLogout();
                 onClose();
               }}
             >
@@ -3557,9 +3272,9 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
       if (isNaN(date.getTime())) {
         return 'Invalid date';
       }
-      return formatDistanceToNow(date, { addSuffix: true });
+      return formatDistanceToNow(date, { addSuffix: true, locale: enUS });
     } catch (error) {
-      console.error('Error formatting date:', error);
+      // console.error('Error formatting date:', error);
       return 'Invalid date';
     }
   };
@@ -3584,7 +3299,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         }
       } catch (error) {
-        console.error('Error sorting history:', error);
+        // console.error('Error sorting history:', error);
         return 0;
       }
     });
@@ -3655,15 +3370,12 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                       <div className="text-xs font-small sm:text-sm sm:font-medium">{item.title}</div>
                       <div className="text-xs text-muted-foreground">
                         {/* {formatTimeDistance(item)} */}
-                        created at {format(new Date(item.created_at), "dd'/'MM'/'yy h:mm a")}{" "}
-                        updated at {format(new Date(item.updated_at), "dd'/'MM'/'yy h:mm a")}
+                        created at {format(new Date(item.created_at), "dd'/'MM'/'yy h:mm a", { locale: enUS })}{" "}
+                        {/* updated at {format(new Date(item.updated_at), "dd'/'MM'/'yy h:mm a", { locale: enUS })} */}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="hidden sm:flex text-xs capitalize">
-                      {item.type}
-                    </Badge>
+                  {/* <div className="flex items-center gap-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -3684,7 +3396,7 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
+                  </div> */}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -3698,15 +3410,11 @@ export function SearchHistoryModal({ isOpen, onClose, currentType }: SearchHisto
 export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialogProps) {
   const { theme } = useTheme();
   const dark = theme === "dark";
-  const { toast } = useToast();
+  ;
 
   const handleShare = (platform: typeof socialMediaOptions[0]) => {
     window.open(platform.handler(imageUrl), '_blank');
-    toast({
-      title: "Shared!",
-      description: `Your creation has been shared to ${platform.name}`,
-      duration: 3000,
-    });
+    toast.success(`Your creation has been shared to ${platform.name}`)
     onClose();
   };
 
@@ -4132,7 +3840,7 @@ export function AlbumModal({ isOpen, onClose }: ModalProps) {
                   <span className="text-sm">{selectedItem.modelName}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(selectedItem.timestamp, { addSuffix: true })}
+                  {formatDistanceToNow(selectedItem.timestamp, { addSuffix: true, locale: enUS })}
                 </span>
               </div>
             </div>
@@ -4151,7 +3859,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
   const [filteredFiles, setFilteredFiles] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  ;
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -4193,12 +3901,8 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
       setFilteredFiles(driveFiles);
       setLastRefresh(new Date());
     } catch (error) {
-      console.error('Failed to load folder contents:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load folder contents"
-      });
+      // console.error('Failed to load folder contents:', error);
+      toast.error('Failed to load folder contents')
     } finally {
       setLoading(false);
     }
@@ -4232,7 +3936,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
           loadFolderContents('root');
         }
       } catch (error) {
-        console.error('Failed to initialize Google Drive:', error);
+        // console.error('Failed to initialize Google Drive:', error);
       }
     };
 
@@ -4263,7 +3967,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
         await loadFolderContents('root');
       }
     } catch (error) {
-      console.error('Authentication failed:', error);
+      // console.error('Authentication failed:', error);
       setPathHistory([]);
       setFiles([]);
       setSearchQuery('');
@@ -4429,7 +4133,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
   const [isNewlyCreated, setIsNewlyCreated] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
-  const { toast } = useToast();
+  ;
   const { currentConversationLink, setCurrentConversationLink } = useSidebarStore();
   const { sectionIds } = useSidebarStore();
   const { addSharedLink, updateSharedLink, getSharedLink } = useSharedLinksStore();
@@ -4447,10 +4151,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
     
     if (!currentTypeEntry || !currentTypeEntry[1]) {
-      toast({
-        variant: "destructive",
-        description: "Please select a conversation to share",
-      });
+      toast.info('Please select a conversation to share');
       setIsLoading(false);
       return;
     }
@@ -4464,10 +4165,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     const history = getHistoryByType(historyType).find(item => item.id === historyId);
 
     if (!history) {
-      toast({
-        variant: "destructive",
-        description: "Conversation not found",
-      });
+      toast.error('Conversation not found')
       setIsLoading(false);
       return;
     }
@@ -4482,15 +4180,11 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     if (existingLink) {
       // Update existing link
       updateSharedLink(existingLink.id, newLink);
-      toast({
-        description: "Share link has been updated",
-      });
+      toast.info('Share link has been updated');
     } else {
       // Create new link
       addSharedLink(historyId, history.title, newLink);
-      toast({
-        description: "Share link has been created",
-      });
+      toast.info('Share link has been created');
     }
 
     setCurrentConversationLink(newLink);
@@ -4503,15 +4197,9 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     
     try {
       await navigator.clipboard.writeText(currentConversationLink);
-      toast({
-        title: "Copied",
-        description: "Link copied to clipboard",
-      });
+      toast.success('Copied');
     } catch (err) {
-      toast({
-        variant: "destructive",
-        description: "Failed to copy link",
-      });
+      toast.error('Failed to copy link')
     }
   };
 
@@ -4584,7 +4272,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
                   ? 'Regenerate sharing link'
                   : 'Create sharing link'
               }
-              <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <kbd className="absolute right-4 -top-[0.6rem] pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
                 <span className="text-xs">esc</span>
               </kbd>
             </DialogTitle>
@@ -4681,7 +4369,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
 
 export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   const { sharedLinks, removeSharedLink } = useSharedLinksStore();
-  const { toast } = useToast();
+  ;
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredLinks = useMemo(() => {
@@ -4693,12 +4381,10 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   const copyToClipboard = async (link: string) => {
     try {
       await navigator.clipboard.writeText(link);
-      toast({ description: "Link copied to clipboard" });
+      toast.success('Copied');
     } catch (err) {
-      toast({
-        variant: "destructive",
-        description: "Failed to copy link"
-      });
+      toast.error('Failed to copy link');
+
     }
   };
 
@@ -4707,7 +4393,7 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
       <DialogContent className="max-w-2xl">
         <DialogHeader className="flex flex-row items-center justify-between relative border-b pb-4">
           <DialogTitle>Shared Links</DialogTitle>
-          <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <kbd className="absolute right-4 -top-4 pointer-events-none hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">esc</span>
           </kbd>
         </DialogHeader>
@@ -4951,7 +4637,7 @@ export function ShortcutsModal({ isOpen, onClose }: ModalProps) {
 
 function getIconForAction(action: string) {
   switch (action) {
-    case "Open new chat":
+    case "Start new conversation":
       return <MessageSquare className="h-4 w-4" />;
     case "Focus chat input":
       return <Type className="h-4 w-4" />;
@@ -4983,14 +4669,11 @@ export function ReportContentModal({
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [includeContent, setIncludeContent] = useState(true);
-  const { toast } = useToast();
+  ;
 
   const handleSubmit = async () => {
     if (!selectedCategory) {
-      toast({
-        title: "Please select a category",
-        variant: "destructive",
-      });
+      toast.info('Please select a category')
       return;
     }
 
@@ -4999,18 +4682,11 @@ export function ReportContentModal({
       // Simulated API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast({
-        title: "Report submitted",
-        description: "Thank you for helping keep our platform safe.",
-      });
+      toast.success('Thank you for helping keep our platform safe.')
       onClose();
       setSelectedCategory('');
     } catch (error) {
-      toast({
-        title: "Error submitting report",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      toast.error('Something went wrong, try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -5249,7 +4925,7 @@ export function NotificationModal({
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-4 w-4 mr-2" />
-              {format(notification.timestamp, '')}
+              {format(notification.timestamp, '', {locale: enUS})}
             </div>
             
             {notification.actionUrl && (
@@ -5295,7 +4971,7 @@ export function PromptModal({
       case 'success':
         return <CheckCircle2 className="h-12 w-12 text-green-500" />;
       case 'upgrade':
-        return <Sparkles className="h-12 w-12 text-purple-500" />;
+        return <Gem className="h-12 w-12 text-purple-500" />;
       default:
         return <AlertCircle className="h-12 w-12 text-blue-500" />;
     }
@@ -5330,10 +5006,10 @@ export function PromptModal({
                 <div className="text-center space-y-2">
                   <p className="text-sm text-muted-foreground">
                     <a 
-                      href="/hub/getting-started" 
+                      href={metadata.link ? metadata.link.url : '/hub/getting-started'} target="_blank"
                       className="inline-flex items-center gap-1 text-primary hover:underline"
                     >
-                      Learn more
+                      {metadata.link ? metadata.link.text : 'Learn more'}
                       <ChevronRight className="h-3 w-3 inline-block" />
                     </a>
                     {' '}
@@ -5349,18 +5025,6 @@ export function PromptModal({
                     <span className="text-sm font-medium text-primary">{metadata.requiredTokens}</span>
                   </div>
                 </div>
-              )}
-
-              {metadata.link && (
-                <a
-                  href={metadata.link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  {metadata.link.text}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
               )}
             </div>
           )}
@@ -5378,7 +5042,7 @@ export function PromptModal({
                   variant={action.variant || "default"}
                   className={cn(
                     "flex-1 gap-2 focus-visible:outline-none",
-                    action.variant === 'premium' && "text-white dark:bg-white dark:text-black bg-black text-white"
+                    action.variant === 'premium' && "text-white dark:bg-white dark:text-black bg-black "
                   )}
                 >
                   {action.icon && action.icon}
@@ -5409,7 +5073,7 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
   const [keyName, setKeyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const addKey = useApiKeyStore((state) => state.addKey);
-  const { toast } = useToast();
+  ;
   const { user } = useAuthStore();
 
   const handleCreateKey = async () => {
@@ -5435,21 +5099,14 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
         email: user?.email,
         cost: "$0.00"
       });
-      
-      toast({
-        title: "API Key Created",
-        description: "Your new API key has been created successfully.",
-      });
+
+      toast.success('API Key Created')
       
       setKeyName('');
       onClose();
     } catch (error) {
-      console.error('Error creating API key:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create API key",
-        variant: "destructive",
-      });
+      // console.error('Error creating API key:', error);
+      toast.error('Failed to create key');
     } finally {
       setIsLoading(false);
     }
@@ -5502,7 +5159,7 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
 export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalProps & { keyId: string; initialName: string }) {
   const [keyName, setKeyName] = useState(initialName);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  ;
   const { keys, updateKeyName } = useApiKeyStore();
 
   const handleEditKey = async () => {
@@ -5515,25 +5172,17 @@ export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalPr
         name: keyName.trim()
       });
       
-      console.log('Edit API key response:', response);
+      // // console.log('Edit API key response:', response);
       
       if (response.status) {
         // Update the key name in the store
         updateKeyName(keyId, response.api_key.name);
-        
-        toast({
-          title: "Success",
-          description: response.message || "API key name updated successfully",
-        });
+        toast.success('API key name updated')
         onClose();
       }
     } catch (error) {
-      console.error('Error editing API key:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update API key name",
-        variant: "destructive",
-      });
+      // console.error('Error editing API key:', error);
+      toast.error('Failed to update key name');
     } finally {
       setIsLoading(false);
     }
@@ -5601,7 +5250,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
   const { addPaymentMethod } = usePaymentStore();
   const [isLoading, setIsLoading] = useState(false);
   const [saveCard, setSaveCard] = useState(mode === 'add');
-  const { toast } = useToast();
+  ;
 
   const [errors, setErrors] = useState({
     cardNumber: '',
@@ -5772,7 +5421,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
 
       onClose();
     } catch (error) {
-      console.error('Error:', error);
+      // console.error('Error:', error);
       // Here you could add error handling/notifications
     } finally {
       setIsLoading(false);
@@ -5819,7 +5468,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
                     options={{
                       creditCard: true,
                       onCreditCardTypeChanged: (type) => {
-                        console.log('Card type changed:', type);
+                        // // console.log('Card type changed:', type);
                       }
                     }}
                     className={cn(
@@ -5954,10 +5603,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
               disabled={isLoading}
               onClick={()=>{
                 mode === 'add' && (
-                  toast({
-                    title: "Success",
-                    description: "Payment method has been added",
-                  })
+                  toast.success('Payment method added')
                 )
               }}
             >
@@ -6088,7 +5734,7 @@ export function BuyCreditsModal({ isOpen, onClose }: ModalProps) {
   };
 
   const handlePayment = () => {
-    console.log('Payment is done')
+    // // console.log('Payment is done')
   }
 
   return (
@@ -6302,7 +5948,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
   const { currentProject, addProjectFile, removeProjectFile } = useProjectStore();
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const { toast } = useToast();
+  ;
 
   useEffect(() => {
     if (currentProject) {
@@ -6321,16 +5967,9 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
 
       await addProjectFile(currentProject.id, file);
 
-      toast({
-        title: "File uploaded",
-        description: `${file.name} has been added successfully`,
-      });
+      toast.success('File uploaded')
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Failed to upload file"
-      });
+      toast.error('Failed to upload file');
     }
   };
 
@@ -6354,11 +5993,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
 
   const handleDownload = (file: ProjectFile) => {
     if (!file.content) {
-      toast({
-        variant: "destructive",
-        title: "Download failed",
-        description: "File content not available"
-      });
+      toast.error('Downlaod failed, please try again');
       return;
     }
 
@@ -6379,11 +6014,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Download failed",
-        description: "Failed to download file"
-      });
+      toast.error('Download failed, please try again')
     }
   };
 
@@ -6441,10 +6072,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
                       onClick={() => {
                         if (!currentProject?.id) return;
                         removeProjectFile(currentProject.id, file.id);
-                        toast({
-                          title: "File removed",
-                          description: `${file.name} removed from project`
-                        });
+                        toast.success('File removed');
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -6574,7 +6202,7 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
   const [view, setView] = useState<'list' | 'create'>('list');
   const [orgName, setOrgName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  ;
   const router = useRouter();
 
   // Mock data - Replace with your actual data fetching
@@ -6612,21 +6240,13 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       // Add your organization creation logic here
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast({
-        title: "Organization Created",
-        description: "Your organization has been created successfully.",
-        variant: "default",
-      });
+      toast.success('Organization Created');
       
       // Open the new organization page in a new tab
       router.push(`/organization/${newOrgId}`);
       onClose();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create organization. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Error creating organization');
     } finally {
       setIsSubmitting(false);
     }
@@ -6637,18 +6257,9 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       // Add your organization selection logic here
       await new Promise(resolve => setTimeout(resolve, 500)); // Mock API call
       router.push(`/organization/${orgId}`);
-      toast({
-        title: "Organization Selected",
-        description: "Switched to selected organization.",
-        variant: "default",
-      });
       onClose();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to switch organization. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Error, switching organization');
     }
   };
 
@@ -6811,7 +6422,7 @@ export function AddMembersModal({ isOpen, onClose }: ModalProps) {
           setColumns(columnNames.filter(name => name.trim() !== '')); // Filter out empty strings
         },
         error: (error) => {
-          console.error("Error parsing file:", error);
+          // console.error("Error parsing file:", error);
         }
       });
     }
@@ -6835,7 +6446,7 @@ export function AddMembersModal({ isOpen, onClose }: ModalProps) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       onClose();
     } catch (error) {
-      console.error("Failed to add members", error);
+      // console.error("Failed to add members", error);
     } finally {
       setIsSubmitting(false);
     }

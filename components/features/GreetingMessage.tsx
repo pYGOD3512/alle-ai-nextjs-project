@@ -61,7 +61,7 @@ const GreetingMessage = ({
   const questionTextArray = textReveal(questionText)
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 mt-8">
+    <div className="w-full max-w-2xl mx-auto px-2">
       <div className="text-center space-y-4 mb-8">
         <motion.h2 
           initial="hidden" 

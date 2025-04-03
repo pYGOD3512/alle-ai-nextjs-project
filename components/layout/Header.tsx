@@ -6,8 +6,7 @@ import { Text } from "@radix-ui/themes";
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { 
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
   Bell,
   ALargeSmall,
   MessagesSquare,
@@ -17,6 +16,7 @@ import {
   Crown,
   Gem,
   Loader2,
+  PanelRightClose,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -24,7 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { navItems, userMenuItems, notifications as notificationData, CHAT_MODELS, IMAGE_MODELS, AUDIO_MODELS, VIDEO_MODELS} from '@/lib/constants';
+import { navItems, userMenuItems, notifications as notificationData, AUDIO_MODELS, VIDEO_MODELS} from '@/lib/constants';
 import { NotificationItem } from "@/lib/types";
 import { useSidebarStore, useSelectedModelsStore, useAuthStore } from "@/stores";
 import { ThemeToggle } from "../ui/theme-toggle";
@@ -32,6 +32,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { TextSizeModal, FeedbackModal, SettingsModal, UserProfileModal, ReferModal, AlbumModal, ShareLinkModal, LogoutModal, OrganizationModal } from "../ui/modals";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname } from 'next/navigation';
+import { toast } from "sonner"
+
 
 import { useAuth } from '@/components/providers/AuthProvider';
 import { NotificationsPanel } from "@/components/NotificationWindow";
@@ -72,6 +74,9 @@ export function Header() {
   const [loadingModels, setLoadingModels] = useState<string[]>([]);
   const conversationId = pathname.includes('/chat/res/') ? pathname.split('/').pop() : null;
 
+  // Add this state to track if the models dropdown is open
+  const [modelsDropdownOpen, setModelsDropdownOpen] = useState(false);
+
   const getCurrentType = (): 'chat' | 'image' | 'audio' | 'video' => {
     if (pathname.startsWith('/image')) return 'image';
     if (pathname.startsWith('/audio')) return 'audio';
@@ -102,13 +107,14 @@ export function Header() {
     }
   };
 
-  const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate, isLoadingLatest } = useSelectedModelsStore(
+  const { getSelectedModelNames, toggleModelActive, inactiveModels, lastUpdate, isLoadingLatest, initialized  } = useSelectedModelsStore(
     (state) => ({
       getSelectedModelNames: state.getSelectedModelNames,
       toggleModelActive: state.toggleModelActive,
       inactiveModels: state.inactiveModels,
       lastUpdate: state.lastUpdate,
-      isLoadingLatest: state.isLoadingLatest
+      isLoadingLatest: state.isLoadingLatest,
+      initialized: state.initialized,
     })
   );
 
@@ -300,17 +306,19 @@ export function Header() {
         } else if (item.label === 'Settings') {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
-          setReferModalOpen(true);
+          // setReferModalOpen(true);
+          toast.info('This feature will be available soon');
+
         } else if (item.label === 'Favorites') {
           setAlbumModalOpen(true);
         }
         break;
       case 'link':
-        // if (item.label === 'Developer') {
-        //   router.push('/developer');
-        // } else {
+        if (item.label === 'Developer') {
+          toast.info('This feature will be available soon');
+        } else {
           window.open(item.href, '_blank');
-        // }
+        }
         break;
       case 'function':
         const functionMap = {
@@ -345,7 +353,7 @@ export function Header() {
   
 
   const handleTour = () => {
-    // console.log("Starting tour...");
+    toast.info('This feature will be available soon');
   };
   const handleLogOut = () => {
     setIsLogoutModalOpen(true);
@@ -378,13 +386,10 @@ export function Header() {
       if (response.status) {
         toggleModelActive(model.uid);
       } else {
-        // If status is false, show error message
-        console.error('Failed to toggle model:', response.message);
-        // Optionally show an error toast/notification here
+        toast.error('Failed to toggle model');
       }
     } catch (error) {
-      console.error('Failed to toggle model:', error);
-      // Optionally show an error toast/notification here
+      toast.error('Failed to toggle model');
     } finally {
       setLoadingModels(prev => prev.filter(id => id !== model.uid));
     }
@@ -403,37 +408,43 @@ export function Header() {
         >
           {isOpen ? (
             mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
-                alt="Logo"
-                width={100}
-                height={100}
-                className={`rounded mx-auto`}
-              />
+              <div className="h-8 w-32 flex items-center justify-center overflow-hidden">
+                <Image 
+                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+                  alt="Logo"
+                  width={100}
+                  height={30}
+                  className="rounded object-contain"
+                  priority
+                />
+              </div>
             )
           ) : (
             mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
-                alt="Logo"
-                width={100}
-                height={100}
-                className="rounded mx-auto"
-              />
+              <div className="h-8 w-8 flex items-center justify-center overflow-hidden">
+                <Image 
+                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="rounded object-contain"
+                  priority
+                />
+              </div>
             )
           )}
           {!pathname.includes('/organization') && (
             <Button 
-            variant="secondary" 
+            variant="outline" 
             size="icon" 
             onClick={toggle}
-            className={`h-6 w-6 absolute -right-3 transition-all duration-300 ${isMobile ? ( isOpen ? '-right-3' : 'right-[-2.5rem]') : "-right-3" }`}
+            className={`h-8 w-8 absolute p-0 -right-3 transition-all duration-300 bg-transparent border-none text-muted-foreground ${isMobile ? ( isOpen ? '-right-3' : 'right-[-2.5rem]') : "-right-8" }`}
             aria-label="Toggle Sidebar"
           >
             {isOpen ? (
-              <ChevronLeft className="h-5 w-5" />
+              <PanelLeftClose className="h-6 w-6" />
             ) : (
-              <ChevronRight className="h-5 w-5" />
+              <PanelRightClose className="h-6 w-6" />
             )}
           </Button>
           )}
@@ -448,82 +459,82 @@ export function Header() {
         >
           {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
             isLoadingLatest ? (
-              <div className={`flex items-center ml-8 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 px-3 ${selectedModelNames.length > 0 ? 'w-2/5 sm:w-fit' : 'w-fit'}`}>
+              <div className={`flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 px-3 ${selectedModelNames.length > 0 ? 'w-2/5 sm:w-fit' : 'w-fit'}`}>
                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 <span className="text-xs text-muted-foreground"></span>
               </div>
             ) :
             (selectedModelNames.length > 0) ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className={`w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-8 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}>
-                      {selectedModelNames.map((model, index) => (
-                        <span 
-                          key={`${model}-${index}`} 
-                          className={`flex items-center gap-1 text-xs border-r px-1 border-muted-foreground last:border-none ${
-                            !model.isActive ? 'text-muted-foreground opacity-50' : 'dark:text-gray-400 text-gray-800'
-                          }`}
-                        >
-                          {model.name}
-                          {model.type === 'plus' && (
-                            <Gem className={`h-2.5 w-2.5 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
-                          )}
-                        </span>
-                      ))}
+              <DropdownMenu open={modelsDropdownOpen} onOpenChange={setModelsDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <div 
+                    className={`w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}
+                  >
+                    {selectedModelNames.map((model, index) => (
+                      <span 
+                        key={`${model}-${index}`} 
+                        className={`flex items-center gap-1 text-xs border-r px-1 border-muted-foreground last:border-none ${
+                          !model.isActive ? 'text-muted-foreground opacity-50' : 'dark:text-gray-400 text-gray-800'
+                        }`}
+                      >
+                        {model.name}
+                        {model.type === 'plus' && (
+                          <Gem className={`h-2.5 w-2.5 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" sideOffset={5} className="w-64 p-0">
+                  <div className="w-full bg-backgroundSecondary rounded-lg">
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-borderColorPrimary">
+                      <Text className="text-xs font-medium">Selected Models</Text>
+                      <Text className="text-xs text-muted-foreground">
+                        {selectedModelNames.filter(model => model.isActive).length} active
+                      </Text>
                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" sideOffset={5} className="w-64 p-0">
-                    <div className="w-full bg-backgroundSecondary rounded-lg">
-                      <div className="flex items-center justify-between px-4 py-2 border-b border-borderColorPrimary">
-                        <Text className="text-xs font-medium">Selected Models</Text>
-                        <Text className="text-xs text-muted-foreground">
-                          {selectedModelNames.filter(model => model.isActive).length} active
-                        </Text>
-                      </div>
-                      <div className="max-h-[300px] overflow-y-auto py-2">
-                        {selectedModelNames.map((model, index) => {
-                          const isLoading = loadingModels.includes(model.uid);
-                          return (
-                            <div 
-                              key={index}
-                              className={`flex items-center justify-between px-4 py-2 hover:bg-hoverColorPrimary cursor-pointer ${
-                                !model.isActive ? 'opacity-50' : ''
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="flex flex-col">
-                                  <Text className={`text-xs ${!model.isActive ? 'text-muted-foreground' : ''}`}>
-                                    {model.name}
-                                  </Text>
-                                </div>
-                                {model.type === 'plus' && (
-                                  <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
-                                )}
+                    <div className="max-h-[300px] overflow-y-auto py-2">
+                      {selectedModelNames.map((model, index) => {
+                        const isLoading = loadingModels.includes(model.uid);
+                        return (
+                          <div 
+                            key={index}
+                            className={`flex items-center justify-between px-4 py-2 hover:bg-hoverColorPrimary cursor-pointer ${
+                              !model.isActive ? 'opacity-50' : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="flex flex-col">
+                                <Text className={`text-xs ${!model.isActive ? 'text-muted-foreground' : ''}`}>
+                                  {model.name}
+                                </Text>
                               </div>
-                              <div className="relative ml-2">
-                                {isLoading ? (
-                                  <div className="w-8 h-5 flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
-                                  </div>
-                                ) : (
-                                  <Switch
-                                    variant="sm"
-                                    checked={model.isActive}
-                                    onCheckedChange={() => handleModelToggle(model)}
-                                    disabled={loadingModels.includes(model.uid)}
-                                    className={`${model.isActive ? getSectionStyles(currentType).bgColor : ''}`}
-                                  />
-                                )}
-                              </div>
+                              {model.type === 'plus' && (
+                                <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
+                            <div className="relative ml-2">
+                              {isLoading ? (
+                                <div className="w-8 h-5 flex items-center justify-center">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+                                </div>
+                              ) : (
+                                <Switch
+                                  variant="sm"
+                                  checked={model.isActive}
+                                  onCheckedChange={() => handleModelToggle(model)}
+                                  disabled={loadingModels.includes(model.uid)}
+                                  className={`${model.isActive ? getSectionStyles(currentType).bgColor : ''}`}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center ml-8 border border-red-500 rounded-md py-1">
                 <span className="text-xs text-red-500 px-1">
@@ -544,8 +555,8 @@ export function Header() {
           )}
           
 
-          <div className={`flex items-center gap-2 ${!specialRoutes.includes(pathname) ? 'ml-auto mr-8' : 'md:mx-auto'}`}>
-            {pathname.includes("/chat/res/") && (
+          <div className={`flex items-center gap-2 ${!specialRoutes.includes(pathname) ? 'ml-auto mr-4 sm:mr-8' : 'md:mx-auto'}`}>
+            {/* {pathname.includes("/chat/res/") && (
               <Button
               variant={'outline'}
               className="h-8 rounded-full gap-1 p-2 text-muted-foreground"
@@ -554,7 +565,7 @@ export function Header() {
                 <Share className="w-4 h-4"/>
                 Share
               </Button>
-            )}
+            )} */}
             
 
             <ThemeToggle />
@@ -572,7 +583,7 @@ export function Header() {
                 className="h-8 w-8 rounded-full mx-auto cursor-pointer select-none"
               />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-backgroundSecondary">
+              <DropdownMenuContent className="mr-8 rounded-xl max-w-full p-2 bg-background dark:bg-backgroundSecondary shadow-lg">
               {pathname.includes('/plans') ? (
                 <DropdownMenuItem
                 className="flex items-start p-2 gap-4 cursor-pointer">

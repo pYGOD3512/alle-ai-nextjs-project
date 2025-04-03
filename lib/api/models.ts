@@ -2,6 +2,7 @@ import api from './axios';
 
 export interface Model {
     model_uid: string;
+    active: number;
     model_provider: string;
     model_name: string;
     model_image: string;
@@ -21,7 +22,7 @@ export const modelsApi = {
       const response = await api.get<ModelsResponse>(`/models/${type}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching ${type} models:`, error);
+      // console.error(`Error fetching ${type} models:`, error);
       throw error;
     }
   },
@@ -34,7 +35,7 @@ export const modelsApi = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      // console.error('Error toggling favorite:', error);
       throw error;
     }
   },
@@ -42,10 +43,10 @@ export const modelsApi = {
   getLatestSelectedModels: async (type: ModelType): Promise<Model[]> => {
     try {
       const response = await api.get(`/models/${type}/latest`);
-      console.log('Latest selected models response:', response.data);
+      // // console.log('Latest selected models response:', response.data);
       return response.data;
     } catch (error) {
-      console.log('Error fetching latest selected models:', error);
+      // // console.log('Error fetching latest selected models:', error);
       throw error;
     }
   },

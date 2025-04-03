@@ -16,6 +16,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Check if the request data is FormData and adjust Content-Type accordingly
+    if (config.data instanceof FormData) {
+      // Remove the Content-Type header to let the browser set it with the boundary
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => {
@@ -27,6 +34,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // console.log(error, 'axios error code');
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       if (currentPath !== '/auth') {

@@ -46,7 +46,7 @@ export const historyApi = {
         hasMore: response.data.length > 0
       };
     } catch (error) {
-      console.error(`Error fetching ${type} history:`, error);
+      // console.error(`Error fetching ${type} history:`, error);
       throw error;
     }
   },
@@ -60,7 +60,7 @@ export const historyApi = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting conversation title:', error);
+      // console.error('Error getting conversation title:', error);
       throw error;
     }
   },
@@ -73,13 +73,13 @@ export const historyApi = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting conversation title:', error);
+      // console.error('Error getting conversation title:', error);
       throw error;
     }
   },
 
   deleteHistory: async (conversation: string): Promise<DeleteHistoryResponse> => {
-    console.log('Deleting history for conversation:', conversation);
+    // // console.log('Deleting history for conversation:', conversation);
     try {
       const response = await api.delete<DeleteHistoryResponse>(`/delete/conversation/${conversation}`, {
         data: {
@@ -87,10 +87,10 @@ export const historyApi = {
         }
       });
       
-      console.log('Delete history key response:', response.data);
+      // // console.log('Delete history key response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error deleting history key:', error);
+      // console.error('Error deleting history key:', error);
       throw error;
     }
   },

@@ -7,7 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import OrganizationPlansArea from "./OrganizationPlansArea";
@@ -17,17 +18,13 @@ const PlansArea = () => {
   const [isYearly, setIsYearly] = useState(false);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const [showOrgPlans, setShowOrgPlans] = useState(false);
-  const { toast } = useToast();
+  ;
   const router = useRouter();
   const { user, token, plan, setAuth } = useAuthStore();
 
 
   const handleCustomPlan = () => {
-    toast({
-      title: "Coming Soon",
-      description: "This plan is coming soon!",
-      variant: "default",
-    });
+    toast.info('This plan will be available soon!')
   };
 
   const handleCheckout = async (planName: string) => {
@@ -55,11 +52,7 @@ const PlansArea = () => {
         throw new Error(response.message || 'Checkout failed');
       }
     } catch (error: any) {
-      toast({
-        title: "Checkout Failed",
-        description: error.message || "An error occurred. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(`${error.message || "An error occurred. Please try again."}`)
     } finally {
       setProcessingPlan(null);
     }
@@ -267,7 +260,7 @@ const PlansArea = () => {
       <div className="text-center mt-8 sm:mt-12 text-sm text-muted-foreground">
         Need more Capabilities?{" "}
         <button 
-          onClick={() => setShowOrgPlans(true)} 
+          // onClick={() => setShowOrgPlans(true)} 
           className="text-primary hover:underline"
         >
           See Alle-AI Team & Enterprise plans

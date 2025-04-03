@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSelector } from "./ModelSelector";
 import { ChatMessage } from "./ChatMessage";
@@ -8,13 +8,14 @@ import { ChatInput } from "./ChatInput";
 import { ModelResponse as ModelResponseComponent, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import RetryResponse from "./RetryResponse"
-import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore } from "@/stores";
+import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore, useHistoryStore, Attachment } from "@/stores";
 import { useModelsStore, useConversationStore } from "@/stores/models";
 import { chatApi } from '@/lib/api/chat';
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToBottom } from "@/components/ScrollToBottom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { SourcesWindow } from "../SourcesWindow";
 import { Summary } from "./Summary";
 import { Model } from "@/lib/api/models";
@@ -24,7 +25,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { ChevronDown, ChevronUp, Info, } from "lucide-react"
+import { ChevronDown, ChevronUp, TriangleAlert, } from "lucide-react"
 import { CombinedLoader } from "@/components/features/CombinedLoader";
 import { cn } from "@/lib/utils";
 import { useParams } from 'next/navigation';
@@ -60,6 +61,12 @@ interface ChatMessage {
   timestamp: Date;
   responses: ModelResponse[];
   createdInCombinedMode: boolean;
+  attachment?: {
+    name: string;
+    type: string;
+    size: number;
+    url: string;
+  };
 }
 
 interface Message {
@@ -71,6 +78,12 @@ interface Message {
   position: [number, number];
   responses: ModelResponse[];
   createdInCombinedMode: boolean;
+  attachment?: {
+    name: string;
+    type: string;
+    size: number;
+    url: string;
+  };
 }
 
 interface Branch {
@@ -92,8 +105,8 @@ interface LoadedResponse {
 }
 
 export function ChatArea() {
-  const { toast } = useToast();
-  const { content } = useContentStore();
+  ;
+  const { content, setContent } = useContentStore();
   const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
   const { chatModels } = useModelsStore();
   const { conversationId, promptId, setConversationId, generationType, setGenerationType } = useConversationStore();
@@ -106,6 +119,8 @@ export function ChatArea() {
   const [isLoading, setIsLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
   const pathname = usePathname();
+  const { getHistoryItemById } = useHistoryStore();
+
 
   const router = useRouter();
 
@@ -118,12 +133,29 @@ export function ChatArea() {
   const [activeSessionId, setActiveSessionId] = useState<string>();
   const [responseFeedback, setResponseFeedback] = useState<Record<string, 'liked' | 'disliked' | null>>({});
   const [showSummary, setShowSummary] = useState<Record<string, boolean>>({});
-  const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
+  // const [generatingSummary, setGeneratingSummary] = useState<Record<string, boolean>>({});
+  const [generatingSummary, setGeneratingSummary] = useState<{ [key: string]: boolean }>({});
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [conversationModels, setConversationModels] = useState<string[]>([]);
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
   const [previousSelectedModels, setPreviousSelectedModels] = useState<string[]>([]);
+  const [isOldConversation, setIsOldConversation] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [loadConversationError, setLoadConversationError] = useState(false);
+  const [chatModelsLoaded, setChatModelsLoaded] = useState(false);
+
+  const { token, setAuth, clearAuth } = useAuthStore();
+
+
+  const webSearchSourcesRef = useRef<Source[]>([]);
+
+  const createPosition = (x: number = 0, y: number = 0): [number, number] => {
+  return [x, y];
+};
+
+const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
 
   
 
@@ -159,7 +191,7 @@ export function ChatArea() {
   });
 
   const [branches, setBranches] = useState<Branch[]>(() => {
-    if (!conversationId || !promptId) return [{ messages: [], startPosition: [0, 0] }];
+    if (!conversationId || !promptId) return [{ messages: [], startPosition: createPosition() }];
     const initialPrompt = content.chat.input;
     
     return [{
@@ -168,7 +200,7 @@ export function ChatArea() {
         content: initialPrompt,
         sender: 'user',
         timestamp: new Date(),
-        position: [0, 0],
+        position: createPosition(),
         createdInCombinedMode: isCombinedMode,
         responses: selectedModels.chat.map(modelId => ({
           id: `temp-${modelId}`,
@@ -177,7 +209,7 @@ export function ChatArea() {
           status: 'loading'
         }))
       }],
-      startPosition: [0, 0]
+      startPosition: createPosition()
     }];
   });
 
@@ -204,13 +236,20 @@ export function ChatArea() {
   // Add state for summary content
   const [summaryContent, setSummaryContent] = useState<Record<string, string>>({});
 
+  // Add a ref to track the latest message container
+  const latestMessageRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    branches[currentBranch]?.messages.forEach(message => {
-      setExpandedResponses(prev => ({
-        ...prev,
-        [message.id]: true
-      }));
-    });
+    if (!branches[currentBranch]) return; // Ensure the current branch exists
+
+    const newExpandedResponses = branches[currentBranch].messages.reduce((acc, message) => {
+        if (!acc[message.id]) { // Only update if not already expanded
+            acc[message.id] = true;
+        }
+        return acc;
+    }, { ...expandedResponses });
+
+    setExpandedResponses(newExpandedResponses);
   }, [branches, currentBranch]);
 
   // Memoize the auto-activation logic
@@ -241,66 +280,11 @@ export function ChatArea() {
     });
   }, [chatSessions, handleAutoActivation]);
 
-  // First, let's fix the useEffect that handles summary generation
-  useEffect(() => {
-    if (!isSummaryEnabled) return;
-
-    const handleSummaryGeneration = async (messageId: string) => {
-      const message = branches[currentBranch].messages.find(msg => msg.id === messageId);
-      if (!message || message.createdInCombinedMode) return;
-      
-      // Add this check to only generate summaries for messages that were created with summaries enabled
-      if (!message.summaryEnabled) return;
-
-      // Check if all responses are complete and summary isn't already shown or generating
-      const allResponsesComplete = message.responses.every(
-        response => response.status === 'complete'
-      );
-
-      // Only generate summary for new messages (not loaded ones)
-      if (allResponsesComplete && !showSummary[messageId] && !generatingSummary[messageId]) {
-        try {
-          setGeneratingSummary(prev => ({ ...prev, [messageId]: true }));
-
-          const modelResponsePairs = message.responses
-            .filter(response => response.status === 'complete')
-            .map(response => Number(response.id));
-
-          const summaryResponse = await chatApi.getSummary({
-            messageId,
-            modelResponsePairs
-          });
-
-          setShowSummary(prev => ({ ...prev, [messageId]: true }));
-          setSummaryContent(prev => ({
-            ...prev,
-            [messageId]: summaryResponse.summary
-          }));
-
-        } catch (error) {
-          console.error('Error generating summary:', error);
-          toast({
-            title: "Error",
-            description: "Failed to generate summary",
-            variant: "destructive"
-          });
-        } finally {
-          setGeneratingSummary(prev => ({ ...prev, [messageId]: false }));
-        }
-      }
-    };
-
-    if (isSummaryEnabled) {
-      branches[currentBranch]?.messages.forEach(message => {
-        handleSummaryGeneration(message.id);
-      });
-    }
-  }, [ generatingSummary]); 
-
   // Update the effect to handle initial responses
   useEffect(() => {
     const handleInitialResponse = async () => {
       if (!conversationId || !promptId) return;
+      setIsSending(true);
 
       const summaryEnabledForMessage = user?.summary === 1;
       const activeModels = selectedModels.chat.filter(modelId => !inactiveModels.includes(modelId));
@@ -308,9 +292,14 @@ export function ChatArea() {
       setConversationModels(selectedModels.chat);
       setPreviousSelectedModels(selectedModels.chat);
 
-      console.log('Conversation Models', conversationModels);
-      console.log('Selected Models', selectedModels.chat);
-      console.log('Previous Selected Models', previousSelectedModels);
+      // Get attachment from content store if available
+        const attachment = content.chat.attachment ? {
+          name: content.chat.attachment.name,
+          type: content.chat.attachment.type,
+          size: content.chat.attachment.size,
+          url: content.chat.attachment.url
+        } : undefined;
+
 
       setBranches(prev => prev.map(branch => ({
         ...branch,
@@ -319,6 +308,7 @@ export function ChatArea() {
             ...msg,
             createdInCombinedMode: isCombinedMode,
             summaryEnabled: summaryEnabledForMessage,
+            attachment: attachment,
             responses: activeModels.map(modelId => ({
               id: `temp-${modelId}`,
               modelId,
@@ -329,18 +319,25 @@ export function ChatArea() {
         )
       })));
 
+      // Clear the attachment from the content store after using it
+      setContent("chat", "attachment", null);
+
       // Handle web search first if enabled
       if (isWebSearch) {
-        console.log('Web search is enabled - making web search API call');
+        // // console.log('Web search is enabled - making web search API call');
         setWebSearchLoading(prev => ({ ...prev, [promptId]: true }));
 
-        chatApi.webSearch({
-          prompt_id: promptId,
-          conversation_id: conversationId,
-          follow_up: false,
-          prev: null
-        })
-        .then(webSearchResponse => {
+        try {
+          // Wait for web search to complete before proceeding
+          const webSearchResponse = await chatApi.webSearch({
+            prompt_id: promptId,
+            conversation_id: conversationId,
+            messages: null
+          });
+          
+          webSearchSourcesRef.current = webSearchResponse.results;
+          
+          // Update branches with web search results
           setBranches(prev => prev.map(branch => ({
             ...branch,
             messages: branch.messages.map(msg => 
@@ -353,18 +350,12 @@ export function ChatArea() {
               } : msg
             )
           })));
-        })
-        .catch(error => {
-          console.error('Error in web search:', error);
-          toast({
-            title: "Web Search Error",
-            description: "Failed to complete web search, falling back to model responses.",
-            variant: "destructive"
-          });
-        })
-        .finally(() => {
+        } catch (error) {
+          // console.error('Error in web search:', error);
+          toast.error('Error searching the web');
+        } finally {
           setWebSearchLoading(prev => ({ ...prev, [promptId]: false }));
-        });
+        }
       }
 
       // Handle model responses
@@ -434,7 +425,7 @@ export function ChatArea() {
             })));
           }
         } catch (error) {
-          console.error('Error in model response:', error);
+          // console.error('Error in model response:', error);
           // Update error state in UI
           setBranches(prev => prev.map(branch => ({
             ...branch,
@@ -451,13 +442,19 @@ export function ChatArea() {
               } : msg
             )
           })));
+        } finally {
+          setIsSending(false);
         }
       }));
 
       // Handle summary response
       if (summaryEnabledForMessage && !isCombinedMode) {
         try {
-          setGeneratingSummary(prev => ({ ...prev, [promptId]: true }));
+          setGeneratingSummary(prev => {
+            const newState = { ...prev, [promptId]: true };
+            // console.log(newState, 'the updated generatingSummary state');
+            return newState;
+          });
   
           // Make API call to generate summary
           const summaryResponse = await chatApi.getSummary({
@@ -466,19 +463,20 @@ export function ChatArea() {
           });
   
           setShowSummary(prev => ({ ...prev, [promptId]: true }));
+          // console.log(showSummary, 'The set show summary');
           setSummaryContent(prev => ({
             ...prev,
             [promptId]: summaryResponse.summary
           }));
         } catch (error) {
-          console.error('Error generating summary:', error);
-          toast({
-            title: "Error",
-            description: "Failed to generate summary",
-            variant: "destructive"
-          });
+          // console.error('Error generating summary:', error);
+          toast.error('Error generating summary');
         } finally {
-          setGeneratingSummary(prev => ({ ...prev, [promptId]: false }));
+          setGeneratingSummary(prev => {
+            const newState = { ...prev, [promptId]: false };
+            // console.log(newState, 'the final generatingSummary state');
+            return newState;
+          });
         }
       }
 
@@ -521,7 +519,8 @@ export function ChatArea() {
                       content: combinationResponse.combination,
                       status: 'complete',
                       model_images: modelImages,
-                      model_names: modelNames
+                      model_names: modelNames,
+                      sources: webSearchSourcesRef.current
                     }]
                   } : msg
                 )
@@ -538,9 +537,10 @@ export function ChatArea() {
             }));
           }
         } catch (error) {
-          console.error('Error in combination response:', error);
+          // console.error('Error in combination response:', error);
         } finally {
           setCombinedLoading(prev => ({ ...prev, [promptId]: false }));
+          webSearchSourcesRef.current = [];
         }
       }
     };
@@ -551,25 +551,38 @@ export function ChatArea() {
       }
 
       setConversationId(loadConversationId);     
-
-      if (conversationId) {
-      getConversationModels(conversationId);
-    }
-      
       setIsLoadingConversation(true);
+      setLoadingLatest(true);
+
+
+      // Check if this is an old conversation
+      const historyItem = getHistoryItemById(loadConversationId);
+      if (historyItem && historyItem.created_at) {
+        const timestamp = new Date(historyItem.created_at);
+        const cutoffDate = new Date('2025-03-23');
+
+        
+        if (timestamp < cutoffDate) {
+          setIsOldConversation(true);
+        } else {
+          setIsOldConversation(false);
+        }
+      }
+
+      // if (conversationId) {
+      //   getConversationModels(conversationId);
+      // }
+      
       try {
-        console.log('Loading conversation content');
+        // // console.log('Loading conversation content');
         const response = await chatApi.getConversationContent('chat', loadConversationId);
-        console.log('Loaded conversation content:', response);
+        // console.log('Loaded conversation content:', response);
         
         handleLoadConversation(response);
       } catch (error) {
-        console.error('Error loading conversation:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load conversation",
-          variant: "destructive",
-        });
+        // console.error('Error loading conversation:', error);
+        setLoadConversationError(true);
+        toast.error('Failed to load conversation');
       } finally {
         setIsLoadingConversation(false);
         // setGenerationType('new');
@@ -581,9 +594,35 @@ export function ChatArea() {
     } else if(generationType === 'load'){
       loadConversation();
     }
+    // // console.log(generationType);
 
     // handleInitialResponse();
-  }, [conversationId]);
+  }, []);
+
+  // Update the useEffect to check if chat models are loaded
+  useEffect(() => {
+    // Check if chat models are loaded
+    if (chatModels && chatModels.length > 0) {
+      setChatModelsLoaded(true);
+    }
+  }, [chatModels]);
+
+  useEffect(()=>{
+    if (conversationId && generationType === 'load' && chatModelsLoaded) {
+      getConversationModels(conversationId);
+    }
+  },[conversationId, generationType, chatModelsLoaded])
+
+  // Add an effect to scroll to the latest message when it changes
+useEffect(() => {
+  if (latestMessageRef.current && branches[currentBranch]?.messages.length > 0) {
+    // Scroll the latest message into view with a smooth animation
+    latestMessageRef.current.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start' // Align to the top of the viewport
+    });
+  }
+}, [branches, currentBranch]);
 
   useEffect(() => {
 
@@ -621,72 +660,185 @@ export function ChatArea() {
 
   // When loading the conversation
   const handleLoadConversation = (loadedConversation: any[]) => {
+    const messagesByYPosition: Record<number, any[]> = {};
+    
+    loadedConversation.forEach(message => {
 
-    setBranches(prev => prev.map((branch, idx) => 
-      idx === currentBranch ? {
-        ...branch,
-        messages: loadedConversation.map(message => {
-          // Check if this message has a combined response
-          const combinedResponse = message.responses.find(
-            (response: LoadedResponse) => response.model.uid === 'alle-ai-comb'
-          );
+      if (message.position) {
+        message.position = message.position.map((coord: any) => 
+          typeof coord === 'string' ? parseInt(coord, 10) : coord
+        );
+      }
+
+      const yPos = message.position[1];
+      if (!messagesByYPosition[yPos]) {
+        messagesByYPosition[yPos] = [];
+      }
+      messagesByYPosition[yPos].push(message);
+
+      // const yPos = message.position ? message.position[1] : 0;
+      // if (!messagesByYPosition[yPos]) {
+      //   messagesByYPosition[yPos] = [];
+      // }
+      // messagesByYPosition[yPos].push(message);
+    });
+    
+    const newBranches: Branch[] = [];
+    
+    Object.keys(messagesByYPosition)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .forEach(yPos => {
+        const messagesAtLevel = messagesByYPosition[yPos];
+        
+        // For each message at this level
+        messagesAtLevel.forEach(message => {
+          const [xPos, yPos] = message.position;
+          
+          // Find if this message belongs to an existing branch
+          let targetBranch = newBranches.find(branch => {
+            // If this is the first message (y=0), it starts a new branch
+            if (yPos === 0) return false;
+            
+            // Otherwise, check if there's a branch that has a message at the previous y-level
+            // with the same x-coordinate (meaning this message continues that branch)
+            const previousMessage = branch.messages.find(msg => 
+              msg.position[1] === yPos - 1 && msg.position[0] === xPos
+            );
+            
+            return !!previousMessage;
+          });
+          
+          // If no existing branch found, create a new one
+          if (!targetBranch) {
+            targetBranch = {
+              messages: [],
+              startPosition: [xPos, yPos],
+              // If not at y=0, this is a branch from a parent
+              parentPosition: yPos > 0 ? [xPos, yPos - 1] : undefined
+            };
+            newBranches.push(targetBranch);
+          }
 
           const webSearchSources = message.input_content?.web_search_results?.results || [];
 
-          // Extract model names - ensure we're getting names from the correct models
+          // Extract file attachment if present
+        let attachment;
+        if (message.input_content?.uploaded_files?.length > 0) {
+          const file = message.input_content.uploaded_files[0];
+          
+          const isImage = file.file_type === 'image';
+          
+          attachment = {
+            name: file.file_name,
+            type: file.file_type,
+            size: parseInt(file.file_size) || 0,
+            url: isImage ? file.file_content : ''
+          };
+        }
+
+          // Get latest responses for each unique model
+          const latestResponses = message.responses.reduce((acc: any[], response: any) => {
+            const modelUid = response.model.uid;
+            
+            // Always keep alle-ai-summ and alle-ai-comb responses
+            if (modelUid === 'alle-ai-summ' || modelUid === 'alle-ai-comb') {
+              return [...acc, response];
+            }
+
+            // Find existing response for this model
+            const existingIndex = acc.findIndex(r => 
+              r.model.uid === modelUid && 
+              r.model.uid !== 'alle-ai-summ' && 
+              r.model.uid !== 'alle-ai-comb'
+            );
+            
+            if (existingIndex === -1) {
+              // If no existing response for this model, add it
+              return [...acc, response];
+            } else {
+              // If existing response, replace if current one has higher ID
+              if (response.id > acc[existingIndex].id) {
+                acc[existingIndex] = response;
+              }
+              return acc;
+            }
+          }, []);
+
+          // Check for combined response
+          const combinedResponse = latestResponses.find(
+            (response: LoadedResponse) => response.model.uid === 'alle-ai-comb'
+          );
+          
+          // Extract model names and images for combined response
           const modelNames = message.responses
-            .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
+            .filter((r: LoadedResponse) => 
+              r.model.uid !== 'alle-ai-comb' && 
+              r.model.uid !== 'alle-ai-summ'
+            )
             .map((response: LoadedResponse) => {
-              // First try to get from the response itself
               if (response.model.name) {
                 return response.model.name;
               }
-              // Fallback to finding in chatModels
               const model = chatModels.find(m => m.model_uid === response.model.uid);
               return model ? model.model_name : null;
             })
-            .filter(Boolean); // Filter out nulls
+            .filter(Boolean);
 
-          console.log('Model names for combined response:', modelNames);
+          const modelImages = message.responses
+            .filter((r: LoadedResponse) => 
+              r.model.uid !== 'alle-ai-comb' && 
+              r.model.uid !== 'alle-ai-summ'
+            )
+            .map((r: LoadedResponse) => r.model.image)
+            .filter(Boolean);
 
-          return {
+          // Create the message object
+          const messageObj = {
             id: String(message.prompt_id),
             content: message.prompt,
             sender: 'user',
             timestamp: new Date(),
             position: message.position,
             createdInCombinedMode: !!combinedResponse,
+            attachment: attachment,
             responses: combinedResponse 
               ? [{
                   id: String(combinedResponse.id),
                   modelId: 'alle-ai-comb',
                   content: combinedResponse.body,
-                  status: 'complete' as const,
-                  model_images: message.responses
-                    .filter((r: LoadedResponse) => r.model.uid !== 'alle-ai-comb' && r.model.uid !== 'alle-ai-summ')
-                    .map((r: LoadedResponse) => r.model.image),
-                  model_names: modelNames
+                  status: 'complete',
+                  model_images: modelImages,
+                  model_names: modelNames,
+                  sources: webSearchSources
                 }]
-                : message.responses
-                    .filter((response: LoadedResponse) => 
-                      response.model.uid !== 'alle-ai-comb' && 
-                      response.model.uid !== 'alle-ai-summ'
-                    )
-                    .map((response: LoadedResponse) => ({
-                      id: String(response.id),
-                      modelId: response.model.uid,
-                      content: response.body,
-                      status: 'complete' as const,
-                      model_images: [response.model.image],
-                      model_names: [response.model.name || chatModels.find(m => m.model_uid === response.model.uid)?.model_name].filter(Boolean),
-                      sources: webSearchSources
-                    }))
+              : latestResponses
+                  .filter((response: LoadedResponse) => response.model.uid !== 'alle-ai-summ' && response.model.uid !== 'alle-ai-comb')
+                  .map((response: LoadedResponse) => ({
+                    id: String(response.id),
+                    modelId: response.model.uid,
+                    content: response.body,
+                    status: 'complete',
+                    model_images: [response.model.image],
+                    model_names: [response.model.name || chatModels.find(m => m.model_uid === response.model.uid)?.model_name].filter(Boolean),
+                    sources: webSearchSources,
+                  }))
           };
-        })
-      } : branch
-    ));
+          
+          // Add the message to the branch
+          targetBranch.messages.push(messageObj as Message);
+        });
+      });
 
-    // Handle summaries and set active contents
+    // Sort messages within each branch by y-position
+    newBranches.forEach(branch => {
+      branch.messages.sort((a, b) => a.position[1] - b.position[1]);
+    });
+    
+    setBranches(newBranches);
+    setCurrentBranch(0);
+    
+    // Process summaries and set active contents
     loadedConversation.forEach(message => {
       const summaryResponse = message.responses.find(
         (response: LoadedResponse) => response.model.uid === 'alle-ai-summ'
@@ -710,7 +862,7 @@ export function ChatArea() {
           [String(message.prompt_id)]: false
         }));
       }
-
+      
       // Set active content based on response type
       setActiveContents(prev => ({
         ...prev,
@@ -734,18 +886,24 @@ export function ChatArea() {
 
   // Get the models used in the conversation
   const getConversationModels = (conversationId: string) => {
-    setLoadingLatest(true);
     chatApi.getModelsForConversation(conversationId)
       .then(response => {
-        console.log('Models used in conversation:', response);
+        // console.log('Models used in conversation:', response);
         const modelUids = response.map((model: Model) => model.model_uid);
-        console.log('modelUids for setting and saving conversation models', modelUids);
+
         setConversationModels(modelUids);
         setTempSelectedModels(modelUids);
         saveSelectedModels('chat');
+
+        // Toggle inactive models using toggleModelActive
+        response.forEach((model: { model_uid: string, active: number }) => {
+          if (model.active === 0) {
+            useSelectedModelsStore.getState().toggleModelActive(model.model_uid);
+          }
+        });
       })
       .catch(error => {
-        console.error('Error fetching models for conversation:', error);
+        // console.error('Error fetching models for conversation:', error);
       })
       .finally(() => {
         setLoadingLatest(false);
@@ -759,42 +917,63 @@ export function ChatArea() {
   const handleEditMessage = async (newContent: string, position: [number, number]) => {
     if (!conversationId) return;
 
+    // // console.log('Editing message at position', position);
+
     try {
       const summaryEnabledForMessage = user?.summary === 1;
+      
+      // Increment the x position for the new branch
+      const newXPosition = branches.reduce((maxX, branch) => {
+        const messageAtSameY = branch.messages.find(msg => msg.position[1] === position[1]);
+        return messageAtSameY ? Math.max(maxX, messageAtSameY.position[0] + 1) : maxX;
+      }, 0);
+
+      const newPosition: [number, number] = createPosition(newXPosition, position[1]);
+
       // Create prompt
       const promptResponse = await chatApi.createPrompt(
         conversationId,
         newContent,
-        position
+        newPosition
       );
+
+      // // console.log('old position', position);
+      // // console.log('new position', newPosition);
+
+      const newMessage = {
+        id: promptResponse.id,
+        content: newContent,
+        sender: 'user' as const,
+        timestamp: new Date(),
+        position: newPosition,
+        createdInCombinedMode: isCombinedMode,
+        summaryEnabled: summaryEnabledForMessage,
+        responses: selectedModels.chat
+          .filter(modelId => !inactiveModels.includes(modelId))
+          .map(modelId => ({
+            id: `temp-${modelId}`,
+            modelId,
+            content: '',
+            status: 'loading' as const
+          }))
+      };
 
       // Create new branch
       const newBranch: Branch = {
-        messages: [{
-          id: promptResponse.id,
-          content: newContent,
-          sender: 'user',
-          timestamp: new Date(),
-          position,
-          createdInCombinedMode: isCombinedMode,
-          summaryEnabled: summaryEnabledForMessage,
-          responses: selectedModels.chat
-            .filter(modelId => !inactiveModels.includes(modelId))
-            .map(modelId => ({
-              id: `temp-${modelId}`,
-              modelId,
-              content: '',
-              status: 'loading'
-          }))
-        }],
-        startPosition: position,
+        messages: [newMessage],
+        startPosition: newPosition,
         parentPosition: position
       };
 
       // Add new branch and switch to it
-      const newBranchIndex = branches.length;
-      setBranches(prev => [...prev, newBranch]);
-      setCurrentBranch(newBranchIndex);
+      const newBranches = [...branches];
+      newBranches.push(newBranch);
+      // // console.log('newBranches', (newBranches));
+      setBranches(newBranches);
+      setTimeout(() => {
+        setCurrentBranch(newBranches.length - 1);
+      }, 0);
+    
 
       // Generate responses for the new branch
       const activeModels = selectedModels.chat.filter(
@@ -822,7 +1001,7 @@ export function ChatArea() {
             
             // Update the branch with the response
             setBranches(prev => prev.map((branch, idx) => 
-              idx === newBranchIndex ? {
+              idx === newBranches.length - 1 ? {
                 ...branch,
                 messages: branch.messages.map(msg => 
                   msg.id === promptResponse.id ? {
@@ -853,10 +1032,10 @@ export function ChatArea() {
             }
           }
         } catch (error) {
-          console.error('Error in model response:', error);
+          // console.error('Error in model response:', error);
           // Update error state in the branch
           setBranches(prev => prev.map((branch, idx) => 
-            idx === newBranchIndex ? {
+            idx === newBranches.length - 1 ? {
               ...branch,
               messages: branch.messages.map(msg => 
                 msg.id === promptResponse.id ? {
@@ -880,25 +1059,21 @@ export function ChatArea() {
       if (summaryEnabledForMessage && !isCombinedMode) {
       try {
         setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: true }));
-
+    
         // Make API call to generate summary
         const summaryResponse = await chatApi.getSummary({
           messageId: promptResponse.id,
           modelResponsePairs
         });
-
+    
         setShowSummary(prev => ({ ...prev, [promptResponse.id]: true }));
         setSummaryContent(prev => ({
           ...prev,
           [promptResponse.id]: summaryResponse.summary
         }));
       } catch (error) {
-        console.error('Error generating summary:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate summary",
-          variant: "destructive"
-        });
+        // console.error('Error generating summary:', error);
+        toast.error('Error generating summary')
       } finally {
         setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: false }));
       }
@@ -928,9 +1103,17 @@ export function ChatArea() {
           })
           .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
 
+          const sources = branches[currentBranch].messages
+            .find(msg => msg.id === promptResponse.id)
+            ?.responses[0]?.sources || [];
+
+            // // console.log(sources,'this is the source am passing to the combined response')
+
+          // Only proceed if we have valid images
           if (modelImages.length > 0) {
+            // Update the branch with the combined response
             setBranches(prev => prev.map((branch, idx) => 
-              idx === newBranchIndex ? {
+              idx === newBranches.length - 1 ? {
                 ...branch,
                 messages: branch.messages.map(msg => 
                   msg.id === promptResponse.id ? {
@@ -941,13 +1124,15 @@ export function ChatArea() {
                       content: combinationResponse.combination,
                       status: 'complete',
                       model_images: modelImages,
-                      model_names: modelNames
+                      model_names: modelNames,
+                      sources: sources
                     }]
                   } : msg
                 )
               } : branch
             ));
 
+            // Automatically set as active content
             setActiveContents(prev => ({
               ...prev,
               [promptResponse.id]: {
@@ -957,26 +1142,31 @@ export function ChatArea() {
             }));
           }
         } catch (error) {
-          console.error('Error in combination response:', error);
+          // console.error('Error in combination response:', error);
         } finally {
           setCombinedLoading(prev => ({ ...prev, [promptResponse.id]: false }));
         }
       }
 
     } catch (error) {
-      console.error('Error editing message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to edit message",
-        variant: "destructive"
-      });
+      // console.error('Error editing message:', error);
+      toast.error('Failed to edit message')
     }
   };
 
-  const handleSendMessage = async (fileContent?: any) => {
+  const handleSendMessage = async (fileContent?: {
+    uploaded_files: Array<{
+      file_name: string;
+      file_size: string;
+      file_type: string;
+      file_content: string;
+    }>;
+  }) => {
     if (!input.trim() || !conversationId) return;
+
+    // console.log(token, 'call with this token')
     
-    
+    setIsSending(true);
     try {
       const summaryEnabledForMessage = user?.summary === 1;
 
@@ -984,19 +1174,46 @@ export function ChatArea() {
       const lastMessage = currentBranchMessages[currentBranchMessages.length - 1];
       
       // For follow-ups, keep the same x coordinate but increment y
-      const nextPosition: [number, number] = lastMessage 
-        ? [lastMessage.position[0], lastMessage.position[1] + 1]
-        : [0, 0];
+      const nextPosition = lastMessage 
+      ? createPosition(lastMessage.position[0], lastMessage.position[1] + 1)
+      : createPosition(0, 0);
+
+      // Restructure the fileContent to match the expected format
+    const options = fileContent ? {
+      input_content: {
+        uploaded_files: fileContent.uploaded_files.map(file => ({
+          file_name: file.file_name,
+          file_size: file.file_size,
+          file_type: file.file_type,
+          file_content: file.file_content
+        }))
+      }
+    } : undefined;
 
       const promptResponse = await chatApi.createPrompt(
         conversationId,
         input,
         nextPosition,
-        fileContent
+        options
       );
       setInput("");
 
+      // console.log(promptResponse,'This is prompt created in the handleSendMessage in the ChatArea')
+
       // Store the current combined mode state with the message
+      // Create attachment object if file content exists
+      let attachment: Attachment | undefined;
+      if (promptResponse.input_content?.uploaded_files?.[0]) {
+        const file = promptResponse.input_content.uploaded_files[0];
+        const isImage = file.file_type === 'image';
+        
+        attachment = {
+          name: file.file_name,
+          type: file.file_type,
+          size: parseInt(file.file_size),
+          url: isImage ? file.file_content : '' // For images, use file_content as URL
+        };
+      }
 
       setBranches(prev => prev.map((branch, idx) => 
         idx === currentBranch ? {
@@ -1009,6 +1226,7 @@ export function ChatArea() {
             position: nextPosition,
             createdInCombinedMode: isCombinedMode,
             summaryEnabled: summaryEnabledForMessage,
+            attachment: attachment,
             responses: selectedModels.chat
               .filter(modelId => !inactiveModels.includes(modelId))
               .map(modelId => ({
@@ -1023,18 +1241,27 @@ export function ChatArea() {
 
       // Handle web search first if enabled
       if (isWebSearch) {
-        console.log('Web search is enabled - making web search API call');
+        // // console.log('Web search is enabled - making web search API call');
         setWebSearchLoading(prev => ({ ...prev, [promptResponse.id]: true }));
 
         try {
+
+          // Use the dedicated function for web search context
+          const webSearchPairs = getWebSearchContext(
+            branches[currentBranch], 
+            nextPosition[1]  // Current Y position
+          );
+
           const webSearchResponse = await chatApi.webSearch({
             prompt_id: promptResponse.id,
             conversation_id: conversationId,
-            follow_up: true,
-            prev: getPreviousPromptResponsePairs(branches[currentBranch], nextPosition[1], 'websearch')
+            // follow_up: true,
+            messages:  webSearchPairs.length > 0 ? webSearchPairs : null
           });
-          
-          
+
+          webSearchSourcesRef.current = webSearchResponse.results;
+          // console.log(webSearchSourcesRef.current, 'Web search results stored in ref');
+
           // Store the web search results in the state
           setBranches(prev => prev.map((branch, index) => 
             index === currentBranch
@@ -1053,12 +1280,8 @@ export function ChatArea() {
               : branch
           ));
         } catch (error) {
-          console.error('Error in web search:', error);
-          toast({
-            title: "Web Search Error",
-            description: "Failed to complete web search, falling back to model responses.",
-            variant: "destructive"
-          });
+          // console.error('Error in web search:', error);
+          toast.error('Error searching the web');
         } finally {
           setWebSearchLoading(prev => ({ ...prev, [promptResponse.id]: false }));
         }
@@ -1140,7 +1363,7 @@ export function ChatArea() {
             ));
           }
         } catch (error) {
-          console.error('Error in model response:', error);
+          // console.error('Error in model response:', error);
           // Update error state in UI
           setBranches(prev => prev.map((branch, idx) => 
             idx === currentBranch ? {
@@ -1179,12 +1402,9 @@ export function ChatArea() {
               [promptResponse.id]: summaryResponse.summary
             }));
           } catch (error) {
-            console.error('Error generating summary:', error);
-            toast({
-              title: "Error",
-              description: "Failed to generate summary",
-              variant: "destructive"
-            });
+            // console.error('Error generating summary:', error);
+            toast.error('Error generating summary')
+
           } finally {
             setGeneratingSummary(prev => ({ ...prev, [promptResponse.id]: false }));
           }
@@ -1216,6 +1436,12 @@ export function ChatArea() {
           })
           .filter((name): name is string => Boolean(name) && name !== ''); // Filter out nulls
 
+          const sources = branches[currentBranch].messages
+          .find(msg => msg.id === promptResponse.id)
+          ?.responses[0]?.sources || [];
+          
+          // console.log(webSearchSourcesRef.current, 'Web search sources from ref for combined response');
+
           // Only proceed if we have valid images
           if (modelImages.length > 0) {
             // Update the branch with the combined response
@@ -1231,7 +1457,8 @@ export function ChatArea() {
                       content: combinationResponse.combination,
                       status: 'complete',
                       model_images: modelImages,
-                      model_names: modelNames
+                      model_names: modelNames,
+                      sources: webSearchSourcesRef.current
                     }]
                   } : msg
                 )
@@ -1248,23 +1475,21 @@ export function ChatArea() {
             }));
           }
         } catch (error) {
-          console.error('Error in combination response:', error);
+          // console.error('Error in combination response:', error);
         } finally {
           setCombinedLoading(prev => ({ ...prev, [promptResponse.id]: false }));
+          webSearchSourcesRef.current = [];
         }
       }
 
       // setInput("");
     } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive"
-      });
+      // console.error('Error sending message:', error);
+      toast.error('Something went wrong, please try again');
     } finally {
       setIsLoading(false);
       setCompleted(true);
+      setIsSending(false);
     }
   };
 
@@ -1365,7 +1590,7 @@ export function ChatArea() {
         })));
       }
     } catch (error) {
-      console.error('Error retrying response:', error);
+      // console.error('Error retrying response:', error);
       // Update error state in UI
       setBranches(prev => prev.map(branch => ({
         ...branch,
@@ -1419,6 +1644,67 @@ export function ChatArea() {
     return pairs;
 };
 
+// Function specifically for web search context
+const getWebSearchContext = (branch: Branch, currentY: number): [string, string][] => {
+  const pairs: [string, string][] = [];
+  
+  // Get all messages up to the current Y position
+  const previousMessages = branch.messages
+    .filter(msg => msg.position[1] < currentY)
+    .sort((a, b) => a.position[1] - b.position[1]);
+
+  // For each message, get its prompt ID and the appropriate response ID
+  previousMessages.forEach(msg => {
+    // Skip messages without responses
+    if (!msg.responses || msg.responses.length === 0) return;
+    
+    let responseId: string | undefined;
+    
+    // First priority: If message was created in combined mode, use the combined response
+    if (msg.createdInCombinedMode) {
+      const combinedResponse = msg.responses.find(r => 
+        r.modelId === 'alle-ai-comb' && 
+        r.status === 'complete'
+      );
+      
+      if (combinedResponse) {
+        responseId = combinedResponse.id;
+      }
+    } 
+    
+    // Second priority: Use the active response from activeContents
+    if (!responseId && activeContents[msg.id]) {
+      const activeContentId = activeContents[msg.id].id;
+      const activeResponse = msg.responses.find(r => 
+        r.modelId === activeContentId && 
+        r.status === 'complete'
+      );
+      
+      if (activeResponse) {
+        responseId = activeResponse.id;
+      }
+    }
+    
+    // Third priority: Just use the first complete response
+    if (!responseId) {
+      const firstCompleteResponse = msg.responses.find(r => r.status === 'complete');
+      if (firstCompleteResponse) {
+        responseId = firstCompleteResponse.id;
+      }
+    }
+    
+    // If we found a valid response, add the pair
+    if (responseId) {
+      pairs.push([msg.id, responseId]);
+      // console.log(`Added context for web search: [${msg.id}, ${responseId}]`);
+    }
+  });
+
+  // console.log('Web search context pairs:', pairs);
+  return pairs;
+};
+
+
   const handleSourcesClick = (responseId: string, sources: Source[], userPrompt: string) => {
     setSourcesWindowState({
       isOpen: true,
@@ -1435,35 +1721,56 @@ export function ChatArea() {
     currentBranch: number;
     onBranchSelect: (index: number) => void;
   }) => {
-    const versionsAtLevel = branches.filter(branch => 
-      branch.messages.some(msg => msg.position[1] === level)
-    );
+    // Memoize the filtered and sorted branches to prevent recalculation
+    const sortedBranches = useMemo(() => {
+      // Filter branches that have messages at the current y level
+      const versionsAtLevel = branches.filter(branch => 
+          branch.messages.some(msg => msg.position[1] === level)
+      );
 
-    if (versionsAtLevel.length <= 1) return null;
+      // Sort branches by x position for consistent tab order
+      return versionsAtLevel.sort((a, b) => {
+          const aX = a.messages.find(msg => msg.position[1] === level)?.position[0] || 0;
+          const bX = b.messages.find(msg => msg.position[1] === level)?.position[0] || 0;
+          return aX - bX;
+      });
+    }, [branches, level]); // Only recalculate when branches or level changes
+
+    if (sortedBranches.length <= 1) return null;
+
+    // Find the current branch index in the sorted list - use a more efficient lookup
+    const currentBranchObj = branches[currentBranch];
+    const currentSortedIndex = sortedBranches.findIndex(branch => branch === currentBranchObj);
+    const totalTabs = sortedBranches.length;
+
+    const handlePrevious = () => {
+        const newIndex = (currentSortedIndex - 1 + totalTabs) % totalTabs;
+        onBranchSelect(branches.indexOf(sortedBranches[newIndex]));
+    };
+
+    const handleNext = () => {
+        const newIndex = (currentSortedIndex + 1) % totalTabs;
+        onBranchSelect(branches.indexOf(sortedBranches[newIndex]));
+    };
 
     return (
-      <div className="flex gap-2 mb-2">
-        {versionsAtLevel.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => onBranchSelect(index)}
-            className={cn(
-              "px-2 py-1 rounded-md",
-              currentBranch === index 
-                ? "bg-primary text-primary-foreground" 
-                : "bg-muted hover:bg-muted/80"
-            )}
-          >
-            {index + 1}
-          </button>
-        ))}
-      </div>
+        <div className="flex justify-end items-center gap-2 mb-2 text-xs mr-2 mt-1">
+            <button onClick={handlePrevious} className="rounded-md bg-transparent">
+                {"<"}
+            </button>
+            <span className="">
+                {`${currentSortedIndex + 1}/${totalTabs}`}
+            </span>
+            <button onClick={handleNext} className="rounded-md bg-transparent">
+                {">"}
+            </button>
+        </div>
     );
   };
 
   return (
     <RenderPageContent>
-      <ScrollArea ref={scrollAreaRef} className="flex-1">
+      <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-10rem)] sm:h-full">
       {isLoadingConversation && (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="flex flex-col items-center gap-4">
@@ -1473,18 +1780,18 @@ export function ChatArea() {
           </div>
         )}
         {!isLoadingConversation && (
-          <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-4">
+          <div className="max-w-xl sm:max-w-2xl md:max-w-4xl mt-4 mx-auto px-2 sm:p-4">
             {branches[currentBranch]?.messages?.map((message, index) => {
               const level = message.position[1];
+              const isLatestMessage = index === branches[currentBranch].messages.length - 1;
               
               return (
-                <div key={`${message.position[0]}-${message.position[1]}`} className="mb-8">
-                  <BranchTabs
-                    level={level}
-                    branches={branches}
-                    currentBranch={currentBranch}
-                    onBranchSelect={setCurrentBranch}
-                  />
+                <div 
+                  key={`${message.position[0]}-${message.position[1]}`} 
+                  className="mb-8"
+                  ref={isLatestMessage ? latestMessageRef : null}
+                  id={`message-${message.id}`}
+                >
                   <ChatMessage
                     content={message.content}
                     sender={message.sender}
@@ -1495,6 +1802,13 @@ export function ChatArea() {
                     currentBranch={currentBranch}
                     onBranchChange={setCurrentBranch}
                     branches={branches}
+                    attachment={message.attachment}
+                  />
+                  <BranchTabs
+                    level={level}
+                    branches={branches}
+                    currentBranch={currentBranch}
+                    onBranchSelect={setCurrentBranch}
                   />
                   <div className="">
                     {webSearchLoading[message.id] && (
@@ -1534,7 +1848,7 @@ export function ChatArea() {
                             {/* Only show Summary when all responses are complete AND not in combined mode */}
                             {message.responses.every(r => r.status === 'complete') && 
                              !message.createdInCombinedMode && 
-                             (showSummary[message.id] || summaryContent[message.id]) && (
+                             (showSummary[message.id] || summaryContent[message.id] || generatingSummary[message.id]) && (
                                 <Summary 
                                   isGenerating={generatingSummary[message.id]}
                                   isActive={activeContents[message.id]?.type === 'summary'}
@@ -1577,8 +1891,17 @@ export function ChatArea() {
                                             {model.model_name}
                                           </span>
                                         </div>
-                                        <div className="w-full mt-3 space-y-2">
-                                          <Skeleton className="h-2 w-full" />
+                                        <div className="w-full text-center space-y-2">
+                                          {thinkingModels.includes(model.model_uid) ? (
+                                          <div className="thinking-animation">
+                                             <span className="text-muted-foreground text-xs">Thinking</span>
+                                             <span className="dot-1">.</span>
+                                             <span className="dot-2">.</span>
+                                             <span className="dot-3">.</span>
+                                           </div>
+                                          ) : (
+                                            <Skeleton className="h-2 w-full" />
+                                          )}
                                         </div>
                                       </div>
                                     );
@@ -1643,9 +1966,7 @@ export function ChatArea() {
                           )?.id || ""]}
                           onFeedbackChange={handleFeedbackChange}
                           webSearchEnabled={isWebSearch}
-                          sources={message.responses.find(r => 
-                            r.modelId === activeContents[message.id].id
-                          )?.sources || []}
+                          sources={message.responses.find(r => r.modelId === activeContents[message.id].id)?.sources || []}
                           onSourcesClick={(responseId, sources) => handleSourcesClick(responseId, sources, message.content)}
                           onRegenerate={() => handleRetry(activeContents[message.id].id, message.id)}
                         />
@@ -1653,7 +1974,7 @@ export function ChatArea() {
                       {activeContents[message.id]?.type === 'summary' && (
                       <ModelResponseComponent
                         key={`${conversationId}-alle-ai-summ`}
-                        model="Alle-AI Summary"
+                        model="Alle-AI Summary & Comparison"
                         content={summaryContent[message.id] || ""}
                         model_img="/svgs/logo-desktop-mini.png"
                         responseId={`alle-ai-summ-${message.id}`}
@@ -1679,31 +2000,41 @@ export function ChatArea() {
         className="z-50 w-8 h-8"
         content={branches[currentBranch]?.messages || []}
       />
-        {/* <div className="w-1/2 mb-2 mx-auto bg-gray-800 border border-blue-500 text-blue-200 p-3 rounded-md flex items-center">
-          <Info className="w-4 h-4" />
-          <div className="flex-1">
-            <p className="text-sm text-center">
-              This conversation happened in a previous build. 
-              <span 
-                className="text-blue-400 cursor-pointer hover:underline"
-                onClick={() => router.push('/chat')}
-              >
-                Start a new chat
-              </span> to begin a new conversation.
-            </p>
+      {isOldConversation ? (
+        <div className="w-full sm:w-2/3 md:w-1/2 mb-2 mx-auto bg-blue-100/50 dark:bg-blue-900/30 border-blue-500 text-blue-800 dark:text-blue-300 p-3 rounded-md flex items-start">
+        <TriangleAlert className="w-4 h-4" />
+        <div className="flex-1">
+          <p className="text-sm text-center">
+            This conversation happened in a previous version of Alle-AI. Start a{' '}
+            <span 
+              className="cursor-pointer underline font-bold"
+              onClick={() => router.push('/chat')}
+            >
+              New chat
+            </span> to begin a new conversation.
+          </p>
+        </div>
+      </div>
+      ):(
+        <div className="w-full bg-background fixed bottom-0 sm:relative sm:px-4">
+          {!isLoadingConversation && !loadConversationError && (
+            <ChatInput
+              value={input}
+              onChange={handleInputChange}
+              onSend={handleSendMessage}
+              inputRef={inputRef}
+              isLoading={isLoading}
+              isSending={isSending}
+              isWeb={true}
+              isCombined={true}
+              onWebSearchToggle={() => {}}
+              onCombinedToggle={() => {}}
+            />
+          )}
           </div>
-        </div> */}
-      <ChatInput
-        value={input}
-        onChange={handleInputChange}
-        onSend={handleSendMessage}
-        inputRef={useRef<HTMLTextAreaElement>(null)}
-        isLoading={isLoading}
-        isWeb={true}
-        isCombined={true}
-        onWebSearchToggle={() => {}}
-        onCombinedToggle={() => {}}
-      />
+      )}
+        
+      
       <SourcesWindow
         sources={sourcesWindowState.sources}
         isOpen={sourcesWindowState.isOpen}

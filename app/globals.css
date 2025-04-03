@@ -61,6 +61,7 @@
     --backgroundSecondary: #2f2f2f;
     --sideBarBackground: #171717;
     --borderColorPrimary: hsla(0, 0%, 100%, .1);
+    /* --borderColorPrimary: hsla(0, 0%, 100%, 0.288); */
     --buttonBackground: #676767;
     --bodyColor: #fcfbfb;
     --bodyColorAlt: #0e0d0d;
@@ -205,3 +206,119 @@ li > p {
 .animate-blink {
   animation: blink 1s infinite;
 }
+
+.thinking-animation {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.dot-1, .dot-2, .dot-3 {
+  animation: pulse 1.5s infinite;
+  opacity: 0.6;
+}
+
+.dot-1 {
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation-delay: 0.3s;
+}
+
+.dot-3 {
+  animation-delay: 0.6s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+pre.prism {
+    background-color: white;
+  }
+  
+  /* Dark theme */
+  pre.tomorrow {
+    background-color: #2d2d2d; /* Background color of prism-tomorrow */
+  }
+  
+  /* Custom Modal Styles */
+  .ant-modal-wrap {
+    backdrop-filter: blur(8px) !important;
+  }
+  
+  .ant-modal .ant-modal-content {
+    background-color: var(--backgroundSecondary) !important;
+    backdrop-filter: blur(12px) !important;
+    background: rgba(var(--background-start-rgb), 0.7) !important;
+  }
+  
+  .ant-modal .ant-modal-header {
+    background: transparent !important;
+  }
+  
+  .ant-modal .ant-modal-title {
+    color: var(--bodyColor) !important;
+  }
+  
+  /* Make sure the modal mask (overlay) is slightly transparent */
+  .ant-modal-mask {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+  
+  /* Modal Input and Text Styles */
+  .ant-modal .ant-input {
+    background-color: var(--background) !important;
+    border: 1px solid var(--accent) !important;
+    color: var(--bodyColor) !important;
+  }
+  
+  .ant-modal .ant-input::placeholder {
+    color: var(--muted-foreground) !important;
+  }
+  
+  .ant-modal .ant-input:hover {
+    border-color: var(--muted) !important;
+  }
+  
+  .ant-modal .ant-input:focus {
+    border-color: var(--muted) !important;
+    box-shadow: 0 0 0 2px rgba(var(--muted), 0.1) !important;
+  }
+  
+  /* Search Results Text */
+  .ant-modal .text-gray-700,
+  .ant-modal li {
+    color: var(--bodyColor) !important;
+  }
+  
+  .ant-modal .text-gray-500,
+  .ant-modal .text-muted-foreground {
+    color: var(--muted-foreground) !important;
+  }
+  
+  /* Spinner Color */
+  .ant-spin {
+    color: var(--primary) !important;
+  }
+  
+  .ant-spin .ant-spin-dot-item {
+    background-color: currentColor !important;
+  }
+  
+  .ant-spin .ant-spin-dot {
+    font-size: 20px;
+  }
+  
+  .ant-spin.ant-spin-small .ant-spin-dot {
+    font-size: 14px !important;
+  }

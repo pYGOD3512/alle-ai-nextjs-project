@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
 import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader2 } from "lucide-react";
-import { IMAGE_MODELS } from '@/lib/constants';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import {
   Dialog,
   DialogContent,
@@ -113,7 +113,7 @@ const ImageArea = () => {
   const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
   const { conversationId, promptId, generationType, setConversationId } = useConversationStore();
   const { imageModels } = useModelsStore();
-  const { toast } = useToast();
+  ;
   const params = useParams();
   const loadConversationId = params.chatId as string;
 
@@ -122,6 +122,8 @@ const ImageArea = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [retryingModels, setRetryingModels] = useState<string[]>([]);
+const [imageModelsLoaded, setImageModelsLoaded] = useState(false);
+
 
   useEffect(() => {
     const generateImage = async (modelId: string) => {
@@ -177,21 +179,19 @@ const ImageArea = () => {
 
     const loadConversation = async () => {
       if (!loadConversationId) {
-        console.log('no conversation id');
+        // // console.log('no conversation id');
         return;
       }
       
       setConversationId(loadConversationId);     
-      console.log('conversationId', conversationId);
-      if (conversationId) {
-        getConversationModels(conversationId);
-      }
-      
       setIsLoadingConversation(true);
+      setLoadingLatest(true);
+
+      
       try {
-        console.log('Loading conversation content');
+        // // console.log('Loading conversation content');
         const response = await chatApi.getConversationContent('image', loadConversationId);
-        console.log('Loaded conversation content:', response);
+        // // console.log('Loaded conversation content:', response);
         
         if (response && response[0]?.prompt) {
           setContent("image", "input", response[0].prompt);
@@ -209,12 +209,8 @@ const ImageArea = () => {
         });
 
       } catch (error) {
-        console.error('Error loading conversation:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load conversation",
-          variant: "destructive",
-        });
+        // console.error('Error loading conversation:', error);
+        toast.error('Failed to load conversation');
       } finally {
         setIsLoadingConversation(false);
       }
@@ -227,22 +223,41 @@ const ImageArea = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // Check if chat models are loaded
+    if (imageModels && imageModels.length > 0) {
+      setImageModelsLoaded(true);
+    }
+  }, [imageModels]);
+
+  useEffect(()=>{
+    if (conversationId && generationType === 'load' && imageModelsLoaded) {
+      getConversationModels(conversationId);
+    }
+  },[conversationId, generationType, imageModelsLoaded])
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [sharingImage, setSharingImage] = useState<{ url: string; modelName: string } | null>(null);
 
   const getConversationModels = (conversationId: string) => {
-    setLoadingLatest(true);
     chatApi.getModelsForConversation(conversationId)
       .then(response => {
-        console.log('Models used in conversation:', response);
+        // // console.log('Models used in conversation:', response);
         const modelUids = response.map((model: any) => model.model_uid);
         setTempSelectedModels(modelUids);
         saveSelectedModels('image');
+
+        // Toggle inactive models using toggleModelActive
+        response.forEach((model: { model_uid: string, active: number }) => {
+          if (model.active === 0) {
+            useSelectedModelsStore.getState().toggleModelActive(model.model_uid);
+          }
+        });
       })
       .catch(error => {
-        console.error('Error fetching models for conversation:', error);
+        // console.error('Error fetching models for conversation:', error);
       })
       .finally(() => {
         setLoadingLatest(false);
@@ -282,35 +297,20 @@ const ImageArea = () => {
           setSelectedImage(prev => prev ? { ...prev, liked: !prev.liked } : null);
         }
 
-        toast({
-          title: newLikedState === 'liked' ? "Liked" : "Unliked",
-          description: `${modelInfo?.name} image ${newLikedState === 'liked' ? 'liked' : 'unliked'}`,
-          duration: 3000,
-        });
+        toast.success(`${modelInfo?.name} image ${newLikedState === 'liked' ? 'liked' : 'unliked'}`)
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to update like status",
-          variant: "destructive",
-        });
+        toast.error('Ooops! something went wrong')
       }
     } catch (error) {
-      console.error('Error updating like state:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update like status",
-        variant: "destructive",
-      });
+      // console.error('Error updating like state:', error);
+      toast.error('Ooops! something went wrong')
+
     }
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content.image.input);
-    toast({
-      title: "Copied",
-      description: "Image URL copied to clipboard",
-      duration: 3000,
-    });
+    toast.success('Copied');
   };
 
   const handleDownload = async (imageUrl: string, modelName: string) => {
@@ -326,19 +326,10 @@ const ImageArea = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast({
-        title: "Success",
-        description: "Image downloaded successfully",
-        duration: 3000,
-      });
+      toast.success('Image downloaded');
     } catch (error) {
-      console.error('Error downloading image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to download image",
-        variant: "destructive",
-        duration: 3000,
-      });
+      // console.error('Error downloading image:', error);
+      toast.error('Failed to download image');
     }
   };
 
@@ -634,20 +625,24 @@ const ImageArea = () => {
         </div>
 
         <Dialog open={isModalOpen} onOpenChange={(open) => !open && handleModalClose()}>
-          <DialogContent className="max-w-5xl h-[90vh] w-full p-0 overflow-hidden">
+          <DialogContent 
+            className="w-[90vw] h-[90vw] max-w-2xl max-h-[60vh] md:max-w-4xl md:max-h-[90vh] md:w-[80vh] md:h-[80vh] lg:w-[90vh] lg:h-[90vh] p-0 overflow-hidden border-none flex items-center justify-center"
+          >
             <DialogHeader className="sr-only">
               <DialogTitle>Generated image</DialogTitle>
             </DialogHeader>
+            
             {selectedImage && (
               <div className="relative w-full h-full group">
+                {/* Image - Ensures it scales correctly */}
                 <Image
                   src={selectedImage.imageUrl ? selectedImage.imageUrl : '/images/models/default.png'}
                   alt={`Generated by ${getModelInfo(selectedImage.modelId)?.name}`}
                   fill
-                  className=""
+                  className="object-contain"
                 />
-                
-                {/* Overlay that appears on hover */}
+
+                {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   {/* Top info */}
                   <div className="absolute top-0 left-0 right-0 p-6 flex items-center gap-3">
@@ -699,6 +694,7 @@ const ImageArea = () => {
             )}
           </DialogContent>
         </Dialog>
+
       </div>
       {sharingImage && (
         <ShareDialog

@@ -9,9 +9,9 @@ export function usePageTitle() {
     let pageTitle = "Chat";
 
     // Match the pathname to determine the title
-    if (pathname.startsWith('/image')) pageTitle = "Image";
-    else if (pathname.startsWith('/audio')) pageTitle = "Audio";
-    else if (pathname.startsWith('/video')) pageTitle = "Video";
+    if (pathname.startsWith('/image')) pageTitle = "Image Generation";
+    else if (pathname.startsWith('/audio')) pageTitle = "Audio Generation";
+    else if (pathname.startsWith('/video')) pageTitle = "Video Generation";
     else if (pathname.startsWith('/changelog')) pageTitle = "Changelog";
     else if (pathname.startsWith('/terms-of-service')) pageTitle = "Terms of Service";
     else if (pathname.startsWith('/privacy-policy')) pageTitle = "Privacy Policy";

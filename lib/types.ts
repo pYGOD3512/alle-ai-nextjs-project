@@ -45,6 +45,7 @@ export interface UploadedFile {
   status: "loading" | "ready" | "error";
   progress?: number;
   processedContent?: string;
+  timestamp?: number;
 }
 
 export interface ChatThread {

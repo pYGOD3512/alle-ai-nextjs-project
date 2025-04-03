@@ -3,7 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 
 interface ResetPasswordSuccessProps {
@@ -14,7 +14,7 @@ interface ResetPasswordSuccessProps {
   export function ResetPasswordSuccess({ onBackToLogin, email }: ResetPasswordSuccessProps) {
     const [isResending, setIsResending] = useState(false);
     const [countdown, setCountdown] = useState(0);
-    const { toast } = useToast();
+    ;
 
     // Handle countdown timer
     useEffect(() => {
@@ -35,17 +35,9 @@ interface ResetPasswordSuccessProps {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         
         setCountdown(30); // Start 30s countdown
-        toast({
-          title: "Success",
-          description: "Reset link sent successfully!",
-          variant: "default",
-        });
+        toast.success('Reset link sent')
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to send reset link. Please try again.",
-          variant: "destructive",
-        });
+        toast.error('Faild to send reset link');
       } finally {
         setIsResending(false);
       }
@@ -112,7 +104,7 @@ interface ResetPasswordSuccessProps {
           </Button>
           
           <div className="text-center text-sm text-muted-foreground">
-          Didn't receive the email?{" "}
+          Didn&apos;t receive the email?{" "}
             {renderResendButton()}
           </div>
         </div>

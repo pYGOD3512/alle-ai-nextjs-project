@@ -8,7 +8,8 @@ import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
+
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
@@ -27,7 +28,7 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   
   const { register } = useAuth();
-  const { toast } = useToast();
+  ;
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,17 +48,15 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
         password_confirmation: confirmPassword,
       });
 
+      // console.log(result, 'This is the response for register');
+
       if (result && result.to === 'verify-email') {
         onRegister(email);
         setIsLoading(false);
       }
       
     } catch (error: any) {
-      toast({
-        title: "Registration failed",
-        description: error.response?.data?.message || "Please check your information and try again",
-        variant: "destructive",
-      });
+      toast.error(`${error.response?.data?.message || "Please check your information and try again"}`)
       setIsLoading(false);
     }
   };

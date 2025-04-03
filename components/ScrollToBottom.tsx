@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+import { ArrowDown  } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useRef } from "react";
 import { useSidebarStore } from "@/stores";
@@ -48,7 +48,7 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
         setTimeout(() => {
           userScrolledRef.current = false;
           setShowButton(false); // Hide button after scrolling stops
-        }, 2000);
+        }, 3000);
       }
       
       lastScrollTopRef.current = scrollTop;
@@ -92,12 +92,12 @@ export function ScrollToBottom({ className, scrollAreaRef, content }: ScrollToBo
       variant="default"
       size="icon"
       className={cn(
-        `fixed bottom-24 ${isOpen ? "right-[43%]" : "right-[50%]"} rounded-full shadow-md opacity-80 hover:opacity-100 transition-all duration-300`,
+        ` bg-foreground border border-borderColorPrimary fixed bottom-36 ${isOpen ? "right-[43%]" : "right-[50%]"} rounded-full shadow-md opacity-90 hover:opacity-100 transition-all duration-300`,
         className
       )}
       onClick={handleManualScrollToBottom}
     >
-      <ChevronDown className="h-4 w-4" />
+      <ArrowDown  className="h-4 w-4" />
     </Button>
   );
 }

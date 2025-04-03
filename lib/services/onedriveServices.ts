@@ -46,10 +46,9 @@ declare global {
         script.src = 'https://js.live.net/v7.2/OneDrive.js';
         script.onload = () => {
           this.isInitialized = true;
-          console.log('OneDrive SDK loaded successfully');
         };
         script.onerror = (error) => {
-          console.error('Failed to load OneDrive SDK:', error);
+          // console.error('Failed to load OneDrive SDK:', error);
         };
         document.head.appendChild(script);
       }
@@ -67,7 +66,7 @@ declare global {
       cancel?: () => void;
     }): void {
       if (typeof window === 'undefined' || !window.OneDrive) {
-        console.error('OneDrive SDK not loaded');
+        // console.error('OneDrive SDK not loaded');
         return;
       }
   
@@ -82,7 +81,7 @@ declare global {
         success: options.success,
         cancel: options.cancel,
         error: (error) => {
-          console.error('OneDrive picker error:', error);
+          // console.error('OneDrive picker error:', error);
         }
       });
     }

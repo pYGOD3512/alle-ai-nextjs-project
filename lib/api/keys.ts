@@ -53,10 +53,10 @@ export const keysApi = {
         name: params.name
       });
       
-      console.log('Create API key response:', response.data);
+      // // console.log('Create API key response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error creating API key:', error);
+      // console.error('Error creating API key:', error);
       throw error;
     }
   },
@@ -68,10 +68,10 @@ export const keysApi = {
         name: params.name
       });
       
-      console.log('Edit API key response:', response.data);
+      // // console.log('Edit API key response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error editing API key:', error);
+      // console.error('Error editing API key:', error);
       throw error;
     }
   },
@@ -79,10 +79,10 @@ export const keysApi = {
   getAllApiKeys: async (): Promise<ApiKeyData[]> => {
     try {
       const response = await api.get<ApiKeyData[]>('/api-keys');
-      console.log('Get all API keys response:', response.data);
+      // // console.log('Get all API keys response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error getting API keys:', error);
+      // console.error('Error getting API keys:', error);
       throw error;
     }
   },
@@ -93,10 +93,10 @@ export const keysApi = {
         id: parseInt(id)
       });
       
-      console.log('Disable API key response:', response.data);
+      // // console.log('Disable API key response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error disabling API key:', error);
+      // console.error('Error disabling API key:', error);
       throw error;
     }
   },
@@ -107,10 +107,10 @@ export const keysApi = {
         id: parseInt(id)
       });
       
-      console.log('Enable API key response:', response);
+      // // console.log('Enable API key response:', response);
       return response.data;
     } catch (error) {
-      console.error('Error enabling API key:', error);
+      // console.error('Error enabling API key:', error);
       throw error;
     }
   },
@@ -123,10 +123,10 @@ export const keysApi = {
         }
       });
       
-      console.log('Delete API key response:', response.data);
+      // // console.log('Delete API key response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error deleting API key:', error);
+      // console.error('Error deleting API key:', error);
       throw error;
     }
   },
