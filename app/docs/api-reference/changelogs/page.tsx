@@ -19,69 +19,75 @@ type ChangelogItem = {
 const CHANGELOG_DATA: ChangelogItem[] = [
   {
     id: "1",
-    title: "Dark Mode Support Released",
-    date: "April 2025",
+    title: "Documentation Enhancements",
+    date: "March 2025",
     content: {
       description:
-        "We've added dark mode support across all platforms based on popular user requests.",
+        "Completely revamped our documentation to improve developer experience and accelerate integration.",
       highlights: [
-        "Automatic system theme detection",
-        "Manual toggle in user settings",
-        "Reduced eye strain in low-light environments",
+        "Interactive API playground for testing requests",
+        "Comprehensive guides for each model type",
+        "Expanded code examples in multiple languages",
+        "Performance optimization recommendations",
       ],
-      upcoming: [
-        "Scheduled dark/light mode switching",
-        "Per-device theme preferences",
-      ],
+      upcoming: ["Tutorial videos", "Community contribution section"],
     },
   },
   {
     id: "2",
-    title: "Performance Improvements",
-    date: "March 2025",
+    title: "Multimodal Model Support",
+    date: "February 2025",
     content: {
       description:
-        "Significant performance optimizations have been implemented in this release.",
+        "Expanded allea-ai capabilities beyond text to include image, audio, and video AI models.",
       highlights: [
-        "30% faster page load times",
-        "Reduced memory usage by 20%",
-        "Optimized database queries",
+        "Image generation and analysis through multiple providers",
+        "Audio transcription and analysis model integration",
+        "Video analysis model support",
+        "Unified request format across all modalities",
       ],
       notes: [
-        "Some older devices may need to clear cache for full benefits",
-        "First load might be slightly slower due to new caching mechanism",
+        "Some models may require additional authentication steps",
+        "Check provider-specific documentation for response format details",
       ],
     },
   },
   {
     id: "3",
-    title: "New Dashboard Layout",
-    date: "February 2025",
+    title: "SDK Releases",
+    date: "Late January 2025",
     content: {
       description:
-        "Completely redesigned dashboard with improved navigation and customization options.",
+        "Released official client libraries to simplify integration with our API.",
       highlights: [
-        "Drag-and-drop widget system",
-        "Customizable quick actions",
-        "Improved mobile responsiveness",
+        "Python SDK for data science and backend applications",
+        "Node.js library for web and server applications",
+        "Streamlined authentication and error handling",
+        "Example code and quick-start guides",
+      ],
+      notes: [
+        "SDKs are available via npm and pip",
+        "Minimum Python version: 3.8",
+        "Minimum Node.js version: 14.0.0",
       ],
     },
   },
   {
     id: "4",
-    title: "API Version 2.0 Released",
+    title: "Initial API Launch",
     date: "January 2025",
     content: {
       description:
-        "Our new API brings better performance, more features, and improved documentation.",
+        "Launched the first version of allea-ai API, enabling users to make single requests to multiple chat AI models simultaneously.",
       highlights: [
-        "GraphQL support added",
-        "Rate limiting improvements",
-        "Webhook verification",
+        "Support for major chat models including ChatGPT, Claude, and Gemini",
+        "Simple HTTP request interface",
+        "Response aggregation and normalization across different AI providers",
+        "Basic authentication and request management",
       ],
-      notes: [
-        "API v1 will be deprecated on June 30, 2025",
-        "Migration guide available in documentation",
+      upcoming: [
+        "Additional AI model support",
+        "Client libraries for popular programming languages",
       ],
     },
   },
