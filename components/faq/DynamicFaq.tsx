@@ -87,8 +87,12 @@ const faqComponents = {
   history: dynamic(() => import("@/components/docs/tutorials/History")),
 
   models: dynamic(() => import("@/components/docs/userGuides/models")),
+  // user guides new
   "platform-overview": dynamic(
     () => import("@/components/docs/userGuideMain/overview")
+  ),
+  "user-interface": dynamic(
+    () => import("@/components/docs/userGuideMain/user-interface")
   ),
 };
 

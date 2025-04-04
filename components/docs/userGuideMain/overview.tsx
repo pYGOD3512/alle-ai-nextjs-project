@@ -97,7 +97,7 @@ export default function PlatformOverview() {
     <main className="">
       {/* Header Section */}
       <div className="mb-6">
-        <p className="text-muted-foreground ">
+        <p className="text-muted-foreground">
           Generate text, images, audio, and videos all in one place. Compare
           outputs from top models or enhance results with AlleAI's proprietary
           AI models.
@@ -109,29 +109,24 @@ export default function PlatformOverview() {
         <div className="">
           {/* Sign Up */}
           <div className="mb-5">
-            <h3 className="text-xl font-semibold ">
+            <h3 className="text-xl font-semibold">
               Create an account and learn how to start using alle-ai.
             </h3>
             <p className="text-muted-foreground mb-4">
               Instant access to 20+ AI models across text, image, audio, and
-              video.
-              <span>
-                If you’re ready to start developing, see our &nbsp;
-                <span>
-                  <Link
-                    href="/docs/api-reference/introduction"
-                    target="_blank"
-                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    developer quickstart.
-                  </Link>
-                </span>
-              </span>
+              video. If you’re ready to start developing, see our{" "}
+              <Link
+                href="/docs/api-reference/introduction"
+                target="_blank"
+                className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
+              >
+                developer quickstart.
+              </Link>
             </p>
             <Link
               href="/"
               target="_blank"
-              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+              className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
             >
               Create your alle-ai account{" "}
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -157,9 +152,7 @@ export default function PlatformOverview() {
                       <div className="flex-shrink-0 mr-4">
                         <span
                           className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-background text-black 
- dark:text-white 
-  border border-neutral-300 dark:border-neutral-700 
-  shadow-md transition-colors"
+                            dark:text-white border border-neutral-300 dark:border-neutral-700 shadow-md transition-colors"
                         >
                           {task.icon}
                         </span>
@@ -187,26 +180,27 @@ export default function PlatformOverview() {
 
       {/* Guidance Section */}
       <div className="mt-7 mx-auto flex flex-col items-center justify-center">
-        <h3 className="text-lg font-medium mb-3 ">Need Guidance?</h3>
+        <h3 className="text-lg font-medium mb-3">Need Guidance?</h3>
         <div className="flex flex-col sm:flex-row sm:space-x-8 space-y-4 sm:space-y-0">
           <Link
             href="/model-glossary"
             target="_blank"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
           >
             <List className="w-4 h-4 mr-2" /> Browse Full Model List
           </Link>
           <Link
             href="/docs/api-reference/introduction"
             target="_blank"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
           >
             <BookOpen className="w-4 h-4 mr-2" /> Quickstart Tutorial
           </Link>
         </div>
       </div>
       <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10" />
-      {/* developer quickstart */}
+
+      {/* Developer Quickstart */}
       <section>
         <div>
           <h2 className="text-2xl font-bold mb-6">For developers</h2>
@@ -216,14 +210,12 @@ export default function PlatformOverview() {
               <Link key={index} href={card.href} className="block">
                 <Card
                   className="border border-gray-200 dark:border-gray-700 
-            bg-white dark:bg-accent
-            transition-all duration-200 
-            hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-400 
-            hover:bg-gray-50 dark:hover:bg-gray-750 
-            h-auto"
+                    bg-white dark:bg-accent transition-all duration-200 
+                    hover:shadow-lg hover:border-gray-500 dark:hover:border-gray-400 
+                    hover:bg-gray-100 dark:hover:bg-gray-800 h-auto"
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-blue-500 dark:text-blue-400 text-lg">
+                    <CardTitle className="text-gray-800 dark:text-gray-200 text-lg">
                       {card.title}
                     </CardTitle>
                   </CardHeader>

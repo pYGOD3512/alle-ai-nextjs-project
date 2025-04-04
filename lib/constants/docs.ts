@@ -1538,10 +1538,7 @@ export const mainUserGuides: mainGuides[] = [
         id: "user-interface",
         title: "User interface",
       },
-      {
-        id: "subscriptions",
-        title: "Subscription Plans",
-      },
+
       {
         id: "understanding-models",
         title: "Understanding AI Models",
