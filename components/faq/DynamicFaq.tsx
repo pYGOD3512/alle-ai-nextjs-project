@@ -94,6 +94,12 @@ const faqComponents = {
   "user-interface": dynamic(
     () => import("@/components/docs/userGuideMain/user-interface")
   ),
+  "setup-environment": dynamic(
+    () => import("@/components/docs/userGuideMain/setup-environment")
+  ),
+  "first-request": dynamic(
+    () => import("@/components/docs/userGuideMain/first-request")
+  ),
 };
 
 type FaqName = keyof typeof faqComponents;
