@@ -267,8 +267,8 @@ export default function AuthLayout({
           setAuthState("show-auth");
         }
       } else {
-        setAuthState('show-auth');
-        // router.replace("/docs/api-reference/introduction");
+        // setAuthState('show-auth');
+        router.replace("/docs/api-reference/introduction");
       }
     };
 

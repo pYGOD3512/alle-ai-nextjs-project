@@ -12,7 +12,7 @@ export function DocsHeader() {
   const pathname = usePathname();
   const navItems = [
     { name: "Welcome", href: "/docs/getting-started", pageOne: "" },
-    { name: "User Guide", href: "/docs/user-guides", pageOne: "quickstart" },
+    { name: "User Guide", href: "/docs/user-guides", pageOne: "platform-overview" },
     {
       name: "API Reference",
       href: "/docs/api-reference",

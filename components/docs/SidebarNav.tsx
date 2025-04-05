@@ -3,7 +3,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
-import { tutorial, apiReference, guides } from "@/lib/constants/docs";
+import {
+  tutorial,
+  apiReference,
+  guides,
+  mainUserGuides,
+} from "@/lib/constants/docs";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
@@ -21,6 +26,19 @@ export const SidebarNav = () => {
       [sectionId]: !prev[sectionId],
     }));
   };
+
+  //  guides sections
+  const [expandedUserGuideSections, setExpandedUserGuideSections] = useState<
+    Record<string, boolean>
+  >({});
+
+  const flipUserGuideSection = (sectionId: string) => {
+    setExpandedUserGuideSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
   // Auto-expand logic for active subsections
   useEffect(() => {
     if (!pathname?.startsWith("/docs/api-reference")) return;
@@ -166,19 +184,23 @@ export const SidebarNav = () => {
 
   const renderUserGuides = () => (
     <div>
-      {guides.map((items) => (
-        <div className="" key={items.title}>
+      {mainUserGuides.map((guide) => (
+        <div className="" key={guide.id}>
           <span className="font-bold px-2 mb-3 text-xs">
-            {`${items.title.toUpperCase()}`}
+            {`${guide.title.toUpperCase()}`}
           </span>
           <div className="py-2">
-            {items.sections.map((section) => {
-              const isSupport = items.id === "support";
+            {guide.sections.map((section) => {
+              const isSupport = guide.id === "support";
+              const hasSubsections =
+                section.sections && section.sections.length > 0;
+              const isExpanded = expandedUserGuideSections[section.id];
+
               return (
                 <div key={section.id}>
                   {isSupport ? (
                     <Link
-                      href={section.href}
+                      href={section.href ?? "#"}
                       target="_blank"
                       className="group flex items-center w-3/4 rounded-md p-2 text-sm ml-2 hover:bg-accent/10 hover:text-foreground text-muted-foreground"
                     >
@@ -187,18 +209,60 @@ export const SidebarNav = () => {
                     </Link>
                   ) : (
                     <div className="mb-2">
-                      <Link
-                        href={`/docs/user-guides/${section.id}`}
-                        className={cn(
-                          "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
-                          "relative overflow-hidden",
-                          isActive(`/docs/user-guides/${section.id}`)
-                            ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
-                            : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
-                        )}
-                      >
-                        <span className="px-2 text-sm">{section.title}</span>
-                      </Link>
+                      {hasSubsections ? (
+                        <button
+                          onClick={() => flipUserGuideSection(section.id)}
+                          className={cn(
+                            "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                            "relative overflow-hidden",
+                            isActive(`/docs/user-guides/${section.id}`)
+                              ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                              : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                          )}
+                        >
+                          <span className="px-2 text-sm">{section.title}</span>
+                          {isExpanded ? (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="ml-2 h-4 w-4" />
+                          )}
+                        </button>
+                      ) : (
+                        <Link
+                          href={`/docs/user-guides/${section.id}`}
+                          className={cn(
+                            "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                            "relative overflow-hidden",
+                            isActive(`/docs/user-guides/${section.id}`)
+                              ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                              : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                          )}
+                        >
+                          <span className="px-2 text-sm">{section.title}</span>
+                        </Link>
+                      )}
+
+                      {hasSubsections && isExpanded && (
+                        <div className="ml-4 mt-2">
+                          {section.sections!.map((subsection) => (
+                            <Link
+                              key={subsection.id}
+                              href={`/docs/user-guides/${subsection.id}`}
+                              className={cn(
+                                "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                                "relative overflow-hidden",
+                                isActive(`/docs/user-guides/${subsection.id}`)
+                                  ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                                  : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                              )}
+                            >
+                              <span className="px-2 text-sm">
+                                {subsection.title}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

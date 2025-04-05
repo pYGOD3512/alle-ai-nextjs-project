@@ -1,21 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 
 interface ArticleFeedbackProps {
   articleId?: string;
-  onFeedbackSubmit?: (feedback: FeedbackData) => void;
+  onFeedbackSubmit?: (feedback: FeedbackData) => Promise<void>;
   className?: string;
 }
 
 interface FeedbackData {
   isHelpful: boolean | null;
   reason: string | null;
+  additionalComment?: string;
+  articleId?: string;
+  timestamp?: string;
 }
 
 interface ToastState {
   show: boolean;
   message: string;
+  isError?: boolean;
 }
 
 const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
@@ -26,64 +30,102 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
   const [feedback, setFeedback] = useState<FeedbackData>({
     isHelpful: null,
     reason: null,
+    additionalComment: "",
   });
   const [toast, setToast] = useState<ToastState>({
     show: false,
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
   const positiveOptions = [
-    { value: "Accurate", label: "Accurately describes the product or feature" },
-    { value: "Solved my problem", label: "Helped me resolve an issue" },
-    { value: "Easy to understand", label: "Easy to follow and comprehend" },
+    {
+      value: "Accurate",
+      label: "Accurately reflects the API's multi-model capabilities",
+    },
+    {
+      value: "Solved my problem",
+      label: "Helped me achieve my goal with multiple models",
+    },
+    {
+      value: "Easy to understand",
+      label: "Made requesting multiple models simple and clear",
+    },
     {
       value: "Helped me decide",
-      label: "Convinced me to adopt the product or feature",
+      label: "Showed me the value of comparing or combining model outputs",
     },
     { value: "Another reason", label: "Another reason" },
   ];
 
   const negativeOptions = [
-    {
-      value: "Inaccurate",
-      label: "Doesn't accurately describe the product or feature",
-    },
+    { value: "Inaccurate", label: "Misrepresents how the API or models work" },
     {
       value: "Couldn't find",
-      label: "Missing important information",
+      label: "Lacks details on model limits or supported types",
     },
-    { value: "Hard to understand", label: "Too complicated or unclear" },
+    {
+      value: "Hard to understand",
+      label: "Confusing to set up or use multiple models",
+    },
     {
       value: "Code sample errors",
-      label: "One or more code samples are incorrect",
+      label: "Code examples for API requests don't work",
     },
     { value: "Another reason", label: "Another reason" },
   ];
 
+  useEffect(() => {
+    if (feedback.reason === "Another reason") {
+      setIsSubmitDisabled(!feedback.additionalComment?.trim());
+    } else {
+      setIsSubmitDisabled(!feedback.reason);
+    }
+  }, [feedback.reason, feedback.additionalComment]);
+
   const handleInitialFeedback = (isHelpful: boolean): void => {
     if (feedback.isHelpful === null) {
-      setFeedback({ isHelpful, reason: null });
+      setFeedback({ isHelpful, reason: null, additionalComment: "" });
     }
   };
 
-  const handleReasonSubmit = (): void => {
-    if (feedback.isHelpful !== null && feedback.reason) {
-      const message = feedback.isHelpful
-        ? "Thanks for your feedback! We're glad this was helpful."
-        : "Thanks for your feedback. We'll work on improving this.";
+  const handleReasonSubmit = async (): Promise<void> => {
+    if (isSubmitDisabled) return;
 
-      setToast({ show: true, message });
-      onFeedbackSubmit?.(feedback);
+    setIsSubmitting(true);
+    const fullFeedback: FeedbackData = {
+      ...feedback,
+      articleId,
+      timestamp: new Date().toISOString(),
+    };
 
-      setTimeout(() => {
-        setToast((prev) => ({ ...prev, show: false }));
-      }, 3000);
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await onFeedbackSubmit?.(fullFeedback);
+      setToast({
+        show: true,
+        message: feedback.isHelpful
+          ? "Thanks for your feedback! We're glad this was helpful."
+          : "Thanks for your feedback. We'll work on improving this.",
+      });
+      setFeedback({ isHelpful: null, reason: null, additionalComment: "" });
+    } catch (error) {
+      setToast({
+        show: true,
+        message: "Oops, something went wrong. Try again?",
+        isError: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
     }
   };
 
   return (
     <div className={`max-w-xl pl-8 ${className}`}>
-      <div className=" dark:border-zinc-800 mt-8 pt-6">
+      <div className="dark:border-zinc-800 mt-8 pt-6">
         {feedback.isHelpful === null ? (
           <div className="flex items-center gap-4 flex-wrap">
             <h3 className="text-lg font-medium">Was this article helpful?</h3>
@@ -119,7 +161,14 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
                       value={option.value}
                       checked={feedback.reason === option.value}
                       onChange={() =>
-                        setFeedback({ ...feedback, reason: option.value })
+                        setFeedback({
+                          ...feedback,
+                          reason: option.value,
+                          additionalComment:
+                            option.value === "Another reason"
+                              ? ""
+                              : feedback.additionalComment,
+                        })
                       }
                       className="text-blue-500"
                     />
@@ -133,16 +182,60 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
                 )
               )}
             </div>
+            {feedback.reason === "Another reason" && (
+              <div className="mt-4">
+                <label className="text-sm font-medium">
+                  Tell us more (required):
+                </label>
+                <textarea
+                  value={feedback.additionalComment}
+                  onChange={(e) =>
+                    setFeedback({
+                      ...feedback,
+                      additionalComment: e.target.value,
+                    })
+                  }
+                  className="w-full mt-1 p-2 rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-white"
+                  rows={3}
+                  placeholder="Please tell us more about your experience"
+                  required
+                />
+              </div>
+            )}
             <button
               onClick={handleReasonSubmit}
-              disabled={!feedback.reason}
-              className={`mt-4 px-4 py-2 rounded-lg transition-all duration-200 ${
-                feedback.reason
+              disabled={isSubmitDisabled || isSubmitting}
+              className={`mt-4 px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                !isSubmitDisabled && !isSubmitting
                   ? "bg-blue-500 hover:bg-blue-600 text-white"
                   : "bg-gray-200 dark:bg-zinc-700 text-gray-400 dark:text-zinc-400 cursor-not-allowed"
               }`}
             >
-              Submit
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4 text-current"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                "Submit"
+              )}
             </button>
           </div>
         )}
@@ -152,9 +245,9 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
         <div className="fixed bottom-4 right-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
           <Alert
             className={
-              feedback.isHelpful
-                ? "dark:bg-green-500/20 bg-zinc-800 "
-                : "bg-zinc-800"
+              toast.isError
+                ? "bg-red-500/20 dark:bg-red-500/20"
+                : "bg-zinc-800 dark:bg-zinc-800"
             }
           >
             <p className="text-sm text-zinc-200">{toast.message}</p>
