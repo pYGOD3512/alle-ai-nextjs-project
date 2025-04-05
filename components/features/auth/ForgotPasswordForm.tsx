@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { toast } from "sonner"
 
 import { authApi } from '@/lib/api/auth';
@@ -74,7 +74,7 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
             </>
           ) : (
             "Send"

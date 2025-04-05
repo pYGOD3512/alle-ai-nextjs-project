@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GoogleButton } from "./GoogleButton";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from "sonner"
 
@@ -136,8 +136,7 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Registering...
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
             </>
           ) : (
             'Register'

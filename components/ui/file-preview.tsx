@@ -3,7 +3,7 @@ import { BiSolidFilePdf, BiSolidFileTxt, BiSolidFileDoc  } from "react-icons/bi"
 import Image from "next/image";
 import { UploadedFile } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { 
   Dialog, 
@@ -60,7 +60,7 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
           {/* Loading overlay with progress */}
           {file.status === 'loading' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/50 rounded">
-              <Loader2 className="w-4 h-4 animate-spin text-primary mb-1" />
+              <Loader className="w-4 h-4 animate-spin text-primary mb-1" />
               {file.progress !== undefined && (
                 <span className="text-[10px] text-primary font-medium">
                   {Math.round(file.progress)}%

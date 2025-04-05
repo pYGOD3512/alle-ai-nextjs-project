@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
 import { toast } from "sonner";
@@ -222,7 +222,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
       >
         {isVerifying ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader className="w-4 h-4 mr-2 animate-spin" />
             Verifying...
           </>
         ) : (

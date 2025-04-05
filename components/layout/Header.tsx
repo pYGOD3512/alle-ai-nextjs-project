@@ -15,7 +15,7 @@ import {
   Share,
   Crown,
   Gem,
-  Loader2,
+  Loader,
   PanelRightClose,
 } from 'lucide-react';
 import {
@@ -460,7 +460,7 @@ export function Header() {
           {!isChangelogPage && mounted && !specialRoutes.some(route => pathname.includes(route)) ? (
             isLoadingLatest ? (
               <div className={`flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 px-3 ${selectedModelNames.length > 0 ? 'w-2/5 sm:w-fit' : 'w-fit'}`}>
-                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                 <Loader className="h-4 w-4 animate-spin text-muted-foreground" />
                 <span className="text-xs text-muted-foreground"></span>
               </div>
             ) :
@@ -474,13 +474,10 @@ export function Header() {
                       <span 
                         key={`${model}-${index}`} 
                         className={`flex items-center gap-1 text-xs border-r px-1 border-muted-foreground last:border-none ${
-                          !model.isActive ? 'text-muted-foreground opacity-50' : 'dark:text-gray-400 text-gray-800'
+                          !model.isActive ? 'text-muted-foreground' : model.type === 'standard' ? 'bg-gradient-to-r from-gray-300/90 to-gray-400/90 rounded-xl' : model.type === 'plus' ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 rounded-xl' : ''
                         }`}
                       >
                         {model.name}
-                        {model.type === 'plus' && (
-                          <Gem className={`h-2.5 w-2.5 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
-                        )}
                       </span>
                     ))}
                   </div>
@@ -503,15 +500,12 @@ export function Header() {
                               !model.isActive ? 'opacity-50' : ''
                             }`}
                           >
-                            <div className="flex items-center gap-2">
-                              <div className="flex flex-col">
-                                <Text className={`text-xs ${!model.isActive ? 'text-muted-foreground' : ''}`}>
+                            <div className={`flex items-center gap-2 rounded-lg p-0.5 ${model.type === 'standard' ? 'bg-gradient-to-r from-gray-300/90 to-gray-400/90' : model.type === 'plus' ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90' : ''}`}>
+                              <div className={`flex flex-col`}>
+                                <Text className={`text-xs ${!model.isActive ? 'text-foreground' : ''} `}>
                                   {model.name}
                                 </Text>
                               </div>
-                              {model.type === 'plus' && (
-                                <Gem className={`h-3 w-3 ${model.isActive ? 'text-yellow-500' : 'text-muted-foreground'}`} />
-                              )}
                             </div>
                             <div className="relative ml-2">
                               {isLoading ? (

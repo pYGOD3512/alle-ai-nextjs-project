@@ -12,7 +12,7 @@ import {
   ContextMenuContent,
 } from "@/components/ui/context-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video, Folder, Loader2 } from "lucide-react";
+import { LayoutGrid, Plus, EllipsisVertical, Gem, ChevronDown, BookOpen, Pencil, Trash2, History, Search, ChartLine, MessageSquare, ImageIcon, Music, Video, Folder, Loader } from "lucide-react";
 import Image from "next/image";
 import {
   sidebarMenuItems,
@@ -517,7 +517,7 @@ export function Sidebar() {
                 <div className="px-4 space-y-0.5">
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <Loader className="h-4 w-4 animate-spin text-muted-foreground" />
                     </div>
                   ) : currentHistory.length > 0 ? (
                     currentHistory.map((item) => (
@@ -635,7 +635,7 @@ export function Sidebar() {
                   {/* Add loading indicator at the bottom when loading more */}
                   {hasMoreHistory && !isLoading && currentHistory.length > 0 && (
                     <div className="flex justify-center py-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <Loader className="h-4 w-4 animate-spin text-muted-foreground" />
                     </div>
                   )}
                 </div>
@@ -689,7 +689,7 @@ export function Sidebar() {
                         variant="outline" 
                         className="text-[0.6rem] h-3 p-1 flex justify-center items-center relative overflow-hidden"
                       >
-                        <span className="relative z-10">Plan</span>
+                        <Loader className="h-4 w-4 animate-spin" />
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
                               style={{ backgroundSize: '200% 100%' }}
                         />
@@ -709,7 +709,7 @@ export function Sidebar() {
                 disabled={isLoadingBillingPortal}
               >
                 {isLoadingBillingPortal ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
                     <Gem className="h-4 w-4" />

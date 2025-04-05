@@ -44,9 +44,9 @@ const getTimeBasedGreeting = (): string => {
 };
 
 const GreetingMessage = ({
-  options = defaultOptions,
+  options,
   handlePressed = () => {},
-  questionText = "What would you like to do today?",
+  questionText,
 }: GreetingMessageProp) => {
   const handleOptionClick = (option: option) => {
     handlePressed({
@@ -57,8 +57,8 @@ const GreetingMessage = ({
 
   const { user } = useAuthStore();
 
-  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name} 🎉`)
-  const questionTextArray = textReveal(questionText)
+  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name} !`)
+  const questionTextArray = textReveal(questionText ? questionText : "What would you like to do today?")
 
   return (
     <div className="w-full max-w-2xl mx-auto px-2">
@@ -67,21 +67,21 @@ const GreetingMessage = ({
           initial="hidden" 
           whileInView="reveal" 
           transition={{staggerChildren: .02}} 
-          className="font-bold mb-2 break-words"
+          className="mb-2 break-words"
         >
           {greetings.map(({char, id}) => (
               <motion.span
               key={id}
               transition={{duration: 0.5}}
               variants={charVariants}
-              className="text-md"
+              className="text-md sm:text-2xl"
               >
                 {char}
               </motion.span>
-            ))}
+          ))}
           </motion.h2>
 
-          <motion.p 
+          {/* <motion.p 
           initial="hidden" 
           whileInView="reveal" 
           transition={{staggerChildren: .015}} 
@@ -96,17 +96,17 @@ const GreetingMessage = ({
                 {char}
               </motion.span>
             ))}
-          </motion.p>
+          </motion.p> */}
       </div>
 
-      {options.length > 0 && (
+      {options && options.length > 0 && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
           className="flex flex-wrap gap-2 justify-center"
         >
-          {options.map((option, index) => (
+          {options && options.map((option, index) => (
             <motion.button
               key={index}
               initial={{ opacity: 0, scale: 0.95 }}

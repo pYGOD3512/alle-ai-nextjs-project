@@ -26,6 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { AutoFeedbackModal } from "@/components/ui/modals";
 
 const options = [
   {
@@ -64,6 +66,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { setConversationId, setPromptId, setGenerationType } = useConversationStore();
   const { addHistory, updateHistoryTitle, getHistoryByType, setHistory, setLoading: setHistoryLoading, setError: setHistoryError } = useHistoryStore();
   const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
+
+  const [autoFeedbackModal, setAutoFeedbackModal] = useState(false);
 
   // Calculate number of active models
   const activeModelsCount = selectedModels.chat.filter(
@@ -246,16 +250,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setIsCombinedMode(enabled);
     };
 
+    const handleAutoFeedbackSubmit = () => {
+      console.log('Auto feedback submitted');
+    };
+
 
   return (
     <div className={`flex flex-col min-h-[calc(100vh-3.5rem)] transition-all duration-300 ${isOpen ? "pl-40" : "pl-0"}`}>
-      {pathname === "/chat" && (
-        <div className={`flex-1 flex flex-col sm:mb-32`}>
+      {pathname === "/chat" && (<>        <div className={`flex-1 flex flex-col sm:mb-32`}>
           <div className="flex-1 flex flex-col justify-center items-center gap-8">
             <GreetingMessage
-              options={options}
+              // options={options}
               handlePressed={handleClicked}
             />
+            {/* <Button onClick={() => setAutoFeedbackModal(true)}>Open Auto Feedback Modal</Button> */}
+            
             <div className="w-full fixed bottom-6 sm:relative max-w-3xl sm:px-4">
               <ChatInput
                 value={input}
@@ -271,6 +280,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+        <AutoFeedbackModal
+          isOpen={autoFeedbackModal}
+          onClose={() => setAutoFeedbackModal(false)}
+          onSubmit={handleAutoFeedbackSubmit}
+          onAskLater={() => setAutoFeedbackModal(false)}
+        />
+        </>
+
       )}
       <div className="flex-1 sm:flex-none">{children}</div>
     </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner"
 
 import { authApi } from '@/lib/api/auth';
@@ -98,7 +98,7 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
             animate={{ opacity: 1 }}
             className="flex items-center"
           >
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader className="mr-2 h-4 w-4 animate-spin" />
             <span>Resetting...</span>
           </motion.div>
         ) : (

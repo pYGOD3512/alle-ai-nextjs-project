@@ -21,7 +21,7 @@ import {
   X,
   Shield,
   MoreVertical,
-  Loader2
+  Loader
 } from "lucide-react";
 import { toast } from "sonner"
 

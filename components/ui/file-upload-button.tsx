@@ -243,7 +243,7 @@ export function FileUploadButton({
             aria-label="Upload File"
             disabled={disabled}
             >
-              <Plus size={32} className={`border border-borderColorPrimary rounded-full p-[0.3rem]`} />
+              <Plus size={30} className={`border border-borderColorPrimary rounded-full p-[0.3rem]`} />
             </Button>
           )}
         </DropdownMenuTrigger>

@@ -11,6 +11,9 @@ import { FooterText } from '@/components/FooterText';
 import { useSidebarStore } from "@/stores";
 import { usePathname } from 'next/navigation';
 import { usePageTitle } from '@/hooks/use-page-title';
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+
 
 
 const isMaintenance = false;
@@ -39,13 +42,12 @@ export function MainLayoutClient({
   }
 
   return (
-    // <Frigade.Provider
-    //   apiKey="api_public_BGpQR8HxE4b3kuNSLcZycUQmi5rGQbd4bjowqjRRtYoZ7ODc37Cspa9vTpRcelti"
-    //   userId="my-user-id">
-    //   <Frigade.Tour flowId="flow_Nx0Q4Shx" />
-      <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden">
+        {/* <SidebarProvider> */}
+       {/* <AppSidebar /> */}
         <Sidebar />
         <main className="flex-1 flex flex-col h-full relative">
+          {/* <SidebarTrigger /> */}
           <Header />
           <div className="flex-1 overflow-auto">
             {children}
@@ -57,7 +59,7 @@ export function MainLayoutClient({
             />
           )}
         </main>
+    {/* </SidebarProvider> */}
       </div>
-    // </Frigade.Provider>
   );
 }

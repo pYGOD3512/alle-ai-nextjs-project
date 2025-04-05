@@ -119,7 +119,6 @@ import {
   ChevronRight,
   Key,
   CreditCard,
-  Loader2,
   LightbulbIcon,
   FileText, 
   Download,
@@ -127,6 +126,9 @@ import {
   Users,
   Building2,
   InfoIcon,
+  ThumbsUp,
+  ThumbsDown,
+  HelpCircle,
 } from "lucide-react";
 import { FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -301,9 +303,6 @@ interface ReportModalProps extends ModalProps {
   contentPreview?: string;
 }
 
-type TimeRange = '24h' | '7d' | '30d' | '90d';
-type ChartType = 'bar' | 'pie' | 'line';
-
 const reportCategories = [
   {
     id: 'illegal',
@@ -379,13 +378,16 @@ export interface PromptModalProps {
   showConfetti?: boolean;
 }
 
-type UserPlan = 'free' | 'standard' | 'plus';
-
 interface PaymentOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectMethod: (method: 'card' | 'link' | 'revolut' | 'paypal') => void;
 }
+
+type UserPlan = 'free' | 'standard' | 'plus';
+type TimeRange = '24h' | '7d' | '30d' | '90d';
+type ChartType = 'bar' | 'pie' | 'line';
+
 
 export function FeedbackModal({ isOpen, onClose }: ModalProps) {
   const [selectedRating, setSelectedRating] = React.useState<number | null>(null);
@@ -507,8 +509,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                 </>
               ) : (
                 'Done'
@@ -863,19 +864,21 @@ const userPlan = React.useMemo(() => {
     },
     {
       value: "free",
-      label: "Free models",
+      label: "Free",
     },
     {
       value: "standard",
-      label: "Standard models",
+      label: "Standard",
+      icon: '/icons/silver-alle-ai.png'
     },
     {
       value: "plus",
-      label: "Plus models",
+      label: "Plus",
+      icon: '/icons/gold-alle-ai.png'
     },
     {
       value: "favorite",
-      label: "Favorite models",
+      label: "Favorite",
     },
   ];
 
@@ -920,7 +923,6 @@ const userPlan = React.useMemo(() => {
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-lg sm:max-w-2xl md:max-w-3xl rounded-md" id="tooltip-select-menu">
           <DialogHeader className="space-y-4 relative">
-            {/* <PlanSwitcher /> */}
             <DialogTitle className="">Model Selection</DialogTitle>
 
             {/* Selected Models */}
@@ -935,12 +937,27 @@ const userPlan = React.useMemo(() => {
                         <Badge
                           variant="outline"
                           key={modelId}
-                          className="px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground"
+                          className={`${model?.model_plan === 'standard' ? 'bg-gradient-to-r from-gray-300/90 to-gray-400/90' : model?.model_plan === 'plus' ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90' : ''  } 
+                            px-2 py-1 flex items-center gap-1 border-borderColorPrimary rounded-md cursor-pointer hover:bg-hoverColorPrimary text-accent-foreground`}
+                          
                         >
                           {model?.model_name}
-                          {model?.model_plan === 'standard' && (
-                            <Gem className="h-3 w-3 text-yellow-500" />
-                          )}
+                          {/* {model?.model_plan === 'standard' ? (
+                            <Image
+                            src={'/svgs/logo-desktop-mini.png'}
+                              height={10}
+                              width={10}
+                              alt="silver-alle-ai"
+                              className="bg-gradient-to-r from-gray-300/90 to-gray-400/90 rounded-sm"
+                            />
+                          ): model?.model_plan === 'plus' ? (
+                            <Image
+                            src={'/icons/gold-alle-ai.png'}
+                              height={10}
+                              width={10}
+                              alt="gold-alle-ai"
+                            />
+                          ): ''} */}
                           <X
                             className="h-3 w-3 cursor-pointer hover:text-red-700"
                             onClick={() => toggleModelSelection(modelId)}
@@ -977,7 +994,23 @@ const userPlan = React.useMemo(() => {
                         key={option.value}
                         value={option.value}
                       >
-                        {option.label}
+                        <div className="flex items-center justify-between w-full">
+                          {option.label}
+                          {(option.value === 'standard' || option.value === 'plus') && (
+                            <div className={`inline-flex items-center ml-1
+                              ${option.value === 'standard' 
+                                ? 'bg-gradient-to-r from-gray-300/90 to-gray-400/90' 
+                                : 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90'} 
+                              rounded-sm p-0.5`}>
+                              <Image
+                                src={'/svgs/logo-desktop-mini.png'}
+                                height={10}
+                                width={10}
+                                alt={`${option.value}-alle-ai`}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1065,7 +1098,7 @@ const userPlan = React.useMemo(() => {
                       disabled={favoriteLoading === model.model_uid}
                     >
                       {favoriteLoading === model.model_uid ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <Loader className="h-3 w-3 animate-spin" />
                       ) : (
                         <Heart
                           className={cn(
@@ -1230,7 +1263,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     },
     personalization: {
       summary: {
-        title: "Alle-AI Summary & Comparison",
+        title: "Compare",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
         enabled: user?.summary===1,
@@ -1394,7 +1427,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       if (isFreeUser) {
         setPromptConfig({
           title: "Upgrade Required",
-          message: "Please upgrade your plan to enable the Summary & Comparison feature.",
+          message: "Please upgrade your plan to enable the Compare & Comparison feature.",
           actions: [
             {
               label: "Upgrade Plan",
@@ -1426,7 +1459,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         }
       } catch (error) {
         setPersonalizationSetting(key, !checked);
-        toast.error('Failed to toggle summary');
+        toast.error('Failed to toggle Compare');
       }
     } else {
       // Handle other personalization settings
@@ -2247,7 +2280,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                     <span className='hidden sm:inline'>Saving...</span>
                   </div>
                 ) : isEditing ? (
@@ -3086,7 +3119,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
                       >
                         {processingPlan === plan.name ? (
                           <div className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader className="h-4 w-4 animate-spin" />
                             <span>Processing...</span>
                           </div>
                         ) : (
@@ -5141,7 +5174,7 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
           <Button onClick={handleCreateKey} disabled={isLoading || !keyName.trim()}>
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
               </>
             ) : (
               <>
@@ -5225,7 +5258,7 @@ export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalPr
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" />
               </>
             ) : (
               <>
@@ -5609,7 +5642,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   {mode === 'add' ? 'Adding...' : 'Processing...'}
                 </span>
               ) : (
@@ -5923,7 +5956,7 @@ export function ProjectModal({ isOpen, onClose }: ModalProps) {
             <Button type="submit" disabled={!projectName.trim() || isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Creating project...
                 </>
               ) : (
@@ -6184,7 +6217,7 @@ export function ProjectInstructionsModal({ isOpen, onClose, projectName }: Proje
             <Button type="submit" disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Saving instructions...
                 </>
               ) : (
@@ -6387,7 +6420,7 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
                       Creating...
                     </>
                   ) : (
@@ -6530,6 +6563,167 @@ export function AddMembersModal({ isOpen, onClose }: ModalProps) {
           >
             {isSubmitting ? 'Submitting...' : 'Submit'}
           </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export interface AutoFeedbackModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+  // onubSmit: (liked: boolean, feedback: string) => Promise<void>;
+  onAskLater: () => void;
+}
+
+export function AutoFeedbackModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit,
+  onAskLater 
+}: AutoFeedbackModalProps) {
+  const [liked, setLiked] = useState<boolean | null | 'neutral'>(null);
+  const [feedback, setFeedback] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (liked === null) {
+      toast.error('Please select an option about your experience');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // await onSubmit(liked, feedback);
+      // Reset form
+      onSubmit();
+      setLiked(null);
+      setFeedback("");
+      onClose();
+      toast.success('Thanks for your feedback!');
+    } catch (error) {
+      toast.error('Failed to submit feedback');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Toggle function that allows deselection
+  const toggleLiked = (value: boolean | 'neutral') => {
+    setLiked(prev => prev === value ? null : value);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[400px] p-5 rounded-xl"> 
+        <DialogHeader>
+          <DialogTitle>How&apos;s your experience so far? 🤓</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-5">          
+          {/* Thumbs up/down/neutral selection with animation */}
+          <div className="flex justify-center gap-6 py-2">
+            <motion.button
+              onClick={() => toggleLiked(true)}
+              className={cn(
+                "flex flex-col items-center gap-1 p-3 rounded-full transition-all",
+                liked === true 
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" 
+                  : "hover:bg-muted"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ 
+                scale: liked === true ? [1, 1.2, 1] : 1,
+                transition: { duration: 0.3 }
+              }}
+            >
+              <ThumbsUp size={24} className={liked === true ? "fill-green-500 dark:fill-green-400" : ""} />
+            </motion.button>
+            
+            <motion.button
+              onClick={() => toggleLiked('neutral')}
+              className={cn(
+                "flex flex-col items-center gap-1 p-3 rounded-full transition-all",
+                liked === 'neutral' 
+                  ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400" 
+                  : "hover:bg-muted"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ 
+                scale: liked === 'neutral' ? [1, 1.2, 1] : 1,
+                transition: { duration: 0.3 }
+              }}
+            >
+              <HelpCircle size={24} className={liked === 'neutral' ? "fill-yellow-500 dark:fill-yellow-400" : ""} />
+            </motion.button>
+            
+            <motion.button
+              onClick={() => toggleLiked(false)}
+              className={cn(
+                "flex flex-col items-center gap-1 p-3 rounded-full transition-all",
+                liked === false 
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400" 
+                  : "hover:bg-muted"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ 
+                scale: liked === false ? [1, 1.2, 1] : 1,
+                transition: { duration: 0.3 }
+              }}
+            >
+              <ThumbsDown size={24} className={liked === false ? "fill-red-500 dark:fill-red-400" : ""} />
+            </motion.button>
+          </div>
+          
+          {/* Feedback textarea with floating label */}
+          <div className="relative">
+            <Textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder=""
+              className="w-full border-borderColorPrimary min-h-[2rem] resize-none focus-visible:outline-none"
+              rows={2}
+              id="feedback-input"
+            />
+            <label 
+              htmlFor="feedback-input"
+              className={cn(
+                "absolute left-3 transition-all duration-200",
+                feedback.length > 0 
+                  ? "-top-4 text-xs text-muted-foreground" 
+                  : "top-4 -translate-y-1/2 text-sm text-muted-foreground"
+              )}
+            >
+              How&apos;s your experience so far? 
+            </label>
+          </div>
+          
+          {/* Action buttons */}
+          <div className="flex justify-between gap-3">
+            <Button 
+              variant="outline" 
+              onClick={onAskLater}
+              className="flex-1"
+              size="sm"
+            >
+              Ask me later
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || liked === null}
+              className="flex-1"
+              size="sm"
+            >
+              {isSubmitting ? (
+                <Loader className="h-4 w-4 animate-spin" />
+              ) : (
+                'Send'
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

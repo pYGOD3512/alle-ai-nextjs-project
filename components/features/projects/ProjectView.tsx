@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Folder, Pencil, FileText, Settings, FilePlus2, MessageSquare, Check, Loader2, MessagesSquare } from "lucide-react";
+import { Folder, Pencil, FileText, Settings, FilePlus2, MessageSquare, Check, Loader, MessagesSquare } from "lucide-react";
 import { ChatInput } from "@/components/features/ChatInput";
 import { ProjectFilesModal, ProjectInstructionsModal } from "@/components/ui/modals";
 import { useProjectStore } from "@/stores";
@@ -153,7 +153,7 @@ export function ProjectView() {
               >
                 {isEditing ? (
                   isRenamingLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                   ) : (
                     <Check className="h-4 w-4" />
                   )

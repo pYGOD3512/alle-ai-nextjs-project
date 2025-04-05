@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader } from "lucide-react";
 import { toast } from "sonner"
 
 import { authApi } from '@/lib/api/auth';
@@ -245,7 +245,7 @@ const PlansArea = () => {
               >
                 {processingPlan === plan.name ? (
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                     <span>Processing...</span>
                   </div>
                 ) : (

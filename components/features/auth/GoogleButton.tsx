@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 
 export function GoogleButton() {
@@ -36,7 +36,7 @@ export function GoogleButton() {
     >
       {isLoading ? (
         <>
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <Loader className="h-5 w-5 animate-spin" />
           <span>Signing in...</span>
         </>
       ) : (
