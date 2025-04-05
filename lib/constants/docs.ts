@@ -744,9 +744,19 @@ export const apiReference: apiREfprops[] = [
     title: "API Usage",
     sections: [
       {
+        id: "upload-files",
+        title: "Uploading Files",
+        href: "/docs/api-reference/analytics/usage-metrics",
+      },
+      {
         id: "rate-limits",
         title: "Rate Limits & Usage",
         href: "/docs/api-reference/analytics/usage-metrics",
+      },
+      {
+        id: "error-handling",
+        title: "Error Handling",
+        href: "",
       },
       {
         id: "changelogs",
@@ -1494,3 +1504,139 @@ export const apiReferenceFields = [
 //  image generation api
 
 export const imageHeaders = [];
+
+// main user guides
+// user guides 2
+interface subsections {
+  id: string;
+  title: string;
+  href?: string;
+}
+interface guideSections {
+  id: string;
+  href?: string;
+  title: string;
+  sections?: subsections[];
+}
+export interface mainGuides {
+  id: string;
+  title: string;
+  sections: guideSections[];
+}
+
+export const mainUserGuides: mainGuides[] = [
+  {
+    id: "get-started",
+    title: "Get Started",
+    sections: [
+      {
+        id: "platform-overview",
+        title: "Overview",
+      },
+
+      {
+        id: "user-interface",
+        title: "User interface",
+      },
+
+      {
+        id: "understanding-models",
+        title: "Understanding AI Models",
+      },
+    ],
+  },
+  {
+    id: "platform-usage",
+    title: "Platform Capabilities",
+    sections: [
+      {
+        id: "text-generation",
+        title: "Chat",
+      },
+      {
+        id: "image-generation",
+        title: "Image Generation",
+      },
+      {
+        id: "audio-generation",
+        title: "Audio Generation",
+      },
+      {
+        id: "video-generation",
+        title: "Video Generation",
+      },
+      {
+        id: "file-uploads",
+        title: "Attachments",
+      },
+    ],
+  },
+  {
+    id: "developer-quickstart",
+    title: "For developers",
+    sections: [
+      {
+        id: "start-developing",
+        title: "Start developing",
+        sections: [
+          {
+            id: "setup-environment",
+            title: "Setup Environment",
+          },
+          {
+            id: "first-request",
+            title: "Make your first request",
+          },
+          {
+            id: "sdk&libraries",
+            title: "SDKs & libraries",
+          },
+        ],
+      },
+      {
+        id: "about-api",
+        title: "About APIs",
+        sections: [
+          {
+            id: "pricing",
+            title: "Pricing",
+          },
+          {
+            id: "models",
+            title: "Models",
+          },
+          {
+            id: "best-practise",
+            title: "Best Practices",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "support",
+    title: "Help & Support",
+    sections: [
+      {
+        id: "faq",
+        title: "FAQ",
+        href: "/collection",
+      },
+      {
+        id: "contact-us",
+        title: "Contact Us",
+        href: "/contact-us",
+      },
+      {
+        id: "model_glossary",
+        title: "Model Glossary",
+        href: "/model-glossary",
+      },
+      {
+        id: "changelog",
+        title: "changelog",
+        href: "/changelog",
+      },
+    ],
+  },
+];

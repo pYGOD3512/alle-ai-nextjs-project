@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, ExternalLink, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SearchCommand } from "@/components/features/developer/search-command";
-import { apiReference, guides, tutorial } from "@/lib/constants/docs";
+import { apiReference, guides, tutorial,mainUserGuides } from "@/lib/constants/docs";
 import SearchModal from "../docSearchModal";
 
 export function MobileNav() {
@@ -45,7 +44,7 @@ export function MobileNav() {
       .flatMap((item) => item.sections)
       .filter((section) => section.sections)
       .find((section) =>
-        section.sections.some((subsection) =>
+        section.sections!.some((subsection) =>
           currentPath.startsWith(subsection.href)
         )
       );
@@ -64,10 +63,73 @@ export function MobileNav() {
   // Broader match for top-level nav items
   const isNavActive = (href: string) => pathname.startsWith(href);
 
-  const handleReferenceClick = (e, sectionHref) => {
-    e.preventDefault();
-    router.push(`/docs/api-reference/${sectionHref}`, { scroll: false });
-    setIsOpen(false);
+   const handleReferenceClick = (
+     e: React.MouseEvent<HTMLAnchorElement>,
+     sectionHref?: string
+   ) => {
+     e.preventDefault();
+     if (!sectionHref) return;
+
+     const specialSections = ["rate-limits", "changelogs", "faq"];
+     const currentPath = pathname || "";
+
+     const isInSpecialSection = specialSections.some((section) =>
+       currentPath.includes(`/docs/api-reference/${section}`)
+     );
+
+     if (specialSections.includes(sectionHref)) {
+       // For special sections, always use router.push
+       router.push(`/docs/api-reference/${sectionHref}`);
+     } else {
+       // If we're coming from a special section to a regular section
+       if (isInSpecialSection) {
+         router.push(`/docs/api-reference/${sectionHref}`);
+         // Scroll immediately after push
+         const element = document.querySelector(
+           `[data-section="${sectionHref}"]`
+         );
+         if (element) {
+           const elementPosition =
+             element.getBoundingClientRect().top + window.scrollY;
+           const offset = 30;
+           window.scrollTo({
+             top: elementPosition - offset,
+             behavior: "instant",
+           });
+         }
+       } else {
+         // Original logic for navigation within single-page sections
+         window.history.pushState(
+           null,
+           "",
+           `/docs/api-reference/${sectionHref}`
+         );
+
+         const element = document.querySelector(
+           `[data-section="${sectionHref}"]`
+         );
+         if (element) {
+           const elementPosition =
+             element.getBoundingClientRect().top + window.scrollY;
+           const offset = 30;
+           window.scrollTo({
+             top: elementPosition - offset,
+             behavior: "instant",
+           });
+         }
+       }
+     }
+   };
+  //  guides sections
+  const [expandedUserGuideSections, setExpandedUserGuideSections] = useState<
+    Record<string, boolean>
+  >({});
+
+  const flipUserGuideSection = (sectionId: string) => {
+    setExpandedUserGuideSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
   };
 
   const renderApiReference = () => (
@@ -136,35 +198,92 @@ export function MobileNav() {
   );
 
   const renderUserGuides = () => (
-    <div className="space-y-2">
-      {guides.map((item) => (
-        <div key={item.id}>
-          <span className="font-bold text-sm px-4 py-2 block">
-            {item.title.toUpperCase()}
+    <div>
+      {mainUserGuides.map((guide) => (
+        <div className="" key={guide.id}>
+          <span className="font-bold px-2 mb-3 text-xs">
+            {`${guide.title.toUpperCase()}`}
           </span>
-          {item.sections.map((section) => (
-            <Link
-              key={section.id}
-              href={
-                item.id === "support"
-                  ? section.href
-                  : `/docs/user-guides/${section.id}`
-              }
-              target={item.id === "support" ? "_blank" : undefined}
-              className={cn(
-                "flex items-center px-4 py-2 text-sm",
-                isActive(`/docs/user-guides/${section.id}`)
-                  ? "bg-accent text-foreground font-medium"
-                  : "text-muted-foreground hover:bg-accent/50"
-              )}
-              onClick={() => setIsOpen(false)}
-            >
-              {section.title}
-              {item.id === "support" && (
-                <ExternalLink className="ml-2 h-4 w-4" />
-              )}
-            </Link>
-          ))}
+          <div className="py-2">
+            {guide.sections.map((section) => {
+              const isSupport = guide.id === "support";
+              const hasSubsections =
+                section.sections && section.sections.length > 0;
+              const isExpanded = expandedUserGuideSections[section.id];
+
+              return (
+                <div key={section.id}>
+                  {isSupport ? (
+                    <Link
+                      href={section.href ?? "#"}
+                      target="_blank"
+                      className="group flex items-center w-3/4 rounded-md p-2 text-sm ml-2 hover:bg-accent/10 hover:text-foreground text-muted-foreground"
+                    >
+                      <span className="relative z-10">{section.title}</span>
+                      <ExternalLink className="ml-2 h-4 w-4 opacity-70" />
+                    </Link>
+                  ) : (
+                    <div className="mb-2">
+                      {hasSubsections ? (
+                        <button
+                          onClick={() => flipUserGuideSection(section.id)}
+                          className={cn(
+                            "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                            "relative overflow-hidden",
+                            isActive(`/docs/user-guides/${section.id}`)
+                              ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                              : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                          )}
+                        >
+                          <span className="px-2 text-sm">{section.title}</span>
+                          {isExpanded ? (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="ml-2 h-4 w-4" />
+                          )}
+                        </button>
+                      ) : (
+                        <Link
+                          href={`/docs/user-guides/${section.id}`}
+                          className={cn(
+                            "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                            "relative overflow-hidden",
+                            isActive(`/docs/user-guides/${section.id}`)
+                              ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                              : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                          )}
+                        >
+                          <span className="px-2 text-sm">{section.title}</span>
+                        </Link>
+                      )}
+
+                      {hasSubsections && isExpanded && (
+                        <div className="ml-4 mt-2">
+                          {section.sections!.map((subsection) => (
+                            <Link
+                              key={subsection.id}
+                              href={`/docs/user-guides/${subsection.id}`}
+                              className={cn(
+                                "group flex items-center w-3/4 rounded-md py-2 text-sm transition-all duration-200",
+                                "relative overflow-hidden",
+                                isActive(`/docs/user-guides/${subsection.id}`)
+                                  ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
+                                  : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
+                              )}
+                            >
+                              <span className="px-2 text-sm">
+                                {subsection.title}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>
