@@ -97,11 +97,11 @@ export default function SetupEnvironment() {
               python -m venv venv
             </span>
             &nbsp; and &nbsp;
-            <div className="py-1.5">
+            <p className="py-1.5">
               <span className="bg-gray-100 px-2 py-0.5   dark:bg-gray-700 rounded">
                 source venv/bin/activate
               </span>
-            </div>
+            </p>
           </p>
           {/* nodejs */}
           <RenderCode
