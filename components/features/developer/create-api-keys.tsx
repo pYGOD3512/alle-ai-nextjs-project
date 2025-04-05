@@ -25,7 +25,7 @@ import {
   Power,
   PowerOff,
   Ban,
-  Loader2,
+  Loader,
   RefreshCw
 } from "lucide-react";
 import {
@@ -333,7 +333,7 @@ export function CreateApiKeys() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Refreshing...
                 </>
               ) : (
@@ -411,7 +411,7 @@ export function CreateApiKeys() {
                               <Ban className="w-4 h-4 text-red-500"/>
                             )}
                             {deletingKeys.has(key.id) && (
-                              <Loader2 className="h-4 w-4 animate-spin text-primary"/>
+                              <Loader className="h-4 w-4 animate-spin text-primary"/>
                             )}
                           </div>
                         </TableCell>
@@ -495,7 +495,7 @@ export function CreateApiKeys() {
                               >
                                 {deletingKeys.has(key.id) ? (
                                   <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    <Loader className="h-4 w-4 mr-2 animate-spin" />
                                     {key.isDisabled ? "Enabling..." : "Disabling..."}
                                   </>
                                 ) : key.isDisabled ? (
@@ -517,7 +517,7 @@ export function CreateApiKeys() {
                               >
                                 {deletingKeys.has(key.id) ? (
                                   <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    <Loader className="h-4 w-4 mr-2 animate-spin" />
                                     Deleting...
                                   </>
                                 ) : (

@@ -23,22 +23,17 @@ const options = [
   {
     label: "Futuristic cityscape",
     icon: <Lightbulb className="w-4 h-4 text-amber-400"/>,
-    description: "Create a stunning digital artwork of a city of the future"
-  },
-  {
-    label: "Surreal landscape",
-    icon: <Image className="w-4 h-4 text-purple-500" />,
-    description: "Produce an abstract, dreamlike scene with vibrant colors"
+    description: "A vast futuristic cityscape at sunset, with towering skyscrapers made of glass and metal, flying cars zipping through neon-lit skyways, holographic billboards glowing in the dusk, and distant mountains silhouetted against a colorful sky"
   },
   {
     label: "Underwater kingdom",
     icon: <Anchor className="w-4 h-4 text-teal-500" />,
-    description: "Imagine a deep-sea civilization full of mysterious sea creatures, glowing coral reefs, and submerged castles."
+    description: "A majestic underwater kingdom deep in the ocean, with glowing coral castles, schools of colorful fish, mermaids swimming gracefully, ancient ruins covered in seaweed, and rays of sunlight piercing through the deep blue water."
   },
   {
     label: "Magical forest",
     icon: <TreePalm className="w-4 h-4 text-green-500" />,
-    description: "Create a mystical forest with glowing trees, enchanted animals, and an ethereal atmosphere."
+    description: "An enchanted forest glowing with bioluminescent plants, sparkling fairy lights floating in the air, ancient twisted trees with glowing runes, a misty path leading to a hidden glade, and mythical creatures peeking through the foliage."
   }
 ];
 

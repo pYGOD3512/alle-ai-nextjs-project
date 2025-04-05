@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Check, Loader2, Users, Building2, Shield, Zap } from "lucide-react";
+import { Check, Loader, Users, Building2, Shield, Zap } from "lucide-react";
 import { toast } from "sonner"
 
 

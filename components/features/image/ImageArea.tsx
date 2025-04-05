@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
-import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader2 } from "lucide-react";
+import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader } from "lucide-react";
 import { toast } from "sonner"
 
 import {
@@ -122,7 +122,7 @@ const ImageArea = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [retryingModels, setRetryingModels] = useState<string[]>([]);
-const [imageModelsLoaded, setImageModelsLoaded] = useState(false);
+  const [imageModelsLoaded, setImageModelsLoaded] = useState(false);
 
 
   useEffect(() => {

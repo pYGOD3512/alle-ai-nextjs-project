@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { ArrowUp, Paperclip, Globe , X, Layers } from "lucide-react";
+import { ArrowUp, Paperclip, Globe , X, Layers, FileText, Loader, Scale } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner"
@@ -22,6 +22,12 @@ import { useSelectedModelsStore, useWebSearchStore, useCombinedModeStore } from 
 import { ModelSelectionModal, PromptModal } from "@/components/ui/modals";
 import { ContentLengthWarning } from "../ui/content-length-warning";
 import { useModelsStore } from "@/stores/models";
+
+import { useSettingsStore } from "@/stores";
+import { useAuthStore } from "@/stores";
+import { PlansModal } from "@/components/ui/modals";
+import { chatApi } from "@/lib/api/chat";
+import { useTheme } from "next-themes";
 
 declare global {
   interface Window {
@@ -65,7 +71,6 @@ export function ChatInput({
   disableCombined
 }: ChatInputProps) {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-  ;
   const { isWebSearch, setIsWebSearch } = useWebSearchStore();
   const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
@@ -84,6 +89,7 @@ export function ChatInput({
   const [contentPercentage, setContentPercentage] = useState<number>(0);
   const [incompatibleModels, setIncompatibleModels] = useState<string[]>([]);
   const [incompatibleModelNames, setIncompatibleModelNames] = useState<string[]>([]);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
   const pathname = usePathname();
 
@@ -94,7 +100,6 @@ export function ChatInput({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // const MAX_CONTENT_LENGTH = 40;
   const MAX_CONTENT_LENGTH = 400000;
   const IMAGE_COMPATIBLE_MODELS = [
     'gpt-4o',
@@ -106,6 +111,18 @@ export function ChatInput({
     'grok-2-vision',
     'claude-3-7-sonnet'
   ];
+
+  const { personalization, setPersonalizationSetting } = useSettingsStore();
+  const { plan, user } = useAuthStore();
+  const isFreeUser = plan === 'free' || !plan;
+  const isSummaryEnabled = user?.summary === 1;
+  const [showSummaryPrompt, setShowSummaryPrompt] = useState(false);
+  const [plansModalOpen, setPlansModalOpen] = useState(false);
+  const [promptConfig, setPromptConfig] = useState<any>(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+
+  const { theme, resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   useEffect(() => {
     // Only check if there's an uploaded image file
@@ -137,10 +154,8 @@ export function ChatInput({
     }
   }, [uploadedFile, selectedModels.chat, inactiveModels, chatModels, toast]);
 
-
-   // Function to check if all active models support image uploads
-   const checkImageCompatibility = (file: File) => {
-    // Only check for image files
+  // Function to check if all active models support image uploads
+  const checkImageCompatibility = (file: File) => {
     if (!file.type.startsWith('image/')) {
       setIncompatibleModels([]);
       return { compatible: true, incompatibleModels: [] };
@@ -218,6 +233,8 @@ export function ChatInput({
 }
 
   const handlePaste = async (event: React.ClipboardEvent) => {
+    if(pathname.includes('/image')) return;
+
     const items = event.clipboardData.items;
     
     for (const item of items) {
@@ -594,6 +611,54 @@ export function ChatInput({
     }
   }, [activeModelsCount, isCombinedMode, onCombinedToggle]);
 
+  const handleSummaryToggle = async () => {
+    if (!isSummaryEnabled && activeModelsCount < 2) {
+      setShowSummaryPrompt(true);
+      return;
+    }
+
+    if (isFreeUser) {
+      setPromptConfig({
+        title: "Upgrade Required",
+        message: "Please upgrade your plan to enable the Compare feature.",
+        actions: [
+          {
+            label: "Upgrade Plan",
+            onClick: () => {
+              setShowPromptModal(false);
+              setPlansModalOpen(true)
+            },
+            variant: "outline"
+          },
+        ],
+      });
+      setShowPromptModal(true);
+      return;
+    }
+
+    try {
+      setIsSummaryLoading(true);
+      const newValue = !isSummaryEnabled;
+      const response = await chatApi.updateSummaryPreference(newValue);
+      
+      if (response.status) {
+        useAuthStore.setState((state) => ({
+          ...state,
+          user: state.user ? {
+            ...state.user,
+            summary: response.value ? 1 : 0
+          } : state.user
+        }));
+        
+        setPersonalizationSetting('summary', !newValue);
+      }
+    } catch (error) {
+      toast.error('Failed to toggle Compare');
+    } finally {
+      setIsSummaryLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="p-2 bg-background/95 backdrop-blur transition-all duration-300">
@@ -681,7 +746,7 @@ export function ChatInput({
                           } ${!!uploadedFile ? 'opacity-50 cursor-pointer' : ''}`}
                         >
                           <Globe size={16} />
-                          <span className="text-[0.8rem]">Search</span>
+                          {isWebSearch ? <span className="text-[0.8rem]">Search</span> : ''}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -695,28 +760,96 @@ export function ChatInput({
                 )}
 
                 {isCombined && (
+                <>
                   <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        disabled={ isLoading || isSending }
-                        onClick={handleCombinedToggle}
-                        className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
-                          isCombinedMode 
-                            ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
-                            : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <Layers size={16} />
-                        <span className="text-[0.8rem]">Combine</span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isCombinedMode ? "Combine selected models" : "Combine selected models"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          disabled={ isLoading || isSending }
+                          onClick={handleCombinedToggle}
+                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
+                            isCombinedMode 
+                              ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
+                              : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          <Layers size={16} />
+                          <span className="text-[0.8rem]">Combine</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isCombinedMode ? "Combine selected models" : "Combine selected models"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          disabled={isLoading || isSending || isSummaryLoading}
+                          onClick={handleSummaryToggle}
+                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] overflow-hidden ${
+                            isSummaryEnabled 
+                              ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} hover:bg-green-500/20`
+                              : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          {/* Loading gradient animation */}
+                          {isSummaryLoading && (
+                            <motion.div 
+                              className={`absolute inset-0 bg-gradient-to-r ${
+                                isDarkMode 
+                                  ? "from-transparent via-white/40 to-transparent" 
+                                  : "from-transparent via-black/30 to-transparent"
+                              }`}
+                              initial={{ x: "-100%" }}
+                              animate={{ x: "100%" }}
+                              transition={{ 
+                                repeat: Infinity, 
+                                duration: 1.5, 
+                                ease: "linear" 
+                              }}
+                            />
+                          )}
+                          
+                          {/* Periodic subtle glow animation when not loading */}
+                          {!isSummaryLoading && (
+                            <motion.div 
+                              className={`absolute inset-0 bg-gradient-to-r ${
+                                isDarkMode 
+                                  ? "from-transparent via-white/10 to-transparent" 
+                                  : "from-transparent via-black/5 to-transparent"
+                              }`}
+                              initial={{ x: "-100%", opacity: 0 }}
+                              animate={{ x: "100%", opacity: [0, 1, 0] }}
+                              transition={{ 
+                                repeat: Infinity, 
+                                repeatDelay: 5, // Wait 5 seconds between animations
+                                duration: 2.5,  // Slower animation
+                                ease: "easeInOut" 
+                              }}
+                            />
+                          )}
+                          
+                          {/* Icon - changes to spinner when loading */}
+                          {isSummaryLoading ? (
+                            <Loader size={16} className="animate-spin" />
+                          ) : (
+                            <Scale size={18} className="" />
+                          )}
+                          
+                          <span className="text-[0.8rem]">Compare</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isSummaryEnabled ? "Compare AI models" : "Compare AI models"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
                 )}
+                
               </div>
 
               <div className="flex items-center gap-2">
@@ -758,8 +891,7 @@ export function ChatInput({
 
         {pathname.startsWith("/chat/res") && (
             <FooterText />
-        )}
-      </div>
+        )}      </div>
 
       <PromptModal
         isOpen={showModelPrompt}
@@ -803,10 +935,37 @@ export function ChatInput({
         ]}
       />
 
+      <PromptModal
+        isOpen={showSummaryPrompt}
+        onClose={() => setShowSummaryPrompt(false)}
+        title="NOTICE"
+        message="At least 2 active models are required to enable summary feature on Alle-AI."
+        actions={[
+          {
+            label: "Ok",
+            onClick: () => setShowSummaryPrompt(false),
+            variant: "default"
+          }
+        ]}
+      />
+
       <ModelSelectionModal
         isOpen={modelSelectionModalOpen}
         onClose={() => setModelSelectionModalOpen(false)}
       />
+
+      <PlansModal
+        isOpen={plansModalOpen}
+        onClose={() => setPlansModalOpen(false)}
+      />
+
+      {promptConfig && (
+        <PromptModal
+          isOpen={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
+          {...promptConfig}
+        />
+      )}
     </>
   );
 }

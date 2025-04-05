@@ -18,7 +18,7 @@ export default function ApiIntroduction() {
       <div className="lg:w-3/4  w-full">
         {/* Introduction Section */}
         <section
-          className="min-h-[80vh]  space-y-8"
+          className=" mb-10 space-y-8"
           data-section="introduction"
         >
           <div className="space-y-6">
@@ -359,7 +359,7 @@ ${installSdks.javascript}`}
             </li>
             <li>
               <strong className="font-medium">TypeScript Support:</strong> If
-              you're using Node.js, consider using TypeScript for better type
+              you&apos;re using Node.js, consider using TypeScript for better type
               safety and autocompletion.
             </li>
             <li>

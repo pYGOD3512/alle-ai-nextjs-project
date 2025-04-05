@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-import { Play, Copy, Terminal, FileJson, Code2, X, FileText, Image, FileType, Maximize2, Loader2, Download } from "lucide-react";
+import { Play, Copy, Terminal, FileJson, Code2, X, FileText, Image, FileType, Maximize2, Loader, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ExpandableCode } from "@/components/ui/expandable-code";
 import {
@@ -374,7 +374,7 @@ response = requests.post(
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                   ) : (
                     <Play className="h-4 w-4 mr-2" />
                   )}

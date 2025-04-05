@@ -39,11 +39,9 @@ const faqComponents = {
     () => import("@/components/faq/others/models-selection")
   ),
 
-  "model-limits": dynamic(
-    () => import("@/components/faq/others/model-limits")
-  ),
+  "model-limits": dynamic(() => import("@/components/faq/others/model-limits")),
 
-  //api reference  pages
+  //user guides pages in ref to main guides folder
   quickstart: dynamic(
     () => import("@/components/docs/userGuides/initial-setup")
   ),
@@ -89,8 +87,19 @@ const faqComponents = {
   history: dynamic(() => import("@/components/docs/tutorials/History")),
 
   models: dynamic(() => import("@/components/docs/userGuides/models")),
-
- 
+  // user guides new
+  "platform-overview": dynamic(
+    () => import("@/components/docs/userGuideMain/overview")
+  ),
+  "user-interface": dynamic(
+    () => import("@/components/docs/userGuideMain/user-interface")
+  ),
+  "setup-environment": dynamic(
+    () => import("@/components/docs/userGuideMain/setup-environment")
+  ),
+  "first-request": dynamic(
+    () => import("@/components/docs/userGuideMain/first-request")
+  ),
 };
 
 type FaqName = keyof typeof faqComponents;

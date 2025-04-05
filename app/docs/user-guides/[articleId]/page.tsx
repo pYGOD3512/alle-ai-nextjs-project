@@ -1,7 +1,6 @@
 // @ts-nocheck
 "use client";
-import { guides } from "@/lib/constants/docs";
-import { userGuides } from "@/lib/constants/docs";
+import { mainUserGuides } from "@/lib/constants/docs";
 import { usePathname } from "next/navigation";
 import DynamicFaq from "@/components/faq/DynamicFaq";
 import { Divide } from "lucide-react";
@@ -21,10 +20,16 @@ export default function Page() {
   const pathname = usePathname();
 
   const getTitle = (): { title: string; des: string; param?: string } => {
-    for (const item of guides as Guide[]) {
+    for (const item of mainUserGuides) {
       for (const secs of item.sections) {
-        if (pathname === `/docs/user-guides/${secs.id}`) {
-          return { title: secs.title, param: secs.id };
+        if (secs.sections && secs.sections != []) {
+          for (const subsec of secs.sections) {
+            if (pathname === `/docs/user-guides/${subsec.id}`) {
+              return { title: subsec.title, param: subsec.id, des: "" };
+            }
+          }
+        } else if (pathname === `/docs/user-guides/${secs.id}`) {
+          return { title: item.title, param: secs.id, des: "" };
         }
       }
     }
@@ -38,7 +43,7 @@ export default function Page() {
   const { title, param } = getTitle();
 
   return (
-    <div className="flex-1 w-full flex-col ml-8">
+    <div className="flex-1 w-full flex-col ">
       {title === "Platform overview" ? (
         <div className="mb-5 py-4 ">
           <h1 className="text-xl  text-muted-foreground mb-3 ">Get started</h1>
@@ -58,10 +63,12 @@ export default function Page() {
       ) : (
         <div>
           <h1 className="font-semibold text-xl mb-3 text-muted-foreground">
-            Guides
+            {title === "Overview" ? "Welcome to AlleAI" : "Guides"}
           </h1>
           <div className="text-2xl font-bold mb-5">
-            <h2 id={`${title}`}>{title}</h2>
+            <h2 id={`${title}`}>
+              {title === "Overview" ? " One Platform for Every AI Task" : title}
+            </h2>
           </div>
         </div>
       )}
