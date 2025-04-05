@@ -22,8 +22,14 @@ export default function Page() {
   const getTitle = (): { title: string; des: string; param?: string } => {
     for (const item of mainUserGuides) {
       for (const secs of item.sections) {
-        if (pathname === `/docs/user-guides/${secs.id}`) {
-          return { title: secs.title, param: secs.id, des: "" };
+        if (secs.sections && secs.sections != []) {
+          for (const subsec of secs.sections) {
+            if (pathname === `/docs/user-guides/${subsec.id}`) {
+              return { title: subsec.title, param: subsec.id, des: "" };
+            }
+          }
+        } else if (pathname === `/docs/user-guides/${secs.id}`) {
+          return { title: item.title, param: secs.id, des: "" };
         }
       }
     }

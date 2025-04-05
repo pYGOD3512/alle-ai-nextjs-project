@@ -1585,11 +1585,7 @@ export const mainUserGuides: mainGuides[] = [
           },
           {
             id: "first-request",
-            title: "Make your first request",
-          },
-          {
-            id: "sdk&libraries",
-            title: "SDKs & libraries",
+            title: "Send your first request",
           },
         ],
       },
