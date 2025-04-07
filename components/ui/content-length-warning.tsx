@@ -16,6 +16,9 @@ export function ContentLengthWarning({
   message,
   models = []
 }: ContentLengthWarningProps) {
+  // Calculate excess percentage
+  const excessPercentage = percentage ? Math.round(percentage - 100) : 0;
+
   return (
     <div 
       className={cn(
@@ -31,8 +34,8 @@ export function ContentLengthWarning({
       <AlertTriangle className="h-4 w-4 flex-shrink-0" />
       {type === 'length' ? (
         <span>
-          Content is <span className="font-medium">{percentage}%</span> over the length limit. 
-          Try replacing the attached files with smaller excerpts.
+          Context length exceeded by <span className="font-medium">{excessPercentage}%</span>. 
+          Please reduce your content to continue.
         </span>
       ) : (
         <span>

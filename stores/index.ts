@@ -583,6 +583,11 @@ interface CombinedModeState {
   setIsCombinedMode: (enabled: boolean) => void;
 }
 
+interface CompareModeState {
+  isCompareMode: boolean;
+  setIsCompareMode: (enabled: boolean) => void;
+}
+
 export const useWebSearchStore = create<WebSearchState>((set) => ({
   isWebSearch: false,
   setIsWebSearch: (enabled) => set({ isWebSearch: enabled }),
@@ -591,6 +596,11 @@ export const useWebSearchStore = create<WebSearchState>((set) => ({
 export const useCombinedModeStore = create<CombinedModeState>((set) => ({
   isCombinedMode: false,
   setIsCombinedMode: (enabled) => set({ isCombinedMode: enabled }),
+}));
+
+export const useCompareModeStore = create<CompareModeState>((set) => ({
+  isCompareMode: false,
+  setIsCompareMode: (enabled) => set({ isCompareMode: enabled }),
 }));
 
 interface CodeThemeStore {

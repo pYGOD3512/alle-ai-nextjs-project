@@ -439,7 +439,7 @@ const VideoArea = () => {
             prev ? { ...prev, status: 'ready' } : null
           );
 
-          toast.success('Image uploaded')
+          toast('Image uploaded')
         } catch (error) {
           if (uploadedFile?.url) {
             URL.revokeObjectURL(uploadedFile.url);
@@ -683,7 +683,7 @@ const VideoArea = () => {
         liked: true
       });
 
-      toast.success(`${modelInfo?.name}'s video liked`)
+      toast(`${modelInfo?.name}'s video liked`)
     } else {
       // Remove from liked media store - find the video's ID first
       const likedItems = useLikedMediaStore.getState().getLikedMediaByType('video');
@@ -695,7 +695,7 @@ const VideoArea = () => {
         removeLikedMedia(likedItem.id);
       }
 
-      toast.success(`${modelInfo?.name}'s video unliked`)
+      toast(`${modelInfo?.name}'s video unliked`)
 
     }
   }, [videos, toast, addLikedMedia, removeLikedMedia, prompt]);
@@ -806,7 +806,7 @@ const VideoArea = () => {
         prev ? { ...prev, status: 'ready' } : null
       );
 
-      toast.success('File uploaded');
+      toast('File uploaded');
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);
@@ -876,8 +876,8 @@ const VideoArea = () => {
         prev ? { ...prev, status: 'ready' } : null
       );
 
-      toast.success('File uploaded');
-      toast.success('File uploaded');
+      toast('File uploaded');
+      toast('File uploaded');
     } catch (error) {
       if (uploadedFile?.url) {
         URL.revokeObjectURL(uploadedFile.url);

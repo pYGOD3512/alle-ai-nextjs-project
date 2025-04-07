@@ -392,7 +392,7 @@ export function Sidebar() {
                       onClick={() => {
                         (isMobile && isOpen) ? toggle() : '';
                         if (item.href === "/audio" || item.href === "/video") {
-                          toast.info('This feature will be available soon');
+                          toast.info('this feature will be available soon');
                         }
                       }}
                     >
@@ -428,7 +428,7 @@ export function Sidebar() {
                         onClick={() => {
                           // setProjectModalOpen(true);
                           (isMobile && isOpen) ? toggle() : '';
-                          toast.info('This feature will be available soon');
+                          toast.info('this feature will be available soon');
                         }}
                         aria-label="New Project"
                       >
@@ -689,7 +689,7 @@ export function Sidebar() {
                         variant="outline" 
                         className="text-[0.6rem] h-3 p-1 flex justify-center items-center relative overflow-hidden"
                       >
-                        <Loader className="h-4 w-4 animate-spin" />
+                        <Loader className="h-2 w-2 animate-spin" />
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
                               style={{ backgroundSize: '200% 100%' }}
                         />
@@ -755,7 +755,7 @@ export function Sidebar() {
                     ${styles.hoverBg} cursor-pointer`}
                   onClick={() => {
                     if (item.href === "/audio" || item.href === "/video") {
-                      toast.info('This feature will be available soon');
+                      toast.info('this feature will be available soon');
                     }
                   }}
                 >
@@ -780,7 +780,7 @@ export function Sidebar() {
               size="icon"
               className="w-full"
               onClick={() => {
-                toast.info('This feature will be available soon');
+                toast.info('this feature will be available soon');
                 // setProjectModalOpen(true)}
               }}
             >

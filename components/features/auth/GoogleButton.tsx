@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 
+import { sendGAEvent } from '@next/third-parties/google'
+
+
 export function GoogleButton() {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,10 +21,13 @@ export function GoogleButton() {
       if (!response.url) {
         throw new Error("Failed to get redirect URL");
       }
+
+      sendGAEvent('formSubmission', 'submit', { authType: 'continueWithGoogle', status: 'success'});
       
       window.location.href = response.url;
     } catch (error) {
       // console.error("Google sign-in failed:", error);
+      sendGAEvent('formSubmission', 'submit', { authType: 'continueWithGoogle', status: 'failed'});
     } finally {
       setIsLoading(false);
     }
@@ -37,7 +43,6 @@ export function GoogleButton() {
       {isLoading ? (
         <>
           <Loader className="h-5 w-5 animate-spin" />
-          <span>Signing in...</span>
         </>
       ) : (
         <>

@@ -62,14 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const conversationResponse = await chatApi.createConversation(allSelectedModels, 'image');
       const conversationId = conversationResponse.session;
 
-      addHistory({
-        session: conversationId,
-        title: input,
-        type: 'image',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-
+      
       const promptResponse = await chatApi.createPrompt(
         conversationId, 
         input,
@@ -78,8 +71,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
       setContent("image", "input", input);
       setGenerationType('new');
+      
+      setConversationId(conversationId);
+      setPromptId(promptResponse.id);
+
       router.push(`/image/res/${conversationId}`);
       setInput("");
+      
+      addHistory({
+        session: conversationId,
+        title: input,
+        type: 'image',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
       // Get actual title based on prompt
       historyApi.getConversationTitle(conversationId, input, 'image')
@@ -90,9 +95,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           // console.error('Error getting conversation title:', error);
         });
 
-      // Get actual title based on prompt
-      setConversationId(conversationId);
-      setPromptId(promptResponse.id);
 
     } catch (error) {
       // console.error('Error in image generation flow:', error);

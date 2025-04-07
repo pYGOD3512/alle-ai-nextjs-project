@@ -10,7 +10,7 @@ import { useAuth } from './authTest';
 export function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [authorized, setAuthorized] = useState(false);
+  const [authorized, setAuthorized] = useState(true);
   const [isValidRoute, setIsValidRoute] = useState(true);
   const { isSubscribed } = useAuth();
   
@@ -23,19 +23,12 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       return false;
     };
 
-    const isPublicRoute = publicRoutes.some(route => matchRoute(route));
     const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
-
-    // Route doesn't exist at all
-    // if (!isPublicRoute && !isPrivateRoute) {
-    //   setIsValidRoute(false);
-    //   setAuthorized(true);
-    //   return;
-    // }
 
     // Route exists but is private and user isn't subscribed
     if (isPrivateRoute && !isSubscribed) {
       router.replace('/');
+      setAuthorized(false);
       return;
     }
 
@@ -43,11 +36,6 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     setIsValidRoute(true);
     setAuthorized(true);
   }, [pathname, router, isSubscribed]);
-
-  // Show nothing while checking authorization
-  if (!authorized) {
-    return null;
-  }
 
   // Show 404 for invalid routes
   if (!isValidRoute) {
@@ -60,6 +48,6 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show the actual content for valid routes
+  // Always render children, authorization will be handled by redirection
   return <>{children}</>;
 }

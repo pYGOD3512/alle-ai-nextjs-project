@@ -24,7 +24,7 @@ const PlansArea = () => {
 
 
   const handleCustomPlan = () => {
-    toast.info('This plan will be available soon!')
+    toast.info('this plan will be available soon!')
   };
 
   const handleCheckout = async (planName: string) => {

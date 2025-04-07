@@ -176,7 +176,7 @@ export default function HelpLayout({
                   href="#" 
                   onClick={(e) => {
                     e.preventDefault();
-                    toast.info('This feature will be available soon');
+                    toast.info('this feature will be available soon');
                   }}
                 >
                   API Docs

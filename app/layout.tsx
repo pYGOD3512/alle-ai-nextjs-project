@@ -1,14 +1,15 @@
-// "use client"
+"use client"
 
 import '@/app/globals.css';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-// import { Toaster } from "@/components/ui/toaster"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { RouteGuard } from '@/components/features/auth/RouteGuard';
 import Script from 'next/script';
+
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -45,11 +46,12 @@ export default function RootLayout({
             <AuthProvider>
                 {/* <ConnectionStatus /> */}
                 {children}
-              <Toaster position="top-center" richColors  />
+              <Toaster position="top-center"  />
             </AuthProvider>
           </RouteGuard>
         </ThemeProvider>
       </body>
+      <GoogleAnalytics gaId="G-4MEVHC95MQ" />
     </html>
   );
 }

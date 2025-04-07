@@ -57,7 +57,7 @@ const GreetingMessage = ({
 
   const { user } = useAuthStore();
 
-  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name} !`)
+  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name}!`)
   const questionTextArray = textReveal(questionText ? questionText : "What would you like to do today?")
 
   return (

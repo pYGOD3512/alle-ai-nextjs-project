@@ -127,7 +127,7 @@ export function FileUploadButton({
       onUploadFromDrive(driveFile);
       setShowDriveModal(false);
 
-      toast.success('File uploaded');
+      toast('File uploaded');
     } catch (error) {
       // console.error('Error processing Drive file:', error);
       // Add more detailed error information
@@ -187,14 +187,14 @@ export function FileUploadButton({
               // Process file
               onUploadFromDrive(dropboxFile);
 
-              toast.success('File uploaded');
+              toast('File uploaded');
             } catch (error) {
               throw error;
             }
           }
         },
         cancel: () => {
-          toast.info('File upload cancelled')
+          toast('File upload cancelled')
         },
         linkType: 'direct',
         multiselect: false,
@@ -210,7 +210,7 @@ export function FileUploadButton({
   };
 
   const handleOneDriveSelect = () => {
-    toast.success('Almost there, Client ID required');
+    toast('Almost there, Client ID required');
   }
   
   const getMimeType = (filename: string): string => {

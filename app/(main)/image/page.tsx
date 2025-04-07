@@ -11,8 +11,6 @@ import { Model, modelsApi } from "@/lib/api/models";
 import { toast } from "sonner"
 
 
-
-
 export default function ImageGenerationPage() {
   const { isOpen } = useSidebarStore();
   const setCurrentPage = useSidebarStore((state) => state.setCurrentPage);
@@ -48,11 +46,6 @@ export default function ImageGenerationPage() {
         }
       };
   
-    //   loadImageModels();
-    // }, [setImageModels, setModelsLoading, setModelsError]);
-
-  // Load previously selected models
-  // useEffect(() => {
     const loadLatestSelectedModels = async () => {
       if (selectedModels.image && selectedModels.image.length > 0) return;
 

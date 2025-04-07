@@ -156,7 +156,7 @@ export default function AboutLayout({
               <Link href="#"  className="inline-block"
               onClick={(e) => {
                 e.preventDefault();
-                toast.info('Alle-AI will be available on playstore soon!')
+                toast('Alle-AI will be available on playstore soon!')
               }}
               >
                 <div className="flex items-center gap-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-6 py-3 rounded-lg hover:opacity-90 transition duration-300">

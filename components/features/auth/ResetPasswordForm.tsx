@@ -41,7 +41,7 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
         password_confirmation: passwordConfirmation,
       });
 
-      toast.success(`Password Reset Successful`);
+      toast(`Password Reset Successful`);
 
       // Don't reset isLoading - keep button disabled during navigation
       router.push('/auth');

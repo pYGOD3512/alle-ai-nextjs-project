@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { ArrowUp, Paperclip, Globe , X, Layers, FileText, Loader, Scale } from "lucide-react";
+import { ArrowUp, Paperclip, Globe , X, Layers, FileText, Scale } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner"
@@ -18,7 +18,7 @@ import { processFile } from '@/lib/fileProcessing';
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FooterText } from "../FooterText";
-import { useSelectedModelsStore, useWebSearchStore, useCombinedModeStore } from "@/stores";
+import { useSelectedModelsStore, useWebSearchStore, useCombinedModeStore, useCompareModeStore } from "@/stores";
 import { ModelSelectionModal, PromptModal } from "@/components/ui/modals";
 import { ContentLengthWarning } from "../ui/content-length-warning";
 import { useModelsStore } from "@/stores/models";
@@ -28,6 +28,9 @@ import { useAuthStore } from "@/stores";
 import { PlansModal } from "@/components/ui/modals";
 import { chatApi } from "@/lib/api/chat";
 import { useTheme } from "next-themes";
+
+import { sendGAEvent } from '@next/third-parties/google'
+
 
 declare global {
   interface Window {
@@ -73,6 +76,7 @@ export function ChatInput({
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { isWebSearch, setIsWebSearch } = useWebSearchStore();
   const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
+  const { isCompareMode, setIsCompareMode } = useCompareModeStore();
   const { selectedModels, inactiveModels } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
   const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
@@ -89,7 +93,6 @@ export function ChatInput({
   const [contentPercentage, setContentPercentage] = useState<number>(0);
   const [incompatibleModels, setIncompatibleModels] = useState<string[]>([]);
   const [incompatibleModelNames, setIncompatibleModelNames] = useState<string[]>([]);
-  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
   const pathname = usePathname();
 
@@ -100,7 +103,7 @@ export function ChatInput({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_CONTENT_LENGTH = 400000;
+  const MAX_CONTENT_LENGTH = 27000;
   const IMAGE_COMPATIBLE_MODELS = [
     'gpt-4o',
     'gemini-1-5-pro',
@@ -115,14 +118,21 @@ export function ChatInput({
   const { personalization, setPersonalizationSetting } = useSettingsStore();
   const { plan, user } = useAuthStore();
   const isFreeUser = plan === 'free' || !plan;
-  const isSummaryEnabled = user?.summary === 1;
   const [showSummaryPrompt, setShowSummaryPrompt] = useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [promptConfig, setPromptConfig] = useState<any>(null);
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const getRandomDelay = () => Math.random() * 8;
 
   const { theme, resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+
+  // Initialize compare mode from user settings
+  // useEffect(() => {
+  //   if (user) {
+  //     setIsCompareMode(user.summary === 1);
+  //   }
+  // }, [user, setIsCompareMode]);
 
   useEffect(() => {
     // Only check if there's an uploaded image file
@@ -483,6 +493,8 @@ export function ChatInput({
   const handleWebSearchToggle = () => {
     const newValue = !isWebSearch;
     setIsWebSearch(newValue);
+    sendGAEvent('buttonClick', 'toggleFeature', { featureName: 'Web-Search', status: newValue});
+
     
     // If enabling web search, disable combined mode
     if (newValue && isCombinedMode) {
@@ -501,6 +513,8 @@ export function ChatInput({
     }
 
     const newValue = !isCombinedMode;
+    sendGAEvent('buttonClick', 'toggleFeature', { featureName: 'Combine', status: newValue});
+
     
     // If enabling combined mode, disable web search
     if (newValue && isWebSearch) {
@@ -611,13 +625,13 @@ export function ChatInput({
     }
   }, [activeModelsCount, isCombinedMode, onCombinedToggle]);
 
-  const handleSummaryToggle = async () => {
-    if (!isSummaryEnabled && activeModelsCount < 2) {
+  const handleSummaryToggle = () => {
+    if (!isCompareMode && activeModelsCount < 2) {
       setShowSummaryPrompt(true);
       return;
     }
 
-    if (isFreeUser) {
+    if (!isFreeUser) {
       setPromptConfig({
         title: "Upgrade Required",
         message: "Please upgrade your plan to enable the Compare feature.",
@@ -636,27 +650,11 @@ export function ChatInput({
       return;
     }
 
-    try {
-      setIsSummaryLoading(true);
-      const newValue = !isSummaryEnabled;
-      const response = await chatApi.updateSummaryPreference(newValue);
-      
-      if (response.status) {
-        useAuthStore.setState((state) => ({
-          ...state,
-          user: state.user ? {
-            ...state.user,
-            summary: response.value ? 1 : 0
-          } : state.user
-        }));
-        
-        setPersonalizationSetting('summary', !newValue);
-      }
-    } catch (error) {
-      toast.error('Failed to toggle Compare');
-    } finally {
-      setIsSummaryLoading(false);
-    }
+    // Toggle the compareMode state immediately (just like web search and combine)
+    const newValue = !isCompareMode;
+    setIsCompareMode(newValue);
+    sendGAEvent('buttonClick', 'toggleFeature', { featureName: 'Comparison', status: newValue});
+
   };
 
   return (
@@ -765,9 +763,9 @@ export function ChatInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          disabled={ isLoading || isSending }
+                          disabled={isLoading || isSending}
                           onClick={handleCombinedToggle}
-                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
+                          className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] overflow-hidden ${
                             isCombinedMode 
                               ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor}  hover:bg-green-500/20`
                               : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
@@ -775,6 +773,25 @@ export function ChatInput({
                         >
                           <Layers size={16} />
                           <span className="text-[0.8rem]">Combine</span>
+                          
+                          {/* Add the animation effect when combined mode is active */}
+                          {(
+                            <motion.div 
+                              className={`absolute inset-0 bg-gradient-to-r ${
+                                isDarkMode 
+                                  ? "from-transparent via-white/10 to-transparent" 
+                                  : "from-transparent via-black/5 to-transparent"
+                              }`}
+                              initial={{ x: "-100%", opacity: 0 }}
+                              animate={{ x: "100%", opacity: [0, 1, 0] }}
+                              transition={{ 
+                                repeat: Infinity, 
+                                repeatDelay:  getRandomDelay(),
+                                duration: 2,  // Slower animation
+                                ease: "easeInOut" 
+                              }}
+                            />
+                          )}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -787,34 +804,15 @@ export function ChatInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          disabled={isLoading || isSending || isSummaryLoading}
+                          disabled={isLoading || isSending}
                           onClick={handleSummaryToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] overflow-hidden ${
-                            isSummaryEnabled 
+                            isCompareMode 
                               ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} hover:bg-green-500/20`
                               : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
                           }`}
                         >
-                          {/* Loading gradient animation */}
-                          {isSummaryLoading && (
-                            <motion.div 
-                              className={`absolute inset-0 bg-gradient-to-r ${
-                                isDarkMode 
-                                  ? "from-transparent via-white/40 to-transparent" 
-                                  : "from-transparent via-black/30 to-transparent"
-                              }`}
-                              initial={{ x: "-100%" }}
-                              animate={{ x: "100%" }}
-                              transition={{ 
-                                repeat: Infinity, 
-                                duration: 1.5, 
-                                ease: "linear" 
-                              }}
-                            />
-                          )}
-                          
-                          {/* Periodic subtle glow animation when not loading */}
-                          {!isSummaryLoading && (
+                          {(
                             <motion.div 
                               className={`absolute inset-0 bg-gradient-to-r ${
                                 isDarkMode 
@@ -825,25 +823,18 @@ export function ChatInput({
                               animate={{ x: "100%", opacity: [0, 1, 0] }}
                               transition={{ 
                                 repeat: Infinity, 
-                                repeatDelay: 5, // Wait 5 seconds between animations
-                                duration: 2.5,  // Slower animation
+                                repeatDelay:  getRandomDelay(),
+                                duration: 2,  // Slower animation
                                 ease: "easeInOut" 
                               }}
                             />
                           )}
-                          
-                          {/* Icon - changes to spinner when loading */}
-                          {isSummaryLoading ? (
-                            <Loader size={16} className="animate-spin" />
-                          ) : (
-                            <Scale size={18} className="" />
-                          )}
-                          
+                          <Scale size={18} className="" />
                           <span className="text-[0.8rem]">Compare</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{isSummaryEnabled ? "Compare AI models" : "Compare AI models"}</p>
+                        <p>{isCompareMode ? "Compare AI models" : "Compare AI models"}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>

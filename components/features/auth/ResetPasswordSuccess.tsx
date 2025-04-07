@@ -35,7 +35,7 @@ interface ResetPasswordSuccessProps {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         
         setCountdown(30); // Start 30s countdown
-        toast.success('Reset link sent')
+        toast('Reset link sent')
       } catch (error) {
         toast.error('Faild to send reset link');
       } finally {

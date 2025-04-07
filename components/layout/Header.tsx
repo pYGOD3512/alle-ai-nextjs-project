@@ -307,7 +307,7 @@ export function Header() {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
           // setReferModalOpen(true);
-          toast.info('This feature will be available soon');
+          toast.info('this feature will be available soon');
 
         } else if (item.label === 'Favorites') {
           setAlbumModalOpen(true);
@@ -315,7 +315,7 @@ export function Header() {
         break;
       case 'link':
         if (item.label === 'Developer') {
-          toast.info('This feature will be available soon');
+          toast.info('this feature will be available soon');
         } else {
           window.open(item.href, '_blank');
         }
@@ -353,7 +353,7 @@ export function Header() {
   
 
   const handleTour = () => {
-    toast.info('This feature will be available soon');
+    toast.info('this feature will be available soon');
   };
   const handleLogOut = () => {
     setIsLogoutModalOpen(true);

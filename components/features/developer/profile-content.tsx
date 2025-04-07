@@ -28,7 +28,7 @@ export function DeveloperProfile() {
     if (!editedName?.trim()) return;
     setName(editedName);
     setIsEditing(false);
-    toast.success('Profile updated');
+    toast('Profile updated');
   };
 
   const handleCancel = () => {

@@ -230,7 +230,7 @@ export function ChatMessage({
               </div>
               {/* <button
                 onClick={()=>{
-                  toast.info('This feature will be available soon')
+                  toast.info('this feature will be available soon')
                   // handleEditClick();
                 }}
                 className="text-muted-foreground hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"
