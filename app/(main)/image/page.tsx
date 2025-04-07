@@ -31,7 +31,10 @@ export default function ImageGenerationPage() {
     useEffect(() => {
       const loadImageModels = async () => {
         // Skip if models are already loaded
-        if (imageModels && imageModels.length > 0) return;
+        if (imageModels && imageModels.length > 0){
+          loadLatestSelectedModels();
+          return;
+        }
         setLoadingLatest(true);
         setModelsLoading(true);
         try {

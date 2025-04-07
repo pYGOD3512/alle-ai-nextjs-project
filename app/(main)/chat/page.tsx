@@ -31,7 +31,10 @@ export default function ChatPage() {
   // Load chat models on mount if not already loaded
   useEffect(() => {
     const loadChatModels = async () => {
-      if (chatModels && chatModels.length > 0) return;
+      if (chatModels && chatModels.length > 0) {
+        loadLatestSelectedModels();
+        return;
+      }
       setLoadingLatest(true);
       setModelsLoading(true);
       try {
@@ -96,7 +99,7 @@ export default function ChatPage() {
     };
 
     loadChatModels();
-  }, [setChatModels, setModelsLoading, setModelsError, selectedModels.chat]);
+  }, [setChatModels, setModelsLoading, setModelsError, selectedModels.chat, chatModels]);
 
   return null;
 }
