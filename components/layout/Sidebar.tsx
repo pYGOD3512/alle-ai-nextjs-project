@@ -720,72 +720,90 @@ export function Sidebar() {
             </div>
           </>
         ) : (
-          <div className="space-y-2 px-2">
-            <div className="flex flex-col space-y-2 mb-8">
+          <div className="flex flex-col h-full">
+            <div className="space-y-2 px-2">
+              <div className="flex flex-col space-y-2 mb-8">
+                <Button
+                  onClick={handleNewChat}
+                  variant="outline"
+                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg} dark:${getSectionStyles(currentType).darkBgColor}`}
+                >
+                  <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
+                </Button>
+                <Button
+                  variant="outline"
+                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
+                  onClick={() => setModelSelectionModalOpen(true)}
+                  id="tooltip-select-selector"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
+              {sidebarMenuItems.map((item, i) => {
+                const isActive = isActiveRoute(item.href, pathname);
+                const type = item.href === "/chat" ? "chat" 
+                  : item.href === "/image" ? "image"
+                  : item.href === "/audio" ? "audio"
+                  : "video";
+                const styles = getSectionStyles(type);
+                
+                // Wrap the Link in a conditional
+                const content = (
+                  <div
+                    className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
+                      ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
+                      ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
+                      ${styles.hoverBg} cursor-pointer`}
+                    onClick={() => {
+                      if (item.href === "/audio" || item.href === "/video") {
+                        toast.info('this feature will be available soon');
+                      }
+                    }}
+                  >
+                    <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
+                  </div>
+                );
+
+                return item.href === "/audio" || item.href === "/video" ? (
+                  <div key={item.label}>{content}</div>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                  >
+                    {content}
+                  </Link>
+                );
+              })}
+
               <Button
-                onClick={handleNewChat}
-                variant="outline"
-                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg} dark:${getSectionStyles(currentType).darkBgColor}`}
+                variant="ghost"
+                size="icon"
+                className="w-full"
+                onClick={() => {
+                  toast.info('this feature will be available soon');
+                  // setProjectModalOpen(true)}
+                }}
               >
-                <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
-              </Button>
-              <Button
-                variant="outline"
-                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
-                onClick={() => setModelSelectionModalOpen(true)}
-                id="tooltip-select-selector"
-              >
-                <LayoutGrid className="h-4 w-4" />
+                <Folder className="h-4 w-4 text-muted-foreground" />
               </Button>
             </div>
-            {sidebarMenuItems.map((item, i) => {
-              const isActive = isActiveRoute(item.href, pathname);
-              const type = item.href === "/chat" ? "chat" 
-                : item.href === "/image" ? "image"
-                : item.href === "/audio" ? "audio"
-                : "video";
-              const styles = getSectionStyles(type);
-              
-              // Wrap the Link in a conditional
-              const content = (
-                <div
-                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
-                    ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                    ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
-                    ${styles.hoverBg} cursor-pointer`}
-                  onClick={() => {
-                    if (item.href === "/audio" || item.href === "/video") {
-                      toast.info('this feature will be available soon');
-                    }
-                  }}
-                >
-                  <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
-                </div>
-              );
 
-              return item.href === "/audio" || item.href === "/video" ? (
-                <div key={item.label}>{content}</div>
-              ) : (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                >
-                  {content}
-                </Link>
-              );
-            })}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-full"
-              onClick={() => {
-                toast.info('this feature will be available soon');
-                // setProjectModalOpen(true)}
-              }}
-            >
-              <Folder className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="mt-auto px-2 pb-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-full"
+                onClick={isPaidPlan ? handleManageSubscription : () => setPlansModalOpen(true)}
+                disabled={isLoadingBillingPortal}
+              >
+                {isLoadingBillingPortal ? (
+                  <Loader className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Gem className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </div>
           </div>
         )}
       </aside>
