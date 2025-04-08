@@ -6,21 +6,21 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 const aiLogos = [
-  { src: "/models/deepseek.png", alt: "OpenAI" },
-  { src: "/models/gpt-4o.png", alt: "Anthropic" },
-  { src: "/models/gemini.png", alt: "Gemini" },
-  { src: "/models/stability-ai.png", alt: "Stability AI" },
-  { src: "/models/mistral-ai.png", alt: "Mistral" },
-  { src: "/models/perplexity-ai.png", alt: "Perplexity" },
-  { src: "/models/claude-3.png", alt: "Claude" },
-  { src: "/models/meta.png", alt: "Meta" },
-  { src: "/models/grok.png", alt: "Grok" },
-  { src: "/models/kling.png", alt: "Kling" },
-  { src: "/models/luma.png", alt: "Luma" },
-  { src: "/models/midjourney.png", alt: "Midjourney" },
-  { src: "/models/amazon.png", alt: "Titan" },
-  { src: "/models/copilot.png", alt: "Copilot" },
-  { src: "/models/microsoft.png", alt: "Microsoft" },
+  { src: "/models/deepseek.webp", alt: "OpenAI" },
+  { src: "/models/gpt-4o.webp", alt: "Anthropic" },
+  { src: "/models/gemini.webp", alt: "Gemini" },
+  { src: "/models/stability-ai.webp", alt: "Stability AI" },
+  { src: "/models/mistral-ai.webp", alt: "Mistral" },
+  { src: "/models/perplexity-ai.webp", alt: "Perplexity" },
+  { src: "/models/claude-3.webp", alt: "Claude" },
+  { src: "/models/meta.webp", alt: "Meta" },
+  { src: "/models/grok.webp", alt: "Grok" },
+  { src: "/models/kling.webp", alt: "Kling" },
+  { src: "/models/luma.webp", alt: "Luma" },
+  { src: "/models/midjourney.webp", alt: "Midjourney" },
+  { src: "/models/amazon.webp", alt: "Titan" },
+  { src: "/models/copilot.webp", alt: "Copilot" },
+  { src: "/models/microsoft.webp", alt: "Microsoft" },
   // Add more AI company logos as needed
 ];
 
@@ -46,13 +46,13 @@ const fixedPositions = [
 export function LoadingScreen() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [logoSrc, setLogoSrc] = useState("/svgs/logo-desktop-mini.png");
+  const [logoSrc, setLogoSrc] = useState("/svgs/logo-desktop-mini.webp");
 
   useEffect(() => {
     setMounted(true);
     setLogoSrc(resolvedTheme === "dark" 
-      ? "/svgs/logo-desktop-mini.png" 
-      : "/svgs/logo-desktop-mini-dark.png"
+      ? "/svgs/logo-desktop-mini.webp" 
+      : "/svgs/logo-desktop-mini-dark.webp"
     );
   }, [resolvedTheme]);
 

@@ -21,13 +21,13 @@ export default function VideoGeneration() {
       modelId: "runway",
       videoUrl: "/videos/video3.mp4",
       modelName: "Runway ML",
-      modelImage: "/models/runway.png",
+      modelImage: "/models/runway.webp",
     },
     {
       modelId: "luma",
       videoUrl: "/videos/video3.mp4",
       modelName: "Luma AI",
-      modelImage: "/models/luma.png",
+      modelImage: "/models/luma.webp",
     },
   ];
 
@@ -132,8 +132,8 @@ export default function VideoGeneration() {
             <Image
               src={
                 resolvedTheme === "dark"
-                  ? "/screenshots/video-mode-dark.png"
-                  : "/screenshots/video-mode-light.png"
+                  ? "/screenshots/video-mode-dark.webp"
+                  : "/screenshots/video-mode-light.webp"
               }
               width={800}
               height={200}
@@ -192,8 +192,8 @@ export default function VideoGeneration() {
             <Image
               src={
                 resolvedTheme === "dark"
-                  ? "/screenshots/video-settings-dark.png"
-                  : "/screenshots/video-settings-light.png"
+                  ? "/screenshots/video-settings-dark.webp"
+                  : "/screenshots/video-settings-light.webp"
               }
               width={800}
               height={400}

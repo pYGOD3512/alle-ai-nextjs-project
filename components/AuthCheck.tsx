@@ -16,9 +16,9 @@ export function useAuthCheck() {
       const checkAuth = async () => {
         if (token) {
           try {
-            console.log('Token exists, checking authentication...');
+            // console.log('Token exists, checking authentication...');
             const response = await authApi.getUser();
-            console.log('Auth check response:', response);
+            // console.log('Auth check response:', response);
             
             // Update auth state with user data
             setAuth(response.data.user, token, response.plan);

@@ -99,7 +99,6 @@ export function ResetPasswordForm({ email, token }: ResetPasswordFormProps) {
             className="flex items-center"
           >
             <Loader className="mr-2 h-4 w-4 animate-spin" />
-            <span>Resetting...</span>
           </motion.div>
         ) : (
           "Reset Password"

@@ -73,7 +73,7 @@ export function Summary({ isGenerating = false, isActive = false, onClick }: Sum
               onClick={onClick}
             >
               <Image
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.webp" : "/svgs/logo-desktop-mini-dark.webp"}
                 alt="Summary"
                 width={16}
                 height={16}

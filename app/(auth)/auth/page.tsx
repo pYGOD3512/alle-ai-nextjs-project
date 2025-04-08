@@ -147,8 +147,22 @@ function AuthPageInner() {
 
   // Modify the logo section
   const logoSrc = mounted && resolvedTheme === 'dark' 
-    ? "/svgs/logo-desktop-full.png" 
-    : "/svgs/logo-desktop-dark-full.png";
+    ? "/svgs/logo-desktop-full.webp" 
+    : "/svgs/logo-desktop-dark-full.webp";
+
+  // Preload both logo variants
+  useEffect(() => {
+    const preloadImages = () => {
+      const lightLogo = new window.Image();
+      const darkLogo = new window.Image();
+      lightLogo.src = "/svgs/logo-desktop-full.webp";
+      darkLogo.src = "/svgs/logo-desktop-dark-full.webp";
+    };
+
+    if (typeof window !== 'undefined') {
+      preloadImages();
+    }
+  }, []);
 
   return (
     <div className="max-w-md mx-auto">
@@ -159,6 +173,10 @@ function AuthPageInner() {
           alt="alle-ai"
           width={120}
           height={120}
+          priority
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQrJyEwPENrLzA7YWNpPqRYXmWBgoaUaWpslmyChpmjj5qoj4+v/9j/"
+          className="transition-opacity duration-300"
         />
       </div>
 

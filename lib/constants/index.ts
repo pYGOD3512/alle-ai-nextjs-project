@@ -316,7 +316,7 @@ export const AUDIO_MODELS = [
   {
     id: "whisper",
     name: "Whisper",
-    icon: "/models/gpt-4.png",
+    icon: "/models/gpt-4.webp",
     provider: "OpenAI",
     type: "free",
     preview: "State-of-the-art speech recognition and transcription",
@@ -324,7 +324,7 @@ export const AUDIO_MODELS = [
   {
     id: "musicgen",
     name: "MusicGen",
-    icon: "/models/dream.png",
+    icon: "/models/dream.webp",
     provider: "musicgen",
     type: "free",
     preview: "Generate original music and sound effects",
@@ -335,7 +335,7 @@ export const VIDEO_MODELS = [
   {
     id: "sora",
     name: "Sora",
-    icon: "/models/gpt-4.png",
+    icon: "/models/gpt-4.webp",
     provider: "OpenAI",
     type: "free",
     preview: "Create realistic and imaginative videos with OpenAI's latest",
@@ -343,7 +343,7 @@ export const VIDEO_MODELS = [
   {
     id: "runway",
     name: "Runway Gen-2",
-    icon: "/models/runway.png",
+    icon: "/models/runway.webp",
     provider: "runaway",
     selected: "true",
     type: "free",
@@ -352,7 +352,7 @@ export const VIDEO_MODELS = [
   {
     id: "luma",
     name: "Luma AI",
-    icon: "/models/luma.png",
+    icon: "/models/luma.webp",
     provider: "Dream Machine",
     selected: "true",
     type: "free",
@@ -361,7 +361,7 @@ export const VIDEO_MODELS = [
   {
     id: "kling",
     name: "Kling AI",
-    icon: "/models/kling.png",
+    icon: "/models/kling.webp",
     provider: "Kuaishou Technology",
     type: "free",
     preview: "Create realistic and imaginative videos with OpenAI's latest",
@@ -369,7 +369,7 @@ export const VIDEO_MODELS = [
   {
     id: "animate-diff",
     name: "Animate Diff",
-    icon: "/models/stability-ai.png",
+    icon: "/models/stability-ai.webp",
     provider: "Stability AI",
     type: "free",
     preview: "Create realistic and imaginative videos with OpenAI's latest",
@@ -382,7 +382,7 @@ export const initialMessages: Message[] = [];
 export const socialMediaOptions = [
   {
     name: 'X',
-    icon: '/svgs/x_white.png',
+    icon: '/svgs/x_white.webp',
     color: 'bg-[#0088cc]/10',
     hoverColor: 'hover:bg-[#0088cc]/20',
     textColor: 'text-[#4267B2]',

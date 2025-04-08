@@ -870,12 +870,12 @@ const userPlan = React.useMemo(() => {
     {
       value: "standard",
       label: "Standard",
-      icon: '/icons/silver-alle-ai.png'
+      icon: '/icons/silver-alle-ai.webp'
     },
     {
       value: "plus",
       label: "Plus",
-      icon: '/icons/gold-alle-ai.png'
+      icon: '/icons/gold-alle-ai.webp'
     },
     {
       value: "favorite",
@@ -945,7 +945,7 @@ const userPlan = React.useMemo(() => {
                           {model?.model_name}
                           {/* {model?.model_plan === 'standard' ? (
                             <Image
-                            src={'/svgs/logo-desktop-mini.png'}
+                            src={'/svgs/logo-desktop-mini.webp'}
                               height={10}
                               width={10}
                               alt="silver-alle-ai"
@@ -953,7 +953,7 @@ const userPlan = React.useMemo(() => {
                             />
                           ): model?.model_plan === 'plus' ? (
                             <Image
-                            src={'/icons/gold-alle-ai.png'}
+                            src={'/icons/gold-alle-ai.webp'}
                               height={10}
                               width={10}
                               alt="gold-alle-ai"
@@ -1004,7 +1004,7 @@ const userPlan = React.useMemo(() => {
                                 : 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90'} 
                               rounded-sm p-0.5`}>
                               <Image
-                                src={'/svgs/logo-desktop-mini.png'}
+                                src={'/svgs/logo-desktop-mini.webp'}
                                 height={10}
                                 width={10}
                                 alt={`${option.value}-alle-ai`}
@@ -1055,7 +1055,7 @@ const userPlan = React.useMemo(() => {
                         <div className="relative flex items-center gap-1 bg-gradient-to-r from-gray-300/90 to-gray-400/90 text-[10px] font-medium text-white pl-2 pr-2 py-0.5 rounded-tr-md rounded-bl-lg">
                           {/* <Gem className="h-2.5 w-2.5" /> */}
                           <Image
-                            src={'/svgs/logo-desktop-mini.png'}
+                            src={'/svgs/logo-desktop-mini.webp'}
                             height={10}
                             width={10}
                             alt="gold-alle-ai"
@@ -1067,7 +1067,7 @@ const userPlan = React.useMemo(() => {
                         <div className="relative flex items-center gap-1 bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 text-[10px] font-medium text-white pl-2 pr-2 py-0.5 rounded-tr-md rounded-bl-lg">
                           {/* <Gem className="h-2.5 w-2.5" /> */}
                           <Image
-                            src={'/svgs/logo-desktop-mini.png'}
+                            src={'/svgs/logo-desktop-mini.webp'}
                             height={10}
                             width={10}
                             alt="gold-alle-ai"
@@ -1287,19 +1287,19 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     linked_apps: {
       google_drive: {
         title: "Google Drive",
-        icon: <Image src={'/icons/google-drive.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        icon: <Image src={'/icons/google-drive.webp'} alt="google_drive_logo" width={16} height={16} /> ,
         description: "Upload Google Docs, Sheets, Slides and other files.",
         action: isAuthenticated ? "Unlink" : "Link"
       },
       one_drive: {
         title: "One Drive",
-        icon: <Image src={'/icons/onedrive.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        icon: <Image src={'/icons/onedrive.webp'} alt="google_drive_logo" width={16} height={16} /> ,
         description: "Upload Microsoft Word, Excel, PowerPoint and other files.",
         action: "Link"
       },
       dropbox: {
         title: "Dropbox",
-        icon: <Image src={'/icons/dropbox.png'} alt="google_drive_logo" width={16} height={16} /> ,
+        icon: <Image src={'/icons/dropbox.webp'} alt="google_drive_logo" width={16} height={16} /> ,
         description: "Upload Docs and other files.",
         action: "Link"
       },
@@ -2104,7 +2104,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
       const file = e.target.files[0];
       
       // Validate file type
-      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif'];
+      const validTypes = ['image/jpeg', 'image/webp', 'image/jpg', 'image/webp', 'image/gif'];
       if (!validTypes.includes(file.type)) {
 
         toast.error('Invalid file type. Supported files(JPEG, PNG, JPG, WEBP, or GIF)');
@@ -2239,7 +2239,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                         type="file"
                         className="hidden"
                         onChange={handleFileChange}
-                        accept="image/jpeg,image/png,image/jpg,image/webp,image/gif"
+                        accept="image/jpeg,image/webp,image/jpg,image/webp,image/gif"
                       />
                     </label>
                   )}
@@ -3523,7 +3523,7 @@ export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialo
                   "p-2 rounded-full transition-colors duration-200 bg-primary/10"
                 )}>
                   <Image
-                    src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
+                    src={platform.name === "X" ? (dark ? "/svgs/x_white.webp" : "/svgs/x_black.webp") : platform.icon}
                     alt={platform.name}
                     width={20}
                     height={20}
@@ -4060,7 +4060,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
           </DialogHeader>
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Image
-              src="/icons/google-drive.png"
+              src="/icons/google-drive.webp"
               alt="Google Drive"
               width={64}
               height={64}
@@ -4105,7 +4105,7 @@ export function GoogleDriveModal({ isOpen, onClose, onFileSelect }: GoogleDriveM
               {currentPath.length === 0 ? (
                 <div className="flex items-center gap-2">
                   <Image
-                    src="/icons/google-drive.png"
+                    src="/icons/google-drive.webp"
                     alt="Google Drive"
                     width={100}
                     height={100}
@@ -4401,7 +4401,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
                     onClick={() => handleShare(platform)}
                   >
                     <Image
-                      src={platform.name === "X" ? (dark ? "/svgs/x_white.png" : "/svgs/x_black.png") : platform.icon}
+                      src={platform.name === "X" ? (dark ? "/svgs/x_white.webp" : "/svgs/x_black.webp") : platform.icon}
                       alt={platform.name}
                       width={20}
                       height={20}
@@ -5549,9 +5549,9 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
                     onChange={(e) => handleInputChange({ target: { name: 'cardNumber', value: e.target.value }} as any)}
                   />
                   <div className="absolute right-3 top-2.5 flex gap-1">
-                    <img src="/icons/visa.png" alt="visa" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'visa' ? 'opacity-100' : 'opacity-50'}`} />
-                    <img src="/icons/mastercard.png" alt="mastercard" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'mastercard' ? 'opacity-100' : 'opacity-50'}`} />
-                    <img src="/icons/amex.png" alt="amex" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'amex' ? 'opacity-100' : 'opacity-50'}`} />
+                    <img src="/icons/visa.webp" alt="visa" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'visa' ? 'opacity-100' : 'opacity-50'}`} />
+                    <img src="/icons/mastercard.webp" alt="mastercard" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'mastercard' ? 'opacity-100' : 'opacity-50'}`} />
+                    <img src="/icons/amex.webp" alt="amex" className={`h-6 w-auto ${detectCardBrand(formData.cardNumber) === 'amex' ? 'opacity-100' : 'opacity-50'}`} />
                   </div>
                 </div>
                 {errors.cardNumber && (
@@ -5593,7 +5593,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
                       required
                     />
                     <div className="absolute right-3 top-2.5">
-                      <img src="/icons/cvc.png" alt="CVC" className="h-6 w-auto opacity-50" />
+                      <img src="/icons/cvc.webp" alt="CVC" className="h-6 w-auto opacity-50" />
                     </div>
                     {errors.cvc && (
                       <p className="text-sm text-red-500 mt-1">{errors.cvc}</p>
@@ -5752,7 +5752,7 @@ export function PaymentOptionsModal({ isOpen, onClose, onSelectMethod }: Payment
             className="w-full p-4 flex items-center gap-4 rounded-lg border border-border hover:border-[#0070BA]/50 hover:bg-[#0070BA]/5 transition-all group"
           >
             <div className="h-10 w-10 rounded-full bg-[#0070BA]/10 flex items-center justify-center">
-              <img src="/icons/paypal.png" alt="PayPal" className="h-5 w-5" />
+              <img src="/icons/paypal.webp" alt="PayPal" className="h-5 w-5" />
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium">PayPal</p>
@@ -6046,7 +6046,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
     // Create an input element
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp';
+    input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.webp,.webp';
     
     // Handle file selection
     input.onchange = (e) => {
@@ -6281,14 +6281,14 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       name: 'KNUST',
       role: 'Admin',
       members: 300,
-      image: '/icons/knust.png'
+      image: '/icons/knust.webp'
     },
     {
       id: 'org2-d4e5f6',
       name: 'University of Ghana',
       role: 'Admin',
       members: 300,
-      image: '/icons/legon.png'
+      image: '/icons/legon.webp'
     }
   ];
 

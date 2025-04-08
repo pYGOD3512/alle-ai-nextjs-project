@@ -89,19 +89,19 @@ export default function AudioGeneration() {
         >
           <AudioPlayer
             audioUrl="/audio/relaxing_meditation.mp3"
-            modelIcon="/models/dream.png"
+            modelIcon="/models/dream.webp"
             modelName="MusicGen"
             modelId="3000"
           />
           <AudioPlayer
             audioUrl="/audio/relaxing_meditation.mp3"
-            modelIcon="/models/dall-e.png"
+            modelIcon="/models/dall-e.webp"
             modelName="Whisper"
             modelId="3001"
           />
           <AudioPlayer
             audioUrl="/audio/relaxing_meditation.mp3"
-            modelIcon="/models/dall-e.png"
+            modelIcon="/models/dall-e.webp"
             modelName="Jukebox"
             modelId="3002"
           />

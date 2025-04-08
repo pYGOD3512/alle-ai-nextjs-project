@@ -23,83 +23,83 @@ const aiModels: AIModel[] = [
     id: "gpt-4o",
     name: "GPT-4o",
     provider: "OpenAI",
-    icon: "/models/gpt-4o.png"
+    icon: "/models/gpt-4o.webp"
   },
   {
     id: "deepseek",
     name: "DeepSeek V2",
     provider: "DeepSeek",
-    icon: "/models/deepseek.png",
+    icon: "/models/deepseek.webp",
     isPro: false
   },
   {
     id: "gemini-pro",
     name: "Gemini 1.5",
     provider: "Google",
-    icon: "/models/gemini.png",
+    icon: "/models/gemini.webp",
     isPro: false
   },
   {
       id: "qwen-2-5",
       name: "Qwen 2.5",
       provider: "Alibaba",
-      icon: "/models/qwen.png",
+      icon: "/models/qwen.webp",
       isPro: false
   },
   {
     id: "claude-3-5-sonnet",
     name: "Claude 3.5",
     provider: "Anthropic",
-    icon: "/models/claude-3.png",
+    icon: "/models/claude-3.webp",
     isPro: false
   },
   {
     id: "llama-70b",
     name: "Llama 3",
     provider: "Meta",
-    icon: "/models/meta.png",
+    icon: "/models/meta.webp",
     isPro: false
   },
   {
     id: "grok",
     name: "Grok",
     provider: "xAI",
-    icon: "/models/grok.png",
+    icon: "/models/grok.webp",
     isPro: false
   },
   {
     id: "mistral",
     name: "Mistral",
     provider: "Mistral AI",
-    icon: "/models/mistral-ai.png",
+    icon: "/models/mistral-ai.webp",
     isPro: false
   },
   {
     "id": "claude-3-haiku",
     "name": "Claude 3 Haiku",
     "provider": "Anthropic",
-    "icon": "/models/claude-3.png",
+    "icon": "/models/claude-3.webp",
     "isPro": false
   },
   {
     id: "phi",
     name: "Phi",
     provider: "Microsoft",
-    icon: "/models/microsoft.png",
+    icon: "/models/microsoft.webp",
     isPro: false
   },
   {
     id: "yi",
     name: "Yi",
     provider: "01.AI",
-    icon: "/models/yi.png",
+    icon: "/models/yi.webp",
     isPro: false
   },
   {
     id: "copilot",
     name: "Copilot",
     provider: "Microsoft",
-    icon: "/models/copilot.png",
+    icon: "/models/copilot.webp",
     isPro: false
   },
   // ... add more models as needed
@@ -692,7 +692,7 @@ export function PlatformChatPreview({ onAnimationComplete }: PlatformPreviewProp
                             <div className="flex gap-2 items-center">
                               <div className="w-4 h-4">
                                 <Image
-                                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.webp" : "/svgs/logo-desktop-mini-dark.webp"}
                                   alt="Summary"
                                   width={20}
                                   height={20}
@@ -803,7 +803,7 @@ export function PlatformChatPreview({ onAnimationComplete }: PlatformPreviewProp
                                 <div className="flex items-center gap-2 p-2">
                                   <div className="w-5 h-5">
                                     <Image
-                                      src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                                      src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.webp" : "/svgs/logo-desktop-mini-dark.webp"}
                                       alt="AI Summary"
                                       width={20}
                                       height={20}

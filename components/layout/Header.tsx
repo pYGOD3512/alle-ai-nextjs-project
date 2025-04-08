@@ -410,7 +410,7 @@ export function Header() {
             mounted && (
               <div className="h-8 w-32 flex items-center justify-center overflow-hidden">
                 <Image 
-                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.webp" : "/svgs/logo-desktop-dark-full.webp"}
                   alt="Logo"
                   width={100}
                   height={30}
@@ -423,7 +423,7 @@ export function Header() {
             mounted && (
               <div className="h-8 w-8 flex items-center justify-center overflow-hidden">
                 <Image 
-                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                  src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.webp" : "/svgs/logo-desktop-mini-dark.webp"}
                   alt="Logo"
                   width={32}
                   height={32}
@@ -539,7 +539,7 @@ export function Header() {
           ) : (
             specialRoutes.includes(pathname) && mounted && (
               <Image
-              src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+              src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.webp" : "/svgs/logo-desktop-dark-full.webp"}
                 alt="Logo"
                 width={100}
                 height={100}

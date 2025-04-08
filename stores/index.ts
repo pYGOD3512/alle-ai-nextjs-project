@@ -851,7 +851,7 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({ 
         token: state.token,
         user: state.user,
-        plan: state.plan,
+        // plan: state.plan,
       }),
     }
   )

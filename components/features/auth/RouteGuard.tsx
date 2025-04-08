@@ -54,17 +54,12 @@ function RouteGuardInner({ children }: RouteGuardProps) {
 
   useEffect(() => {
     // Store the current path for potential restoration after auth
-    const storeCurrentPath = () => {
-      if (pathname !== '/auth') {
-        sessionStorage.setItem('returnUrl', pathname + window.location.search);
-        // console.log(pathname + window.location.search,'this is the resolved return url');
-      }
-    };
+    
 
     const checkAuth = async () => {
       const callback = searchParams.get('callback');
       const tokenFromUrl = searchParams.get('token');
-  
+
       if (callback === 'google' && tokenFromUrl) {
         setAuth({} as User, tokenFromUrl);
         setIsLoading(true);
@@ -110,6 +105,38 @@ function RouteGuardInner({ children }: RouteGuardProps) {
       }
 
       // CASE 2: Has token and trying to access other routes aside auth
+      // if (token && !authRoutes.includes(pathname)) {
+      //     // console.log('Token exits fast refresh');
+      //     storeCurrentPath();
+      //     const returnUrl = sessionStorage.getItem('returnUrl');
+      //     if (returnUrl) {
+      //       sessionStorage.removeItem('returnUrl');
+      //       setGenerationType('load');
+            
+      //       router.replace(returnUrl);
+      //       setAuthState('authorized');
+      //       return;
+      //     }
+      // }
+              
+      // CASE 4: Has token and accessing protected/public routes
+      setAuthState('authorized');
+    };
+
+    setAuthState('checking');
+    checkAuth();
+  // }, [pathname, token, searchParams]);
+  }, [token, searchParams]);
+
+  useEffect(()=>{
+    const storeCurrentPath = () => {
+      if (pathname !== '/auth') {
+        sessionStorage.setItem('returnUrl', pathname + window.location.search);
+        // console.log(pathname + window.location.search,'this is the resolved return url');
+      }
+    };
+
+    // CASE 2: Has token and trying to access other routes aside auth
       if (token && !authRoutes.includes(pathname)) {
           // console.log('Token exits fast refresh');
           storeCurrentPath();
@@ -123,15 +150,8 @@ function RouteGuardInner({ children }: RouteGuardProps) {
             return;
           }
       }
-              
-      // CASE 4: Has token and accessing protected/public routes
-      setAuthState('authorized');
-    };
 
-    setAuthState('checking');
-    checkAuth();
-  // }, [pathname, token, searchParams]);
-  }, [token, searchParams]);
+  },[token])
 
   // Show loading screen while checking auth or during explicit loading states
   if (isLoading || authState === 'checking') {

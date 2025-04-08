@@ -12,9 +12,9 @@ interface LogoLoaderProps {
 }
 
 const aiLogos = [
-  { src: "/models/deepseek.png", alt: "OpenAI" },
-  { src: "/models/gpt-4o.png", alt: "Anthropic" },
-  { src: "/models/gemini.png", alt: "Gemini" },
+  { src: "/models/deepseek.webp", alt: "OpenAI" },
+  { src: "/models/gpt-4o.webp", alt: "Anthropic" },
+  { src: "/models/gemini.webp", alt: "Gemini" },
   // ... you can reduce the number of logos for a smaller version
 ].slice(0, 6); // Using fewer logos for the smaller component
 
@@ -40,15 +40,15 @@ const getFixedPositions = (distance: number) => [
 export function AlleAILoader({ size = 'md', showText = false, className = '' }: LogoLoaderProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [logoSrc, setLogoSrc] = useState("/svgs/logo-desktop-mini.png");
+  const [logoSrc, setLogoSrc] = useState("/svgs/logo-desktop-mini.webp");
   const logoSizes = getLogoSizes(size);
   const positions = getFixedPositions(logoSizes.orbit_distance);
 
   useEffect(() => {
     setMounted(true);
     setLogoSrc(resolvedTheme === "dark" 
-      ? "/svgs/logo-desktop-mini.png" 
-      : "/svgs/logo-desktop-mini-dark.png"
+      ? "/svgs/logo-desktop-mini.webp" 
+      : "/svgs/logo-desktop-mini-dark.webp"
     );
   }, [resolvedTheme]);
 

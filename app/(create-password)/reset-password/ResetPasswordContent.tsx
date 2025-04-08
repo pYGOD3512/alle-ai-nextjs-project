@@ -23,7 +23,7 @@ export function ResetPasswordContent() {
 
   if (!mounted) return null;
 
-  const logoSrc = resolvedTheme === 'dark' ? '/svgs/logo-desktop-full.png' : '/svgs/logo-desktop-dark-full.png';
+  const logoSrc = resolvedTheme === 'dark' ? '/svgs/logo-desktop-full.webp' : '/svgs/logo-desktop-dark-full.webp';
 
   if (!email || !token) {
     return (

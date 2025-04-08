@@ -27,7 +27,7 @@ export default function Navbar({ linkText, linkUrl }: NavbarProps) {
         {mounted && (
           <a href="https://app.alle-ai.com">
             <Image 
-            src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"} 
+            src={theme === 'dark' ? "/svgs/logo-desktop-full.webp" : "/svgs/logo-desktop-dark-full.webp"} 
             alt="Alle-AI Logo" 
             width={125} 
             height={125} />

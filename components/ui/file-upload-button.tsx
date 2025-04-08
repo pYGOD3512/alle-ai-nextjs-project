@@ -253,7 +253,7 @@ export function FileUploadButton({
             className="gap-2"
           >
             <Image 
-              src={'/icons/google-drive.png'}
+              src={'/icons/google-drive.webp'}
               alt="google-drive-logo"
               width={100}
               height={100}
@@ -266,7 +266,7 @@ export function FileUploadButton({
             className="gap-2"
           >
             <Image 
-              src="/icons/dropbox.png"
+              src="/icons/dropbox.webp"
               alt="dropbox-logo"
               width={100}
               height={100}
@@ -276,7 +276,7 @@ export function FileUploadButton({
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleOneDriveSelect} className="gap-2">
             <Image 
-              src="/icons/onedrive.png" 
+              src="/icons/onedrive.webp" 
               alt="OneDrive" 
               width={100} 
               height={100} 

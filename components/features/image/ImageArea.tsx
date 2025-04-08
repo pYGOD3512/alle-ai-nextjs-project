@@ -51,7 +51,7 @@ const RetryImageGeneration = ({ modelInfo, onRetry, isRetrying }: {
       {/* Model Info Header */}
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/50 p-2 rounded-lg">
         <Image 
-          src={modelInfo.icon ? modelInfo.icon : '/images/models/default.png'} 
+          src={modelInfo.icon ? modelInfo.icon : '/images/models/default.webp'} 
           alt={modelInfo.name} 
           width={32}
           height={32}
@@ -124,7 +124,7 @@ const PromptDisplay = ({ text, maxLength }: { text: string; maxLength: number })
         {displayText}
         <button
           onClick={toggleExpand}
-          className="text-sm italic text-muted-foreground hover:text-primary/80 mt-1 self-start"
+          className="text-sm italic text-muted-foreground hover:text-primary/80 mt-1 ml-2 self-start"
         >
           {expanded ? 'See less' : 'See more'}
         </button>
@@ -187,9 +187,9 @@ const ImageArea = () => {
     };
 
     const handleInitialResponse = async () => {
-      console.log('Hi');
+      // console.log('Hi');
       if (!conversationId || !promptId) {
-        console.log('No conversationId or promptId');
+        // console.log('No conversationId or promptId');
         return;
       }
       
@@ -197,13 +197,13 @@ const ImageArea = () => {
         modelId => !inactiveModels.includes(modelId)
       );
       
-      console.log('Active Models after filter:', activeModels);
+      // console.log('Active Models after filter:', activeModels);
       
       setLoadingModels(activeModels);
       setGeneratedImages([]);
       setErrors({});
 
-      console.log('About to start image generation for models:', activeModels);
+      // console.log('About to start image generation for models:', activeModels);
       
       activeModels.forEach(modelId => {
         generateImage(modelId);
@@ -260,12 +260,14 @@ const ImageArea = () => {
   useEffect(() => {
     // Check if chat models are loaded
     if (imageModels && imageModels.length > 0) {
+      console.log(imageModels, 'here are the image models')
       setImageModelsLoaded(true);
     }
   }, [imageModels]);
 
   useEffect(()=>{
     if (conversationId && generationType === 'load' && imageModelsLoaded) {
+      console.log('organa')
       getConversationModels(conversationId);
     }
   },[conversationId, generationType, imageModelsLoaded])
@@ -354,7 +356,7 @@ const ImageArea = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${modelName}-generated-image.png`;
+      link.download = `${modelName}-generated-image.webp`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -425,7 +427,7 @@ const ImageArea = () => {
 
   const ImageSkeleton = ({ modelId }: { modelId: string }) => {
     const modelInfo = getModelInfo(modelId);
-    console.log('modelInfo', modelInfo);
+    // console.log('modelInfo', modelInfo);
 
     return (
       <div className="relative w-80 h-80 lg:w-96 lg:h-96">
@@ -433,7 +435,7 @@ const ImageArea = () => {
           {modelInfo ? (
             <>
               <Image 
-                src={modelInfo.icon ? modelInfo.icon : '/images/models/default.png'} 
+                src={modelInfo.icon ? modelInfo.icon : '/images/models/default.webp'} 
                 alt={modelInfo.name} 
                 width={32}
                 height={32}
@@ -520,13 +522,13 @@ const ImageArea = () => {
                 const isLoading = loadingModels.includes(modelId);
                 const error = errors[modelId];
                 const modelInfo = getModelInfo(modelId);
-                console.log(selectedModels.image, 'the image selected models');
-                console.log(generationType, 'This is the generation type');
-                console.log(isLoading, 'This is isLoading');
-                console.log(loadingModels, 'This is the loading models');
+                // console.log(selectedModels.image, 'the image selected models');
+                // console.log(generationType, 'This is the generation type');
+                // console.log(isLoading, 'This is isLoading');
+                // console.log(loadingModels, 'This is the loading models');
 
                 if (isLoading) {
-                  console.log('isLoading Images', isLoading);
+                  // console.log('isLoading Images', isLoading);
                   return <ImageSkeleton key={modelId} modelId={modelId} />;
                 }
 
@@ -547,7 +549,7 @@ const ImageArea = () => {
                   <div key={image.id} className="relative group">
                     <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/50 p-2 rounded-lg select-none">
                       <Image 
-                        src={modelInfo.icon ? modelInfo.icon : '/images/models/default.png'} 
+                        src={modelInfo.icon ? modelInfo.icon : '/images/models/default.webp'} 
                         alt={modelInfo.name} 
                         width={32}
                         height={32}
@@ -560,7 +562,7 @@ const ImageArea = () => {
 
                     <div className="relative overflow-hidden rounded-lg">
                       <Image 
-                        src={image.imageUrl ? image.imageUrl : '/images/models/default.png'}
+                        src={image.imageUrl ? image.imageUrl : '/images/models/default.webp'}
                         alt={`Generated by ${modelInfo?.name}`}
                         width={400}
                         height={400}
@@ -611,7 +613,7 @@ const ImageArea = () => {
                 <div key={image.id} className="relative group">
                   <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/50 p-2 rounded-lg select-none">
                     <Image 
-                      src={modelInfo?.icon ? modelInfo.icon : '/images/models/default.png'} 
+                      src={modelInfo?.icon ? modelInfo.icon : '/images/models/default.webp'} 
                       alt={modelInfo?.name || ''} 
                       width={32}
                       height={32}
@@ -624,7 +626,7 @@ const ImageArea = () => {
 
                   <div className="relative overflow-hidden rounded-lg">
                     <Image 
-                      src={image.imageUrl ? image.imageUrl : '/images/models/default.png'}
+                      src={image.imageUrl ? image.imageUrl : '/images/models/default.webp'}
                       alt={`Generated by ${modelInfo?.name}`}
                       width={400}
                       height={400}
@@ -680,7 +682,7 @@ const ImageArea = () => {
               <div className="relative w-full h-full group">
                 {/* Image - Ensures it scales correctly */}
                 <Image
-                  src={selectedImage.imageUrl ? selectedImage.imageUrl : '/images/models/default.png'}
+                  src={selectedImage.imageUrl ? selectedImage.imageUrl : '/images/models/default.webp'}
                   alt={`Generated by ${getModelInfo(selectedImage.modelId)?.name}`}
                   fill
                   className="object-contain"

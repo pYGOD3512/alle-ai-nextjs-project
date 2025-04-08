@@ -251,7 +251,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
 
     const handleAutoFeedbackSubmit = () => {
-      console.log('Auto feedback submitted');
+      // console.log('Auto feedback submitted');
     };
 
 
