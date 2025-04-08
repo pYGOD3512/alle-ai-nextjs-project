@@ -29,7 +29,7 @@ export function ForgotPasswordForm({ onSwitchMode, onSuccess }: ForgotPasswordFo
       
       if (response.status) {
         // // console.log('res  ', response);
-        toast.success('Password reset link have been sent to your email');
+        toast('Password reset link have been sent to your email');
         onSuccess(email);
       } else {
         throw new Error(response.message || 'Failed to send reset link');

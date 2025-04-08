@@ -8,7 +8,7 @@ import { ChatInput } from "./ChatInput";
 import { ModelResponse as ModelResponseComponent, useSourcesWindowStore } from "./ModelResponse";
 import RenderPageContent from "../RenderPageContent";
 import RetryResponse from "./RetryResponse"
-import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore, useHistoryStore, Attachment } from "@/stores";
+import { useSelectedModelsStore, useContentStore, useWebSearchStore, useSettingsStore, useCombinedModeStore, useCompareModeStore, useHistoryStore, Attachment } from "@/stores";
 import { useModelsStore, useConversationStore } from "@/stores/models";
 import { chatApi } from '@/lib/api/chat';
 import Image from "next/image";
@@ -114,6 +114,7 @@ export function ChatArea() {
   const { isOpen, activeResponseId, sources, close } = useSourcesWindowStore();
   const { isWebSearch } = useWebSearchStore();
   const { isCombinedMode } = useCombinedModeStore();
+  const { isCompareMode } = useCompareModeStore();
   const [combinedLoading, setCombinedLoading] = useState<{ [key: string]: boolean }>({});
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -125,7 +126,6 @@ export function ChatArea() {
   const router = useRouter();
 
   const { user } = useAuthStore();
-  const isSummaryEnabled = user?.summary === 1;
 
   const params = useParams();
   const loadConversationId = params.chatId as string;
@@ -286,7 +286,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
       if (!conversationId || !promptId) return;
       setIsSending(true);
 
-      const summaryEnabledForMessage = user?.summary === 1;
+      const summaryEnabledForMessage = isCompareMode;
       const activeModels = selectedModels.chat.filter(modelId => !inactiveModels.includes(modelId));
 
       setConversationModels(selectedModels.chat);
@@ -582,6 +582,7 @@ const thinkingModels = ['deepseek-r1', 'o1', 'o3-mini'];
       } catch (error) {
         // console.error('Error loading conversation:', error);
         setLoadConversationError(true);
+        router.replace('/chat');
         toast.error('Failed to load conversation');
       } finally {
         setIsLoadingConversation(false);
@@ -888,19 +889,24 @@ useEffect(() => {
   const getConversationModels = (conversationId: string) => {
     chatApi.getModelsForConversation(conversationId)
       .then(response => {
-        // console.log('Models used in conversation:', response);
+        console.log('Models used in conversation:', response);
         const modelUids = response.map((model: Model) => model.model_uid);
 
+        // Get the store actions
+        const store = useSelectedModelsStore.getState();
+
+        // First, set the selected models
         setConversationModels(modelUids);
         setTempSelectedModels(modelUids);
         saveSelectedModels('chat');
 
-        // Toggle inactive models using toggleModelActive
-        response.forEach((model: { model_uid: string, active: number }) => {
-          if (model.active === 0) {
-            useSelectedModelsStore.getState().toggleModelActive(model.model_uid);
-          }
-        });
+        // Create a new array for inactive models based on the response
+        const inactiveModels = response
+        .filter((model: { active: number; model_uid: string }) => model.active === 0)
+        .map((model: { model_uid: string }) => model.model_uid);
+
+        store.setInactiveModels(inactiveModels);
+
       })
       .catch(error => {
         // console.error('Error fetching models for conversation:', error);
@@ -920,7 +926,7 @@ useEffect(() => {
     // // console.log('Editing message at position', position);
 
     try {
-      const summaryEnabledForMessage = user?.summary === 1;
+      const summaryEnabledForMessage = isCompareMode;
       
       // Increment the x position for the new branch
       const newXPosition = branches.reduce((maxX, branch) => {
@@ -1168,7 +1174,7 @@ useEffect(() => {
     
     setIsSending(true);
     try {
-      const summaryEnabledForMessage = user?.summary === 1;
+      const summaryEnabledForMessage = isCompareMode;
 
       const currentBranchMessages = branches[currentBranch].messages;
       const lastMessage = currentBranchMessages[currentBranchMessages.length - 1];
@@ -1759,7 +1765,7 @@ const getWebSearchContext = (branch: Branch, currentY: number): [string, string]
                 {"<"}
             </button>
             <span className="">
-                {`${currentSortedIndex + 1}/${totalTabs}`}
+                {`${currentSortedIndex + 1}/${totalTabs}`}          `                   `
             </span>
             <button onClick={handleNext} className="rounded-md bg-transparent">
                 {">"}
@@ -2044,9 +2050,15 @@ const getWebSearchContext = (branch: Branch, currentY: number): [string, string]
       />
       <PromptModal 
         isOpen={showPrompt} 
-        onClose={() => setShowPrompt(false)} 
+        onClose={() => {
+          setTempSelectedModels(previousSelectedModels);
+          saveSelectedModels('chat');
+          setShowPrompt(false);
+        }}
+        closeOnOutsideClick={false} // Disable closing when clicking outside
         {...promptConfig}
       />
     </RenderPageContent>
   );
 }
+

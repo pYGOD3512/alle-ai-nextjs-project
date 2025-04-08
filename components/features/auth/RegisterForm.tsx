@@ -9,6 +9,7 @@ import { formVariants } from "@/lib/utils";
 import { Loader } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from "sonner"
+import { sendGAEvent } from '@next/third-parties/google'
 
 import { useRouter } from "next/navigation";
 
@@ -49,6 +50,7 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
       });
 
       // console.log(result, 'This is the response for register');
+      sendGAEvent('formSubmission', 'submit', { formType: 'registerForm', status: 'success'});
 
       if (result && result.to === 'verify-email') {
         onRegister(email);
@@ -58,6 +60,8 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
     } catch (error: any) {
       toast.error(`${error.response?.data?.message || "Please check your information and try again"}`)
       setIsLoading(false);
+      sendGAEvent('formSubmission', 'submit', { formType: 'registerForm', status: 'failed'});
+
     }
   };
 

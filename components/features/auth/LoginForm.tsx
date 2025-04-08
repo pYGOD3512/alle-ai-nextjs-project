@@ -10,6 +10,8 @@ import { Loader } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from "sonner"
 
+import { sendGAEvent } from '@next/third-parties/google'
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -35,6 +37,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
     try {
       const result = await login(email, password);
       
+      sendGAEvent('formSubmission', 'submit', { authType: 'loginForm', status: 'success'});
       // Only handle verification if needed
       if (result.data.to === 'verify-email') {
         onVerify(email);
@@ -44,6 +47,7 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
     } catch (error: any) {
       setPassword("");
       toast.error('Login failed, please try again');
+      sendGAEvent('formSubmission', 'submit', { authType: 'loginForm', status: 'failed'});
       // console.log(error)
     } finally {
       setIsLoading(false);
@@ -115,7 +119,6 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
           {isLoading ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Signing in...
             </>
           ) : (
             "Sign in"

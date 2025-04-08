@@ -145,7 +145,7 @@ export function CreateApiKeys() {
   const copyToClipboard = async (text: string, keyName: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Copied')
+      toast('Copied')
     } catch (err) {
       toast.error('Failed to copy')
     }
@@ -159,7 +159,7 @@ export function CreateApiKeys() {
       
       if (response.deleted_at) {
         removeKey(key.id);
-        toast.success(`${response.message}`)
+        toast(`${response.message}`)
       
       } else {
         toast.error('Failed to delete key');
@@ -187,7 +187,7 @@ export function CreateApiKeys() {
       // Pass both id and the isDisabled state based on !response.active
       toggleKeyStatus(key.id, !response.active);
   
-      toast.success(`${response.message}`)
+      toast(`${response.message}`)
     } catch (error) {
       // console.error('Error toggling API key status:', error);
       toast.error(`Failed to ${key.isDisabled ? 'enable' : 'disable'} API key`)

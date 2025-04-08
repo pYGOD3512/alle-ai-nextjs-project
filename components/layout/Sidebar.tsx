@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal, PlansModal, ProjectModal, SearchHistoryModal } from "../ui/modals";
+import { ModelSelectionModal, PlansModal, ProjectModal, SearchHistoryModal, UserProfileModal } from "../ui/modals";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
@@ -79,6 +79,9 @@ export function Sidebar() {
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const historyScrollRef = useRef<HTMLDivElement>(null);
   const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
+
+  const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -314,7 +317,10 @@ export function Sidebar() {
     }
   };
 
-  const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
+  const isPaidPlan = 
+    typeof plan === 'string' && 
+    (plan === 'standard' || plan === 'plus' || plan.includes('standard') || plan.includes('plus'));
+
   // const isPaidPlan = plan === 'free';
 
   return (
@@ -328,7 +334,7 @@ export function Sidebar() {
       )}
       
       <aside
-        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 
+        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)]  transition-all duration-300 
           ${isOpen ? "w-60" : "w-16"} 
           ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}
           border-r bg-sideBarBackground flex flex-col`}
@@ -392,7 +398,7 @@ export function Sidebar() {
                       onClick={() => {
                         (isMobile && isOpen) ? toggle() : '';
                         if (item.href === "/audio" || item.href === "/video") {
-                          toast.info('This feature will be available soon');
+                          toast.info('this feature will be available soon');
                         }
                       }}
                     >
@@ -428,7 +434,7 @@ export function Sidebar() {
                         onClick={() => {
                           // setProjectModalOpen(true);
                           (isMobile && isOpen) ? toggle() : '';
-                          toast.info('This feature will be available soon');
+                          toast.info('this feature will be available soon');
                         }}
                         aria-label="New Project"
                       >
@@ -568,7 +574,7 @@ export function Sidebar() {
                                       </div>
                                     </TooltipTrigger>
                                     <TooltipContent
-                                      side="top"
+                                      side="right"
                                       className="max-w-[200px] text-xs break-words"
                                     >
                                       {item.title}
@@ -654,11 +660,14 @@ export function Sidebar() {
                         <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                       </a>
                     </Link>
-                    <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
+                    {/* <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
                       <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
                         <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
                       </a>
-                    </Link>
+                    </Link> */}
+                      <div onClick={() => {toast.info('this feature will be available soon')}} className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
+                        <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
+                      </div>
                     {/* <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
                         <History  className="w-4 h-4 ml-4"/> Changelog
                     </Link> */}
@@ -669,7 +678,7 @@ export function Sidebar() {
 
             {/* User section at bottom */}
             <div className="flex-shrink-0 p-4 mt-auto">
-              <div className="flex items-center gap-3 mb-4 rounded-full">
+              <div className="flex items-center gap-3 mb-4 rounded-full cursor-pointer" onClick={(e: React.MouseEvent<HTMLDivElement>) => setUserProfileModalOpen(true)}>
                 <Image
                   src={user?.photo_url || "/user.jpg"}
                   alt="User"
@@ -689,15 +698,15 @@ export function Sidebar() {
                         variant="outline" 
                         className="text-[0.6rem] h-3 p-1 flex justify-center items-center relative overflow-hidden"
                       >
-                        <Loader className="h-4 w-4 animate-spin" />
+                        <Loader className="h-2 w-2 animate-spin" />
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" 
                               style={{ backgroundSize: '200% 100%' }}
                         />
                       </Badge>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {user?.email}
+                  <div className="text-xs text-muted-foreground" title={user?.email}>
+                    {user?.email?.length ? (user.email.length > 20 ? `${user.email.substring(0, 20)}...` : user.email) : ""}
                   </div>
                 </div>
               </div>
@@ -713,79 +722,97 @@ export function Sidebar() {
                 ) : (
                   <>
                     <Gem className="h-4 w-4" />
-                    {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
                   </>
                 )}
+                {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
               </Button>
             </div>
           </>
         ) : (
-          <div className="space-y-2 px-2">
-            <div className="flex flex-col space-y-2 mb-8">
+          <div className="flex flex-col h-full">
+            <div className="space-y-2 px-2">
+              <div className="flex flex-col space-y-2 mb-8">
+                <Button
+                  onClick={handleNewChat}
+                  variant="outline"
+                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg} dark:${getSectionStyles(currentType).darkBgColor}`}
+                >
+                  <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
+                </Button>
+                <Button
+                  variant="outline"
+                  className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
+                  onClick={() => setModelSelectionModalOpen(true)}
+                  id="tooltip-select-selector"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
+              {sidebarMenuItems.map((item, i) => {
+                const isActive = isActiveRoute(item.href, pathname);
+                const type = item.href === "/chat" ? "chat" 
+                  : item.href === "/image" ? "image"
+                  : item.href === "/audio" ? "audio"
+                  : "video";
+                const styles = getSectionStyles(type);
+                
+                // Wrap the Link in a conditional
+                const content = (
+                  <div
+                    className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
+                      ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
+                      ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
+                      ${styles.hoverBg} cursor-pointer`}
+                    onClick={() => {
+                      if (item.href === "/audio" || item.href === "/video") {
+                        toast.info('this feature will be available soon');
+                      }
+                    }}
+                  >
+                    <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
+                  </div>
+                );
+
+                return item.href === "/audio" || item.href === "/video" ? (
+                  <div key={item.label}>{content}</div>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                  >
+                    {content}
+                  </Link>
+                );
+              })}
+
               <Button
-                onClick={handleNewChat}
-                variant="outline"
-                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).hoverBg} dark:${getSectionStyles(currentType).darkBgColor}`}
+                variant="ghost"
+                size="icon"
+                className="w-full"
+                onClick={() => {
+                  toast.info('this feature will be available soon');
+                  // setProjectModalOpen(true)}
+                }}
               >
-                <CurrentIcon className={`h-4 w-4 ${getSectionStyles(currentType).iconColor}`} />
-              </Button>
-              <Button
-                variant="outline"
-                className={`flex-1 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} dark:${getSectionStyles(currentType).darkBgColor}`}
-                onClick={() => setModelSelectionModalOpen(true)}
-                id="tooltip-select-selector"
-              >
-                <LayoutGrid className="h-4 w-4" />
+                <Folder className="h-4 w-4 text-muted-foreground" />
               </Button>
             </div>
-            {sidebarMenuItems.map((item, i) => {
-              const isActive = isActiveRoute(item.href, pathname);
-              const type = item.href === "/chat" ? "chat" 
-                : item.href === "/image" ? "image"
-                : item.href === "/audio" ? "audio"
-                : "video";
-              const styles = getSectionStyles(type);
-              
-              // Wrap the Link in a conditional
-              const content = (
-                <div
-                  className={`w-full flex items-center justify-center h-8 text-sm rounded-md px-2
-                    ${isActive ? `${styles.bgColor} ${styles.iconColor}` : ""}
-                    ${item.href === "/audio" || item.href === "/video" ? "text-muted-foreground" : ""}
-                    ${styles.hoverBg} cursor-pointer`}
-                  onClick={() => {
-                    if (item.href === "/audio" || item.href === "/video") {
-                      toast.info('This feature will be available soon');
-                    }
-                  }}
-                >
-                  <item.icon className={`h-4 w-4 ${isActive ? styles.iconColor : ""}`} />
-                </div>
-              );
 
-              return item.href === "/audio" || item.href === "/video" ? (
-                <div key={item.label}>{content}</div>
-              ) : (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                >
-                  {content}
-                </Link>
-              );
-            })}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-full"
-              onClick={() => {
-                toast.info('This feature will be available soon');
-                // setProjectModalOpen(true)}
-              }}
-            >
-              <Folder className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="mt-auto px-2 pb-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-full"
+                onClick={isPaidPlan ? handleManageSubscription : () => setPlansModalOpen(true)}
+                disabled={isLoadingBillingPortal}
+              >
+                {isLoadingBillingPortal ? (
+                  <Loader className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Gem className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </div>
           </div>
         )}
       </aside>
@@ -805,6 +832,11 @@ export function Sidebar() {
       <ProjectModal
         isOpen={projectModalOpen}
         onClose={() => setProjectModalOpen(false)}
+      />
+
+      <UserProfileModal 
+        isOpen={userProfileModalOpen} 
+        onClose={() => setUserProfileModalOpen(false)} 
       />
 
       {/* Add confirmation dialog */}

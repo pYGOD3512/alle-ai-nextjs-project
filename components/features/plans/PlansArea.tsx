@@ -24,7 +24,7 @@ const PlansArea = () => {
 
 
   const handleCustomPlan = () => {
-    toast.info('This plan will be available soon!')
+    toast.info('this plan will be available soon!')
   };
 
   const handleCheckout = async (planName: string) => {
@@ -246,7 +246,6 @@ const PlansArea = () => {
                 {processingPlan === plan.name ? (
                   <div className="flex items-center gap-2">
                     <Loader className="h-4 w-4 animate-spin" />
-                    <span>Processing...</span>
                   </div>
                 ) : (
                   plan.buttonText

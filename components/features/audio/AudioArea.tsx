@@ -143,7 +143,7 @@ export function AudioArea() {
     try {
       await navigator.clipboard.writeText(submittedPrompt);
       setTimeout(() => {
-        toast.success('Copied');
+        toast('Copied');
       }, 0);
     } catch (err) {
       // console.error('Failed to copy text: ', err);
@@ -210,7 +210,7 @@ export function AudioArea() {
             prev ? { ...prev, status: 'ready' } : null
           );
 
-          toast.success('Image uploaded');
+          toast('Image uploaded');
 
         } catch (error) {
           if (uploadedFile?.url) {
@@ -429,7 +429,7 @@ export function AudioArea() {
         liked: true
       });
 
-      toast.success('Liked')
+      toast('Liked')
     } else {
       // Remove from liked media store
       const likedItems = useLikedMediaStore.getState().getLikedMediaByType('audio');
@@ -441,7 +441,7 @@ export function AudioArea() {
         removeLikedMedia(likedItem.id);
       }
 
-      toast.success('Unliked')
+      toast('Unliked')
 
     }
   }, [responses, submittedPrompt, addLikedMedia, removeLikedMedia, toast]);
@@ -510,7 +510,7 @@ export function AudioArea() {
         setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
       }, 500);
 
-      toast.success('File uploaded');
+      toast('File uploaded');
     } catch (error) {
       handleFileError(error);
     }
@@ -559,7 +559,7 @@ export function AudioArea() {
         setUploadedFile(prev => prev ? { ...prev, status: 'ready' } : null);
       }, 500);
 
-      toast.success('File uploaded');
+      toast('File uploaded');
     } catch (error) {
       handleFileError(error);
     }

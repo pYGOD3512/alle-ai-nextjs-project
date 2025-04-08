@@ -185,7 +185,7 @@ import { useConversationStore, useModelsStore } from '@/stores/models';
 import { useSidebarStore, useSelectedModelsStore, useHistoryStore, 
   useLikedMediaStore, LikedMediaItem, useDriveAuthStore, useSharedLinksStore, 
   useVoiceStore, useSettingsStore, useApiKeyStore, usePaymentStore, useAuthStore, 
-  useProjectStore, ProjectFile, useTextSizeStore } from "@/stores";
+  useProjectStore, ProjectFile, useTextSizeStore, useCompareModeStore } from "@/stores";
 import { AlleAILoader } from "../features/AlleAILoader";
 import { HistoryItem } from "@/lib/api/history";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
@@ -361,6 +361,7 @@ interface ActionButton {
 export interface PromptModalProps {
   isOpen: boolean;
   onClose: () => void;
+  closeOnOutsideClick?: boolean;
   title: string;
   message: string | React.ReactNode;
   type?: 'warning' | 'error' | 'success' | 'info' | 'upgrade';
@@ -418,7 +419,7 @@ export function FeedbackModal({ isOpen, onClose }: ModalProps) {
         anonymous: wantsFutureContact
       });
 
-      toast.success('Your feedback has been submitted')
+      toast('Your feedback has been submitted')
       // Reset form
       setSelectedRating(null);
       setFeedback("");
@@ -1168,6 +1169,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const [logoutDeviceId, setLogoutDeviceId] = useState<string | number | null>(null);
   const [isDevicesOpen, setIsDevicesOpen] = useState(true);
   const [showSummaryPrompt, setShowSummaryPrompt] = useState(false);
+  const { isCompareMode } = useCompareModeStore();
 
   // Calculate active models count
   const activeModelsCount = selectedModels.chat.filter(
@@ -1193,27 +1195,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         return;
       }
 
-        // console.log('this is the active model count', activeModelsCount)
-      if (useAuthStore.getState().user?.summary === 0) {
+      const { isCompareMode, setIsCompareMode } = useCompareModeStore.getState();
+      if (!isCompareMode) {
         return;
       }
-      
-        const AutoActivate = async () => {
-          const response = await chatApi.updateSummaryPreference(false);
-          if (response.status) {
-            // console.log('autoactivation', response)
-          useAuthStore.setState((state) => ({
-            ...state,
-            user: state.user ? {
-              ...state.user,
-              summary: response.value ? 1 : 0
-            } : state.user
-          }));
-          
-          setPersonalizationSetting('summary', false);
-        }
-      }
-      AutoActivate();
+
+      setIsCompareMode(false);     
+      setPersonalizationSetting('summary', false);
     }
 
   }, [activeModelsCount]);
@@ -1266,7 +1254,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         title: "Compare",
         description:
         "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
-        enabled: user?.summary===1,
+        enabled: isCompareMode,
       },
       personalizedAds: {
         title: "Sponsored content",
@@ -1406,7 +1394,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         await driveService.signOut();
         useDriveAuthStore.getState().clearAuth();
         
-        toast.success('Google Drive unlinked');
+        toast('Google Drive unlinked');
       } catch (error) {
         // console.error('Failed to unlink Google Drive:', error);
         toast.error('Failed to unlinked Google Drive');
@@ -1424,7 +1412,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     }
 
     if (key === "summary") {
-      if (isFreeUser) {
+      if (!isFreeUser) {
         setPromptConfig({
           title: "Upgrade Required",
           message: "Please upgrade your plan to enable the Compare & Comparison feature.",
@@ -1441,35 +1429,18 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
         setShowPromptModal(true);
         return;
       }
-  
-      try {
-        // // console.log(checked,'this is the initial state of the switch')
-        const response = await chatApi.updateSummaryPreference(checked);
-        if (response.status) {
-
-          useAuthStore.setState((state) => ({
-            ...state,
-            user: state.user ? {
-              ...state.user,
-              summary: response.value ? 1 : 0
-            } : state.user
-          }));
-          
-          setPersonalizationSetting(key, !checked);
-        }
-      } catch (error) {
-        setPersonalizationSetting(key, !checked);
-        toast.error('Failed to toggle Compare');
-      }
-    } else {
-      // Handle other personalization settings
+    
+      // Use the Compare Mode store instead of the API call
+      const { setIsCompareMode } = useCompareModeStore.getState();
+      
+      // Update the compare mode state
+      setIsCompareMode(checked);
+      
+      // Still update the local personalization setting
       setPersonalizationSetting(key, checked);
     }
   };
 
-  // const handleSwitchChange = (key: keyof typeof personalization, checked: boolean) => {
-  //   setPersonalizationSetting(key, checked);
-  // };
   function safeDisplayLanguageName(languageCode: string) {
     try {
       return new Intl.DisplayNames(['en'], { type: 'language' }).of(languageCode) || languageCode;
@@ -1851,7 +1822,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            toast.info('This feature will be available soon!')
+                            toast.info('this feature will be available soon!')
                             // if (setting.action === "Delete") {
                             //   setDeleteAccountModalOpen(true);
                             // } else if (setting.action === "Export") {
@@ -1887,13 +1858,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           size="sm"
                           onClick={() => {
                             if (key === "google_drive") {
-                            toast.info('This feature will be available soon!')
+                            toast.info('this feature will be available soon!')
                               // handleGoogleDriveAction();
                             } else if (key === "one_drive"){
-                              toast.info('This feature will be available soon!')
+                              toast.info('this feature will be available soon!')
                               // // console.log('One Drive')
                             } else if (key === "dropbox"){
-                              toast.info('This feature will be available soon!')
+                              toast.info('this feature will be available soon!')
                               // // console.log('Dropbox')
                             }
                           }}
@@ -2107,7 +2078,8 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  ;
+  const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
+  
   
   // Form state
   const [formData, setFormData] = useState({
@@ -2149,6 +2121,28 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
     }
   };
 
+  // Add this function to handle billing portal redirection
+  const handleManageSubscription = async () => {
+    try {
+      setIsLoadingBillingPortal(true);
+      const response = await authApi.getBillingPortal(window.location.href);
+      if (response.status && response.url) {
+        window.location.href = response.url;
+      } else {
+        toast.error('Something went wrong, please try again');
+      }
+    } catch (error) {
+      toast.error('Something went wrong, check your internet connection');
+    } finally {
+      setIsLoadingBillingPortal(false);
+    }
+  };
+
+  const isPaidPlan = 
+    typeof plan === 'string' && 
+    (plan === 'standard' || plan === 'plus' || plan.includes('standard') || plan.includes('plus'));
+
+
   const handleEditToggle = async () => {
     if (isEditing) {
       setIsSubmitting(true);
@@ -2175,7 +2169,7 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           );
         }
 
-        toast.success('Profile updated')
+        toast('Profile updated')
         
         setIsEditing(false);
       } catch (error) {
@@ -2266,36 +2260,26 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                 <p className="text-xs sm:text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
-            <div className="absolute right-4 top-4 flex gap-2">
-              <Button 
-                variant={isEditing ? "default" : "outline"}
-                className={`px-2 sm:px-3 transition-all duration-200 ${
-                  isEditing 
-                    ? 'bg-primary hover:bg-primary/90' 
-                    : 'border-2 border-borderColorPrimary hover:bg-accent'
-                }`}
-                size="sm"
-                onClick={handleEditToggle}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <Loader className="h-4 w-4 animate-spin" />
-                    <span className='hidden sm:inline'>Saving...</span>
-                  </div>
-                ) : isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    <span className='hidden sm:inline'>Save Changes</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Pencil className="h-4 w-4" />
-                    <span className='hidden sm:inline'>Edit Profile</span>
-                  </div>
-                )}
-              </Button>
-            </div>
+            {!isEditing && (
+              <div className="absolute right-4 top-4 flex gap-2">
+                <Button 
+                  variant={isEditing ? "default" : "outline"}
+                  className={`px-2 sm:px-3 transition-all duration-200 ${
+                    isEditing 
+                      ? 'bg-primary hover:bg-primary/90' 
+                      : 'border-2 border-borderColorPrimary hover:bg-accent'
+                  }`}
+                  size="sm"
+                  onClick={handleEditToggle}
+                  disabled={isSubmitting}
+                >
+                    <div className="flex items-center gap-2">
+                      <Pencil className="h-4 w-4" />
+                      <span className='hidden sm:inline'>Edit Profile</span>
+                    </div>
+                </Button>
+              </div>
+              )}
           </DialogHeader>
 
           <AnimatePresence mode="wait">
@@ -2360,17 +2344,57 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           </AnimatePresence>
 
           <div className="flex justify-between gap-2 pt-4 border-t">
-            <Button 
-              className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' 
-              variant="outline" 
-              onClick={() => {
-                setPlansModalOpen(true);
-                onClose();
-              }}
-            >
-              <Gem className='w-4 h-4 mr-2'/>
-              <span>UPGRADE</span>
-            </Button>
+            {isEditing ? 
+            (
+              <Button 
+                variant={isEditing ? "default" : "outline"}
+                className={`px-2 sm:px-3 transition-all duration-200 ${
+                  isEditing 
+                    ? 'bg-primary hover:bg-primary/90' 
+                    : 'border-2 border-borderColorPrimary hover:bg-accent'
+                }`}
+                size="sm"
+                onClick={handleEditToggle}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader className="h-4 w-4 animate-spin" />
+                    <span className='hidden sm:inline'>Saving...</span>
+                  </div>
+                ) : isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <Save className="h-4 w-4" />
+                    <span className='hidden sm:inline'>Save Changes</span>
+                  </div>
+                ) : ''}
+              </Button>
+            ) : (
+              <Button 
+                className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' 
+                variant="outline" 
+                onClick={() => {
+                  if (isPaidPlan) {
+                    handleManageSubscription();
+                  } else {
+                    setPlansModalOpen(true);
+                    onClose();
+                  }
+                }}
+                disabled={isLoadingBillingPortal}
+              >
+                {isLoadingBillingPortal ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    <Gem className='w-4 h-4 mr-2'/>
+                  </>
+                )}
+                {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
+              </Button>
+            )}
             <div className='flex gap-4'>
               <Button 
                 className='p-2 sm:p-3 text-xs sm:text-sm' 
@@ -2437,7 +2461,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
-    toast.success('Copied');
+    toast('Copied');
   };
 
   const platforms = [
@@ -2616,7 +2640,7 @@ export function ReferModal({ isOpen, onClose }: ModalProps) {
           currentBalance={stats.cashEarned}
           onConfirm={() => {
             // // console.log(`Subscription confirmed for ${selectedPlan}`);
-            toast.success(`You've subscribed to Alle-AI ${selectedPlan}`);
+            toast(`You've subscribed to Alle-AI ${selectedPlan}`);
             onClose();
           }}
         />
@@ -2708,7 +2732,7 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
   const userPlan = useAuthStore((state) => state.plan);
 
   const handleCustomPlan = () => {
-    toast.info('This plan will be available soon!')
+    toast.info('this plan will be available soon!')
   };
 
 
@@ -3120,7 +3144,6 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
                         {processingPlan === plan.name ? (
                           <div className="flex items-center gap-2">
                             <Loader className="h-4 w-4 animate-spin" />
-                            <span>Processing...</span>
                           </div>
                         ) : (
                           getButtonText(plan.name)
@@ -3447,7 +3470,7 @@ export function ShareDialog({ isOpen, onClose, imageUrl, modelName }: ShareDialo
 
   const handleShare = (platform: typeof socialMediaOptions[0]) => {
     window.open(platform.handler(imageUrl), '_blank');
-    toast.success(`Your creation has been shared to ${platform.name}`)
+    toast(`Your creation has been shared to ${platform.name}`)
     onClose();
   };
 
@@ -4184,7 +4207,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     const currentTypeEntry = Object.entries(sectionIds).find(([_, id]) => id !== null);
     
     if (!currentTypeEntry || !currentTypeEntry[1]) {
-      toast.info('Please select a conversation to share');
+      toast('Please select a conversation to share');
       setIsLoading(false);
       return;
     }
@@ -4213,11 +4236,11 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     if (existingLink) {
       // Update existing link
       updateSharedLink(existingLink.id, newLink);
-      toast.info('Share link has been updated');
+      toast('Share link has been updated');
     } else {
       // Create new link
       addSharedLink(historyId, history.title, newLink);
-      toast.info('Share link has been created');
+      toast('Share link has been created');
     }
 
     setCurrentConversationLink(newLink);
@@ -4230,7 +4253,7 @@ export function ShareLinkModal({ isOpen, onClose }: ModalProps) {
     
     try {
       await navigator.clipboard.writeText(currentConversationLink);
-      toast.success('Copied');
+      toast('Copied');
     } catch (err) {
       toast.error('Failed to copy link')
     }
@@ -4414,7 +4437,7 @@ export function SharedLinksModal({ isOpen, onClose }: ModalProps) {
   const copyToClipboard = async (link: string) => {
     try {
       await navigator.clipboard.writeText(link);
-      toast.success('Copied');
+      toast('Copied');
     } catch (err) {
       toast.error('Failed to copy link');
 
@@ -4706,7 +4729,7 @@ export function ReportContentModal({
 
   const handleSubmit = async () => {
     if (!selectedCategory) {
-      toast.info('Please select a category')
+      toast('Please select a category')
       return;
     }
 
@@ -4715,7 +4738,7 @@ export function ReportContentModal({
       // Simulated API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success('Thank you for helping keep our platform safe.')
+      toast('Thank you for helping keep our platform safe.')
       onClose();
       setSelectedCategory('');
     } catch (error) {
@@ -4977,6 +5000,7 @@ export function NotificationModal({
 export function PromptModal({
   isOpen,
   onClose,
+  closeOnOutsideClick = true, // Default to true for backward compatibility
   title,
   message,
   type = 'info',
@@ -5011,8 +5035,20 @@ export function PromptModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        // If open is becoming false (dialog is closing)
+        if (!open) {
+          // Only call onClose if closeOnOutsideClick is true
+          if (closeOnOutsideClick) {
+            onClose();
+          }
+          // Otherwise, do nothing - modal stays open
+        }
+      }}
+    >
+      <DialogContent className={`max-w-md ${!closeOnOutsideClick ? "[&>button]:hidden" : ""}`}>
         <DialogHeader>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -5133,7 +5169,7 @@ export function CreateApiKeyModal({ isOpen, onClose }: ModalProps) {
         cost: "$0.00"
       });
 
-      toast.success('API Key Created')
+      toast('API Key Created')
       
       setKeyName('');
       onClose();
@@ -5210,7 +5246,7 @@ export function EditApiKeyModal({ isOpen, onClose, keyId, initialName }: ModalPr
       if (response.status) {
         // Update the key name in the store
         updateKeyName(keyId, response.api_key.name);
-        toast.success('API key name updated')
+        toast('API key name updated')
         onClose();
       }
     } catch (error) {
@@ -5636,14 +5672,14 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
               disabled={isLoading}
               onClick={()=>{
                 mode === 'add' && (
-                  toast.success('Payment method added')
+                  toast('Payment method added')
                 )
               }}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Loader className="h-4 w-4 animate-spin" />
-                  {mode === 'add' ? 'Adding...' : 'Processing...'}
+                  {/* {mode === 'add' ? 'Adding...' : 'Processing...'} */}
                 </span>
               ) : (
                 mode === 'add' ? 'Add payment method' : `Pay ${amount ? `£${amount}` : ''}`
@@ -6000,7 +6036,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
 
       await addProjectFile(currentProject.id, file);
 
-      toast.success('File uploaded')
+      toast('File uploaded')
     } catch (error) {
       toast.error('Failed to upload file');
     }
@@ -6105,7 +6141,7 @@ export function ProjectFilesModal({ isOpen, onClose, projectName}: ProjectModalP
                       onClick={() => {
                         if (!currentProject?.id) return;
                         removeProjectFile(currentProject.id, file.id);
-                        toast.success('File removed');
+                        toast('File removed');
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -6273,7 +6309,7 @@ export function OrganizationModal({ isOpen, onClose }: ModalProps) {
       // Add your organization creation logic here
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success('Organization Created');
+      toast('Organization Created');
       
       // Open the new organization page in a new tab
       router.push(`/organization/${newOrgId}`);
@@ -6601,7 +6637,7 @@ export function AutoFeedbackModal({
       setLiked(null);
       setFeedback("");
       onClose();
-      toast.success('Thanks for your feedback!');
+      toast('Thanks for your feedback!');
     } catch (error) {
       toast.error('Failed to submit feedback');
     } finally {

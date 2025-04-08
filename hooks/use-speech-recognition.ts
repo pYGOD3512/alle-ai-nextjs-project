@@ -71,7 +71,7 @@ export function useSpeechRecognition({
       if (inputRef?.current) {
         inputRef.current.focus();
       }
-      toast.info('Listening...')
+      toast('Listening...')
     }
   };
 

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useContentStore, useSelectedModelsStore, useGeneratedImagesStore, useLikedMediaStore } from "@/stores";
 import { Copy, Download, Share2, Heart, Plus, RefreshCcw, X, Loader } from "lucide-react";
 import { toast } from "sonner"
+import { useRouter } from 'next/navigation';
 
 import {
   Dialog,
@@ -108,12 +109,36 @@ interface LoadedImageResponse {
   }>;
 }
 
+const PromptDisplay = ({ text, maxLength }: { text: string; maxLength: number }) => {
+  const [expanded, setExpanded] = useState(false);
+  
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+  };
+  
+  const displayText = expanded ? text : text.substring(0, maxLength)
+  
+  return (
+    <div className="flex flex-col">
+      <div className="text-base">
+        {displayText}
+        <button
+          onClick={toggleExpand}
+          className="text-sm italic text-muted-foreground hover:text-primary/80 mt-1 self-start"
+        >
+          {expanded ? 'See less' : 'See more'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const ImageArea = () => {
   const { content, setContent } = useContentStore();
   const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
   const { conversationId, promptId, generationType, setConversationId } = useConversationStore();
   const { imageModels } = useModelsStore();
-  ;
+  const router = useRouter();
   const params = useParams();
   const loadConversationId = params.chatId as string;
 
@@ -162,16 +187,24 @@ const ImageArea = () => {
     };
 
     const handleInitialResponse = async () => {
-      if (!conversationId || !promptId) return;
+      console.log('Hi');
+      if (!conversationId || !promptId) {
+        console.log('No conversationId or promptId');
+        return;
+      }
       
       const activeModels = selectedModels.image.filter(
         modelId => !inactiveModels.includes(modelId)
       );
-
+      
+      console.log('Active Models after filter:', activeModels);
+      
       setLoadingModels(activeModels);
       setGeneratedImages([]);
       setErrors({});
 
+      console.log('About to start image generation for models:', activeModels);
+      
       activeModels.forEach(modelId => {
         generateImage(modelId);
       });
@@ -179,7 +212,7 @@ const ImageArea = () => {
 
     const loadConversation = async () => {
       if (!loadConversationId) {
-        // // console.log('no conversation id');
+        // console.log('no conversation id');
         return;
       }
       
@@ -189,9 +222,9 @@ const ImageArea = () => {
 
       
       try {
-        // // console.log('Loading conversation content');
+        // console.log('Loading conversation content');
         const response = await chatApi.getConversationContent('image', loadConversationId);
-        // // console.log('Loaded conversation content:', response);
+        // console.log('Loaded conversation content:', response);
         
         if (response && response[0]?.prompt) {
           setContent("image", "input", response[0].prompt);
@@ -210,6 +243,7 @@ const ImageArea = () => {
 
       } catch (error) {
         // console.error('Error loading conversation:', error);
+        router.replace('/image');
         toast.error('Failed to load conversation');
       } finally {
         setIsLoadingConversation(false);
@@ -297,7 +331,7 @@ const ImageArea = () => {
           setSelectedImage(prev => prev ? { ...prev, liked: !prev.liked } : null);
         }
 
-        toast.success(`${modelInfo?.name} image ${newLikedState === 'liked' ? 'liked' : 'unliked'}`)
+        toast(`${modelInfo?.name} image ${newLikedState === 'liked' ? 'liked' : 'unliked'}`)
       } else {
         toast.error('Ooops! something went wrong')
       }
@@ -310,7 +344,7 @@ const ImageArea = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content.image.input);
-    toast.success('Copied');
+    toast('Copied');
   };
 
   const handleDownload = async (imageUrl: string, modelName: string) => {
@@ -326,7 +360,7 @@ const ImageArea = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success('Image downloaded');
+      toast('Image downloaded');
     } catch (error) {
       // console.error('Error downloading image:', error);
       toast.error('Failed to download image');
@@ -391,6 +425,7 @@ const ImageArea = () => {
 
   const ImageSkeleton = ({ modelId }: { modelId: string }) => {
     const modelInfo = getModelInfo(modelId);
+    console.log('modelInfo', modelInfo);
 
     return (
       <div className="relative w-80 h-80 lg:w-96 lg:h-96">
@@ -446,10 +481,14 @@ const ImageArea = () => {
       <div className="w-full max-w-3xl">
         {/* Only show the prompt section when not loading conversation */}
         {!isLoadingConversation && content.image.input && (
-          <div className="flex items-center justify-around mb-8">
-            <span className="text-base">
-              {content.image.input}
-            </span>
+          <div className="flex items-start justify-around mb-8">
+            <div className="">
+              {content.image.input.length > 100 ? (
+                <PromptDisplay text={content.image.input} maxLength={100} />
+              ) : (
+                <span className="text-base">{content.image.input}</span>
+              )}
+            </div>
             <div className="relative">
               <button
                 onClick={handleCopy}
@@ -481,8 +520,13 @@ const ImageArea = () => {
                 const isLoading = loadingModels.includes(modelId);
                 const error = errors[modelId];
                 const modelInfo = getModelInfo(modelId);
+                console.log(selectedModels.image, 'the image selected models');
+                console.log(generationType, 'This is the generation type');
+                console.log(isLoading, 'This is isLoading');
+                console.log(loadingModels, 'This is the loading models');
 
                 if (isLoading) {
+                  console.log('isLoading Images', isLoading);
                   return <ImageSkeleton key={modelId} modelId={modelId} />;
                 }
 

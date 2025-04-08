@@ -35,7 +35,7 @@ const components = [
   },
 ];
 export default function FirstRequest() {
-  const Highlight = ({ children }) => (
+  const Highlight = ({ children }: { children: ReactNode }) => (
     <span className="font-semibold text-muted-foreground bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700 rounded text-sm">
       {children}
     </span>

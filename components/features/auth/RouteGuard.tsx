@@ -130,7 +130,8 @@ function RouteGuardInner({ children }: RouteGuardProps) {
 
     setAuthState('checking');
     checkAuth();
-  }, [pathname, token, searchParams]);
+  // }, [pathname, token, searchParams]);
+  }, [token, searchParams]);
 
   // Show loading screen while checking auth or during explicit loading states
   if (isLoading || authState === 'checking') {

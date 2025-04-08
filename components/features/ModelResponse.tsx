@@ -276,7 +276,7 @@ export function ModelResponse({
   .replace(/\n\s*\n/g, '\n\n')
   .trim();
     await navigator.clipboard.writeText(textToCopy || '' );
-    toast.success('Copied');
+    toast('Copied');
   };
 
   const handleFeedback = async (newState: 'liked' | 'disliked' | null) => {
@@ -294,7 +294,7 @@ export function ModelResponse({
         onFeedbackChange(responseId || '', state === 'none' ? null : state as 'liked' | 'disliked');
         
         if (state !== 'none') {
-          toast.success(`Response ${state === 'liked' ? 'liked' : 'disliked'}`);
+          toast(`Response ${state === 'liked' ? 'liked' : 'disliked'}`);
         }
       }
     } catch (error) {

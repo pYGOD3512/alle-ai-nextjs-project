@@ -21,7 +21,7 @@ export function CategoryContent({
   useEffect(() => {
     document.title = "Alle-AI | Help Center";
     if (selectedLanguage.code !== "en") {
-      toast.info('This language translation will be available soon');
+      toast.info('this language translation will be available soon');
     }
   }, [selectedLanguage.code, toast]);
 

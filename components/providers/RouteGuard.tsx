@@ -23,15 +23,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       return false;
     };
 
-    const isPublicRoute = publicRoutes.some(route => matchRoute(route));
     const isPrivateRoute = privateRoutes.some(route => matchRoute(route));
-
-    // Route doesn't exist at all
-    // if (!isPublicRoute && !isPrivateRoute) {
-    //   setIsValidRoute(false);
-    //   setAuthorized(true);
-    //   return;
-    // }
 
     // Route exists but is private and user isn't subscribed
     if (isPrivateRoute && !isSubscribed) {
@@ -60,6 +52,5 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show the actual content for valid routes
   return <>{children}</>;
 }

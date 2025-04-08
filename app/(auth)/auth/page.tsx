@@ -17,6 +17,9 @@ import { authApi } from "@/lib/api/auth";
 // import { useAuthCheck } from "@/hooks/use-auth-check";
 import { LoadingScreen } from '@/components/features/auth/LoadingScreen';
 
+import { sendGAEvent } from '@next/third-parties/google'
+
+
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-success' | 'verify-email';
 
 // Create an inner component for the auth page logic
@@ -86,6 +89,8 @@ function AuthPageInner() {
 
   const handleForgotPassword = () => {
     setAuthMode('forgot-password');
+    sendGAEvent('formSubmission', 'forgottenPassword', { formType: 'loginForm'});
+
   };
 
   const handleResetSuccess = (email: string) => {

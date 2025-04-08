@@ -13,7 +13,7 @@ export default function Footer() {
     <footer className=" text-center py-4">
       <div className="container mx-auto">
         <p className="text-sm text-card-foreground">
-          Copyright © 2024 Alle-AI. All rights reserved.
+          Copyright © {new Date().getFullYear()} Alle-AI. All rights reserved.
         </p>
         <div className="mt-2">
           <Link href={`/terms-of-service`} className="text-muted-foreground underline text-sm  hover:text-foreground">Terms of Service</Link>

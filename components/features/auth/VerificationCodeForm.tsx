@@ -121,7 +121,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
 
       const formattedCode = `A-${verificationCode}`;
       await verifyEmail(formattedCode);
-      toast.success('Email verified');
+      toast('Email verified');
       
       onSuccess();
       
@@ -144,7 +144,7 @@ export function VerificationCodeForm({ email, onSuccess, onBackToLogin }: Verifi
       const response = await authApi.resendVerification();
       
       setCountdown(30);
-      toast.success('Verification code sent');
+      toast('Verification code sent');
       
       setCode(['', '', '', '', '', '']);
       inputs.current[0]?.focus();

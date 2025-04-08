@@ -79,7 +79,7 @@ class GoogleDriveService {
       );
       
       this.isAuthenticated = true;
-      toast.success('Signed into Google Drive');
+      toast('Signed into Google Drive');
       return true;
     } catch (error) {
       this.isAuthenticated = false;

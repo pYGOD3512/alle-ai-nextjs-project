@@ -57,7 +57,7 @@ const GreetingMessage = ({
 
   const { user } = useAuthStore();
 
-  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name} !`)
+  const greetings = textReveal(`${getTimeBasedGreeting()}, ${user?.first_name}!`)
   const questionTextArray = textReveal(questionText ? questionText : "What would you like to do today?")
 
   return (
@@ -67,7 +67,7 @@ const GreetingMessage = ({
           initial="hidden" 
           whileInView="reveal" 
           transition={{staggerChildren: .02}} 
-          className="mb-2 break-words"
+          className="mb-2 break-words font-semibold"
         >
           {greetings.map(({char, id}) => (
               <motion.span

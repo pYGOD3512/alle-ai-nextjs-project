@@ -7,9 +7,10 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from 'next-themes';
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+
 interface NavbarProps {
   linkText: string;
-  linkUrl: string;
+  linkUrl?: string;
 }
 
 export default function Navbar({ linkText, linkUrl }: NavbarProps) {
@@ -24,18 +25,18 @@ export default function Navbar({ linkText, linkUrl }: NavbarProps) {
     <nav className="fixed top-0 left-0 right-0 bg-background mb-6 sm:mb-0 mx-auto flex justify-between md:justify-around items-center p-2 z-10">
       <div className="text-xl font-bold">
         {mounted && (
-          <Link href="/">
+          <a href="https://app.alle-ai.com">
             <Image 
             src={theme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"} 
             alt="Alle-AI Logo" 
             width={125} 
             height={125} />
-          </Link>
+          </a>
         )}
       </div>
       <div className="flex gap-2 items-center">
         <ThemeToggle />
-        <Link href={linkUrl} className="text-muted-foreground hover:underline">
+        <a href="https://app.alle-ai.com" className="text-muted-foreground hover:underline">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -43,7 +44,7 @@ export default function Navbar({ linkText, linkUrl }: NavbarProps) {
           >
             <Home className="h-5 w-5" />
           </Button>
-        </Link>
+        </a>
       </div>
     </nav>
   );

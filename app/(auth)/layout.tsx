@@ -213,10 +213,8 @@ export default function AuthLayout({
 }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isFirstAnimationComplete, setIsFirstAnimationComplete] =
-    useState(false);
-  const [isSecondAnimationComplete, setIsSecondAnimationComplete] =
-    useState(false);
+  const [isFirstAnimationComplete, setIsFirstAnimationComplete] = useState(false);
+  const [isSecondAnimationComplete, setIsSecondAnimationComplete] = useState(false);
   const router = useRouter();
   const { token, setAuth, clearAuth } = useAuthStore();
   const [authState, setAuthState] = useState<
@@ -267,8 +265,8 @@ export default function AuthLayout({
           setAuthState("show-auth");
         }
       } else {
-        // setAuthState('show-auth');
-        router.replace("/docs/api-reference/introduction");
+        setAuthState('show-auth');
+        // router.replace("/docs/api-reference/introduction");
       }
     };
 

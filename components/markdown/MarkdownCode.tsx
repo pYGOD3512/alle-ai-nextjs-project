@@ -80,14 +80,14 @@ export function MarkdownCode({ children, className, inline }: MarkdownCodeProps)
     if (typeof children === 'string') {
       await navigator.clipboard.writeText(children);
       setCopied(true);
-      toast.success('Copied')
+      toast('Copied')
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleThemeChange = (theme: ThemeKey) => {
     setCodeTheme(theme);
-    toast.success(`Theme changed to ${theme}`);
+    toast(`Theme changed to ${theme}`);
   };
 
   return (
