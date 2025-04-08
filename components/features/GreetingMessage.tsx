@@ -67,7 +67,7 @@ const GreetingMessage = ({
           initial="hidden" 
           whileInView="reveal" 
           transition={{staggerChildren: .02}} 
-          className="mb-2 break-words"
+          className="mb-2 break-words font-semibold"
         >
           {greetings.map(({char, id}) => (
               <motion.span

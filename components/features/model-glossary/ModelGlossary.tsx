@@ -34,7 +34,7 @@ export default function ModelGlossary() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar linkText="Blog" linkUrl="/" />
+      <Navbar linkText="Blog" />
       <div className="container pt-16 mx-auto py-6 px-4 max-w-6xl flex-grow">
         <h1 className="text-2xl font-bold text-center mb-8">MODEL GLOSSARY</h1>
         

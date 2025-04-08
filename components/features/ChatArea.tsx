@@ -889,19 +889,24 @@ useEffect(() => {
   const getConversationModels = (conversationId: string) => {
     chatApi.getModelsForConversation(conversationId)
       .then(response => {
-        // console.log('Models used in conversation:', response);
+        console.log('Models used in conversation:', response);
         const modelUids = response.map((model: Model) => model.model_uid);
 
+        // Get the store actions
+        const store = useSelectedModelsStore.getState();
+
+        // First, set the selected models
         setConversationModels(modelUids);
         setTempSelectedModels(modelUids);
         saveSelectedModels('chat');
 
-        // Toggle inactive models using toggleModelActive
-        response.forEach((model: { model_uid: string, active: number }) => {
-          if (model.active === 0) {
-            useSelectedModelsStore.getState().toggleModelActive(model.model_uid);
-          }
-        });
+        // Create a new array for inactive models based on the response
+        const inactiveModels = response
+        .filter((model: { active: number; model_uid: string }) => model.active === 0)
+        .map((model: { model_uid: string }) => model.model_uid);
+
+        store.setInactiveModels(inactiveModels);
+
       })
       .catch(error => {
         // console.error('Error fetching models for conversation:', error);
@@ -1760,7 +1765,7 @@ const getWebSearchContext = (branch: Branch, currentY: number): [string, string]
                 {"<"}
             </button>
             <span className="">
-                {`${currentSortedIndex + 1}/${totalTabs}`}
+                {`${currentSortedIndex + 1}/${totalTabs}`}          `                   `
             </span>
             <button onClick={handleNext} className="rounded-md bg-transparent">
                 {">"}

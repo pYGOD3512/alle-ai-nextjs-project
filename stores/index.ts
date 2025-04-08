@@ -127,6 +127,7 @@ interface SelectedModelsStore {
     video: string[];
   };
   inactiveModels: string[];
+  setInactiveModels: (models: string[]) => void; 
   tempSelectedModels: string[];
   setTempSelectedModels: (models: string[]) => void;
   saveSelectedModels: (type: 'chat' | 'image' | 'audio' | 'video') => void;
@@ -147,6 +148,10 @@ export const useSelectedModelsStore = create<SelectedModelsStore>((set, get) => 
     video: [],
   },
   inactiveModels: [],
+  setInactiveModels: (models) => set({ 
+    inactiveModels: models,
+    lastUpdate: Date.now()
+  }),
   tempSelectedModels: [],
   lastUpdate: Date.now(),
   isLoadingLatest: false,
@@ -831,6 +836,8 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authApi.getUser();
           // console.log(response.plan, 'user from zutsand');
           if (response && response.plan) {
+            /* The above code is setting the value of the `plan` property in the response object to the
+            `plan` property in the `set` function. */
             set({ plan: response.plan });
           }
         } catch (error) {
@@ -844,7 +851,7 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({ 
         token: state.token,
         user: state.user,
-        // plan: state.plan,
+        plan: state.plan,
       }),
     }
   )

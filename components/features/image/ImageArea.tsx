@@ -109,6 +109,30 @@ interface LoadedImageResponse {
   }>;
 }
 
+const PromptDisplay = ({ text, maxLength }: { text: string; maxLength: number }) => {
+  const [expanded, setExpanded] = useState(false);
+  
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+  };
+  
+  const displayText = expanded ? text : text.substring(0, maxLength)
+  
+  return (
+    <div className="flex flex-col">
+      <div className="text-base">
+        {displayText}
+        <button
+          onClick={toggleExpand}
+          className="text-sm italic text-muted-foreground hover:text-primary/80 mt-1 self-start"
+        >
+          {expanded ? 'See less' : 'See more'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const ImageArea = () => {
   const { content, setContent } = useContentStore();
   const { selectedModels, inactiveModels, setTempSelectedModels, saveSelectedModels, setLoadingLatest } = useSelectedModelsStore();
@@ -457,10 +481,14 @@ const ImageArea = () => {
       <div className="w-full max-w-3xl">
         {/* Only show the prompt section when not loading conversation */}
         {!isLoadingConversation && content.image.input && (
-          <div className="flex items-center justify-around mb-8">
-            <span className="text-base">
-              {content.image.input}
-            </span>
+          <div className="flex items-start justify-around mb-8">
+            <div className="">
+              {content.image.input.length > 100 ? (
+                <PromptDisplay text={content.image.input} maxLength={100} />
+              ) : (
+                <span className="text-base">{content.image.input}</span>
+              )}
+            </div>
             <div className="relative">
               <button
                 onClick={handleCopy}

@@ -20,7 +20,7 @@ export default function ModelDetails({ model }: { model?: ModelDetailsType }) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar linkText="Home" linkUrl="/model-glossary" />
+      <Navbar linkText="Home"/>
       <div className="container mx-auto pt-18 py-20 px-1 max-w-full md:max-w-4xl flex-grow">
         <div className="flex justify-between mb-4">
           <div onClick={() => window.history.back()} className="cursor-pointer flex items-center gap-2">

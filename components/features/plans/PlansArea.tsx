@@ -246,7 +246,6 @@ const PlansArea = () => {
                 {processingPlan === plan.name ? (
                   <div className="flex items-center gap-2">
                     <Loader className="h-4 w-4 animate-spin" />
-                    <span>Processing...</span>
                   </div>
                 ) : (
                   plan.buttonText

@@ -46,7 +46,7 @@ export default function RootLayout({
             <AuthProvider>
                 {/* <ConnectionStatus /> */}
                 {children}
-              <Toaster position="top-center"  />
+              <Toaster position="top-center" richColors />
             </AuthProvider>
           </RouteGuard>
         </ThemeProvider>

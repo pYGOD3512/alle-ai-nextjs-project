@@ -107,13 +107,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadImageModels = async () => {
       // Skip if models are already loaded
+      console.log(imageModels, 'Imagemodels', imageModels.length, 'Image models length')
       if (imageModels && imageModels.length > 0) return;
-      
+      console.log('I tried')
       setModelsLoading(true);
       try {
         const models = await modelsApi.getModels('image');
         setImageModels(models);
-        // // console.log('Image models loaded', models);
+        console.log('Image models loaded', models);
       } catch (err) {
         setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');
       } finally {

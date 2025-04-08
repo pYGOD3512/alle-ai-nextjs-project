@@ -533,6 +533,11 @@ export function ChatInput({
     }
     onSend(fileContent || undefined);
     handleRemoveFile();
+    
+    // Reset textarea height to default state
+    if (inputRef?.current) {
+      inputRef.current.style.height = 'auto';
+    }
   };
 
   const handleProcessFile = async (file: File, text: string) => {

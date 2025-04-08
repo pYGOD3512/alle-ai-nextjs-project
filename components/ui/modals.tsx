@@ -2078,7 +2078,8 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  ;
+  const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
+  
   
   // Form state
   const [formData, setFormData] = useState({
@@ -2119,6 +2120,28 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
       setFormData(prev => ({ ...prev, profilePhoto: file }));
     }
   };
+
+  // Add this function to handle billing portal redirection
+  const handleManageSubscription = async () => {
+    try {
+      setIsLoadingBillingPortal(true);
+      const response = await authApi.getBillingPortal(window.location.href);
+      if (response.status && response.url) {
+        window.location.href = response.url;
+      } else {
+        toast.error('Something went wrong, please try again');
+      }
+    } catch (error) {
+      toast.error('Something went wrong, check your internet connection');
+    } finally {
+      setIsLoadingBillingPortal(false);
+    }
+  };
+
+  const isPaidPlan = 
+    typeof plan === 'string' && 
+    (plan === 'standard' || plan === 'plus' || plan.includes('standard') || plan.includes('plus'));
+
 
   const handleEditToggle = async () => {
     if (isEditing) {
@@ -2237,36 +2260,26 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
                 <p className="text-xs sm:text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
-            <div className="absolute right-4 top-4 flex gap-2">
-              <Button 
-                variant={isEditing ? "default" : "outline"}
-                className={`px-2 sm:px-3 transition-all duration-200 ${
-                  isEditing 
-                    ? 'bg-primary hover:bg-primary/90' 
-                    : 'border-2 border-borderColorPrimary hover:bg-accent'
-                }`}
-                size="sm"
-                onClick={handleEditToggle}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <Loader className="h-4 w-4 animate-spin" />
-                    <span className='hidden sm:inline'>Saving...</span>
-                  </div>
-                ) : isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    <span className='hidden sm:inline'>Save Changes</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Pencil className="h-4 w-4" />
-                    <span className='hidden sm:inline'>Edit Profile</span>
-                  </div>
-                )}
-              </Button>
-            </div>
+            {!isEditing && (
+              <div className="absolute right-4 top-4 flex gap-2">
+                <Button 
+                  variant={isEditing ? "default" : "outline"}
+                  className={`px-2 sm:px-3 transition-all duration-200 ${
+                    isEditing 
+                      ? 'bg-primary hover:bg-primary/90' 
+                      : 'border-2 border-borderColorPrimary hover:bg-accent'
+                  }`}
+                  size="sm"
+                  onClick={handleEditToggle}
+                  disabled={isSubmitting}
+                >
+                    <div className="flex items-center gap-2">
+                      <Pencil className="h-4 w-4" />
+                      <span className='hidden sm:inline'>Edit Profile</span>
+                    </div>
+                </Button>
+              </div>
+              )}
           </DialogHeader>
 
           <AnimatePresence mode="wait">
@@ -2331,17 +2344,57 @@ export function UserProfileModal({ isOpen, onClose }: ModalProps) {
           </AnimatePresence>
 
           <div className="flex justify-between gap-2 pt-4 border-t">
-            <Button 
-              className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' 
-              variant="outline" 
-              onClick={() => {
-                setPlansModalOpen(true);
-                onClose();
-              }}
-            >
-              <Gem className='w-4 h-4 mr-2'/>
-              <span>UPGRADE</span>
-            </Button>
+            {isEditing ? 
+            (
+              <Button 
+                variant={isEditing ? "default" : "outline"}
+                className={`px-2 sm:px-3 transition-all duration-200 ${
+                  isEditing 
+                    ? 'bg-primary hover:bg-primary/90' 
+                    : 'border-2 border-borderColorPrimary hover:bg-accent'
+                }`}
+                size="sm"
+                onClick={handleEditToggle}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader className="h-4 w-4 animate-spin" />
+                    <span className='hidden sm:inline'>Saving...</span>
+                  </div>
+                ) : isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <Save className="h-4 w-4" />
+                    <span className='hidden sm:inline'>Save Changes</span>
+                  </div>
+                ) : ''}
+              </Button>
+            ) : (
+              <Button 
+                className='p-2 sm:p-3 text-xs sm:text-sm group border-none dark:bg-white dark:text-black bg-black text-white' 
+                variant="outline" 
+                onClick={() => {
+                  if (isPaidPlan) {
+                    handleManageSubscription();
+                  } else {
+                    setPlansModalOpen(true);
+                    onClose();
+                  }
+                }}
+                disabled={isLoadingBillingPortal}
+              >
+                {isLoadingBillingPortal ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    <Gem className='w-4 h-4 mr-2'/>
+                  </>
+                )}
+                {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
+              </Button>
+            )}
             <div className='flex gap-4'>
               <Button 
                 className='p-2 sm:p-3 text-xs sm:text-sm' 
@@ -3091,7 +3144,6 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
                         {processingPlan === plan.name ? (
                           <div className="flex items-center gap-2">
                             <Loader className="h-4 w-4 animate-spin" />
-                            <span>Processing...</span>
                           </div>
                         ) : (
                           getButtonText(plan.name)
@@ -5627,7 +5679,7 @@ export function CardPaymentMethodModal({ isOpen, onClose, mode = 'add', amount, 
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Loader className="h-4 w-4 animate-spin" />
-                  {mode === 'add' ? 'Adding...' : 'Processing...'}
+                  {/* {mode === 'add' ? 'Adding...' : 'Processing...'} */}
                 </span>
               ) : (
                 mode === 'add' ? 'Add payment method' : `Pay ${amount ? `£${amount}` : ''}`

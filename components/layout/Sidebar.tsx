@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModelSelectionModal, PlansModal, ProjectModal, SearchHistoryModal } from "../ui/modals";
+import { ModelSelectionModal, PlansModal, ProjectModal, SearchHistoryModal, UserProfileModal } from "../ui/modals";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
@@ -79,6 +79,9 @@ export function Sidebar() {
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const historyScrollRef = useRef<HTMLDivElement>(null);
   const [isLoadingBillingPortal, setIsLoadingBillingPortal] = useState(false);
+
+  const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (isMobile && isOpen) {
@@ -314,7 +317,10 @@ export function Sidebar() {
     }
   };
 
-  const isPaidPlan = plan === 'standard' || plan === 'plus' || plan?.includes('standard') || plan?.includes('plus');
+  const isPaidPlan = 
+    typeof plan === 'string' && 
+    (plan === 'standard' || plan === 'plus' || plan.includes('standard') || plan.includes('plus'));
+
   // const isPaidPlan = plan === 'free';
 
   return (
@@ -328,7 +334,7 @@ export function Sidebar() {
       )}
       
       <aside
-        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-300 
+        className={`fixed left-0 top-0 z-40 mt-14 h-[calc(100vh-3.5rem)]  transition-all duration-300 
           ${isOpen ? "w-60" : "w-16"} 
           ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}
           border-r bg-sideBarBackground flex flex-col`}
@@ -568,7 +574,7 @@ export function Sidebar() {
                                       </div>
                                     </TooltipTrigger>
                                     <TooltipContent
-                                      side="top"
+                                      side="right"
                                       className="max-w-[200px] text-xs break-words"
                                     >
                                       {item.title}
@@ -654,11 +660,14 @@ export function Sidebar() {
                         <BookOpen className="w-4 h-4 ml-4"/> Model Glossary
                       </a>
                     </Link>
-                    <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
+                    {/* <Link href={`https://all-ai-model-usage-tracker.vercel.app/`} legacyBehavior>
                       <a target="_blank" rel="noopener noreferrer" className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
                         <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
                       </a>
-                    </Link>
+                    </Link> */}
+                      <div onClick={() => {toast.info('this feature will be available soon')}} className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
+                        <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
+                      </div>
                     {/* <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
                         <History  className="w-4 h-4 ml-4"/> Changelog
                     </Link> */}
@@ -669,7 +678,7 @@ export function Sidebar() {
 
             {/* User section at bottom */}
             <div className="flex-shrink-0 p-4 mt-auto">
-              <div className="flex items-center gap-3 mb-4 rounded-full">
+              <div className="flex items-center gap-3 mb-4 rounded-full cursor-pointer" onClick={(e: React.MouseEvent<HTMLDivElement>) => setUserProfileModalOpen(true)}>
                 <Image
                   src={user?.photo_url || "/user.jpg"}
                   alt="User"
@@ -696,8 +705,8 @@ export function Sidebar() {
                       </Badge>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {user?.email}
+                  <div className="text-xs text-muted-foreground" title={user?.email}>
+                    {user?.email?.length ? (user.email.length > 20 ? `${user.email.substring(0, 20)}...` : user.email) : ""}
                   </div>
                 </div>
               </div>
@@ -713,9 +722,9 @@ export function Sidebar() {
                 ) : (
                   <>
                     <Gem className="h-4 w-4" />
-                    {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
                   </>
                 )}
+                {isPaidPlan ? "MANAGE SUBSCRIPTION" : "UPGRADE"}
               </Button>
             </div>
           </>
@@ -823,6 +832,11 @@ export function Sidebar() {
       <ProjectModal
         isOpen={projectModalOpen}
         onClose={() => setProjectModalOpen(false)}
+      />
+
+      <UserProfileModal 
+        isOpen={userProfileModalOpen} 
+        onClose={() => setUserProfileModalOpen(false)} 
       />
 
       {/* Add confirmation dialog */}
