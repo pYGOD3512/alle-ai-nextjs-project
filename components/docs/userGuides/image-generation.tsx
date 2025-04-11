@@ -1,338 +1,379 @@
-import React, { useState, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Copy, Info, CheckCircle2 } from "lucide-react";
-import { models } from "@/lib/models";
-import type { ModelDetails } from "@/lib/types";
-import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
-import RenderCode from "@/components/RenderCode";
-import { GuidesImageGeneration } from "@/lib/constants/code-snippets-docs/userGuides";
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import ImageGenerationShowcase from "@/components/ImageGenerationShowcase";
+import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import NavigationContainer from "@/components/NavigationContainer";
-// Static data
-const suggestions = [
-  { title: "Text Generation", href: "/text-generation" },
-  { title: "Audio Generation", href: "/audio-generation" },
-  { title: "Working with Files", href: "/working-with-files" },
-];
+export default function ImageGeneration() {
+  const showcaseRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
 
-const faqs = [
-  {
-    title: "Can I choose just a single model?",
-    description:
-      "No, we encourage the use of multiple models to achieve the best results. Using a variety of models helps ensure a broader range of creative outputs and greater flexibility.",
-  },
-  {
-    title: "Do we support streaming of responses?",
-    description:
-      "Yes, we support streaming of responses. This allows for faster processing and real-time feedback, making it ideal for applications where you need quick updates without waiting for a full response.",
-  },
-  {
-    title: "What are the error messages and how can I avoid them?",
-    description: (
-      <>
-        Read more on{" "}
-        <a href="your-link-here" className="text-blue-500 hover:underline">
-          error messages and their corresponding meaning and how to avoid them
-          here
-        </a>
-        .
-      </>
-    ),
-  },
-];
-
-export default function ImageGenerationDocs() {
-  const imageModels = models.filter(
-    (model) => model.type === "image"
-  ) as ModelDetails[];
-  const [selectedModels, setSelectedModels] = useState([
-    imageModels[0]?.name.toLowerCase().replace(/ /g, "_") || "",
-  ]);
-  const [expanded, setExpanded] = useState<number | null>(null);
-
-  // Code examples for both languages
-  const getCodeExamples = (modelNames: string[]) => [
+  // FAQ data
+  const faqData = [
     {
-      language: "python",
-      code: `import alleai
-
-client = alleai.Client(api_key="[YOUR API KEY HERE]")
-
-# Example 1: Basic image generation
-response = client.generate_image(
-    prompt="A futuristic cityscape at sunset, highly detailed",
-    models=${JSON.stringify(modelNames)},
-    size="1024x1024"
-)
-
-# Save the generated image
-with open("output.png", "wb") as f:
-    f.write(response.image_data)
-
-# Example 2: Advanced options
-response = client.generate_image(
-    prompt="A serene mountain landscape with a lake",
-    models=${JSON.stringify(modelNames)},
-    size="1024x1024",
-    negative_prompt="blurry, low quality, distorted",
-    num_outputs=1,
-    seed=42,  # For reproducible results
-    style_preset="photographic"  # Available presets: photographic, digital-art, anime, cinematic
-)
-
-# Access response metadata
-print(f"Generation time: {response.metadata.generation_time}s")
-print(f"Models used: {response.metadata.models}")
-print(f"Total cost: {response.metadata.cost} credits")`,
+      question: "What types of images can I generate with ALLE-AI?",
+      answer:
+        "You can generate a wide variety of images, including realistic scenes, artistic visuals, and abstract designs. The platform supports multiple AI models to cater to different creative needs.",
     },
     {
-      language: "javascript",
-      code: `const alleai = require('alleai');
-
-const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
-
-async function generateImage() {
-  try {
-    // Example 1: Basic image generation
-    const response = await client.generateImage({
-      prompt: 'A futuristic cityscape at sunset, highly detailed',
-      models: ${JSON.stringify(modelNames)},
-      size: '1024x1024'
-    });
-
-    // Save the generated image
-    const fs = require('fs');
-    fs.writeFileSync('output.png', response.imageData);
-
-    // Example 2: Advanced options
-    const advancedResponse = await client.generateImage({
-      prompt: 'A serene mountain landscape with a lake',
-      models: ${JSON.stringify(modelNames)},
-      size: '1024x1024',
-      negativePrompt: 'blurry, low quality, distorted',
-      numOutputs: 1,
-      seed: 42,  // For reproducible results
-      stylePreset: 'photographic'  // Available presets: photographic, digital-art, anime, cinematic
-    });
-
-    // Access response metadata
-    console.log(\`Generation time: \${response.metadata.generationTime}s\`);
-    console.log(\`Models used: \${response.metadata.models}\`);
-    console.log(\`Total cost: \${response.metadata.cost} credits\`);
-  } catch (error) {
-    console.error('Error generating image:', error);
-  }
-}
-
-generateImage();`,
+      question: "How do I ensure the best results from image generation?",
+      answer:
+        "To get the best results, provide detailed and specific prompts. Include elements like subject, style, composition, lighting, mood, and color palette. Experiment with different combinations and refine your prompts based on the results.",
+    },
+    {
+      question: "Can I download the generated images?",
+      answer:
+        "Yes, you can download the generated images in various formats such as JPEG and PNG. Simply hover over the image and click the download icon.",
+    },
+    {
+      question: "Is there a limit to the number of images I can generate?",
+      answer:
+        "The number of images you can generate may depend on your subscription plan. Free users may have certain limitations, while premium users enjoy higher limits and additional features.",
     },
   ];
 
-  return (
-    <div className="pb-16 w-full max-w-[100%] pr-4">
-      {" "}
-      {/* Added right padding */}
-      <div className="space-y-8">
-        {/* Title Section */}
-        <div>
-          <div className="prose prose-blue max-w-none">
-            <p className="text-muted-foreground text-lg">
-              The Alle-AI Model Hub provides a powerful API that enables
-              high-quality image generation using multiple state-of-the-art
-              foundation models. Our unique multi-model approach allows you to
-              combine different models' strengths in a single API call, without
-              managing complex infrastructure or individual model endpoints.
-            </p>
-          </div>
-        </div>
+  // What to Read Next data
+  const readNextData = [
+    {
+      title: "Audio Generation Guide",
+      href: "/docs/user-guides/audio",
+      description:
+        "Learn how to create and manipulate audio using our platform.",
+    },
+    {
+      title: "Video Generation Guide",
+      href: "/docs/user-guides/video",
+      description:
+        "Step-by-step instructions for generating videos with our AI.",
+    },
+    {
+      title: "Manage Your History",
+      href: "/docs/user-guides/history",
+      description:
+        "Learn how to access, organize, and manage your past creations and activity.",
+    },
+  ];
+  const toggleQuestion = (index: number) => {
+    setExpandedQuestion(expandedQuestion === index ? null : index);
+  };
 
-        {/* Prerequisites Section */}
-        <div className="bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-gray-500 dark:text-gray-300 mt-1" />
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                Prerequisites
-              </h3>
-              <p className="text-gray-800 dark:text-gray-200">
-                This guide assumes basic familiarity with:
-              </p>
-              <ul className="list-none mt-2 space-y-1">
-                {[
-                  "REST APIs",
-                  "Python or JavaScript/Node.js",
-                  "Command line interface",
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center text-gray-800 dark:text-gray-200"
-                  >
-                    <CheckCircle2 className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-300" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+  return (
+    <div>
+      <section className="">
+        <h2 className="text-3xl font-bold mb-3">
+          Create Stunning Images with ALLE-AI
+        </h2>
+        <p className="text-muted-foreground">
+          Our image generation feature allows you to create high-quality images
+          using advanced AI models. Whether you need realistic scenes, artistic
+          visuals, or abstract designs, our platform has you covered. Select
+          multiple models, customize parameters, and bring your ideas to life!.
+          With a single prompt, you can receive responses from selected models
+          seamlessly, as shown below.
+        </p>
+
+        {/* Showcase Container */}
+        <div className="">{<ImageGenerationShowcase />}</div>
+      </section>
+
+      {/* article  */}
+      <section className="mb-5">
+        <h2 className="text-2xl font-bold mb-3">
+          Getting Started With Image Generation
+        </h2>
+        <p className="text-muted-foreground mb-4">
+          This section explains how to generate images using our platform. Many
+          of the interface elements are shared with the Text Generation feature,
+          so we'll focus here on the aspects unique to image creation. If you're
+          unfamiliar with the basic interface, such as model selection, file
+          attachments, or voice input, please refer to the &nbsp;
+          <span className="text-blue-600 font-bold">
+            <Link href={"/docs/user-guides/chat#walkthrough"}>
+              Platform Interface
+            </Link>
+          </span>{" "}
+          before continuing.
+        </p>
+
+        <h2 className="text-xl font-semibold mb-2">
+          1. Ensuring Image Generation is Active:
+        </h2>
+
+        <p className="text-muted-foreground">
+          {`Before you begin, make sure you're in the Image Generation section.
+          Verify that "Image Generation" is highlighted in the sidebar and not
+          "Chat" or any other mode as shown in the image above.`}
+        </p>
+        <p className="text-muted-foreground">
+          Get started in seconds!&nbsp;
+          <span className="text-blue-600 font-bold">
+            <Link href={"/image"}>Click here</Link>
+          </span>{" "}
+          to go directly to the Image Generation page, pre-selected and ready
+          for your creative inputs.
+        </p>
+      </section>
+
+      {/* ar */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-3">2. Providing Input</h2>
+        <p className="text-muted-foreground mb-3">
+          Just like with Text Generation, you have several options for providing
+          input to guide the image creation process. The core methods text
+          prompts, file attachments, and voice input are the same, ensuring a
+          consistent user experience across our platform. However, the way these
+          inputs are used and their impact on the output are tailored
+          specifically for image generation.
+        </p>
+        <h2 className="text-2xl font-semibold mb-3">
+          Image Specific Consideration
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          {`While the input methods are the same, here's how to think about them
+          specifically for image creation:`}
+        </p>
+        {/* Effective prompts */}
+        <div className="">
+          <h1 className="text-3xl font-bold mb-6 text-center">
+            Crafting Effective Text Prompts for Image Generation
+          </h1>
+          <p className="mb-6 text-muted-foreground">
+            To generate high-quality images, your text prompts should be
+            descriptive and specific. Include the following elements to guide
+            the AI effectively:
+          </p>
+
+          <div className="mb-8 text-muted-foreground">
+            <h2 className="text-2xl font-semibold mb-4">
+              Key Elements to Include:
+            </h2>
+            <ul className="list-disc list-inside space-y-2 pl-5">
+              <li>
+                <strong>Subject</strong>: The main focus of the image.{" "}
+                <em>
+                  Example: "a majestic lion," "a futuristic cityscape," "a
+                  serene mountain lake"
+                </em>
+              </li>
+              <li>
+                <strong>Style</strong>: The artistic style you want.{" "}
+                <em>
+                  Example: "photorealistic," "impressionist," "abstract," "pop
+                  art," "anime," "cyberpunk"
+                </em>
+              </li>
+              <li>
+                <strong>Composition</strong>: How elements are arranged.{" "}
+                <em>
+                  Example: "close-up," "wide shot," "portrait," "landscape,"
+                  "symmetrical"
+                </em>
+              </li>
+              <li>
+                <strong>Lighting</strong>: The type of lighting.{" "}
+                <em>
+                  Example: "soft," "dramatic," "neon," "backlit," "ambient"
+                </em>
+              </li>
+              <li>
+                <strong>Mood/Emotion</strong>: The feeling the image should
+                evoke.{" "}
+                <em>
+                  Example: "happy," "sad," "mysterious," "epic," "tranquil"
+                </em>
+              </li>
+              <li>
+                <strong>Color Palette</strong>: Dominant colors or overall
+                scheme.
+                <em>
+                  Example: "vibrant," "pastel," "monochromatic," "earth tones"
+                </em>
+              </li>
+              <li>
+                <strong>Details</strong>: Specific elements to include.{" "}
+                <em>
+                  Example: "wearing a crown," "in a spaceship," "with a
+                  waterfall"
+                </em>
+              </li>
+            </ul>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">
+              Examples of Effective Prompts:
+            </h2>
+            <div className="">
+              <div className="">
+                <p className="text-muted-foreground">
+                  "A photorealistic portrait of a majestic lion with a golden
+                  mane, standing on a rocky cliff at sunset, backlit by warm,
+                  dramatic lighting. The mood should feel epic and powerful,
+                  with a vibrant orange and gold color palette."
+                </p>
+                <p className="  mt-2">
+                  <strong>Why it works</strong>: Specifies subject, style,
+                  composition, lighting, mood, and color palette.
+                </p>
+              </div>
+              <div className="">
+                <p className="text-muted-foreground">
+                  "A futuristic cityscape in the style of cyberpunk, with
+                  towering neon skyscrapers, flying cars, and a rainy,
+                  reflective street. The mood should be mysterious and
+                  futuristic, with a dominant neon blue and purple color
+                  scheme."
+                </p>
+                <p className="  mt-2">
+                  <strong>Why it works</strong>: Clearly defines subject, style,
+                  mood, and details.
+                </p>
+              </div>
+              <div className="">
+                <p className="text-muted-foreground">
+                  "A serene mountain lake at dawn, painted in the style of
+                  impressionism. The composition should be a wide shot with
+                  soft, ambient lighting, evoking a tranquil and peaceful mood.
+                  Use a pastel color palette with shades of blue, green, and
+                  pink."
+                </p>
+                <p className=" mt-2">
+                  <strong>Why it works</strong>: Combines style, composition,
+                  lighting, mood, and color palette.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Installation Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Installation</h2>
-          <Tabs defaultValue="python">
-            <TabsList>
-              <TabsTrigger value="python">Python</TabsTrigger>
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-            </TabsList>
-            <TabsContent value="python">
-              <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <RenderCode language="bash" code={`pip install alleai`} />
-              </div>
-            </TabsContent>
-            <TabsContent value="javascript">
-              <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <RenderCode language="bash" code={`npm install alleai`} />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Available Models Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Available Models</h2>
-          <p className="text-muted-foreground mb-4">
-            Each model has unique strengths and specializations. You can use
-            multiple models in a single API call by including their identifiers
-            in your request:
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-200">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border border-gray-200 text-left font-semibold">
-                    Model Identifier
-                  </th>
-                  <th className="py-2 px-4 border border-gray-200 text-left font-semibold">
-                    Provider
-                  </th>
-                  <th className="py-2 px-4 border border-gray-200 text-left font-semibold">
-                    Description
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {imageModels.map((model) => (
-                  <tr
-                    key={model.name}
-                    className="hover:bg-gray-50 dark:hover:bg-zinc-800"
-                  >
-                    <td className="py-2 px-4 border border-gray-200 font-mono text-sm">
-                      {model.name.toLowerCase().replace(/ /g, "_")}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-200">
-                      {model.provider}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-200">
-                      {model.description}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-4">Tips for Success:</h2>
+            <ul className="list-disc list-inside space-y-2 pl-5">
+              <li>
+                <strong>Be Specific</strong>: Include as many relevant details
+                as possible.
+              </li>
+              <li>
+                <strong>Experiment</strong>: Test different combinations of
+                styles, moods, and compositions.
+              </li>
+              <li>
+                <strong>Iterate</strong>: Refine your prompts based on the
+                results.
+              </li>
+            </ul>
           </div>
         </div>
-
-        {/* Code Examples Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Code Examples</h2>
-          <div className="space-y-6">
-            <Tabs defaultValue="python" className="w-full">
-              <TabsList>
-                <TabsTrigger value="python">Python</TabsTrigger>
-                <TabsTrigger value="javascript">Node.js</TabsTrigger>
-              </TabsList>
-              <TabsContent value="python">
-                <RenderCode
-                  code={GuidesImageGeneration.python}
-                  language="python"
-                  showLanguage={false}
-                />
-              </TabsContent>
-              <TabsContent value="javascript">
-                <RenderCode
-                  code={GuidesImageGeneration.javascript}
-                  language="javascript"
-                  showLanguage={false}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-
-        {/* Response Format Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Response Format</h2>
-          <p>The API response includes:</p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>
-              <code className="bg-gray-100 text-black px-1 rounded">
-                image_data
-              </code>
-              : Generated image in binary format (Python) or URL (JavaScript)
-            </li>
-            <li>
-              <code className="bg-gray-100 text-black px-1 rounded">
-                metadata
-              </code>
-              : Object containing generation time, models used, and cost
-            </li>
-            <li>
-              <code className="bg-gray-100 text-black px-1 rounded">error</code>
-              : Error message if the generation failed
-            </li>
-          </ul>
-        </div>
-
-        {/* FAQs Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">
-            Frequently Asked Questions
+        <section className="">
+          <h2 className="text-2xl font-semibold mb-3 mt-3">
+            3. Viewing and Managing Generated Images
           </h2>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={index} className="border-b pb-3">
-                <div
-                  className="cursor-pointer flex items-center justify-between text-lg font-medium"
-                  onClick={() => setExpanded(expanded === index ? null : index)}
-                >
-                  <span>{faq.title}</span>
-                  <span>
-                    {expanded === index ? (
-                      <ChevronUp className="text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="text-muted-foreground" />
-                    )}
-                  </span>
-                </div>
-                {expanded === index && (
-                  <div className="mt-2 text-muted-foreground">
-                    {faq.description}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+          <p className="text-muted-foreground mb-4">
+            Once the image generation process is complete, the generated images
+            will be displayed in the output area. This section explains how to
+            view, manage, and interact with your generated images. The generated
+            images will be presented in the output area, where you can interact
+            with them in various ways. This section explains how to view,
+            manage, and interact with your generated images.
+          </p>
 
-        {/* What to Read Next Section */}
-        <NavigationContainer
-          previousTitle="Audio Generation"
-          previousDescription="Interacting with audio models"
-          preUrl="/docs/user-guides/audio-generation"
-          nextTitle="Video Generation"
-          nextDesciption="Learn interacting with video models "
-          nextUrl="/docs/user-guides/video-generation"
-        />
-      </div>
+          <div className="">
+            <h1 className="text-3xl font-bold mb-5 text-center">
+              Viewing and Managing Generated Images
+            </h1>
+            <Image
+              src={
+                resolvedTheme === "dark"
+                  ? "/screenshots/image-gen-dark.png"
+                  : "/screenshots/image-gen-light.png"
+              }
+              alt=""
+              width={800}
+              height={800}
+              className="mb-4"
+            />
+            <p className="mb-6 text-lg text-muted-foreground">
+              The output will display images generated by multiple models,
+              allowing you to compare, interact with, and manage your results.
+              As shown in the image above. Here’s how it works:
+            </p>
+
+            {/* Section 3.1: Displaying the Results */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">
+                Displaying the Results
+              </h2>
+
+              {/* Multi-Model Output */}
+              <div className="mb-6">
+                <h3 className=" font-sembold mb-2">Multi-Model Output</h3>
+                <p className="mb-4 text-muted-foreground">
+                  Images generated by each selected model are displayed
+                  together, making it easy to compare results. Outputs from
+                  different models are distinguished by labels or separate
+                  sections.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 3.2: Interacting with the Images */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">
+                Interacting with the Images
+              </h2>
+              <p className="mb-4 text-muted-foreground">
+                When you hover over an image, a set of actions will appear,
+                allowing you to interact with it.
+              </p>
+
+              {/* Downloading */}
+              <div className="mb-4">
+                <h3 className="text-2xl font-semibold mb-2">Downloading</h3>
+                <p className="text-muted-foreground">
+                  Click on icon to either download,share or add to favourite to
+                  save the image to your computer. You can typically choose the
+                  file format (e.g., JPEG, PNG).
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="my-8">
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Frequently Asked Questions
+        </h2>
+        <div className="space-y-4">
+          {faqData.map((faq, index) => (
+            <div key={index} className="border rounded-lg p-4">
+              <button
+                onClick={() => toggleQuestion(index)}
+                className="w-full text-left flex justify-between items-center"
+              >
+                <h3 className=" font-semibold">{faq.question}</h3>
+                <span className="">
+                  {expandedQuestion === index ? "-" : "+"}
+                </span>
+              </button>
+              {expandedQuestion === index && (
+                <p className="mt-4 text-muted-foreground">{faq.answer}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <NavigationContainer
+        previousTitle="Text Generation"
+        previousDescription="Explore AI-powered text generation, including creative writing, summarization, and automated content creation."
+        preUrl="/docs/tutorials/image-ai"
+        nextDesciption="Create AI-generated audio, including speech synthesis, music, and sound effects."
+        nextTitle="Audio Generation"
+        nextUrl="/docs/tutorials/audio-ai"
+      />
     </div>
   );
 }
