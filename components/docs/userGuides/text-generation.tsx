@@ -51,32 +51,45 @@ const TextGenerationPlatform = () => {
 
   return (
     <div className="min-h-screen">
-      <div></div>
-      <h1 className="text-3xl mb-4 font-semibold">
-        A Quick Tour of the Text Generation Interface
-      </h1>
+      <div className="mb-6">
+        {/* intro */}
+        <section>
+          <p className="text-muted-foreground">
+            <span className="font-bold">Alle-AI</span> brings together the
+            world’s leading generative language models including ChatGPT,
+            Claude, Grok, and many more into one powerful, unified chat
+            experience. Whether you're exploring ideas, building products, or
+            solving complex problems, Alle-AI gives you the tools to do it
+            faster, with the power of all the AI models on your side.
+          </p>
+        </section>
+      </div>
+      <h1 className="text-2xl mb-4 font-semibold">A Quick Tour</h1>
+
       <p className="text-muted-foreground mb-3">
-        {`Experience the next level of text generation! This video tutorial
+        {/* {`Experience the next level of text generation! This video tutorial
         introduces you to the Text Generation interface, highlighting its unique
         multi-model capabilities. We'll walk you through the process of
         selecting and interacting with ChatGPT, Claude, Gemini, and other
         leading AI models, demonstrating how to generate text and explore the
-        distinct strengths of each model.`}
+        distinct strengths of each model.`} */}
       </p>
       {/* Video Walkthrough Placeholder */}
-      <aside id="walkthrough" className="mb-8 flex justify-center">
+      <aside id="walkthrough" className="mb-8 flex justify-center max-w-2xl">
         <div className="w-full max-w-4xl">
           <iframe
-            src="https://scribehow.com/embed/Accessing_GPT-4o_Chat_and_Saving_Summary__NQZpM_PXQ6mfOV17aHIq2A?as=video"
-            width="100%"
-            height="400"
+            src="https://www.youtube.com/embed/8g7kHVMFxlE"
+            width="560"
+            height="315"
+            className="rounded"
+            allowFullScreen
           ></iframe>
         </div>
       </aside>
 
       {/* Using the Text Generation Page */}
       <section className="mb-8">
-        <h2 id="text-generation" className="text-3xl font-bold mb-2">
+        <h2 id="text-generation" className="text-2xl font-bold mb-2">
           Using the Text Generation Page
         </h2>
         <p className="text-muted-foreground mb-4">
@@ -119,7 +132,7 @@ const TextGenerationPlatform = () => {
                   find the ones that best suit your project. For a deeper dive
                   into each available model, including their strengths,
                   weaknesses, and more,&nbsp;
-                  <span className="text-blue-600 font-semibold">
+                  <span className="italic text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
                     <Link target="_blank" href={"/modal-gloassary"}>
                       check out this dedicated documentation page.
                     </Link>
@@ -297,15 +310,17 @@ const TextGenerationPlatform = () => {
         {/* Summarization Feature */}
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">
-            4. Summarization Feature
+            4. Chat features (summarization,combination)
           </h3>
           {/* Video Walkthrough Placeholder */}
-          <aside className="mb-5 flex justify-center">
+          <aside className="mb-5 flex justify-center max-w-2xl">
             <div className="w-full max-w-4xl">
               <iframe
-                src="https://scribehow.com/embed/Accessing_GPT-4o_Chat_and_Saving_Summary__NQZpM_PXQ6mfOV17aHIq2A?as=video"
-                width="100%"
-                height="400"
+                src="https://www.youtube.com/embed/8g7kHVMFxlE"
+                width="560"
+                height="315"
+                className="rounded"
+                allowFullScreen
               ></iframe>
             </div>
           </aside>
@@ -380,14 +395,14 @@ const TextGenerationPlatform = () => {
               <h2 className="text-lg font-bold">
                 3. Refining the Generated Text:
               </h2>
-              <p className="mt-2">
+              <p className="mt-2 text-muted-foreground">
                 Sometimes, the generated text might require some refinement to
                 perfectly match your requirements. Here are some tips:
               </p>
               <ul className="list-disc ml-6 mt-2 space-y-2">
                 <li>
                   <strong>Prompt Refinement:</strong>
-                  <p className="mt-1">
+                  <p className="mt-1 text-muted-foreground">
                     If the generated text isn't quite what you were looking for,
                     try refining your original prompt. Be more specific or try a
                     different phrasing. You can also experiment with different
@@ -396,14 +411,14 @@ const TextGenerationPlatform = () => {
                 </li>
                 <li>
                   <strong>Manual Editing:</strong>
-                  <p className="mt-1">
+                  <p className="mt-1 text-muted-foreground">
                     Don't hesitate to manually edit the generated text. This is
                     often the quickest way to make small adjustments.
                   </p>
                 </li>
                 <li>
                   <strong>Regenerating Text:</strong>
-                  <p className="mt-1">
+                  <p className="mt-1 text-muted-foreground">
                     In some cases, you might want to completely regenerate the
                     text. This will create a new output based on your original
                     prompt and selected models.
@@ -417,11 +432,10 @@ const TextGenerationPlatform = () => {
 
       {/* Troubleshooting & Support */}
       <section>
-        <h2 className="text-2xl font-bold mb-4">Troubleshooting & Support</h2>
+        <h2 className="text-2xl font-semibold mb-4">Common Issues & Fixes</h2>
 
         {/* Common Issues & Solutions */}
         <div className="mb-6">
-          <h3 className=" font-semibold mb-4">Common Issues & Solutions</h3>
           <ul className="space-y-3">
             <CollapsibleItems items={faqData} />
           </ul>
@@ -433,7 +447,7 @@ const TextGenerationPlatform = () => {
         <h3 className="text-xl font-semibold mb-2"> Contact Support</h3>
         <p className="text-muted-foreground">
           For further assistance, visit our &nbsp;
-          <span className="text-blue-600">
+          <span className="italic text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
             <Link target="_blank" href={"/collection"}>
               Help Center
             </Link>
@@ -442,7 +456,7 @@ const TextGenerationPlatform = () => {
           <span>
             <button
               onClick={handleContactSupport}
-              className="  text-blue-600 rounded-lg hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className="  italic text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
             >
               support@alle-ai.com
             </button>
@@ -454,7 +468,7 @@ const TextGenerationPlatform = () => {
         <ArticleFeedback />
       </div>
       <div>
-        <DocsFooter/>
+        <DocsFooter />
       </div>
     </div>
   );

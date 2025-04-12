@@ -29,7 +29,7 @@ export default function Page() {
             }
           }
         } else if (pathname === `/docs/user-guides/${secs.id}`) {
-          return { title: item.title, param: secs.id, des: "" };
+          return { title: secs.title, param: secs.id, des: "" };
         }
       }
     }
