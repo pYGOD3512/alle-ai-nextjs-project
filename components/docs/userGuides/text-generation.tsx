@@ -3,50 +3,42 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react"; // Import Lucide icons
-import NavigationContainer from "@/components/NavigationContainer";
+import CollapsibleItems from "../CollapsibleItem";
+import ArticleFeedback from "../articleFeedback";
+import DocsFooter from "../simpleFooterDocs";
 const faqData = [
   {
+    id: "1",
     question: "AI response delay",
-    answer: "Check internet connection and retry.",
+    answer:
+      "If you're experiencing delays in AI responses, please check your internet connection for stability. A slow or interrupted network can affect response times. Try refreshing the page or reconnecting to the internet before attempting again.",
   },
   {
+    id: "2",
     question: "File upload failure",
-    answer: "Ensure file format is supported and re-upload.",
+    answer:
+      "Make sure the file you're trying to upload is in a supported format (e.g., PDF, PNG, JPG). Also, check that the file size doesn’t exceed the maximum limit. If the issue persists, try renaming the file and re-uploading.",
   },
   {
+    id: "3",
     question: "Voice input not working",
-    answer: "Check microphone permissions and retry.",
+    answer:
+      "Voice input may not work if microphone permissions are not granted. Check your browser settings to ensure microphone access is enabled. Also, verify that your microphone is connected and functioning properly.",
   },
   {
+    id: "4",
     question: "Error message while processing",
-    answer: "Clear the cache and try again.",
+    answer:
+      "If an error message appears during processing, it might be due to temporary data issues or a system glitch. Try clearing your browser's cache and cookies, then refresh the page and attempt the action again.",
   },
   {
+    id: "5",
     question: "Slow application performance",
-    answer: "Close unnecessary applications running in the background.",
+    answer:
+      "Performance may slow down if your device is running too many applications at once. Try closing unused programs or browser tabs. Restarting the app or your device can also help improve responsiveness.",
   },
 ];
 
-const readNextData = [
-  {
-    title: "Image Generation",
-    href: "/docs/user-guides/image",
-    description: "Learn how to create stunning images using our AI tools.",
-  },
-  {
-    title: "Video Generation",
-    href: "/docs/user-guides/video",
-    description: "Explore the process of generating videos with AI assistance.",
-  },
-  {
-    title: "Understanding AI models",
-    href: "/docs/user-guides/models",
-    description:
-      "Gain a deeper understanding of the AI models powering our platform.",
-  },
-];
 const handleContactSupport = () => {
   const email = "support@alle.com";
   const subject = "Support Request"; // Optional: You can customize the subject
@@ -56,11 +48,6 @@ const handleContactSupport = () => {
 
 const TextGenerationPlatform = () => {
   const { resolvedTheme } = useTheme();
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-  const toggleAnswer = (index: number) => {
-    setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
-  };
 
   return (
     <div className="min-h-screen">
@@ -436,40 +423,7 @@ const TextGenerationPlatform = () => {
         <div className="mb-6">
           <h3 className=" font-semibold mb-4">Common Issues & Solutions</h3>
           <ul className="space-y-3">
-            {faqData.map((faq, index) => (
-              <li
-                key={index}
-                className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                <button
-                  className="w-full text-left border dark:bg-zinc-800 p-4 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                  onClick={() => toggleAnswer(index)}
-                  aria-expanded={expandedIndex === index}
-                  aria-controls={`faq-answer-${index}`}
-                >
-                  <div className="flex items-center">
-                    {expandedIndex === index ? (
-                      <ChevronDown className="w-5 h-5 mr-3 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 mr-3 text-muted-foreground" />
-                    )}
-                    <span className="font-medium ">{faq.question}</span>
-                  </div>
-                </button>
-                {expandedIndex === index && (
-                  <div
-                    id={`faq-answer-${index}`}
-                    className="p-4 pt-2 border-t bg-gray-50 dark:bg-zinc-800  text-muted-foreground transition-all duration-300 ease-in-out"
-                    aria-hidden={expandedIndex !== index}
-                  >
-                    <strong className="font-semibold text-muted-foreground">
-                      Solution:
-                    </strong>{" "}
-                    {faq.answer}
-                  </div>
-                )}
-              </li>
-            ))}
+            <CollapsibleItems items={faqData} />
           </ul>
         </div>
       </section>
@@ -495,14 +449,13 @@ const TextGenerationPlatform = () => {
           </span>
         </p>
       </div>
-      <NavigationContainer
-        previousTitle="Overview"
-        previousDescription="An introduction to the platform, its features, and how to navigate through its functionalities."
-        preUrl="/docs/tutorials/using-platform"
-        nextDesciption="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
-        nextTitle="Image Generation"
-        nextUrl="/docs/tutorials/image-ai"
-      />
+      {/* article feedback  */}
+      <div className="mb-5">
+        <ArticleFeedback />
+      </div>
+      <div>
+        <DocsFooter/>
+      </div>
     </div>
   );
 };
