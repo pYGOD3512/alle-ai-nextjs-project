@@ -102,14 +102,14 @@ export const notifications: NotificationItem[] = [
 ];
 
 export const navItems = [
-  // {
-  //   type: ALargeSmall,
-  //   label: "Text size",
-  //   interactionType: "modal",
-  //   onClick: () => {
-  //     // // // console.log("Opening Text Size Modal");
-  //   },
-  // },
+  {
+    type: ALargeSmall,
+    label: "Text size",
+    interactionType: "modal",
+    onClick: () => {
+      // // // console.log("Opening Text Size Modal");
+    },
+  },
   // {
   //   type: HelpCircle,
   //   label: "Help",
@@ -139,9 +139,9 @@ export const navItems = [
 
 export const sidebarMenuItems = [
   { icon: MessageSquare, label: "Chat", href: "/chat" },
-  { icon: ImageIcon, label: "Image Generation", href: "/image" },
-  { icon: Music, label: "Audio Generation", beta: true, href: "/audio" },
-  { icon: Video, label: "Video Generation", beta: true, href: "/video" },
+  { icon: ImageIcon, label: "Image", href: "/image" },
+  { icon: Music, label: "Audio", beta: true, href: "/audio" },
+  { icon: Video, label: "Video", beta: true, href: "/video" },
 ];
 
 // Helper function to generate random IDs

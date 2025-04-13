@@ -879,7 +879,7 @@ const userPlan = React.useMemo(() => {
     },
     {
       value: "favorite",
-      label: "Favorite",
+      label: "My favorite",
     },
   ];
 
@@ -1011,6 +1011,7 @@ const userPlan = React.useMemo(() => {
                               />
                             </div>
                           )}
+                          {option.value === 'favorite' && (<Heart className ='ml-1 w-4 fill-red-500'/>)}
                         </div>
                       </SelectItem>
                     ))}
@@ -1149,7 +1150,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   const { theme, setTheme } = useTheme();
   const { selectedModels, inactiveModels, isLoadingLatest } = useSelectedModelsStore();
   const { isLoading } = useModelsStore();
-  const [textSize, setTextSize] = React.useState("16 px");
+  const { size, setSize } = useTextSizeStore();
   const [disabled, setDisabled] = useState(true);
   const [exportModalOpen, setExportModalOpen] = React.useState(false);
   const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false);
@@ -1246,16 +1247,16 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
       },
       textSize: {
         title: "Text size",
-        value: textSize,
+        value: `${size} px`,
       },
     },
     personalization: {
-      summary: {
-        title: "Compare",
-        description:
-        "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
-        enabled: isCompareMode,
-      },
+      // summary: {
+      //   title: "Compare",
+      //   description:
+      //   "Get a concise overview of all AI responses. Summarizes and distills the key points from each AI model for easy understanding",
+      //   enabled: isCompareMode,
+      // },
       personalizedAds: {
         title: "Sponsored content",
         description: "See relevant contents based on your prompt and responses. Turning this off will disable ads.",
@@ -1412,7 +1413,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     }
 
     if (key === "summary") {
-      if (!isFreeUser) {
+      if (isFreeUser) {
         setPromptConfig({
           title: "Upgrade Required",
           message: "Please upgrade your plan to enable the Compare & Comparison feature.",
@@ -1453,7 +1454,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-xl lg:max-w-3xl rounded-md">
+        <DialogContent className="sm:max-w-xl lg:max-w-3xl rounded-md overflow-hidden">
           <DialogHeader className="flex flex-row items-center justify-between relative border-b border-borderColorPrimary">
             <DialogTitle className="mb-2">Settings</DialogTitle>
             <kbd className="absolute right-4 -top-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
@@ -1461,16 +1462,17 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
             </kbd>
           </DialogHeader>
 
-          <Tabs defaultValue={`${defaultTabValue ? defaultTabValue : 'general'}`} className="w-full">
-            <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 overflow-hidden">
+            <Tabs defaultValue={`${defaultTabValue ? defaultTabValue : 'general'}`} className="w-full h-full">
+              <div className="flex flex-col sm:flex-row gap-4 h-full max-h-[80vh]">
               {/* Sidebar */}
-              <div className="w-48 space-y-1">
-                <TabsList className="w-full flex flex-col h-auto bg-transparent space-y-1">
+                <div className="w-full sm:w-48 shrink-0">
+                  <TabsList className="w-full flex flex-row sm:flex-col h-auto bg-transparent gap-1 sm:space-y-1 overflow-x-auto pb-2 sm:pb-0">
                   {tabs.map((tab) => (
                     <TabsTrigger
                       key={tab.value}
                       value={tab.value}
-                      className="w-full justify-start gap-2 focus-visible:outline-none data-[state=active]:bg-backgroundSecondary"
+                        className="w-full justify-start gap-2 focus-visible:outline-none data-[state=active]:bg-backgroundSecondary whitespace-nowrap"
                     >
                       {tab.icon}
                       {tab.label}
@@ -1480,7 +1482,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
               </div>
 
               {/* Content */}
-              <div className="flex-1">
+                <div className="flex-1 overflow-y-auto pr-2">
                 <TabsContent value="general" className="space-y-2">
                   <div className="flex items-center justify-between border-b border-borderColorPrimary">
                     <span className="text-sm">Theme</span>
@@ -1515,7 +1517,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                   </div>
                   <div className="flex items-center justify-between border-b border-borderColorPrimary">
                     <span className="text-sm">Text size</span>
-                    <Select defaultValue="16">
+                      <Select value={size.toString()} onValueChange={(value) => setSize(Number(value))}>
                       <SelectTrigger className="w-24 p-2 border-none focus:outline-none">
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
@@ -1822,7 +1824,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           className={`h-8 rounded-md p-2 text-xs border-borderColorPrimary transition-all`}
                           size="sm"
                           onClick={() => {
-                            toast.info('this feature will be available soon!')
+                            toast.info('This feature will be available soon!')
                             // if (setting.action === "Delete") {
                             //   setDeleteAccountModalOpen(true);
                             // } else if (setting.action === "Export") {
@@ -1858,13 +1860,13 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
                           size="sm"
                           onClick={() => {
                             if (key === "google_drive") {
-                            toast.info('this feature will be available soon!')
+                            toast.info('This feature will be available soon!')
                               // handleGoogleDriveAction();
                             } else if (key === "one_drive"){
-                              toast.info('this feature will be available soon!')
+                              toast.info('This feature will be available soon!')
                               // // console.log('One Drive')
                             } else if (key === "dropbox"){
-                              toast.info('this feature will be available soon!')
+                              toast.info('This feature will be available soon!')
                               // // console.log('Dropbox')
                             }
                           }}
@@ -2007,6 +2009,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
               </div>
             </div>
           </Tabs>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -2768,12 +2771,14 @@ export function PlansModal({ isOpen, onClose }: ModalProps) {
         } else {
           window.location.href = response.to;
         }
+        setProcessingPlan(null);
+
       } else {
+        setProcessingPlan(null);
         throw new Error(response.message || 'Checkout failed');
       }
     } catch (error: any) {
       toast.error(`${error.message || "An error occurred. Please try again."}`)
-    } finally {
       setProcessingPlan(null);
     }
   };

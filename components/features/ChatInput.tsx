@@ -23,6 +23,7 @@ import { ModelSelectionModal, PromptModal } from "@/components/ui/modals";
 import { ContentLengthWarning } from "../ui/content-length-warning";
 import { useModelsStore } from "@/stores/models";
 
+
 import { useSettingsStore } from "@/stores";
 import { useAuthStore } from "@/stores";
 import { PlansModal } from "@/components/ui/modals";
@@ -30,7 +31,7 @@ import { chatApi } from "@/lib/api/chat";
 import { useTheme } from "next-themes";
 
 import { sendGAEvent } from '@next/third-parties/google'
-
+import { LatencyWarning } from "../ui/latency-warning";
 
 declare global {
   interface Window {
@@ -77,7 +78,7 @@ export function ChatInput({
   const { isWebSearch, setIsWebSearch } = useWebSearchStore();
   const { isCombinedMode, setIsCombinedMode } = useCombinedModeStore();
   const { isCompareMode, setIsCompareMode } = useCompareModeStore();
-  const { selectedModels, inactiveModels } = useSelectedModelsStore();
+  const { selectedModels, inactiveModels, isLoadingLatest } = useSelectedModelsStore();
   const [showModelPrompt, setShowModelPrompt] = useState(false);
   const { chatModels, setChatModels, setLoading: setModelsLoading, setError: setModelsError } = useModelsStore();
   const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
@@ -93,6 +94,8 @@ export function ChatInput({
   const [contentPercentage, setContentPercentage] = useState<number>(0);
   const [incompatibleModels, setIncompatibleModels] = useState<string[]>([]);
   const [incompatibleModelNames, setIncompatibleModelNames] = useState<string[]>([]);
+
+  
 
   const pathname = usePathname();
 
@@ -127,12 +130,14 @@ export function ChatInput({
   const { theme, resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
 
-  // Initialize compare mode from user settings
-  // useEffect(() => {
-  //   if (user) {
-  //     setIsCompareMode(user.summary === 1);
-  //   }
-  // }, [user, setIsCompareMode]);
+  const [showLatencyWarning, setShowLatencyWarning] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<'combine' | 'compare' | null>(null);
+
+  useEffect(() => {
+    if ((pathname === '/chat' || pathname === '/image') && inputRef?.current) {
+      inputRef.current.focus();
+    }
+  }, [pathname]);
 
   useEffect(() => {
     // Only check if there's an uploaded image file
@@ -497,10 +502,10 @@ export function ChatInput({
 
     
     // If enabling web search, disable combined mode
-    if (newValue && isCombinedMode) {
-      setIsCombinedMode(false);
-      onCombinedToggle?.(false);
-    }
+    // if (newValue && isCombinedMode) {
+    //   setIsCombinedMode(false);
+    //   onCombinedToggle?.(false);
+    // }
     
     onWebSearchToggle?.(newValue);
   };
@@ -515,11 +520,15 @@ export function ChatInput({
     const newValue = !isCombinedMode;
     sendGAEvent('buttonClick', 'toggleFeature', { featureName: 'Combine', status: newValue});
 
-    
-    // If enabling combined mode, disable web search
-    if (newValue && isWebSearch) {
-      setIsWebSearch(false);
-      onWebSearchToggle?.(false);
+    // If enabling combined mode, disable web search and compare mode
+    if (newValue) {
+      // if (isWebSearch) {
+      //   setIsWebSearch(false);
+      //   onWebSearchToggle?.(false);
+      // }
+      if (isCompareMode) {
+        setIsCompareMode(false);
+      }
     }
     
     setIsCombinedMode(newValue);
@@ -636,7 +645,7 @@ export function ChatInput({
       return;
     }
 
-    if (!isFreeUser) {
+    if (isFreeUser) {
       setPromptConfig({
         title: "Upgrade Required",
         message: "Please upgrade your plan to enable the Compare feature.",
@@ -655,41 +664,63 @@ export function ChatInput({
       return;
     }
 
-    // Toggle the compareMode state immediately (just like web search and combine)
+    // Toggle the compareMode state immediately
     const newValue = !isCompareMode;
+    
+    // If enabling compare mode, disable combined mode
+    if (newValue && isCombinedMode) {
+      setIsCombinedMode(false);
+      onCombinedToggle?.(false);
+    }
+    
     setIsCompareMode(newValue);
     sendGAEvent('buttonClick', 'toggleFeature', { featureName: 'Comparison', status: newValue});
-
   };
+
+  // Add this effect to handle latency warning
+  useEffect(() => {
+    if (isWebSearch && (isCombinedMode || isCompareMode)) {
+      setActiveFeature(isCombinedMode ? 'combine' : 'compare');
+      setShowLatencyWarning(true);
+      
+      // Hide warning after 5 seconds
+      const timer = setTimeout(() => {
+        setShowLatencyWarning(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowLatencyWarning(false);
+    }
+  }, [isWebSearch, isCombinedMode, isCompareMode]);
 
   return (
     <>
       <div className="p-2 bg-background/95 backdrop-blur transition-all duration-300">
-
         {uploadedFile && (
           <div className="max-w-xl md:max-w-3xl mx-auto mb-2">
             <FilePreview file={uploadedFile} onRemove={handleRemoveFile} />
           </div>
         )}
-        
-        {contentPercentage > 100 && (
-          <div className="max-w-xl md:max-w-3xl mx-auto">
-            <ContentLengthWarning percentage={contentPercentage} />
-          </div>
-        )}
 
-         {/* Show incompatible models warning if needed */}
-        {uploadedFile?.type.startsWith('image/') && incompatibleModels.length > 0 && (
-          <div className="max-w-xl md:max-w-3xl mx-auto mb-2">
+        <div className="max-w-xl md:max-w-3xl mx-auto">
+          {contentPercentage > 100 && (
+            <ContentLengthWarning percentage={contentPercentage} />
+          )}
+
+          {/* Show incompatible models warning if needed */}
+          {uploadedFile?.type.startsWith('image/') && incompatibleModels.length > 0 && (
             <ContentLengthWarning 
               type="incompatible-models"
               message="The following models don't support image uploads:"
               models={incompatibleModelNames}
             />
-          </div>
-        )}
+          )}
 
-        <div className="max-w-xl md:max-w-3xl mx-auto">
+          {showLatencyWarning && activeFeature && (
+            <LatencyWarning isVisible={showLatencyWarning} feature={activeFeature} />
+          )}
+
           <div className="flex flex-col p-3 border dark:border-none shadow-xl bg-background dark:bg-backgroundSecondary rounded-3xl focus-within:border-borderColorPrimary">
             <Textarea 
               ref={inputRef}
@@ -740,7 +771,7 @@ export function ChatInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          disabled={isLoading || !!uploadedFile}
+                          disabled={isLoading || !!uploadedFile || isLoadingLatest || isSending}
                           onClick={handleWebSearchToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] ${
                             isWebSearch 
@@ -768,7 +799,7 @@ export function ChatInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          disabled={isLoading || isSending}
+                          disabled={isLoading || isSending || isLoadingLatest}
                           onClick={handleCombinedToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] overflow-hidden ${
                             isCombinedMode 
@@ -809,12 +840,11 @@ export function ChatInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          disabled={isLoading || isSending}
+                          disabled={isLoading || isSending || isLoadingLatest}
                           onClick={handleSummaryToggle}
                           className={`relative flex items-center gap-1 rounded-full transition-all duration-300 p-[0.4rem] overflow-hidden ${
                             isCompareMode 
-                              ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} hover:bg-green-500/20`
-                              : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
+                              ? `border border-green-500/10 ${getSectionStyles(currentType).bgColor} ${getSectionStyles(currentType).iconColor} hover:bg-green-500/20`                              : 'border border-borderColorPrimary text-muted-foreground hover:text-foreground'
                           }`}
                         >
                           {(
@@ -865,7 +895,7 @@ export function ChatInput({
                       ? ""
                       : "bg-bodyColor hover:bg-opacity-70 transition-all duration-200"
                   }`}
-                  disabled={isInputEmpty || isLoading || isSending || isContentOverLimit(contentPercentage) || (uploadedFile?.type.startsWith('image/') && 
+                  disabled={isInputEmpty || isLoading || isSending || isLoadingLatest || isContentOverLimit(contentPercentage) || (uploadedFile?.type.startsWith('image/') && 
                     incompatibleModels.length > 0)}
                 >
                   {pathname.startsWith('/chat') ? <ArrowUp className="h-4 w-4" /> : 'Generate' }
@@ -965,3 +995,4 @@ export function ChatInput({
     </>
   );
 }
+

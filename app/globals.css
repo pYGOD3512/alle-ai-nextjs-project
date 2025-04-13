@@ -172,8 +172,20 @@
   @apply list-disc list-inside mb-4;
 }
 
+.prose-sm :where(ul):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  margin-top: 1.1428571em;
+  margin-bottom: 1.1428571em;
+  padding-inline-start: 0.5em;
+}
+
 .prose ol {
   @apply list-decimal list-inside mb-4;
+}
+
+.prose-sm :where(ol):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  margin-top: 1.1428571em;
+  margin-bottom: 1.1428571em;
+  padding-inline-start: 0.5em;
 }
 
 .prose li {

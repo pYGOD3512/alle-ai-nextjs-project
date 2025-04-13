@@ -398,7 +398,7 @@ export function Sidebar() {
                       onClick={() => {
                         (isMobile && isOpen) ? toggle() : '';
                         if (item.href === "/audio" || item.href === "/video") {
-                          toast.info('this feature will be available soon');
+                          toast.info('This feature will be available soon');
                         }
                       }}
                     >
@@ -426,20 +426,20 @@ export function Sidebar() {
               {(pathname.includes('chat') || pathname.includes('project')) && (
                 
                 <>
-                  <div className="flex-shrink-0 px-2">
-                    <div className="flex justify-between items-center mx-2 text-xs font-medium text-muted-foreground mb-2">
+                  <div className="flex-shrink-0 px-4">
+                    <div className="flex justify-between items-center mx-2 text-sm font-medium text-muted-foreground mb-2">
+                      <span>New project</span>
                       <Button
                         variant="ghost"
-                        className="w-full p-0 gap-2 border-none justify-start px-2"
+                        className="p-0 h-5 w-5 border-none"
                         onClick={() => {
-                          // setProjectModalOpen(true);
+                          setProjectModalOpen(true);
                           (isMobile && isOpen) ? toggle() : '';
-                          toast.info('this feature will be available soon');
+                          toast.info('This feature will be available soon');
                         }}
                         aria-label="New Project"
                       >
-                        <Folder  className="w-4 h-4"/>
-                        New project
+                        <Plus className="w-4 h-4"/>
                       </Button>
                     </div>
                   </div>
@@ -459,7 +459,7 @@ export function Sidebar() {
                                 onClick={() => handleProjectClick(project)}
                               >
                                 <Folder className="mr-2 h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm truncate">{project.name}</span>
+                                <span className="text-xs truncate">{project.name}</span>
                               </div>
                             </ContextMenuTrigger>
                             <ContextMenuContent>
@@ -648,7 +648,7 @@ export function Sidebar() {
               </ScrollArea>
 
               {/* More section */}
-              <div className="flex-shrink-0 px-4 my-8">
+              <div className="flex-shrink-0 px-4 my-2">
                 <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
                   <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md bg-backgroundSecondary text-xs font-medium text-muted-foreground hover:text-primary">
                     MORE
@@ -665,7 +665,7 @@ export function Sidebar() {
                         <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
                       </a>
                     </Link> */}
-                      <div onClick={() => {toast.info('this feature will be available soon')}} className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
+                      <div onClick={() => {toast.info('This feature will be available soon')}} className=" flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer">
                         <ChartLine  className="w-4 h-4 ml-4"/> Model Analytics
                       </div>
                     {/* <Link href={`/changelog`} className={`flex gap-2 items-center px-2 py-1.5 text-xs hover:bg-secondary/80 rounded-md cursor-pointer ${isActiveRoute('/changelog', pathname) ? "bg-secondary font-medium" : ""}`}>
@@ -765,7 +765,7 @@ export function Sidebar() {
                       ${styles.hoverBg} cursor-pointer`}
                     onClick={() => {
                       if (item.href === "/audio" || item.href === "/video") {
-                        toast.info('this feature will be available soon');
+                        toast.info('This feature will be available soon');
                       }
                     }}
                   >
@@ -790,7 +790,7 @@ export function Sidebar() {
                 size="icon"
                 className="w-full"
                 onClick={() => {
-                  toast.info('this feature will be available soon');
+                  toast.info('This feature will be available soon');
                   // setProjectModalOpen(true)}
                 }}
               >
