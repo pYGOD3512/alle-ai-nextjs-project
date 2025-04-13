@@ -99,7 +99,7 @@ const TextGenerationPlatform = () => {
 
         {/* Inputting a Query */}
         <div className="mb-6">
-          <h3 className="text-1xl font-semibold mb-2">
+          <h3 className="text-1xl font-bold  mb-2 ">
             1. Selecting Your AI Models:
           </h3>
           <div className="text-muted-foreground mb-2">
@@ -113,7 +113,12 @@ const TextGenerationPlatform = () => {
           <div className="p-3">
             <ul className="list-disc ml-6 space-y-4">
               <li>
-                <strong id="select_models">How to Select Models:</strong>
+                <strong
+                  className="text-muted-foreground font-bold "
+                  id="select_models"
+                >
+                  How to Select Models:&nbsp;
+                </strong>
                 <p className="mt-1 text-muted-foreground">
                   {`To select a model, simply click on the checkbox next to its
                   name in the 'AI Models' panel as illustrated in the short
@@ -123,7 +128,9 @@ const TextGenerationPlatform = () => {
               </li>
 
               <li>
-                <strong>Choosing the Right Model(s):</strong>
+                <strong className="text-muted-foreground font-bold ">
+                  Choosing the Right Model(s): &nbsp;
+                </strong>
                 <p className="mt-1 text-muted-foreground">
                   Each AI model has its own strengths and characteristics.
                   ChatGPT is known for its conversational abilities, while
@@ -132,7 +139,7 @@ const TextGenerationPlatform = () => {
                   find the ones that best suit your project. For a deeper dive
                   into each available model, including their strengths,
                   weaknesses, and more,&nbsp;
-                  <span className="italic text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
+                  <span className="underline text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 font-bold">
                     <Link target="_blank" href={"/modal-gloassary"}>
                       check out this dedicated documentation page.
                     </Link>
@@ -141,8 +148,10 @@ const TextGenerationPlatform = () => {
               </li>
 
               <li>
-                <strong>Selecting Multiple Models:</strong>
-                <p className="mt-1">
+                <strong className="text-muted-foreground font-bold">
+                  Selecting Multiple Models:&nbsp;
+                </strong>
+                <p className="mt-1 text-muted-foreground">
                   Selecting multiple models will generate text from each model,
                   allowing you to compare the results and choose the best
                   option. The output from each model will be clearly labeled.
@@ -164,7 +173,9 @@ const TextGenerationPlatform = () => {
           <div className="p-3">
             <ul className="list-disc space-y-6 ml-6">
               <li>
-                <strong>Text Prompt:</strong>
+                <strong className="text-muted-foreground font-bold">
+                  Text Prompt: &nbsp;
+                </strong>
                 <p className="mt-1 text-muted-foreground">
                   This is the most common way to provide input. Simply type your
                   instructions or ideas into the text prompt field. Be as
@@ -172,13 +183,17 @@ const TextGenerationPlatform = () => {
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-2">
                   <li>
-                    <strong>Good Prompt:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      Good Prompt:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       "Write a short story about a cat who travels to space."
                     </p>
                   </li>
                   <li>
-                    <strong>Less Effective Prompt:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      Less Effective Prompt:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       "Write something interesting."
                     </p>
@@ -187,7 +202,9 @@ const TextGenerationPlatform = () => {
               </li>
 
               <li>
-                <strong>Voice Input:</strong>
+                <strong className="text-muted-foreground font-bold">
+                  Voice Input:&nbsp;
+                </strong>
                 <p className="mt-1 text-muted-foreground">
                   For hands-free input, you can use our voice input feature.
                   Click the microphone icon and start speaking. The platform
@@ -195,19 +212,25 @@ const TextGenerationPlatform = () => {
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-2">
                   <li>
-                    <strong>Enabling Voice Input:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      Enabling Voice Input:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       Explain how to enable microphone access in the browser.
                     </p>
                   </li>
                   <li>
-                    <strong>Supported Languages:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      Supported Languages:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       List the supported languages, if any.
                     </p>
                   </li>
                   <li>
-                    <strong>Editing Transcribed Text:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      Editing Transcribed Text:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       Explain how to edit the transcribed text if there are
                       errors.
@@ -217,7 +240,9 @@ const TextGenerationPlatform = () => {
               </li>
 
               <li>
-                <strong>Attaching Files:</strong>
+                <strong className="text-muted-foreground font-bold">
+                  Attaching Files:&nbsp;
+                </strong>
                 <p className="mt-1 text-muted-foreground">
                   You can provide additional context by attaching files. This
                   can be useful for summarizing documents, analyzing data, or
@@ -225,13 +250,17 @@ const TextGenerationPlatform = () => {
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-2">
                   <li>
-                    <strong>Supported File Types:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      Supported File Types:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       List the supported file types, e.g., .txt, .pdf, .docx.
                     </p>
                   </li>
                   <li>
-                    <strong>How to Attach Files:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      How to Attach Files:&nbsp;
+                    </strong>
                     <div className="mt-2 mb-3">
                       <Image
                         className="mb-2"
@@ -251,7 +280,9 @@ const TextGenerationPlatform = () => {
                     </div>
                   </li>
                   <li>
-                    <strong>File Size Limits:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      File Size Limits:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       We support uploading files up to 20mb in size. Files
                       larger than this limit cannot be processed
@@ -261,7 +292,9 @@ const TextGenerationPlatform = () => {
               </li>
 
               <li>
-                <strong>Enabling Web Search:</strong>
+                <strong className="text-muted-foreground font-bold">
+                  Enabling Web Search:&nbsp;
+                </strong>
                 <Image
                   className="mb-2"
                   height={120}
@@ -279,7 +312,9 @@ const TextGenerationPlatform = () => {
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-2">
                   <li>
-                    <strong>How Web Search Works:</strong>
+                    <strong className="text-muted-foreground font-bold">
+                      How Web Search Works:&nbsp;
+                    </strong>
                     <p className="mt-1 text-muted-foreground">
                       When web search is enabled, the model queries the internet
                       in real time by accessing search engines, retrieves
@@ -295,7 +330,7 @@ const TextGenerationPlatform = () => {
 
         {/* Generating Responses */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-xl  font-semibold mb-2">
             3. Generating Responses
           </h3>
           <p className="text-muted-foreground">
@@ -309,7 +344,7 @@ const TextGenerationPlatform = () => {
 
         {/* Summarization Feature */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-xl  font-semibold mb-2">
             4. Chat features (summarization,combination)
           </h3>
           {/* Video Walkthrough Placeholder */}
@@ -334,19 +369,23 @@ const TextGenerationPlatform = () => {
 
           <div className="space-y-6">
             <section>
-              <h2 className="text-lg font-bold">
+              <h2 className="text-lg font-bold ">
                 1. Viewing the Generated Output:
               </h2>
               <ul className="list-disc ml-6 mt-2 space-y-2">
                 <li>
-                  <strong>Single Model Output:</strong>
-                  <p className="mt-1">
+                  <strong className="text-muted-foreground font-bold">
+                    Single Model Output:&nbsp;
+                  </strong>
+                  <p className="mt-1 text-muted-foreground">
                     You can select a single model to view its response at
                     response area
                   </p>
                 </li>
                 <li>
-                  <strong>Multiple Model Output:</strong>
+                  <strong className="text-muted-foreground font-bold">
+                    Multiple Model Output:&nbsp;
+                  </strong>
                   <p className="mt-1 text-muted-foreground">
                     The output from each model will be displayed separately,
                     often with clear labels indicating which model generated
@@ -360,8 +399,8 @@ const TextGenerationPlatform = () => {
             </section>
 
             <section>
-              <h2 className="text-lg font-bold">
-                2. Editing the Generated Text:
+              <h2 className="text-lg   font-bold">
+                2. Editing the Generated Text:&nbsp;
               </h2>
               <p className="mt-2 text-muted-foreground">
                 The generated text is fully editable. You can make any changes
@@ -369,7 +408,9 @@ const TextGenerationPlatform = () => {
               </p>
               <ul className="list-disc ml-6 mt-2 space-y-2">
                 <li>
-                  <strong className="mb-3">Comparing Model Outputs :</strong>
+                  <strong className="mb-3 text-muted-foreground font-bold">
+                    Comparing Model Outputs :&nbsp;
+                  </strong>
                   <Image
                     className="mb-2"
                     height={120}
@@ -392,8 +433,8 @@ const TextGenerationPlatform = () => {
             </section>
 
             <section>
-              <h2 className="text-lg font-bold">
-                3. Refining the Generated Text:
+              <h2 className="text-lg   font-bold">
+                3. Refining the Generated Text:&nbsp;
               </h2>
               <p className="mt-2 text-muted-foreground">
                 Sometimes, the generated text might require some refinement to
@@ -401,7 +442,9 @@ const TextGenerationPlatform = () => {
               </p>
               <ul className="list-disc ml-6 mt-2 space-y-2">
                 <li>
-                  <strong>Prompt Refinement:</strong>
+                  <strong className="text-muted-foreground font-bold">
+                    Prompt Refinement:&nbsp;
+                  </strong>
                   <p className="mt-1 text-muted-foreground">
                     If the generated text isn't quite what you were looking for,
                     try refining your original prompt. Be more specific or try a
@@ -410,14 +453,18 @@ const TextGenerationPlatform = () => {
                   </p>
                 </li>
                 <li>
-                  <strong>Manual Editing:</strong>
+                  <strong className="text-muted-foreground font-bold">
+                    Manual Editing:&nbsp;
+                  </strong>
                   <p className="mt-1 text-muted-foreground">
                     Don't hesitate to manually edit the generated text. This is
                     often the quickest way to make small adjustments.
                   </p>
                 </li>
                 <li>
-                  <strong>Regenerating Text:</strong>
+                  <strong className="text-muted-foreground font-bold">
+                    Regenerating Text:&nbsp;
+                  </strong>
                   <p className="mt-1 text-muted-foreground">
                     In some cases, you might want to completely regenerate the
                     text. This will create a new output based on your original

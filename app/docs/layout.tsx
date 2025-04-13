@@ -34,9 +34,13 @@ export default function Layout({ children }) {
               <div className="max-w-4xl mx-auto px-6 py-6">{children}</div>
             </div>
           </main>
-          <aside className="hidden xl:block w-[250px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-background/90 border-l border-border/40">
-            <OnThisPage pathname={pathname} sections={[]} />
-          </aside>
+          {pathname === "/docs/user-guides/platform-overview" ? (
+            <div></div>
+          ) : (
+            <aside className="hidden xl:block w-[250px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-background/90 border-l border-border/40">
+              <OnThisPage pathname={pathname} sections={[]} />
+            </aside>
+          )}
         </div>
       ) : isTwoColumnLayout ? (
         <div className="flex-1 flex">
