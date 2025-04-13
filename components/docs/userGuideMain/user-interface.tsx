@@ -182,9 +182,6 @@ const Overview = () => {
         <div className="flex items-center gap-2 mb-6"></div>
       </div>
       <div className="text-muted-foreground">
-        Welcome to Alle-ai! We’re happy to have you. Alle-ai brings together the
-        world’s leading AI models for chat, image, video, and audio generation
-        in one unified platform designed to power creativity and productivity.
         To get started, check out the guide below for a quick tour.
         <p></p>
       </div>
@@ -258,9 +255,7 @@ const Overview = () => {
         </div>
       </div>
       {/* continuation */}
-      <div>
-        {/* implement article feedback later */}
-      </div>
+      <div>{/* implement article feedback later */}</div>
     </div>
   );
 };
