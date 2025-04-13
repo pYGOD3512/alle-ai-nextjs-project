@@ -1536,7 +1536,7 @@ export const mainUserGuides: mainGuides[] = [
 
       {
         id: "user-interface",
-        title: "User interface",
+        title: "Quickstart",
       },
     ],
   },

@@ -67,7 +67,11 @@ export default function Page() {
           </h1>
           <div className="text-2xl font-bold mb-5">
             <h2 id={`${title}`}>
-              {title === "Overview" ? " One Platform for Every AI Task" : title}
+              {title === "Overview"
+                ? " One Platform for Every AI Task"
+                : title === "Quickstart"
+                ? "User interface"
+                : title}
             </h2>
           </div>
         </div>
