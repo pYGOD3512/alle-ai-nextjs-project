@@ -259,8 +259,8 @@ const Overview = () => {
           preUrl=""
           nextUrl=""
           nextTitle="Text Generation"
-          nextDesciption="Explore tutorial for Text Generation"
-          previousDescription=""
+          // nextDesciption="Explore tutorial for Text Generation"
+          // previousDescription=""
         />
       </div>
     </div>

@@ -1308,8 +1308,7 @@ export function SettingsModal({ isOpen, onClose, defaultTabValue }: ModalProps) 
     analytics: {
       myAnalytics: {
         title: "Coming soon...",
-        description:
-          "Gain insights and track your usage with personalized analytics.",
+        description: "Gain insights and track your usage with personalized analytics.",
       },
     },
     security: {

@@ -221,9 +221,9 @@ export default function AudioGeneration() {
 
       <NavigationContainer
         previousTitle="Image Generation"
-        previousDescription="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
+        // previousDescription="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
         preUrl="/docs/tutorials/image-ai"
-        nextDesciption="Utilize AI for video creation, editing, and automated scene generation."
+        // nextDesciption="Utilize AI for video creation, editing, and automated scene generation."
         nextTitle="Video Generation"
         nextUrl="/docs/tutorials/video-ai"
       />

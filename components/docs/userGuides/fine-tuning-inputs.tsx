@@ -139,10 +139,10 @@ const PromptEngineeringGuide = () => {
       {/* Navigation */}
       <NavigationContainer
         previousTitle="Libraries"
-        previousDescription="Working with file uploads"
+        // previousDescription="Working with file uploads"
         preUrl="/docs/user-guides/libraries"
         nextTitle="Rate Limits"
-        nextDesciption="know about use case limitations"
+        // nextDesciption="know about use case limitations"
         nextUrl="/docs/user-guides/limits"
       />
     </div>

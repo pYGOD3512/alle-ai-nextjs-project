@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 interface containerProps {
   previousTitle: string;
   nextTitle: string;
-  previousDescription: string;
-  nextDesciption: string;
+  previousDescription?: string;
+  nextDesciption?: string;
   preUrl: string;
   nextUrl: string;
 }
@@ -19,7 +19,7 @@ export default function NavigationContainer(props: containerProps) {
             onClick={() => {
               router.back();
             }}
-            className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px]"
+            className="group flex items-center min-w-[240px] space-x-2 p-2 text-sm transition-colors hover:bg-accent rounded-lg border"
           >
             <ChevronLeft className="h-5 w-5 mt-0.5" />
             <div className="flex flex-col items-start">
@@ -39,7 +39,7 @@ export default function NavigationContainer(props: containerProps) {
             onClick={() => {
               router.push(props.nextUrl);
             }}
-            className="group flex items-start space-x-2 px-6 py-3 text-sm transition-colors hover:bg-accent rounded-lg border min-w-[240px] text-right"
+            className="group flex justify-end items-center min-w-[240px] space-x-2 p-2 text-sm transition-colors hover:bg-accent rounded-lg border text-right"
           >
             <div className="flex flex-col items-end">
               <span className="text-sm text-muted-foreground mb-1">Next</span>

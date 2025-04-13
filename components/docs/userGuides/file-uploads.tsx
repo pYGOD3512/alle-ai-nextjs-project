@@ -372,10 +372,10 @@ export default function WorkingWithFilesDocs() {
         {/* Navigation Section */}
         <NavigationContainer
           previousTitle="Video Generation"
-          previousDescription="Interacting with video models"
+          // previousDescription="Interacting with video models"
           preUrl="/docs/user-guides/video-generation"
           nextTitle="Libraries"
-          nextDesciption="Learn how to use libraries with the API"
+          // nextDesciption="Learn how to use libraries with the API"
           nextUrl="/docs/user-guides/libraries"
         />
       </div>

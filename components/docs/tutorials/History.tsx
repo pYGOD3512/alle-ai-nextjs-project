@@ -242,9 +242,9 @@ const ManagingChatHistory = () => {
       </p>
       <NavigationContainer
         previousTitle="Prompts Engineering"
-        previousDescription="Learn how to craft effective prompts to get the best results from AI models"
+        // previousDescription="Learn how to craft effective prompts to get the best results from AI models"
         preUrl="/docs/tutorials/prompts"
-        nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
+        // nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
         nextTitle="Ready to Get Started? 🚀 "
         nextUrl="/"
       />
