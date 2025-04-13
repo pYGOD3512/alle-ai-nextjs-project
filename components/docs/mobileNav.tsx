@@ -1,7 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,22 +7,35 @@ import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, ExternalLink, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SearchCommand } from "@/components/features/developer/search-command";
-import { apiReference, guides, tutorial,mainUserGuides } from "@/lib/constants/docs";
+import { useNavigation } from "@/components/docs/useNavigation";
+import Link from "next/link";
 import SearchModal from "../docSearchModal";
 
 export function MobileNav() {
   const { resolvedTheme } = useTheme();
-  const pathname = usePathname();
-  const router = useRouter();
+  const {
+    pathname,
+    expandedSections,
+    expandedUserGuideSections,
+    toggleSection,
+    flipUserGuideSection,
+    handleReferenceClick,
+    isActive,
+    apiReference,
+    mainUserGuides,
+    tutorial,
+  } = useNavigation();
+
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({});
   const [isSearchOpen, setSearchOpen] = useState(false);
 
   const navItems = [
     { name: "Welcome", href: "/docs/getting-started", pageOne: "" },
-    { name: "User Guide", href: "/docs/user-guides", pageOne: "quickstart" },
+    {
+      name: "User Guide",
+      href: "/docs/user-guides",
+      pageOne: "platform-overview",
+    },
     {
       name: "API Reference",
       href: "/docs/api-reference",
@@ -37,100 +48,8 @@ export function MobileNav() {
   const toggleMenu = () => setIsOpen((prev) => !prev);
   const toggleSearch = () => setSearchOpen((prev) => !prev);
 
-  useEffect(() => {
-    if (!pathname || !pathname.startsWith("/docs/api-reference")) return;
-    const currentPath = pathname.replace("/docs/api-reference/", "");
-    const activeSection = apiReference
-      .flatMap((item) => item.sections)
-      .filter((section) => section.sections)
-      .find((section) =>
-        section.sections!.some((subsection) =>
-          currentPath.startsWith(subsection.href)
-        )
-      );
-    if (activeSection) {
-      setExpandedSections((prev) => ({ ...prev, [activeSection.id]: true }));
-    }
-  }, [pathname]);
-
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
-  };
-
-  // Exact match for sidebar items
-  const isActive = (path: string) => pathname === path;
-
   // Broader match for top-level nav items
   const isNavActive = (href: string) => pathname.startsWith(href);
-
-   const handleReferenceClick = (
-     e: React.MouseEvent<HTMLAnchorElement>,
-     sectionHref?: string
-   ) => {
-     e.preventDefault();
-     if (!sectionHref) return;
-
-     const specialSections = ["rate-limits", "changelogs", "faq"];
-     const currentPath = pathname || "";
-
-     const isInSpecialSection = specialSections.some((section) =>
-       currentPath.includes(`/docs/api-reference/${section}`)
-     );
-
-     if (specialSections.includes(sectionHref)) {
-       // For special sections, always use router.push
-       router.push(`/docs/api-reference/${sectionHref}`);
-     } else {
-       // If we're coming from a special section to a regular section
-       if (isInSpecialSection) {
-         router.push(`/docs/api-reference/${sectionHref}`);
-         // Scroll immediately after push
-         const element = document.querySelector(
-           `[data-section="${sectionHref}"]`
-         );
-         if (element) {
-           const elementPosition =
-             element.getBoundingClientRect().top + window.scrollY;
-           const offset = 30;
-           window.scrollTo({
-             top: elementPosition - offset,
-             behavior: "instant",
-           });
-         }
-       } else {
-         // Original logic for navigation within single-page sections
-         window.history.pushState(
-           null,
-           "",
-           `/docs/api-reference/${sectionHref}`
-         );
-
-         const element = document.querySelector(
-           `[data-section="${sectionHref}"]`
-         );
-         if (element) {
-           const elementPosition =
-             element.getBoundingClientRect().top + window.scrollY;
-           const offset = 30;
-           window.scrollTo({
-             top: elementPosition - offset,
-             behavior: "instant",
-           });
-         }
-       }
-     }
-   };
-  //  guides sections
-  const [expandedUserGuideSections, setExpandedUserGuideSections] = useState<
-    Record<string, boolean>
-  >({});
-
-  const flipUserGuideSection = (sectionId: string) => {
-    setExpandedUserGuideSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
 
   const renderApiReference = () => (
     <div className="space-y-2">
@@ -160,9 +79,10 @@ export function MobileNav() {
                         <Link
                           href={`/docs/api-reference/${subsection.href}`}
                           key={subsection.id}
-                          onClick={(e) =>
-                            handleReferenceClick(e, subsection.href)
-                          }
+                          onClick={(e) => {
+                            handleReferenceClick(e, subsection.href);
+                            setIsOpen(false); // Close sidebar on click
+                          }}
                           className={cn(
                             "block px-4 py-2 text-sm",
                             isActive(`/docs/api-reference/${subsection.href}`)
@@ -179,7 +99,10 @@ export function MobileNav() {
               ) : (
                 <Link
                   href={`/docs/api-reference/${section.id}`}
-                  onClick={(e) => handleReferenceClick(e, section.id)}
+                  onClick={(e) => {
+                    handleReferenceClick(e, section.id);
+                    setIsOpen(false); // Close sidebar on click
+                  }}
                   className={cn(
                     "block px-4 py-2 text-sm",
                     isActive(`/docs/api-reference/${section.id}`)
@@ -218,6 +141,7 @@ export function MobileNav() {
                       href={section.href ?? "#"}
                       target="_blank"
                       className="group flex items-center w-3/4 rounded-md p-2 text-sm ml-2 hover:bg-accent/10 hover:text-foreground text-muted-foreground"
+                      onClick={() => setIsOpen(false)} // Close sidebar on click
                     >
                       <span className="relative z-10">{section.title}</span>
                       <ExternalLink className="ml-2 h-4 w-4 opacity-70" />
@@ -252,6 +176,7 @@ export function MobileNav() {
                               ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
                               : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
                           )}
+                          onClick={() => setIsOpen(false)} // Close sidebar on click
                         >
                           <span className="px-2 text-sm">{section.title}</span>
                         </Link>
@@ -270,6 +195,7 @@ export function MobileNav() {
                                   ? "dark:bg-accent bg-gray-200 rounded-md text-black dark:text-white font-medium shadow-sm"
                                   : "text-muted-foreground dark:hover:bg-accent hover:text-foreground"
                               )}
+                              onClick={() => setIsOpen(false)} // Close sidebar on click
                             >
                               <span className="px-2 text-sm">
                                 {subsection.title}
@@ -306,7 +232,7 @@ export function MobileNav() {
                   ? "bg-accent text-foreground font-medium"
                   : "text-muted-foreground hover:bg-accent/50"
               )}
-              onClick={() => setIsOpen(false)}
+              onClick={() => setIsOpen(false)} // Already present, kept for consistency
             >
               {section.title}
             </Link>
@@ -328,8 +254,8 @@ export function MobileNav() {
               <Image
                 src={
                   resolvedTheme === "dark"
-                    ? "/svgs/logo-desktop-full.webp"
-                    : "/svgs/logo-desktop-dark-full.webp"
+                    ? "/svgs/logo-desktop-full.png"
+                    : "/svgs/logo-desktop-dark-full.png"
                 }
                 alt="Logo"
                 height={32}

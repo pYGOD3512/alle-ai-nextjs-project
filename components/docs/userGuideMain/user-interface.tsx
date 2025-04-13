@@ -3,7 +3,6 @@ import React from "react";
 import { Sparkles, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import NavigationContainer from "@/components/NavigationContainer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 //  components
 const NewChat = () => (
@@ -260,14 +259,7 @@ const Overview = () => {
       </div>
       {/* continuation */}
       <div>
-        <NavigationContainer
-          previousTitle="Get started"
-          preUrl=""
-          nextUrl=""
-          nextTitle="Text Generation"
-          nextDesciption="Explore tutorial for Text Generation"
-          previousDescription=""
-        />
+        {/* implement article feedback later */}
       </div>
     </div>
   );

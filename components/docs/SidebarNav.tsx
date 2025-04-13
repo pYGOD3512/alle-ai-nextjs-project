@@ -1,115 +1,24 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
-import {
-  tutorial,
-  apiReference,
-  guides,
-  mainUserGuides,
-} from "@/lib/constants/docs";
-import { useState, useEffect } from "react";
+import { useNavigation } from "@/components/docs/useNavigation";
 import Link from "next/link";
 
 export const SidebarNav = () => {
-  const pathname = usePathname();
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({});
-  const router = useRouter();
-  const isActive = (path: string) => pathname === path;
+  const {
+    pathname,
+    expandedSections,
+    expandedUserGuideSections,
+    toggleSection,
+    flipUserGuideSection,
+    handleReferenceClick,
+    isActive,
+    apiReference,
+    mainUserGuides,
+    tutorial,
+  } = useNavigation();
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
-
-  //  guides sections
-  const [expandedUserGuideSections, setExpandedUserGuideSections] = useState<
-    Record<string, boolean>
-  >({});
-
-  const flipUserGuideSection = (sectionId: string) => {
-    setExpandedUserGuideSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
-
-  // Auto-expand logic for active subsections
-  useEffect(() => {
-    if (!pathname?.startsWith("/docs/api-reference")) return;
-
-    const currentPath = pathname.replace("/docs/api-reference/", "");
-
-    apiReference.forEach((item) => {
-      item.sections.forEach((section) => {
-        if (section.sections?.some((sub) => currentPath.startsWith(sub.href))) {
-          setExpandedSections((prev) => ({ ...prev, [section.id]: true }));
-        }
-      });
-    });
-  }, [pathname]);
-  const handleReferenceClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    sectionHref?: string
-  ) => {
-    e.preventDefault();
-    if (!sectionHref) return;
-
-    const specialSections = ["rate-limits", "changelogs", "faq"];
-    const currentPath = pathname || "";
-
-    const isInSpecialSection = specialSections.some((section) =>
-      currentPath.includes(`/docs/api-reference/${section}`)
-    );
-
-    if (specialSections.includes(sectionHref)) {
-      // For special sections, always use router.push
-      router.push(`/docs/api-reference/${sectionHref}`);
-    } else {
-      // If we're coming from a special section to a regular section
-      if (isInSpecialSection) {
-        router.push(`/docs/api-reference/${sectionHref}`);
-        // Scroll immediately after push
-        const element = document.querySelector(
-          `[data-section="${sectionHref}"]`
-        );
-        if (element) {
-          const elementPosition =
-            element.getBoundingClientRect().top + window.scrollY;
-          const offset = 30;
-          window.scrollTo({
-            top: elementPosition - offset,
-            behavior: "instant",
-          });
-        }
-      } else {
-        // Original logic for navigation within single-page sections
-        window.history.pushState(
-          null,
-          "",
-          `/docs/api-reference/${sectionHref}`
-        );
-
-        const element = document.querySelector(
-          `[data-section="${sectionHref}"]`
-        );
-        if (element) {
-          const elementPosition =
-            element.getBoundingClientRect().top + window.scrollY;
-          const offset = 30;
-          window.scrollTo({
-            top: elementPosition - offset,
-            behavior: "instant",
-          });
-        }
-      }
-    }
-  };
   const renderApiReference = () => (
     <div>
       {apiReference.map((item) => (

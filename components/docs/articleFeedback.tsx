@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
-
+import { toast } from "sonner";
 interface ArticleFeedbackProps {
   articleId?: string;
   onFeedbackSubmit?: (feedback: FeedbackData) => Promise<void>;
@@ -16,12 +15,6 @@ interface FeedbackData {
   timestamp?: string;
 }
 
-interface ToastState {
-  show: boolean;
-  message: string;
-  isError?: boolean;
-}
-
 const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
   articleId,
   onFeedbackSubmit,
@@ -31,10 +24,6 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
     isHelpful: null,
     reason: null,
     additionalComment: "",
-  });
-  const [toast, setToast] = useState<ToastState>({
-    show: false,
-    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
@@ -104,22 +93,19 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
       // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
       await onFeedbackSubmit?.(fullFeedback);
-      setToast({
-        show: true,
-        message: feedback.isHelpful
+      toast(
+        feedback.isHelpful
           ? "Thanks for your feedback! We're glad this was helpful."
-          : "Thanks for your feedback. We'll work on improving this.",
-      });
+          : "Thanks for your feedback. We'll work on improving this."
+      );
       setFeedback({ isHelpful: null, reason: null, additionalComment: "" });
     } catch (error) {
-      setToast({
-        show: true,
-        message: "Oops, something went wrong. Try again?",
-        isError: true,
+      toast("Oops, something went wrong. Try again?", {
+        // Optional: Add error styling or behavior
+        style: { background: "rgba(239, 68, 68, 0.2)" }, // Mimics your red error bg
       });
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
     }
   };
 
@@ -228,7 +214,7 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
                     <path
                       className="opacity-75"
                       fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 0 7.938l3-2.647z"
                     ></path>
                   </svg>
                   Sending...
@@ -240,20 +226,6 @@ const ArticleFeedback: React.FC<ArticleFeedbackProps> = ({
           </div>
         )}
       </div>
-
-      {toast.show && (
-        <div className="fixed bottom-4 right-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <Alert
-            className={
-              toast.isError
-                ? "bg-red-500/20 dark:bg-red-500/20"
-                : "bg-zinc-800 dark:bg-zinc-800"
-            }
-          >
-            <p className="text-sm text-zinc-200">{toast.message}</p>
-          </Alert>
-        </div>
-      )}
     </div>
   );
 };
