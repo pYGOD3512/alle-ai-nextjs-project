@@ -22,25 +22,25 @@ const aiModels: AIModel[] = [
     id: "dalle-3",
     name: "DALL-E 3",
     provider: "OpenAI",
-    icon: "/models/dall-e.png"
+    icon: "/models/dall-e.webp"
   },
   {
     id: "stable-diffusion",
     name: "Stable Diffusion",
     provider: "Stability AI",
-    icon: "/models/stability-ai.png"
+    icon: "/models/stability-ai.webp"
   },
   {
     id: "midjourney",
     name: "Midjourney",
     provider: "Midjourney",
-    icon: "/models/midjourney.png"
+    icon: "/models/midjourney.webp"
   },
   {
     id: "titan",
     name: "Titan",
     provider: "Amazon",
-    icon: "/models/amazon.png"
+    icon: "/models/amazon.webp"
   }
 ];
 

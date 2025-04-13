@@ -1,383 +1,284 @@
-import React, { useState, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Copy, Info, CheckCircle2 } from "lucide-react";
-import { models } from "@/lib/models";
-import type { ModelDetails } from "@/lib/types";
-import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
+"use client";
+import React, { useState } from "react";
+import VideoPlayer from "@/components/features/video/videoPlayer";
 import Link from "next/link";
-import RenderCode from "@/components/RenderCode";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import NavigationContainer from "@/components/NavigationContainer";
-import { GuidesVideoGeneration } from "@/lib/constants/code-snippets-docs/userGuides";
-// Static data
-const suggestions = [
-  { title: "Text Generation", href: "/text-generation" },
-  { title: "Image Generation", href: "/image-generation" },
-  { title: "Audio Generation", href: "/audio-generation" },
-];
+export default function VideoGeneration() {
+  const { resolvedTheme } = useTheme();
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
 
-const faqs = [
-  {
-    title: "What video formats are supported?",
-    description:
-      "We support popular video formats like MP4, AVI, and MOV. Check the API documentation for a full list of supported formats.",
-  },
-  {
-    title: "Can I generate videos from text prompts?",
-    description:
-      "Yes, you can generate videos from text prompts using our state-of-the-art models. Specify the prompt and desired video length in your API request.",
-  },
-  {
-    title: "How do I handle video processing errors?",
-    description:
-      "Common errors include unsupported formats or exceeding file size limits. Refer to the error handling section for detailed solutions.",
-  },
-];
-
-export default function VideoGenerationDocs() {
-  // Filter models for video generation (type: "video")
-  const videoModels = models.filter(
-    (model) => model.type === "video"
-  ) as ModelDetails[];
-  const [selectedModels, setSelectedModels] = useState([
-    videoModels[0]?.name.toLowerCase().replace(/ /g, "_") || "",
-  ]);
-  const [expanded, setExpanded] = useState<number | null>(null);
-
-  // Code examples for both languages
-  const getCodeExamples = (modelNames: string[]) => [
+  // Sample video data
+  const demoVideos = [
     {
-      language: "python",
-      code: `import alleai
-
-client = alleai.Client(api_key="[YOUR API KEY HERE]")
-
-# Example 1: Generate a video from a text prompt
-response = client.generate_video(
-    prompt="A futuristic cityscape with flying cars at sunset",
-    models=${JSON.stringify(modelNames)},
-    duration=10,  # Duration in seconds
-    resolution="1080p"
-)
-
-# Save the generated video
-with open("output.mp4", "wb") as f:
-    f.write(response.video_data)
-
-# Example 2: Apply style transfer to a video
-with open("input.mp4", "rb") as file:
-    response = client.process_video(
-        file=file,
-        task="style_transfer",
-        style="van_gogh",  # Artistic style
-        models=${JSON.stringify(modelNames)}
-    )
-
-# Save the styled video
-with open("styled_output.mp4", "wb") as f:
-    f.write(response.video_data)
-
-# Example 3: Interpolate frames for smoother video
-with open("input.mp4", "rb") as file:
-    response = client.process_video(
-        file=file,
-        task="frame_interpolation",
-        models=${JSON.stringify(modelNames)}
-    )
-
-# Save the interpolated video
-with open("interpolated_output.mp4", "wb") as f:
-    f.write(response.video_data)`,
+      modelId: "sora",
+      videoUrl: "/videos/video3.mp4",
+      modelName: "Sora AI",
+      modelImage: "/models/sora.webp",
     },
     {
-      language: "javascript",
-      code: `const alleai = require('alleai');
-const fs = require('fs');
-
-const client = new alleai.Client({ apiKey: '[YOUR API KEY HERE]' });
-
-async function generateVideo() {
-  try {
-    // Example 1: Generate a video from a text prompt
-    const response = await client.generateVideo({
-      prompt: 'A futuristic cityscape with flying cars at sunset',
-      models: ${JSON.stringify(modelNames)},
-      duration: 10,  // Duration in seconds
-      resolution: '1080p'
-    });
-
-    // Save the generated video
-    fs.writeFileSync('output.mp4', response.videoData);
-
-    // Example 2: Apply style transfer to a video
-    const inputVideo = fs.readFileSync('input.mp4');
-    const styledResponse = await client.processVideo({
-      file: inputVideo,
-      task: 'style_transfer',
-      style: 'van_gogh',  // Artistic style
-      models: ${JSON.stringify(modelNames)}
-    });
-
-    // Save the styled video
-    fs.writeFileSync('styled_output.mp4', styledResponse.videoData);
-
-    // Example 3: Interpolate frames for smoother video
-    const interpolateResponse = await client.processVideo({
-      file: inputVideo,
-      task: 'frame_interpolation',
-      models: ${JSON.stringify(modelNames)}
-    });
-
-    // Save the interpolated video
-    fs.writeFileSync('interpolated_output.mp4', interpolateResponse.videoData);
-
-    // Access response metadata
-    console.log(\`Generation time: \${response.metadata.generationTime}s\`);
-    console.log(\`Models used: \${response.metadata.models}\`);
-    console.log(\`Total cost: \${response.metadata.cost} credits\`);
-  } catch (error) {
-    console.error('Error generating or processing video:', error);
-  }
-}
-
-generateVideo();`,
+      modelId: "runway",
+      videoUrl: "/videos/video3.mp4",
+      modelName: "Runway ML",
+      modelImage: "/models/runway.webp",
+    },
+    {
+      modelId: "luma",
+      videoUrl: "/videos/video3.mp4",
+      modelName: "Luma AI",
+      modelImage: "/models/luma.webp",
     },
   ];
 
+  // FAQ data
+  const faqData = [
+    {
+      question: "What types of videos can I generate with ALLE-AI?",
+      answer:
+        "You can create various video types including animations, realistic scenes, product demos, and abstract visuals. The platform supports multiple AI models for different styles and use cases.",
+    },
+    {
+      question: "How long can generated videos be?",
+      answer:
+        "Video length can range from 3 seconds to 5 minutes depending on your subscription plan. Higher tiers support longer durations and higher resolutions.",
+    },
+    {
+      question: "Can I edit videos after generation?",
+      answer:
+        "Yes, our platform provides basic editing tools for trimming, adding text overlays, and adjusting playback speed. For advanced editing, you can export to professional tools.",
+    },
+    {
+      question: "What resolutions are supported?",
+      answer:
+        "We support up to 4K resolution for premium users. Standard plans include 1080p output, while free tier supports 720p.",
+    },
+  ];
+
+  // What to Read Next data
+  const readNextData = [
+    { title: "Image Generation Guide", href: "/docs/user-guides/image" },
+    { title: "Audio Generation Guide", href: "/docs/user-guides/audio" },
+    { title: "Advanced Editing Tools", href: "/docs/user-guides/editing" },
+  ];
+
+  const toggleQuestion = (index: number) => {
+    setExpandedQuestion(expandedQuestion === index ? null : index);
+  };
+
   return (
-    <div className="pb-16 w-full max-w-[100%] pr-4">
-      <div className="space-y-8">
-        {/* Title Section */}
-        <div>
-          <div className="prose prose-blue max-w-none">
-            <p className="text-muted-foreground text-lg">
-              The Alle-AI Model Hub provides a powerful API for generating and
-              processing high-quality videos. Whether you need to create videos
-              from text prompts, apply artistic styles, or enhance video
-              smoothness, our API makes it easy to integrate video generation
-              into your applications.
-            </p>
-          </div>
-        </div>
+    <div className="space-y-12">
+      {/* Hero Section */}
+      <section>
+        <h1 className="text-4xl font-bold mb-4">
+          Create Captivating Videos with ALLE-AI
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Transform your ideas into dynamic video content using state-of-the-art
+          AI models. Generate animations, realistic scenes, or abstract visuals.
+          Choose from multiple models, adjust parameters like duration and
+          aspect ratio, and bring your vision to life.
+        </p>
+      </section>
 
-        {/* Prerequisites Section */}
-        <div className="bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-gray-500 dark:text-gray-300 mt-1" />
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                Prerequisites
-              </h3>
-              <p className="text-gray-800 dark:text-gray-200">
-                This guide assumes basic familiarity with:
-              </p>
-              <ul className="list-none mt-2 space-y-1">
-                {[
-                  "REST APIs",
-                  "Python or JavaScript/Node.js",
-                  "Command line interface",
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center text-gray-800 dark:text-gray-200"
-                  >
-                    <CheckCircle2 className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-300" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Installation Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Installation</h2>
-          <Tabs defaultValue="python">
-            <TabsList>
-              <TabsTrigger value="python">Python</TabsTrigger>
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-            </TabsList>
-            <TabsContent value="python">
-              <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <RenderCode language="bash" code={`pip install alleai`} />
-              </div>
-            </TabsContent>
-            <TabsContent value="javascript">
-              <div className="bg-zinc-800 text-white p-4 rounded-md">
-                <RenderCode language="bash" code={`npm install alleai`} />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Available Models Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Available Models</h2>
-          <p className="text-muted-foreground mb-4">
-            Each model has unique strengths and specializations. You can use
-            multiple models in a single API call by including their identifiers
-            in your request:
+      {/* Live Demo Section */}
+      <section>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Model Comparison Demo</h2>
+          <p className="text-muted-foreground mb-6">
+            Below demonstrates different AI models interpreting the same prompt:
+            <em className="block mt-2">
+              "A tranquil forest scene with morning mist and sunlight filtering
+              through trees"
+            </em>
           </p>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-200">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border border-gray-200 text-left font-semibold">
-                    Model Identifier
-                  </th>
-                  <th className="py-2 px-4 border border-gray-200 text-left font-semibold">
-                    Provider
-                  </th>
-                  <th className="py-2 px-4 border border-gray-200 text-left font-semibold">
-                    Description
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {videoModels.map((model) => (
-                  <tr
-                    key={model.id}
-                    className="hover:bg-gray-50 dark:hover:bg-zinc-800"
-                  >
-                    <td className="py-2 px-4 border border-gray-200 font-mono text-sm">
-                      {model.name.toLowerCase().replace(/ /g, "_")}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-200">
-                      {model.provider}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-200">
-                      {model.description}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
-        {/* Code Examples Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Code Examples</h2>
-          <div className="space-y-6">
-            <Tabs defaultValue="python" className="w-full">
-              <TabsList>
-                <TabsTrigger value="python">Python</TabsTrigger>
-                <TabsTrigger value="javascript">Node.js</TabsTrigger>
-              </TabsList>
-              <TabsContent value="python">
-                <RenderCode
-                  code={GuidesVideoGeneration.python}
-                  language="python"
-                  showLanguage={false}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {demoVideos.map((video) => (
+              <div
+                key={video.modelId}
+                className="border rounded-lg overflow-hidden"
+              >
+                <VideoPlayer
+                  videoUrl={video.videoUrl}
+                  modelName={video.modelName}
+                  modelId={video.modelId}
+                  modelImage={video.modelImage}
                 />
-              </TabsContent>
-              <TabsContent value="javascript">
-                <RenderCode
-                  code={GuidesVideoGeneration.javascript}
-                  language="javascript"
-                  showLanguage={false}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-
-        {/* Response Format Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Response Format</h2>
-          <p>The API response includes:</p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>
-              <code className="bg-gray-100 text-black px-1 rounded">
-                video_data
-              </code>
-              : Generated or processed video in binary format (Python) or URL
-              (JavaScript)
-            </li>
-            <li>
-              <code className="bg-gray-100 text-black px-1 rounded">
-                metadata
-              </code>
-              : Object containing generation time, models used, and cost
-            </li>
-            <li>
-              <code className="bg-gray-100 text-black px-1 rounded">error</code>
-              : Error message if the generation or processing failed
-            </li>
-          </ul>
-          <div className="mt-4">
-            <h3 className="text-xl font-semibold mb-2">
-              Read More on Error Handling and Error Messages
-            </h3>
-            <p className="text-muted-foreground">
-              Here are some common error messages you might encounter and how to
-              resolve them:
-            </p>
-            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-              <li>
-                <code className="bg-gray-100 text-black px-1 rounded">
-                  INVALID_VIDEO_FORMAT
-                </code>
-                : Ensure the video format is supported.
-              </li>
-              <li>
-                <code className="bg-gray-100 text-black px-1 rounded">
-                  VIDEO_SIZE_EXCEEDED
-                </code>
-                : Compress or split the video to reduce its size.
-              </li>
-              <li>
-                <code className="bg-gray-100 text-black px-1 rounded">
-                  PROCESSING_FAILED
-                </code>
-                : Check the video content and try again.
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* FAQs Section */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={index} className="border-b pb-3">
-                <div
-                  className="cursor-pointer flex items-center justify-between text-lg font-medium"
-                  onClick={() => setExpanded(expanded === index ? null : index)}
-                >
-                  <span>{faq.title}</span>
-                  <span>
-                    {expanded === index ? (
-                      <ChevronUp className="text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="text-muted-foreground" />
-                    )}
-                  </span>
+                <div className="p-4 bg-muted/50">
+                  <h3 className="font-semibold">{video.modelName}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Resolution: 1080p · Duration: 10s
+                  </p>
                 </div>
-                {expanded === index && (
-                  <div className="mt-2 text-muted-foreground">
-                    {faq.description}
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* Next Steps Section */}
-        <NavigationContainer
-          previousTitle="Video Generation"
-          previousDescription="Interacting with video models"
-          preUrl="/docs/user-guides/video-generation"
-          nextTitle="File uploads"
-          nextDesciption="Attaching files to request "
-          nextUrl="/docs/user-guides/file-uploads"
-        />
-      </div>
+      {/* Getting Started Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">
+          Getting Started with Video Generation
+        </h2>
+
+        <div className="space-y-8">
+          {/* Step 1 */}
+          <div>
+            <h3 className="text-xl font-semibold mb-2">
+              1. Setting Up Video Generation
+            </h3>
+            <Image
+              src={
+                resolvedTheme === "dark"
+                  ? "/screenshots/video-mode-dark.webp"
+                  : "/screenshots/video-mode-light.webp"
+              }
+              width={800}
+              height={200}
+              alt="Video mode selection"
+              className="rounded-lg border mb-4"
+            />
+            <p className="text-muted-foreground">
+              Ensure you're in Video Generation mode from the sidebar. The
+              video-specific toolbar will appear with timeline controls, aspect
+              ratio options, and model selection.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div>
+            <h3 className="text-xl font-semibold mb-2">
+              2. Crafting Effective Video Prompts
+            </h3>
+            <div className="p-6 bg-muted/50 rounded-lg">
+              <ul className="list-disc pl-6 space-y-3">
+                <li>
+                  <strong>Scene Composition:</strong> Describe subjects,
+                  backgrounds, and camera angles
+                  <br />
+                  <em>
+                    Example: "Close-up of a dew-covered spiderweb in morning
+                    light"
+                  </em>
+                </li>
+                <li>
+                  <strong>Motion Description:</strong> Specify movement types
+                  and speeds
+                  <br />
+                  <em>
+                    Example: "Slow pan across mountain range with drifting
+                    clouds"
+                  </em>
+                </li>
+                <li>
+                  <strong>Style Guidance:</strong> Indicate artistic style or
+                  realism level
+                  <br />
+                  <em>
+                    Example: "Cinematic color grading with dramatic lighting"
+                  </em>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div>
+            <h3 className="text-xl font-semibold mb-2">
+              3. Advanced Video Settings
+            </h3>
+            <Image
+              src={
+                resolvedTheme === "dark"
+                  ? "/screenshots/video-settings-dark.webp"
+                  : "/screenshots/video-settings-light.webp"
+              }
+              width={800}
+              height={400}
+              alt="Video settings"
+              className="rounded-lg border mb-4"
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium mb-2">Key Parameters</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Aspect Ratio (16:9, 1:1, 9:16)</li>
+                  <li>• Frame Rate (24fps, 30fps, 60fps)</li>
+                  <li>• Output Resolution (720p to 4K)</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">Advanced Controls</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Camera Motion Paths</li>
+                  <li>• Dynamic Lighting Effects</li>
+                  <li>• Style Interpolation</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Best Practices Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">
+          Video Creation Best Practices
+        </h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="p-6 bg-muted/50 rounded-lg">
+            <h3 className="font-semibold mb-2">✓ Effective Techniques</h3>
+            <ul className="space-y-2">
+              <li>• Use sequential prompts for multi-scene videos</li>
+              <li>• Leverage reference images/videos for consistency</li>
+              <li>• Experiment with different model combinations</li>
+            </ul>
+          </div>
+          <div className="p-6 bg-muted/50 rounded-lg">
+            <h3 className="font-semibold mb-2">✗ Common Pitfalls</h3>
+            <ul className="space-y-2">
+              <li>• Overloading single prompts with too many elements</li>
+              <li>• Neglecting to specify camera movements</li>
+              <li>• Using conflicting style descriptors</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          {faqData.map((faq, index) => (
+            <div key={index} className="border rounded-lg p-4">
+              <button
+                onClick={() => toggleQuestion(index)}
+                className="w-full flex justify-between items-center"
+              >
+                <h3 className="font-medium text-left">{faq.question}</h3>
+                <span className="text-xl">
+                  {expandedQuestion === index ? "-" : "+"}
+                </span>
+              </button>
+              {expandedQuestion === index && (
+                <p className="mt-4 text-muted-foreground">{faq.answer}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <NavigationContainer
+        previousTitle="Audio Generation"
+        // previousDescription="Create AI-generated audio, including speech synthesis, music, and sound effects."
+        preUrl="/docs/tutorials/audio-ai"
+        // nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
+        nextTitle="Prompt Engineering"
+        nextUrl="/docs/tutorials/prompts"
+      />
     </div>
   );
 }

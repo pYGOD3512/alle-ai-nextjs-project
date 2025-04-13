@@ -104,7 +104,7 @@ const AnimatedBackground = () => {
             <div className="relative group">
               <div className="absolute inset-0 rounded-full blur-xs group-hover:blur-sm transition-all duration-300" />
               <Image
-                src={`/models/${logo}.png`}
+                src={`/models/${logo}.webp`}
                 alt={logo}
                 width={48}
                 height={48}
@@ -227,9 +227,9 @@ export default function AuthLayout({
     const checkAuth = async () => {
       if (token) {
         try {
-          console.log("Token exists, checking authentication...");
+          // console.log("Token exists, checking authentication...");
           const response = await authApi.getUser();
-          console.log("Auth check response:", response);
+          // console.log("Auth check response:", response);
 
           // Update auth state with user data
           setAuth(response.data.user, token, response.plan);

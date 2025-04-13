@@ -306,10 +306,10 @@ const ErrorDocs = () => {
         {/* Navigation */}
         <NavigationContainer
           previousTitle="Rate Limits"
-          previousDescription="Understanding API rate limits"
+          // previousDescription="Understanding API rate limits"
           preUrl="/docs/user-guides/limits"
           nextTitle="Updates"
-          nextDesciption="Learn about API updates"
+          // nextDesciption="Learn about API updates"
           nextUrl="/docs/user-guides/updates"
         />
       </div>

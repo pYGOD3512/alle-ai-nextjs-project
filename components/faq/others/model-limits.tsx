@@ -10,13 +10,13 @@ const planLimits = [
     details: "Perfect for casual users who want to compare basic model responses and explore AI capabilities."
   },
   {
-    icon: <Image src={`/icons/silver-alle-ai.png`} width={100} height={100} alt="plan-icon" className="h-10 w-10 text-amber-500" />,
+    icon: <Image src={`/icons/silver-alle-ai.webp`} width={100} height={100} alt="plan-icon" className="h-10 w-10 text-amber-500" />,
     title: "Standard Plan",
     description: "Select up to 3 models maximum",
     details: "Ideal for professionals who need more diverse perspectives and enhanced verification capabilities."
   },
   {
-    icon: <Image src={`/icons/gold-alle-ai.png`} width={100} height={100} alt="plan-icon" className="h-10 w-10 text-amber-500" />,
+    icon: <Image src={`/icons/gold-alle-ai.webp`} width={100} height={100} alt="plan-icon" className="h-10 w-10 text-amber-500" />,
     title: "Plus Plan",
     description: "Select up to 5 models maximum",
     details: "Designed for power users who require comprehensive model comparison and the highest level of insight verification."

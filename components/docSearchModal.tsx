@@ -217,7 +217,7 @@ const SearchModal = ({ isOpen, onClose }: modalProps) => {
         "&:hover": { backgroundColor: hoverBackground },
       }}
       onClick={() => {
-        console.log("Navigate to:", result.baseUrl, "#" + result.hash);
+        // console.log("Navigate to:", result.baseUrl, "#" + result.hash);
         onClose();
       }}
     >

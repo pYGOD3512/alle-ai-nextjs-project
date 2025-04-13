@@ -39,7 +39,7 @@ import Image from 'next/image';
               }}
             >
               <Image
-                src={source.favicon || '/icons/default.png'}
+                src={source.favicon || '/icons/default.webp'}
                 alt={source.title}
                 width={16}
                 height={16}

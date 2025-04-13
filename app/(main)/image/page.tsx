@@ -27,6 +27,8 @@ export default function ImageGenerationPage() {
     setCurrentPage("image");
   }, [setCurrentPage]);
 
+  const preferredOrder = [''];
+
     // Load image models on mount if not already loaded
     useEffect(() => {
       const loadImageModels = async () => {
@@ -39,8 +41,26 @@ export default function ImageGenerationPage() {
         setModelsLoading(true);
         try {
           const models = await modelsApi.getModels('image');
-          setImageModels(models);
-          // // console.log('Image models loaded', models);
+          const sortedImageModels = models.sort((a, b) => {
+            const indexA = preferredOrder.indexOf(a.model_uid);
+            const indexB = preferredOrder.indexOf(b.model_uid);
+          
+            // If both models are in the preferred order, sort by their index
+            if (indexA !== -1 && indexB !== -1) {
+              return indexA - indexB;
+            }
+            
+            // If only a is in the preferred order, it should come first
+            if (indexA !== -1) return -1;
+            
+            // If only b is in the preferred order, it should come first
+            if (indexB !== -1) return 1;
+          
+            // If neither are in the preferred order, maintain their original order
+            return 0;
+          });
+          setImageModels(sortedImageModels);
+          // console.log('Image models loaded', models);
           await loadLatestSelectedModels();
         } catch (err) {
           setModelsError(err instanceof Error ? err.message : 'Failed to load chat models');

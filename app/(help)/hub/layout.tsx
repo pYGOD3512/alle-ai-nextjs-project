@@ -59,8 +59,8 @@ export default function AboutLayout({
             <Image
               src={
                 resolvedTheme === "dark"
-                  ? "/svgs/logo-desktop-full.png"
-                  : "/svgs/logo-desktop-dark-full.png"
+                  ? "/svgs/logo-desktop-full.webp"
+                  : "/svgs/logo-desktop-dark-full.webp"
               }
               alt="all-ai"
               height={100}
@@ -105,8 +105,8 @@ export default function AboutLayout({
                 <Image
                   src={
                     resolvedTheme === "dark"
-                      ? "/svgs/logo-desktop-full.png"
-                      : "/svgs/logo-desktop-dark-full.png"
+                      ? "/svgs/logo-desktop-full.webp"
+                      : "/svgs/logo-desktop-dark-full.webp"
                   }
                   alt="Alle-AI Logo"
                   width={150}

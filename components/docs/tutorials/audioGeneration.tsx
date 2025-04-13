@@ -89,19 +89,19 @@ export default function AudioGeneration() {
         >
           <AudioPlayer
             audioUrl="/audio/relaxing_meditation.mp3"
-            modelIcon="/models/dream.png"
+            modelIcon="/models/dream.webp"
             modelName="MusicGen"
             modelId="3000"
           />
           <AudioPlayer
             audioUrl="/audio/relaxing_meditation.mp3"
-            modelIcon="/models/dall-e.png"
+            modelIcon="/models/dall-e.webp"
             modelName="Whisper"
             modelId="3001"
           />
           <AudioPlayer
             audioUrl="/audio/relaxing_meditation.mp3"
-            modelIcon="/models/dall-e.png"
+            modelIcon="/models/dall-e.webp"
             modelName="Jukebox"
             modelId="3002"
           />
@@ -221,9 +221,9 @@ export default function AudioGeneration() {
 
       <NavigationContainer
         previousTitle="Image Generation"
-        previousDescription="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
+        // previousDescription="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
         preUrl="/docs/tutorials/image-ai"
-        nextDesciption="Utilize AI for video creation, editing, and automated scene generation."
+        // nextDesciption="Utilize AI for video creation, editing, and automated scene generation."
         nextTitle="Video Generation"
         nextUrl="/docs/tutorials/video-ai"
       />

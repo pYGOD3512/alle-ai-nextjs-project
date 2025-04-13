@@ -1536,12 +1536,7 @@ export const mainUserGuides: mainGuides[] = [
 
       {
         id: "user-interface",
-        title: "User interface",
-      },
-
-      {
-        id: "understanding-models",
-        title: "Understanding AI Models",
+        title: "Quickstart",
       },
     ],
   },
@@ -1564,10 +1559,6 @@ export const mainUserGuides: mainGuides[] = [
       {
         id: "video-generation",
         title: "Video Generation",
-      },
-      {
-        id: "file-uploads",
-        title: "Attachments",
       },
     ],
   },

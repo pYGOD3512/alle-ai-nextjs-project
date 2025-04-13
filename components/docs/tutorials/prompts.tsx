@@ -295,9 +295,9 @@ const UsingPromptsEffectively = () => {
       </p>
       <NavigationContainer
         previousTitle="Video Generation"
-        previousDescription="Utilize AI for video creation, editing, and automated scene generation"
+        // previousDescription="Utilize AI for video creation, editing, and automated scene generation"
         preUrl="/docs/tutorials/video-ai"
-        nextDesciption="View, manage, and delete past interactions with AI to keep track of your generated content."
+        // nextDesciption="View, manage, and delete past interactions with AI to keep track of your generated content."
         nextTitle="Managing history"
         nextUrl="/docs/tutorials/history"
       />

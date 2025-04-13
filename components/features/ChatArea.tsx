@@ -887,9 +887,10 @@ useEffect(() => {
 
   // Get the models used in the conversation
   const getConversationModels = (conversationId: string) => {
+    setIsSending(true);
     chatApi.getModelsForConversation(conversationId)
       .then(response => {
-        console.log('Models used in conversation:', response);
+        // console.log('Models used in conversation:', response);
         const modelUids = response.map((model: Model) => model.model_uid);
 
         // Get the store actions
@@ -906,9 +907,11 @@ useEffect(() => {
         .map((model: { model_uid: string }) => model.model_uid);
 
         store.setInactiveModels(inactiveModels);
+        setIsSending(false);
 
       })
       .catch(error => {
+        setIsSending(false);
         // console.error('Error fetching models for conversation:', error);
       })
       .finally(() => {
@@ -1776,7 +1779,7 @@ const getWebSearchContext = (branch: Branch, currentY: number): [string, string]
 
   return (
     <RenderPageContent>
-      <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-10rem)] sm:h-full">
+      <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-13rem)] sm:h-full">
       {isLoadingConversation && (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="flex flex-col items-center gap-4">
@@ -1906,7 +1909,7 @@ const getWebSearchContext = (branch: Branch, currentY: number): [string, string]
                                              <span className="dot-3">.</span>
                                            </div>
                                           ) : (
-                                            <Skeleton className="h-2 w-full" />
+                                            <Skeleton className="hidden md:flex h-2 w-full" />
                                           )}
                                         </div>
                                       </div>
@@ -1982,7 +1985,7 @@ const getWebSearchContext = (branch: Branch, currentY: number): [string, string]
                         key={`${conversationId}-alle-ai-summ`}
                         model="Alle-AI Summary & Comparison"
                         content={summaryContent[message.id] || ""}
-                        model_img="/svgs/logo-desktop-mini.png"
+                        model_img="/svgs/logo-desktop-mini.webp"
                         responseId={`alle-ai-summ-${message.id}`}
                         sessionId={conversationId!}
                         onFeedbackChange={handleFeedbackChange}

@@ -1,18 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GoogleButton } from "./GoogleButton";
 import { motion } from "framer-motion";
 import { formVariants } from "@/lib/utils";
-import { Loader } from "lucide-react";
+import { Loader, Check, X } from "lucide-react";
 import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from "sonner"
 import { sendGAEvent } from '@next/third-parties/google'
-
 import { useRouter } from "next/navigation";
-
 import Link from "next/link";
 
 interface RegisterFormProps {
@@ -20,52 +18,135 @@ interface RegisterFormProps {
   onRegister: (email: string) => void;
 }
 
-export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const { register } = useAuth();
-  ;
-  const router = useRouter();
+interface FormValidation {
+  firstName: boolean;
+  lastName: boolean;
+  email: boolean;
+  password: {
+    hasMinLength: boolean;
+    hasUpperCase: boolean;
+    hasLowerCase: boolean;
+    hasNumber: boolean;
+    hasSpecialChar: boolean;
+    passwordsMatch: boolean;
+  };
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const useFormValidation = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [validation, setValidation] = useState<FormValidation>({
+    firstName: false,
+    lastName: false,
+    email: false,
+    password: {
+      hasMinLength: false,
+      hasUpperCase: false,
+      hasLowerCase: false,
+      hasNumber: false,
+      hasSpecialChar: false,
+      passwordsMatch: false,
+    },
+  });
+
+  const updateFormData = useCallback((field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  useEffect(() => {
+    const validateForm = () => {
+      setValidation({
+        firstName: formData.firstName.length >= 2,
+        lastName: formData.lastName.length >= 2,
+        email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email),
+        password: {
+          hasMinLength: formData.password.length >= 8,
+          hasUpperCase: /[A-Z]/.test(formData.password),
+          hasLowerCase: /[a-z]/.test(formData.password),
+          hasNumber: /[0-9]/.test(formData.password),
+          hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+          passwordsMatch: formData.password === formData.confirmPassword && formData.password !== "",
+        },
+      });
+    };
+
+    validateForm();
+  }, [formData]);
+
+  return {
+    formData,
+    validation,
+    updateFormData,
+  };
+};
+
+const ValidationItem = ({ isValid, text }: { isValid: boolean; text: string }) => (
+  <motion.div
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    className="flex items-center gap-2 text-sm"
+  >
+    {isValid ? (
+      <Check className="h-4 w-4 text-green-500" />
+    ) : (
+      <X className="h-4 w-4 text-red-500" />
+    )}
+    <span className={isValid ? "text-green-500" : "text-red-500"}>{text}</span>
+  </motion.div>
+);
+
+export const RegisterForm = ({ onSwitchMode, onRegister }: RegisterFormProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { register } = useAuth();
+  const router = useRouter();
+  const { formData, validation, updateFormData } = useFormValidation();
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (password !== confirmPassword) {
-        throw new Error("Passwords don't match");
+      if (!validation.firstName || !validation.lastName) {
+        throw new Error("First and last name must be at least 2 characters");
+      }
+
+      if (!validation.email) {
+        throw new Error("Please enter a valid email address");
+      }
+
+      if (!Object.values(validation.password).every(Boolean)) {
+        throw new Error("Please ensure your password meets all requirements");
       }
 
       const result = await register({
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        password,
-        password_confirmation: confirmPassword,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.confirmPassword,
       });
 
-      // console.log(result, 'This is the response for register');
       sendGAEvent('formSubmission', 'submit', { formType: 'registerForm', status: 'success'});
 
       if (result && result.to === 'verify-email') {
-        onRegister(email);
+        onRegister(formData.email);
         setIsLoading(false);
       }
       
     } catch (error: any) {
-      toast.error(`${error.response?.data?.message || "Please check your information and try again"}`)
+      toast.error(error.message || error.response?.data?.message || "Please check your information and try again");
       setIsLoading(false);
       sendGAEvent('formSubmission', 'submit', { formType: 'registerForm', status: 'failed'});
-
     }
-  };
+  }, [formData, validation, register, onRegister]);
 
-  return (
+  const renderForm = useMemo(() => (
     <motion.div
       variants={formVariants}
       initial="hidden"
@@ -89,58 +170,122 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
       {/* Registration Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <Input
-            placeholder="First name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            className="border-borderColorPrimary focus-visible:outline-none"
-          />
-          <Input
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            className="border-borderColorPrimary focus-visible:outline-none"
-          />
+          <div className="space-y-2">
+            <Input
+              placeholder="First name"
+              value={formData.firstName}
+              onChange={(e) => updateFormData('firstName', e.target.value)}
+              required
+              className="border-borderColorPrimary focus-visible:outline-none"
+            />
+            {formData.firstName && (
+              <ValidationItem
+                isValid={validation.firstName}
+                text="At least 2 characters"
+              />
+            )}
+          </div>
+          <div className="space-y-2">
+            <Input
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={(e) => updateFormData('lastName', e.target.value)}
+              required
+              className="border-borderColorPrimary focus-visible:outline-none"
+            />
+            {formData.lastName && (
+              <ValidationItem
+                isValid={validation.lastName}
+                text="At least 2 characters"
+              />
+            )}
+          </div>
         </div>
 
-        <Input
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="border-borderColorPrimary focus-visible:outline-none"
-        />
+        <div className="space-y-2">
+          <Input
+            type="email"
+            placeholder="Email Address"
+            value={formData.email}
+            onChange={(e) => updateFormData('email', e.target.value)}
+            required
+            className="border-borderColorPrimary focus-visible:outline-none"
+          />
+          {formData.email && (
+            <ValidationItem
+              isValid={validation.email}
+              text="Valid email address"
+            />
+          )}
+        </div>
 
-        <Input
-          type="password"
-          placeholder="Create password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="border-borderColorPrimary focus-visible:outline-none"
-        />
+        <div className="space-y-2">
+          <Input
+            type="password"
+            placeholder="Create password"
+            value={formData.password}
+            onChange={(e) => updateFormData('password', e.target.value)}
+            required
+            className="border-borderColorPrimary focus-visible:outline-none"
+          />
+          {formData.password && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="grid gap-2 p-2 bg-background/50 rounded-lg"
+            >
+              <ValidationItem
+                isValid={validation.password.hasMinLength}
+                text="At least 8 characters"
+              />
+              <ValidationItem
+                isValid={validation.password.hasUpperCase}
+                text="At least one uppercase letter"
+              />
+              <ValidationItem
+                isValid={validation.password.hasLowerCase}
+                text="At least one lowercase letter"
+              />
+              <ValidationItem
+                isValid={validation.password.hasNumber}
+                text="At least one number"
+              />
+              <ValidationItem
+                isValid={validation.password.hasSpecialChar}
+                text="At least one special character"
+              />
+            </motion.div>
+          )}
+        </div>
 
-        <Input
-          type="password"
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          className="border-borderColorPrimary focus-visible:outline-none"
-        />
+        <div className="space-y-2">
+          <Input
+            type="password"
+            placeholder="Confirm password"
+            value={formData.confirmPassword}
+            onChange={(e) => updateFormData('confirmPassword', e.target.value)}
+            required
+            className="border-borderColorPrimary focus-visible:outline-none"
+          />
+          {formData.confirmPassword && (
+            <ValidationItem
+              isValid={validation.password.passwordsMatch}
+              text="Passwords match"
+            />
+          )}
+        </div>
 
         <Button 
           variant="secondary"
           type="submit" 
-          disabled={isLoading}
+          disabled={isLoading || !Object.values(validation).every(Boolean) || !Object.values(validation.password).every(Boolean)}
           className="w-full bg-black text-white"
         >
           {isLoading ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Creating Account...
             </>
           ) : (
             'Register'
@@ -172,5 +317,7 @@ export function RegisterForm({ onSwitchMode, onRegister }: RegisterFormProps) {
         </Link>
       </div>
     </motion.div>
-  );
-}
+  ), [formData, validation, isLoading, handleSubmit, onSwitchMode]);
+
+  return renderForm;
+};

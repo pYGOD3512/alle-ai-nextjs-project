@@ -8,6 +8,8 @@ import {
   ArrowRight,
   List,
   BookOpen,
+  Code,
+  ChevronRight,
 } from "lucide-react";
 import {
   Card,
@@ -18,224 +20,255 @@ import {
 } from "@/components/ui/card";
 import ArticleFeedback from "../articleFeedback";
 import DocsFooter from "../simpleFooterDocs";
+
 const resourceCards = [
   {
-    title: "Configure your environment",
-    description: "Set up our Node.js and Python SDKs to access all endpoints.",
+    title: "Configure Your Environment",
+    description: "Set up Node.js or Python SDKs to access all AI endpoints.",
     href: "/developers/setup",
+    icon: <Code className="w-6 h-6 text-black dark:text-white" />,
   },
   {
-    title: "Process text with AI",
-    description:
-      "Use chat endpoints for response summary or combined model outputs.",
+    title: "Process Text with AI",
+    description: "Summarize or chat using combined model outputs.",
     href: "/developers/chat",
+    icon: <MessageSquare className="w-6 h-6 text-black dark:text-white" />,
   },
   {
-    title: "Handle audio workflows",
-    description:
-      "Generate audio from text, transcribe audio, or synthesize speech via API.",
+    title: "Handle Audio Workflows",
+    description: "Generate, transcribe, or synthesize audio via API.",
     href: "/developers/audio",
+    icon: <Headphones className="w-6 h-6 text-black dark:text-white" />,
   },
   {
-    title: "Generate custom images",
-    description:
-      "Integrate the image endpoint for AI-driven visuals with file inputs.",
+    title: "Generate Custom Images",
+    description: "Create AI-driven visuals with flexible inputs.",
     href: "/developers/image",
+    icon: <Images className="w-6 h-6 text-black dark:text-white" />,
   },
   {
-    title: "Manipulate video content",
-    description:
-      "Create or edit videos programmatically with the video endpoint.",
+    title: "Manipulate Video Content",
+    description: "Edit or generate videos programmatically.",
     href: "/developers/video",
+    icon: <Video className="w-6 h-6 text-black dark:text-white" />,
   },
   {
-    title: "Combine multi-model outputs",
-    description:
-      "Send a single request to merge responses from multiple AI models.",
+    title: "Combine Multi-Model Outputs",
+    description: "Merge responses from multiple AI models in one request.",
     href: "/developers/multi-model",
+    icon: <ChevronRight className="w-6 h-6 text-black dark:text-white" />,
   },
 ];
+
 const tasks = [
   {
     id: "chat-text",
     title: "Chat & Text",
     href: "/chat",
     models: ["DeepSeek", "Gemini", "Claude"],
-    icon: <MessageSquare className="w-5 h-5" />,
-    description:
-      "Write, summarize, or translate with models like DeepSeek or Claude",
+    icon: <MessageSquare className="w-6 h-6 text-black dark:text-white" />,
+    description: "Write, summarize, or translate with top models.",
+    featured: true,
   },
   {
     id: "image-generation",
     title: "Image Generation",
     href: "/image",
     models: ["Stable Diffusion", "DALL·E"],
-    icon: <Images className="w-5 h-5" />,
-    description:
-      "Generate art, logos, or photos using Stable Diffusion, DALL·E",
+    icon: <Images className="w-6 h-6 text-black dark:text-white" />,
+    description: "Create art, logos, or photos effortlessly.",
   },
   {
     id: "audio-voice",
     title: "Audio & Voice",
     href: "/audio",
     models: ["ElevenLabs", "Whisper"],
-    icon: <Headphones className="w-5 h-5" />,
-    description: "Convert text to speech, transcribe, or create music",
+    icon: <Headphones className="w-6 h-6 text-black dark:text-white" />,
+    description: "Synthesize speech, transcribe, or make music.",
   },
   {
     id: "video-animation",
     title: "Video & Animation",
     href: "/video",
     models: ["Runway", "Pika"],
-    icon: <Video className="w-5 h-5" />,
-    description: "Animate avatars, edit footage, or generate clips",
+    icon: <Video className="w-6 h-6 text-black dark:text-white" />,
+    description: "Generate clips or animate avatars easily.",
   },
 ];
 
 export default function PlatformOverview() {
   return (
-    <main className="">
-      {/* Header Section */}
-      <div className="mb-6">
-        <p className="text-muted-foreground">
-          Generate text, images, audio, and videos all in one place. Compare
-          outputs from top models or enhance results with AlleAI's proprietary
-          AI models.
+    <main className="w-full max-w-full px-3 sm:px-3 lg:px-3">
+      {/* Hero Section */}
+      <div className="relative rounded-xl p-8 mb-12 border border-borderColorPrimary overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r   pointer-events-none" />
+
+        <p className="text-lg text-muted-foreground  max-w-3xl mb-6">
+          Generate text, images, audio, and video all in one place. Select from
+          multiple top-tier AI models for each task, or enhance your results
+          with AlleAI’s proprietary models built for quality and flexibility
         </p>
-      </div>
-
-      {/* Get Started Section */}
-      <div className="mb-8">
-        <div className="">
-          {/* Sign Up */}
-          <div className="mb-5">
-            <h3 className="text-xl font-semibold">
-              Create an account and learn how to start using alle-ai.
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Instant access to 20+ AI models across text, image, audio, and
-              video. If you’re ready to start developing, see our{" "}
-              <Link
-                href="/docs/api-reference/introduction"
-                target="_blank"
-                className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
-              >
-                developer quickstart.
-              </Link>
-            </p>
-            <Link
-              href="/"
-              target="_blank"
-              className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
-            >
-              Create your alle-ai account{" "}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </div>
-
-          {/* Choose Your Task */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Choose Your Task</h3>
-            <p className="text-muted-foreground mb-4">
-              Select from our range of AI capabilities to fit your specific
-              needs.
-            </p>
-
-            <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-              {tasks.map((task) => (
-                <div key={task.id} className="group">
-                  <Link
-                    href={task.href}
-                    className="block group-hover:opacity-80 transition-opacity"
-                  >
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 mr-4">
-                        <span
-                          className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-background text-black 
-                            dark:text-white border border-neutral-300 dark:border-neutral-700 shadow-md transition-colors"
-                        >
-                          {task.icon}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-medium mb-1 flex items-center">
-                          {task.title}
-                          <ArrowRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </h4>
-                        <p className="text-muted-foreground text-sm mb-1">
-                          {task.description}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {task.models.join(", ")} and more
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Guidance Section */}
-      <div className="mt-7 mx-auto flex flex-col items-center justify-center">
-        <h3 className="text-lg font-medium mb-3">Need Guidance?</h3>
-        <div className="flex flex-col sm:flex-row sm:space-x-8 space-y-4 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row gap-4">
           <Link
-            href="/model-glossary"
+            href="/"
             target="_blank"
-            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
+            className="inline-flex items-center text-white justify-center px-6 py-3 bg-black  dark:bg-white dark:text-black rounded-lg hover:bg-gray-800 dark:hover:bg-zinc-200 transition-all duration-300 font-medium"
           >
-            <List className="w-4 h-4 mr-2" /> Browse Full Model List
+            Start Creating
+            <ArrowRight className="w-4 h-4 ml-2 text-white dark:text-black" />
           </Link>
           <Link
             href="/docs/api-reference/introduction"
             target="_blank"
-            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
+            className="inline-flex items-center justify-center px-6 py-3  border-black border-2 dark:border-gray-500 text-black dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all duration-300 font-medium"
           >
-            <BookOpen className="w-4 h-4 mr-2" /> Quickstart Tutorial
+            <BookOpen className="w-4 h-4 mr-2 text-black dark:text-white" />{" "}
+            Developer Quickstart
           </Link>
         </div>
       </div>
-      <hr className="border-t-1 dark:border-zinc-700 border-gray-200 my-10" />
 
-      {/* Developer Quickstart */}
-      <section>
-        <div>
-          <h2 className="text-2xl font-bold mb-6">For developers</h2>
+      {/* Choose Your Task Section */}
+      <section className="mb-16">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+            Explore
+          </h2>
+          <Link
+            href="/model-glossary"
+            className="text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 flex items-center text-sm font-medium transition-colors duration-200"
+          >
+            All Models{" "}
+            <ChevronRight className="w-4 h-4 ml-1 text-gray-500 dark:text-gray-400" />
+          </Link>
+        </div>
+        <p className="text-muted-foreground mb-8 text-base sm:text-lg">
+          Pick a task to unlock Alle-AI’s powerful capabilities.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {tasks.map((task) => (
+            <Link key={task.id} href={task.href}>
+              <Card
+                className={`relative max-w-md mx-auto bg-background border border-borderColorPrimary rounded-lg hover:shadow-lg transition-all duration-200 group ${
+                  task.featured ? "border-2" : ""
+                }`}
+              >
+                {task.featured && (
+                  <span className="absolute top-3 right-3 text-xs font-semibold bg-gray-900 dark:bg-gray-200 text-white dark:text-gray-900 px-2 py-1 rounded-full">
+                    Featured
+                  </span>
+                )}
+                <CardHeader className="flex flex-row items-start space-y-0 pb-4">
+                  <div className="mr-4 p-3 border-black border-2 dark:border-gray-500 rounded-lg group-hover:bg-gray-100 dark:group-hover:bg-zinc-800 transition-colors">
+                    {task.icon}
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl mb-2  group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                      {task.title}
+                    </CardTitle>
+                    <CardDescription className="text-base text-muted-foreground">
+                      {task.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0 pb-6 px-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 border-t border-borderColorPrimary pt-4">
+                    Models:{" "}
+                    <span className="font-medium">
+                      {task.models.join(", ")} and more
+                    </span>
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
 
+      {/* Developer Resources Section */}
+      <section className="mb-16">
+        <div className="rounded-xl p-8 border border-borderColorPrimary">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 ">
+            Build with Alle-AI
+          </h2>
+          <p className="text-muted-foreground mb-8 text-base sm:text-lg">
+            Integrate our APIs and SDKs to bring AI to your apps.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resourceCards.map((card, index) => (
-              <Link key={index} href={card.href} className="block">
-                <Card
-                  className="border border-gray-200 dark:border-gray-700 
-                    bg-white dark:bg-accent transition-all duration-200 
-                    hover:shadow-lg hover:border-gray-500 dark:hover:border-gray-400 
-                    hover:bg-gray-100 dark:hover:bg-gray-800 h-auto"
-                >
+              <Link key={index} href={card.href} className="block group">
+                <Card className="h-full border bg-background border-borderColorPrimary rounded-lg hover:shadow-lg transition-all duration-200">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-gray-800 dark:text-gray-200 text-lg">
-                      {card.title}
-                    </CardTitle>
+                    <div className="flex items-center mb-2">
+                      <div className="p-3 border-black border-2 dark:border-gray-500  rounded-lg mr-3 group-hover:bg-gray-100 dark:group-hover:bg-zinc-800 transition-colors">
+                        {card.icon}
+                      </div>
+                      <CardTitle className="text-lg  group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                        {card.title}
+                      </CardTitle>
+                    </div>
                   </CardHeader>
                   <CardContent className="pt-0 pb-4">
-                    <CardDescription className="text-gray-600 dark:text-gray-300">
+                    <CardDescription className="text-muted-foreground">
                       {card.description}
                     </CardDescription>
                   </CardContent>
+                  <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="w-4 h-4 text-black dark:text-white" />
+                  </div>
                 </Card>
               </Link>
             ))}
           </div>
+          <div className="mt-6 text-center">
+            <Link
+              href="/docs/api-reference"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
+            >
+              Explore All APIs{" "}
+              <ChevronRight className="w-4 h-4 inline text-gray-500 dark:text-gray-400" />
+            </Link>
+          </div>
         </div>
       </section>
-      <div className="mb-5">
+
+      {/* Support Section */}
+      <section className="mb-16">
+        <div className="rounded-xl p-6 border border-borderColorPrimary flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              Need Help?
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">
+              Dive into our guides or reach out for support.
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Link
+              href="/docs/api-reference/introduction"
+              target="_blank"
+              className="inline-flex items-center px-4 py-2  border-black border-2 dark:border-gray-500 text-black dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all duration-300 font-medium"
+            >
+              <BookOpen className="w-4 h-4 mr-2 text-black dark:text-white" />{" "}
+              Quickstart
+            </Link>
+            <Link
+              href="/support"
+              target="_blank"
+              className="inline-flex items-center px-4 py-2 border-black border-2 dark:border-gray-500 text-black dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all duration-300 font-medium"
+            >
+              <List className="w-4 h-4 mr-2 text-black dark:text-white" />{" "}
+              Support
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Uncomment if needed */}
+      {/* <div className="mb-5">
         <ArticleFeedback />
       </div>
-      <div>
-        <DocsFooter />
-      </div>
+      <DocsFooter /> */}
     </main>
   );
 }

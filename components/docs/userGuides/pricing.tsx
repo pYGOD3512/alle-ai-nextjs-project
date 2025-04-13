@@ -191,11 +191,11 @@ const PricingPage = () => {
         Contact us for custom pricing or enterprise solutions.
       </p>
       <NavigationContainer
-        nextDesciption="Explore Alle-AI models"
+        // nextDesciption="Explore Alle-AI models"
         nextUrl="/docs/user-guides/models"
         nextTitle="Models"
         preUrl="/"
-        previousDescription="Overview of our platform"
+        // previousDescription="Overview of our platform"
         previousTitle="Quickstart"
       />
     </div>

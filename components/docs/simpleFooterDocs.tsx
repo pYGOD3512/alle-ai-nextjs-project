@@ -48,7 +48,7 @@ const DocsFooter: React.FC<FooterProps> = ({ className = "" }) => {
   // Placeholder function for signup logic
   const handleSignup = () => {
     // Implement signup logic here later
-    console.log("Signup attempted with email:", emailInput);
+    // console.log("Signup attempted with email:", emailInput);
   };
 
   // Function to handle link clicks

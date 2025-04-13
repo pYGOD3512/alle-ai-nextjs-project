@@ -178,10 +178,10 @@ else:
       {/* Navigation container aligned with content */}
       <NavigationContainer
         previousTitle="Pricing"
-        previousDescription="Learn about model pricing"
+        // previousDescription="Learn about model pricing"
         preUrl=""
         nextTitle="Platform capabilities"
-        nextDesciption="Learn about platform capabilities "
+        // nextDesciption="Learn about platform capabilities "
         nextUrl="/docs/user-guides/text-generation"
       />
     </div>

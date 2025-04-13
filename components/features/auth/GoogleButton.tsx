@@ -46,7 +46,7 @@ export function GoogleButton() {
         </>
       ) : (
         <>
-          <Image src="/icons/google.png" alt="Google Logo" width={20} height={20} />
+          <Image src="/icons/google.webp" alt="Google Logo" width={20} height={20} />
           <span>Continue with Google</span>
         </>
       )}

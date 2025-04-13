@@ -71,11 +71,11 @@ const RenderCode = ({
 
   return (
     <div
-      className={`rounded-lg overflow-hidden border border-gray-200 dark:border-accent relative ${className}`}
+      className={`rounded-lg overflow-hidden border border-borderColorPrimary relative ${className}`}
       style={style}
     >
       {shouldShowToggle && (
-        <div className="flex flex-wrap gap-2 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap gap-2 px-4 py-2 border-b border-borderColorPrimary">
           {languages.map(({ language, code }) => (
             <div
               key={language}
@@ -96,7 +96,7 @@ const RenderCode = ({
 
       {(showLanguage || title) && (
         <div
-          className="flex justify-between items-center px-4 py-2 text-muted-foreground border-b border-gray-200 dark:border-gray-700"
+          className="flex justify-between items-center px-4 py-2 text-muted-foreground border-b border-borderColorPrimary"
           style={{ width: "100%" }}
         >
           <span className="text-sm font-medium text-muted-foreground">

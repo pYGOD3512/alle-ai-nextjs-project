@@ -82,7 +82,7 @@ export default function TermsOfServiceContent() {
             <div className="container mx-auto px-4 md:px-6 lg:px-8 flex h-14 items-center justify-between">
               {mounted && (
                 <Image 
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.png" : "/svgs/logo-desktop-dark-full.png"}
+                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-full.webp" : "/svgs/logo-desktop-dark-full.webp"}
                 alt="Alle-AI Logo" 
                 width={110} 
                 height={110} />

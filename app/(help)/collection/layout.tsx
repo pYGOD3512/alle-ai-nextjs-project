@@ -159,8 +159,8 @@ export default function HelpLayout({
                 <Image
                   src={
                     resolvedTheme === "dark"
-                      ? "/svgs/logo-desktop-full.png"
-                      : "/svgs/logo-desktop-dark-full.png"
+                      ? "/svgs/logo-desktop-full.webp"
+                      : "/svgs/logo-desktop-dark-full.webp"
                   }
                   alt="all-ai"s
                   height={100}
@@ -176,7 +176,7 @@ export default function HelpLayout({
                   href="#" 
                   onClick={(e) => {
                     e.preventDefault();
-                    toast.info('this feature will be available soon');
+                    toast.info('This feature will be available soon');
                   }}
                 >
                   API Docs

@@ -358,9 +358,9 @@ export default function ApiVideoGenerationDocs() {
       <NavigationContainer
         preUrl="/docs/api-reference/introduction"
         previousTitle="Getting Started"
-        previousDescription="Return to the introduction or main guide"
+        // previousDescription="Return to the introduction or main guide"
         nextTitle=" Analytics & Monitoring"
-        nextDesciption=" Gain insights into system performance, user behavior, and API interactions through comprehensive analytics and monitoring tools."
+        // nextDesciption=" Gain insights into system performance, user behavior, and API interactions through comprehensive analytics and monitoring tools."
         nextUrl=""
       />
     </div>

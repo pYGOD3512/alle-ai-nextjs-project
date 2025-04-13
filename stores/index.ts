@@ -838,7 +838,7 @@ export const useAuthStore = create<AuthStore>()(
           if (response && response.plan) {
             /* The above code is setting the value of the `plan` property in the response object to the
             `plan` property in the `set` function. */
-            set({ plan: response.plan });
+            set({ user: response.data.user, plan: response.plan });
           }
         } catch (error) {
           console.error('Failed to refresh plan data:', error);
@@ -850,8 +850,8 @@ export const useAuthStore = create<AuthStore>()(
       name: 'auth-storage',
       partialize: (state) => ({ 
         token: state.token,
-        user: state.user,
-        plan: state.plan,
+        // user: state.user,
+        // plan: state.plan,
       }),
     }
   )

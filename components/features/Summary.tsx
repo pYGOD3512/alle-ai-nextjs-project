@@ -31,7 +31,7 @@ export function Summary({ isGenerating = false, isActive = false, onClick }: Sum
           className="flex items-center justify-start gap-2 py-2 px-[5%]"
         >
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span className="text-sm text-muted-foreground">Comparing model responses...</span>
+          <span className="text-sm text-muted-foreground">Comparing model responses</span>
         </motion.div>
       ) : (
         <motion.div
@@ -73,7 +73,7 @@ export function Summary({ isGenerating = false, isActive = false, onClick }: Sum
               onClick={onClick}
             >
               <Image
-                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.png" : "/svgs/logo-desktop-mini-dark.png"}
+                src={resolvedTheme === 'dark' ? "/svgs/logo-desktop-mini.webp" : "/svgs/logo-desktop-mini-dark.webp"}
                 alt="Summary"
                 width={16}
                 height={16}
