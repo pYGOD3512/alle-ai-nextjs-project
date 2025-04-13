@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           router.push(returnUrl);
         } else {
           router.push('/chat');
+          refreshPlan();
         }
       } else if (response.data.to === 'plans') {
         router.push('/plans');

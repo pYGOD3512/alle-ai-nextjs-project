@@ -368,9 +368,9 @@ export default function ImageGeneration() {
 
       <NavigationContainer
         previousTitle="Text Generation"
-        previousDescription="Explore AI-powered text generation, including creative writing, summarization, and automated content creation."
+        // previousDescription="Explore AI-powered text generation, including creative writing, summarization, and automated content creation."
         preUrl="/docs/tutorials/image-ai"
-        nextDesciption="Create AI-generated audio, including speech synthesis, music, and sound effects."
+        // nextDesciption="Create AI-generated audio, including speech synthesis, music, and sound effects."
         nextTitle="Audio Generation"
         nextUrl="/docs/tutorials/audio-ai"
       />

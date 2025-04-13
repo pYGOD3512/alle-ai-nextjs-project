@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ContentLengthWarningProps {
   percentage?: number;
@@ -20,31 +21,41 @@ export function ContentLengthWarning({
   const excessPercentage = percentage ? Math.round(percentage - 100) : 0;
 
   return (
-    <div 
-      className={cn(
-        "flex items-center gap-2 p-3 mb-0 rounded-lg text-sm",
-        type === 'length' ? (
-          percentage && percentage > 100 
-            ? "bg-destructive/10 text-destructive border border-destructive/20" 
-            : "bg-warning/10 text-warning border border-warning/20"
-        ) : "bg-destructive/10 text-destructive border border-destructive/20",
-        className
-      )}
+    <motion.div
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 20, opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="mb-2 w-full"
     >
-      <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-      {type === 'length' ? (
-        <span>
-          Context length exceeded by <span className="font-medium">{excessPercentage}%</span>. 
-          Please reduce your content to continue.
-        </span>
-      ) : (
-        <span>
-          {message || "Some models don't support image uploads: "}
-          {models.length > 0 && (
-            <span className="font-bold italic"> {models.join(', ')}</span>
+      <div 
+        className={cn(
+          "flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-[14px] backdrop-blur-sm w-full",
+          type === 'length' ? (
+            percentage && percentage > 100 
+              ? "bg-red-500/10 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50" 
+              : "bg-yellow-500/10 dark:bg-yellow-950/50 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900/50"
+          ) : "bg-red-500/10 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50",
+          className
+        )}
+      >
+        <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+        <span className="text-center">
+          {type === 'length' ? (
+            <>
+              Context length exceeded by <span className="font-medium">{excessPercentage}%</span>. 
+              Please reduce your content to continue.
+            </>
+          ) : (
+            <>
+              {message || "Some models don't support image uploads: "}
+              {models.length > 0 && (
+                <span className="font-bold italic"> {models.join(', ')}</span>
+              )}
+            </>
           )}
         </span>
-      )}
-    </div>
+      </div>
+    </motion.div>
   );
 }

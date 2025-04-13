@@ -100,7 +100,7 @@ export default function PlatformOverview() {
   return (
     <main className="w-full max-w-full px-3 sm:px-3 lg:px-3">
       {/* Hero Section */}
-      <div className="relative rounded-xl p-8 mb-12 border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="relative rounded-xl p-8 mb-12 border border-borderColorPrimary overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r   pointer-events-none" />
 
         <p className="text-lg text-muted-foreground  max-w-3xl mb-6">
@@ -149,8 +149,8 @@ export default function PlatformOverview() {
           {tasks.map((task) => (
             <Link key={task.id} href={task.href}>
               <Card
-                className={`relative max-w-md mx-auto bg-background border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-lg transition-all duration-200 group ${
-                  task.featured ? "border-gray-400 dark:border-gray-800" : ""
+                className={`relative max-w-md mx-auto bg-background border border-borderColorPrimary rounded-lg hover:shadow-lg transition-all duration-200 group ${
+                  task.featured ? "border-2" : ""
                 }`}
               >
                 {task.featured && (
@@ -172,7 +172,7 @@ export default function PlatformOverview() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 pb-6 px-6">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 border-t border-borderColorPrimary pt-4">
                     Models:{" "}
                     <span className="font-medium">
                       {task.models.join(", ")} and more
@@ -187,7 +187,7 @@ export default function PlatformOverview() {
 
       {/* Developer Resources Section */}
       <section className="mb-16">
-        <div className="rounded-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div className="rounded-xl p-8 border border-borderColorPrimary">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 ">
             Build with Alle-AI
           </h2>
@@ -197,7 +197,7 @@ export default function PlatformOverview() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resourceCards.map((card, index) => (
               <Link key={index} href={card.href} className="block group">
-                <Card className="h-full border bg-background border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-lg transition-all duration-200">
+                <Card className="h-full border bg-background border-borderColorPrimary rounded-lg hover:shadow-lg transition-all duration-200">
                   <CardHeader className="pb-2">
                     <div className="flex items-center mb-2">
                       <div className="p-3 border-black border-2 dark:border-gray-500  rounded-lg mr-3 group-hover:bg-gray-100 dark:group-hover:bg-zinc-800 transition-colors">
@@ -234,7 +234,7 @@ export default function PlatformOverview() {
 
       {/* Support Section */}
       <section className="mb-16">
-        <div className="rounded-xl p-6 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="rounded-xl p-6 border border-borderColorPrimary flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
               Need Help?

@@ -33,23 +33,23 @@ export function LoginForm({ onSwitchMode, onForgotPassword, onVerify }: LoginFor
     e.preventDefault();
     setIsLoading(true);
 
-    
     try {
       const result = await login(email, password);
       
       sendGAEvent('formSubmission', 'submit', { authType: 'loginForm', status: 'success'});
+      
       // Only handle verification if needed
       if (result.data.to === 'verify-email') {
         onVerify(email);
+        setIsLoading(false);
         return;
       }
       // Login function will handle other redirects
+      // The loading state will be maintained until the page actually changes
     } catch (error: any) {
       setPassword("");
       toast.error('Login failed, please try again');
       sendGAEvent('formSubmission', 'submit', { authType: 'loginForm', status: 'failed'});
-      // console.log(error)
-    } finally {
       setIsLoading(false);
     }
   };

@@ -3,10 +3,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Image from 'next/image';
-import { Pencil, Check, X } from "lucide-react";
+import { Pencil, Check, X, ChevronDown } from "lucide-react";
 import { useAuthStore } from "@/stores";
 import { ModelResponse } from "@/lib/types";
 import { toast } from "sonner"
+import { motion, AnimatePresence } from "framer-motion";
 
 import { MessageAttachment } from "./MessageAttachment";
 
@@ -64,7 +65,9 @@ export function ChatMessage({
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
+  const [isExpanded, setIsExpanded] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const contentRef = useRef<HTMLParagraphElement>(null);
   const { user } = useAuthStore();
   ;
 
@@ -130,6 +133,19 @@ export function ChatMessage({
     Math.max(...versionsOfThisMessage.map(m => m.position[0])) + 1 : 
     1;
 
+  // Check if content needs truncation
+  const [needsTruncation, setNeedsTruncation] = useState(false);
+  const MAX_LINES = 6;
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const lineHeight = parseInt(getComputedStyle(contentRef.current).lineHeight);
+      const contentHeight = contentRef.current.scrollHeight;
+      const maxHeight = lineHeight * MAX_LINES;
+      setNeedsTruncation(contentHeight > maxHeight);
+    }
+  }, [content]);
+
   const handleEditClick = () => {
     setIsEditing(true);
   };
@@ -187,7 +203,7 @@ export function ChatMessage({
 
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex-1 relative">
-        <Card className="flex items-start gap-3 p-3 rounded-2xl bg-backgroundSecondary">
+        <Card className="flex items-start gap-3 px-2 py-6 rounded-2xl bg-backgroundSecondary">
           <div className="hidden sm:flex w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <Image
               src={user?.photo_url || '/user.jpg'}
@@ -225,12 +241,41 @@ export function ChatMessage({
             </div>
           ) : (
             <div className="flex-1 flex items-start">
-              <div className="flex-1 pr-2">
-                <p className="text-sm whitespace-pre-wrap break-words">{content}</p>
+              <div className="flex-1 pr-2 relative">
+                <AnimatePresence initial={false}>
+                  <motion.p 
+                    ref={contentRef}
+                    initial={{ height: "auto" }}
+                    animate={{ height: isExpanded ? "auto" : needsTruncation ? "7.5rem" : "auto" }}
+                    exit={{ height: needsTruncation ? "7.5rem" : "auto" }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className={`text-sm whitespace-pre-wrap break-words overflow-hidden ${
+                      !isExpanded && needsTruncation ? 'line-clamp-6' : ''
+                    }`}
+                  >
+                    {content}
+                  </motion.p>
+                </AnimatePresence>
+                {needsTruncation && (
+                  <motion.button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="absolute -bottom-4 -left-1 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <ChevronDown size={16} />
+                    </motion.div>
+                    {isExpanded ? 'Show less' : 'Show more'}
+                  </motion.button>
+                )}
               </div>
               {/* <button
                 onClick={()=>{
-                  toast.info('this feature will be available soon')
+                  toast.info('This feature will be available soon')
                   // handleEditClick();
                 }}
                 className="text-muted-foreground hover:bg-gray-100 p-1 rounded-full transition-colors flex-shrink-0"

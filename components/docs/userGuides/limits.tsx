@@ -408,10 +408,10 @@ const RateLimits = () => {
       </p>
       <NavigationContainer
         previousTitle="Prompt Examples"
-        previousDescription="Learn about fine-tunning inputs"
+        // previousDescription="Learn about fine-tunning inputs"
         preUrl="/docs/user-guides/prompts"
         nextTitle="Error Codes"
-        nextDesciption="Learn about error handlings"
+        // nextDesciption="Learn about error handlings"
         nextUrl="/docs/user-guides/error-codes"
       />
     </div>

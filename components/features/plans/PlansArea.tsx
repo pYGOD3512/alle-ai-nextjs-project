@@ -48,13 +48,14 @@ const PlansArea = () => {
         } else {
           window.location.href = response.to;
         }
+        setProcessingPlan(null);
       } else {
         throw new Error(response.message || 'Checkout failed');
       }
     } catch (error: any) {
-      toast.error(`${error.message || "An error occurred. Please try again."}`)
-    } finally {
       setProcessingPlan(null);
+
+      toast.error(`${error.message || "An error occurred. Please try again."}`)
     }
   };
 

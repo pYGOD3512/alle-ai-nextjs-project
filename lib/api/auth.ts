@@ -180,6 +180,11 @@ export const authApi = {
     return response.data;
   },
 
+  verifyResetToken: async (data: { email: string; token: string }) => {
+    const response = await api.post('/verify/token', data);
+    return response.data;
+  },
+
   checkout: async (data: { 
     plan: 'free' | 'standard' | 'plus' | 'custom';
     billing_cycle: 'monthly' | 'yearly';

@@ -497,9 +497,9 @@ const TextGenerationPlatform = () => {
       </div>
       <NavigationContainer
         previousTitle="Overview"
-        previousDescription="An introduction to the platform, its features, and how to navigate through its functionalities."
+        // previousDescription="An introduction to the platform, its features, and how to navigate through its functionalities."
         preUrl="/docs/tutorials/using-platform"
-        nextDesciption="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
+        // nextDesciption="Generate high-quality images using AI, from artistic illustrations to realistic visuals."
         nextTitle="Image Generation"
         nextUrl="/docs/tutorials/image-ai"
       />

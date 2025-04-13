@@ -273,9 +273,9 @@ export default function VideoGeneration() {
       {/* Related Guides */}
       <NavigationContainer
         previousTitle="Audio Generation"
-        previousDescription="Create AI-generated audio, including speech synthesis, music, and sound effects."
+        // previousDescription="Create AI-generated audio, including speech synthesis, music, and sound effects."
         preUrl="/docs/tutorials/audio-ai"
-        nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
+        // nextDesciption="Learn how to craft effective prompts to get the best results from AI models."
         nextTitle="Prompt Engineering"
         nextUrl="/docs/tutorials/prompts"
       />

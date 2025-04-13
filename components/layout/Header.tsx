@@ -307,7 +307,7 @@ export function Header() {
           setSettingsModalOpen(true);
         } else if (item.label === 'Refer') {
           // setReferModalOpen(true);
-          toast.info('this feature will be available soon');
+          toast.info('This feature will be available soon');
 
         } else if (item.label === 'Favorites') {
           setAlbumModalOpen(true);
@@ -315,7 +315,7 @@ export function Header() {
         break;
       case 'link':
         if (item.label === 'Developer') {
-          toast.info('this feature will be available soon');
+          toast.info('This feature will be available soon');
         } else {
           window.open(item.href, '_blank');
         }
@@ -353,7 +353,7 @@ export function Header() {
   
 
   const handleTour = () => {
-    toast.info('this feature will be available soon');
+    toast.info('This feature will be available soon');
   };
   const handleLogOut = () => {
     setIsLogoutModalOpen(true);
@@ -468,16 +468,32 @@ export function Header() {
               <DropdownMenu open={modelsDropdownOpen} onOpenChange={setModelsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <div 
-                    className={`w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}
+                    className={`bg-backgroundSecondary w-2/5 sm:w-fit overflow-auto whitespace-nowrap flex items-center ml-10 ${!isLoadingLatest ? 'border border-muted-foreground' : 'border-none'} rounded-md py-1 cursor-pointer hover:bg-backgroundSecondary/50 transition-colors`}
                   >
                     {selectedModelNames.map((model, index) => (
                       <span 
                         key={`${model}-${index}`} 
                         className={`flex items-center gap-1 text-xs border-r px-1 border-muted-foreground last:border-none ${
-                          !model.isActive ? 'text-muted-foreground' : model.type === 'standard' ? 'bg-gradient-to-r from-gray-300/90 to-gray-400/90 rounded-xl' : model.type === 'plus' ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 rounded-xl' : ''
+                          !model.isActive ? 'text-muted-foreground opacity-50' : 'dark:text-gray-400 text-gray-800'
                         }`}
                       >
                         {model.name}
+                        {(model.type === 'standard' || model.type === 'plus') &&
+                          (
+                            <div className={`inline-flex items-center ml-1
+                              ${model.type === 'standard' 
+                                ? 'bg-gradient-to-r from-gray-300/90 to-gray-400/90' 
+                                : model.type === 'plus' ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90': ''} 
+                              rounded-sm p-0.5`}>
+                              <Image
+                                src={'/svgs/logo-desktop-mini.webp'}
+                                height={10}
+                                width={10}
+                                alt={`${model.type}-alle-ai`}
+                              />
+                            </div>
+                          )
+                        }
                       </span>
                     ))}
                   </div>
