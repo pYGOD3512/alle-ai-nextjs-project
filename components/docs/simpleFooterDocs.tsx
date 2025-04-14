@@ -3,6 +3,7 @@ import Link from "next/link";
 
 interface FooterProps {
   className?: string;
+  nonDev?: boolean;
 }
 
 interface FooterLink {
@@ -42,7 +43,7 @@ const footerLinks: FooterLink[] = [
   },
 ];
 
-const DocsFooter: React.FC<FooterProps> = ({ className = "" }) => {
+const DocsFooter: React.FC<FooterProps> = ({ className = "", nonDev }) => {
   const [emailInput, setEmailInput] = useState("");
 
   // Placeholder function for signup logic
@@ -98,7 +99,9 @@ const DocsFooter: React.FC<FooterProps> = ({ className = "" }) => {
           {/* Right Side: Subscription Placeholder */}
           <div className="w-full md:w-1/3">
             <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-              Sign up for developer updates:
+              {nonDev
+                ? "Sign up for news and updates"
+                : "Sign up for developer updates:"}
             </h3>
             <div className="flex items-center gap-2">
               <input

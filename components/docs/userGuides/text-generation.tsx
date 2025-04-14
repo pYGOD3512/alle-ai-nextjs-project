@@ -17,7 +17,7 @@ const faqData = [
     id: "2",
     question: "File upload failure",
     answer:
-      "Make sure the file you're trying to upload is in a supported format (e.g., PDF, PNG, JPG). Also, check that the file size doesn’t exceed the maximum limit. If the issue persists, try renaming the file and re-uploading.",
+      "Make sure the file you're trying to upload is in a supported format (e.g., PDF, PNG, JPG). Also, check that the file size doesn't exceed the maximum limit. If the issue persists, try renaming the file and re-uploading.",
   },
   {
     id: "3",
@@ -50,13 +50,13 @@ const TextGenerationPlatform = () => {
   const { resolvedTheme } = useTheme();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen px-2 sm:px-4">
       <div className="mb-6">
         {/* intro */}
         <section>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             <span className="font-bold">Alle-AI</span> brings together the
-            world’s leading generative language models including ChatGPT,
+            world's leading generative language models including ChatGPT,
             Claude, Grok, and many more into one powerful, unified chat
             experience. Whether you're exploring ideas, building products, or
             solving complex problems, Alle-AI gives you the tools to do it
@@ -64,9 +64,9 @@ const TextGenerationPlatform = () => {
           </p>
         </section>
       </div>
-      <h1 className="text-2xl mb-4 font-semibold">A Quick Tour</h1>
+      <h1 className="text-xl sm:text-2xl mb-4 font-semibold">A Quick Tour</h1>
 
-      <p className="text-muted-foreground mb-3">
+      <p className="text-muted-foreground mb-3 text-sm sm:text-base">
         {/* {`Experience the next level of text generation! This video tutorial
         introduces you to the Text Generation interface, highlighting its unique
         multi-model capabilities. We'll walk you through the process of
@@ -75,34 +75,34 @@ const TextGenerationPlatform = () => {
         distinct strengths of each model.`} */}
       </p>
       {/* Video Walkthrough Placeholder */}
-      <aside id="walkthrough" className="mb-8 flex justify-center max-w-2xl">
-        <div className="w-full max-w-4xl">
-          <iframe
-            src="https://www.youtube.com/embed/8g7kHVMFxlE"
-            width="560"
-            height="315"
-            className="rounded"
-            allowFullScreen
-          ></iframe>
+      <aside id="walkthrough" className="mb-8 flex justify-center w-full">
+        <div className="w-full">
+          <div className="relative w-full pb-[56.25%]">
+            <iframe
+              src="https://www.youtube.com/embed/8g7kHVMFxlE"
+              className="absolute top-0 left-0 w-full h-full rounded"
+              allowFullScreen
+            ></iframe>
+          </div>
         </div>
       </aside>
 
       {/* Using the Text Generation Page */}
       <section className="mb-8">
-        <h2 id="text-generation" className="text-2xl font-bold mb-2">
+        <h2 id="text-generation" className="text-xl sm:text-2xl font-bold mb-2">
           Using the Text Generation Page
         </h2>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-muted-foreground mb-4 text-sm sm:text-base">
           This section provides a step-by-step guide on how to generate text
           using our platform.
         </p>
 
         {/* Inputting a Query */}
         <div className="mb-6">
-          <h3 className="text-1xl font-bold  mb-2 ">
+          <h3 className="text-lg sm:text-xl font-bold mb-2">
             1. Selecting Your AI Models:
           </h3>
-          <div className="text-muted-foreground mb-2">
+          <div className="text-muted-foreground mb-2 text-sm sm:text-base">
             <p>
               Before you can generate text, you need to choose the AI model(s)
               you want to use. Our platform supports a variety of powerful
@@ -110,11 +110,11 @@ const TextGenerationPlatform = () => {
               select one or more models to interact with 😊.
             </p>
           </div>
-          <div className="p-3">
-            <ul className="list-disc ml-6 space-y-4">
+          <div className="p-2 sm:p-3">
+            <ul className="list-disc ml-4 sm:ml-6 space-y-4 text-sm sm:text-base">
               <li>
                 <strong
-                  className="text-muted-foreground font-bold "
+                  className="text-muted-foreground font-bold"
                   id="select_models"
                 >
                   How to Select Models:&nbsp;
@@ -128,7 +128,7 @@ const TextGenerationPlatform = () => {
               </li>
 
               <li>
-                <strong className="text-muted-foreground font-bold ">
+                <strong className="text-muted-foreground font-bold">
                   Choosing the Right Model(s): &nbsp;
                 </strong>
                 <p className="mt-1 text-muted-foreground">
@@ -163,15 +163,18 @@ const TextGenerationPlatform = () => {
 
         {/* Selecting AI Models */}
         <div className="mb-6">
-          <h3 id="providing-inputs" className="text-xl font-semibold mb-2">
+          <h3
+            id="providing-inputs"
+            className="text-lg sm:text-xl font-semibold mb-2"
+          >
             2. Providing inputs
           </h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             {`Once you've selected your AI models, you have several options for
             providing input to guide the text generation:`}
           </p>
-          <div className="p-3">
-            <ul className="list-disc space-y-6 ml-6">
+          <div className="p-2 sm:p-3">
+            <ul className="list-disc space-y-6 ml-4 sm:ml-6 text-sm sm:text-base">
               <li>
                 <strong className="text-muted-foreground font-bold">
                   Text Prompt: &nbsp;
@@ -181,7 +184,7 @@ const TextGenerationPlatform = () => {
                   instructions or ideas into the text prompt field. Be as
                   specific as possible to get the best results.
                 </p>
-                <ul className="list-disc ml-6 mt-2 space-y-2">
+                <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2">
                   <li>
                     <strong className="text-muted-foreground font-bold">
                       Good Prompt:&nbsp;
@@ -210,7 +213,7 @@ const TextGenerationPlatform = () => {
                   Click the microphone icon and start speaking. The platform
                   will automatically transcribe your speech into text.
                 </p>
-                <ul className="list-disc ml-6 mt-2 space-y-2">
+                <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2">
                   <li>
                     <strong className="text-muted-foreground font-bold">
                       Enabling Voice Input:&nbsp;
@@ -248,7 +251,7 @@ const TextGenerationPlatform = () => {
                   can be useful for summarizing documents, analyzing data, or
                   generating text based on existing content.
                 </p>
-                <ul className="list-disc ml-6 mt-2 space-y-2">
+                <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2">
                   <li>
                     <strong className="text-muted-foreground font-bold">
                       Supported File Types:&nbsp;
@@ -262,17 +265,20 @@ const TextGenerationPlatform = () => {
                       How to Attach Files:&nbsp;
                     </strong>
                     <div className="mt-2 mb-3">
-                      <Image
-                        className="mb-2"
-                        height={120}
-                        width={800}
-                        src={
-                          resolvedTheme === "dark"
-                            ? "/screenshots/input-dark.png"
-                            : "/screenshots/input-light.png"
-                        }
-                        alt=""
-                      ></Image>
+                      <div className="relative w-full">
+                        <Image
+                          className="mb-2"
+                          height={120}
+                          width={800}
+                          style={{ width: "100%", height: "auto" }}
+                          src={
+                            resolvedTheme === "dark"
+                              ? "/screenshots/input-dark.png"
+                              : "/screenshots/input-light.png"
+                          }
+                          alt=""
+                        />
+                      </div>
                       <span className="text-muted-foreground">
                         Click the file icon to open a window, select a file, and
                         it will be uploaded automatically
@@ -295,22 +301,25 @@ const TextGenerationPlatform = () => {
                 <strong className="text-muted-foreground font-bold">
                   Enabling Web Search:&nbsp;
                 </strong>
-                <Image
-                  className="mb-2"
-                  height={120}
-                  width={800}
-                  src={
-                    resolvedTheme === "dark"
-                      ? "/screenshots/web-dark.png"
-                      : "/screenshots/web-light.png"
-                  }
-                  alt=""
-                ></Image>
+                <div className="relative w-full">
+                  <Image
+                    className="mb-2"
+                    height={120}
+                    width={800}
+                    style={{ width: "100%", height: "auto" }}
+                    src={
+                      resolvedTheme === "dark"
+                        ? "/screenshots/web-dark.png"
+                        : "/screenshots/web-light.png"
+                    }
+                    alt=""
+                  />
+                </div>
                 <p className="mt-1 text-muted-foreground">
                   To incorporate current events or factual information into your
                   generated text, you can enable the web search feature.
                 </p>
-                <ul className="list-disc ml-6 mt-2 space-y-2">
+                <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2">
                   <li>
                     <strong className="text-muted-foreground font-bold">
                       How Web Search Works:&nbsp;
@@ -330,10 +339,10 @@ const TextGenerationPlatform = () => {
 
         {/* Generating Responses */}
         <div className="mb-6">
-          <h3 className="text-xl  font-semibold mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">
             3. Generating Responses
           </h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             {`Once you've provided your input, click the "Generate" button. The
             platform will then process your request and generate the text based
             on your chosen models and input. The time it takes to generate the
@@ -344,24 +353,24 @@ const TextGenerationPlatform = () => {
 
         {/* Summarization Feature */}
         <div className="mb-6">
-          <h3 className="text-xl  font-semibold mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">
             4. Chat features (summarization,combination)
           </h3>
           {/* Video Walkthrough Placeholder */}
-          <aside className="mb-5 flex justify-center max-w-2xl">
-            <div className="w-full max-w-4xl">
-              <iframe
-                src="https://www.youtube.com/embed/8g7kHVMFxlE"
-                width="560"
-                height="315"
-                className="rounded"
-                allowFullScreen
-              ></iframe>
+          <aside className="mb-5 flex justify-center w-full">
+            <div className="w-full">
+              <div className="relative w-full pb-[56.25%]">
+                <iframe
+                  src="https://www.youtube.com/embed/8g7kHVMFxlE"
+                  className="absolute top-0 left-0 w-full h-full rounded"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           </aside>
         </div>
-        <div className="p-3">
-          <p className="mb-4 text-muted-foreground">
+        <div className="p-2 sm:p-3">
+          <p className="mb-4 text-muted-foreground text-sm sm:text-base">
             Once the text generation process is complete, you'll be presented
             with the generated output. This section explains how to review,
             edit, and refine the generated text.
@@ -369,10 +378,10 @@ const TextGenerationPlatform = () => {
 
           <div className="space-y-6">
             <section>
-              <h2 className="text-lg font-bold ">
+              <h2 className="text-base sm:text-lg font-bold">
                 1. Viewing the Generated Output:
               </h2>
-              <ul className="list-disc ml-6 mt-2 space-y-2">
+              <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2 text-sm sm:text-base">
                 <li>
                   <strong className="text-muted-foreground font-bold">
                     Single Model Output:&nbsp;
@@ -399,31 +408,34 @@ const TextGenerationPlatform = () => {
             </section>
 
             <section>
-              <h2 className="text-lg   font-bold">
+              <h2 className="text-base sm:text-lg font-bold">
                 2. Editing the Generated Text:&nbsp;
               </h2>
-              <p className="mt-2 text-muted-foreground">
+              <p className="mt-2 text-muted-foreground text-sm sm:text-base">
                 The generated text is fully editable. You can make any changes
                 you like, just as you would with any other text document.
               </p>
-              <ul className="list-disc ml-6 mt-2 space-y-2">
+              <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2">
                 <li>
                   <strong className="mb-3 text-muted-foreground font-bold">
                     Comparing Model Outputs :&nbsp;
                   </strong>
-                  <Image
-                    className="mb-2"
-                    height={120}
-                    width={800}
-                    src={
-                      resolvedTheme === "dark"
-                        ? "/screenshots/summary-dark.png"
-                        : "/screenshots/summary-light.png"
-                    }
-                    alt=""
-                  ></Image>
+                  <div className="relative w-full">
+                    <Image
+                      className="mb-2"
+                      height={120}
+                      width={800}
+                      style={{ width: "100%", height: "auto" }}
+                      src={
+                        resolvedTheme === "dark"
+                          ? "/screenshots/summary-dark.png"
+                          : "/screenshots/summary-light.png"
+                      }
+                      alt=""
+                    />
+                  </div>
                 </li>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm sm:text-base">
                   We provide a model that offers summarization, combination, and
                   more. To get a summary, simply click on the 'Summary' button
                   as shown in the image above. You can also use the toggle to
@@ -433,14 +445,14 @@ const TextGenerationPlatform = () => {
             </section>
 
             <section>
-              <h2 className="text-lg   font-bold">
+              <h2 className="text-base sm:text-lg font-bold">
                 3. Refining the Generated Text:&nbsp;
               </h2>
-              <p className="mt-2 text-muted-foreground">
+              <p className="mt-2 text-muted-foreground text-sm sm:text-base">
                 Sometimes, the generated text might require some refinement to
                 perfectly match your requirements. Here are some tips:
               </p>
-              <ul className="list-disc ml-6 mt-2 space-y-2">
+              <ul className="list-disc ml-4 sm:ml-6 mt-2 space-y-2 text-sm sm:text-base">
                 <li>
                   <strong className="text-muted-foreground font-bold">
                     Prompt Refinement:&nbsp;
@@ -479,7 +491,9 @@ const TextGenerationPlatform = () => {
 
       {/* Troubleshooting & Support */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Common Issues & Fixes</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+          Common Issues & Fixes
+        </h2>
 
         {/* Common Issues & Solutions */}
         <div className="mb-6">
@@ -491,10 +505,13 @@ const TextGenerationPlatform = () => {
 
       {/* Contact Support */}
       <div>
-        <h3 className="text-xl font-semibold mb-2"> Contact Support</h3>
-        <p className="text-muted-foreground">
+        <h3 className="text-lg sm:text-xl font-semibold mb-2">
+          {" "}
+          Contact Support
+        </h3>
+        <p className="text-muted-foreground text-sm sm:text-base">
           For further assistance, visit our &nbsp;
-          <span className="italic text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
+          <span className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
             <Link target="_blank" href={"/collection"}>
               Help Center
             </Link>
@@ -503,7 +520,7 @@ const TextGenerationPlatform = () => {
           <span>
             <button
               onClick={handleContactSupport}
-              className="  italic text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
+              className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
             >
               support@alle-ai.com
             </button>
@@ -515,7 +532,7 @@ const TextGenerationPlatform = () => {
         <ArticleFeedback />
       </div>
       <div>
-        <DocsFooter />
+        <DocsFooter nonDev={true} />
       </div>
     </div>
   );
