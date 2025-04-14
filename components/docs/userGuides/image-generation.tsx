@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import ImageGenerationShowcase from "@/components/ImageGenerationShowcase";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import NavigationContainer from "@/components/NavigationContainer";
 import CollapsibleItems from "../CollapsibleItem";
 import ArticleFeedback from "../articleFeedback";
 import DocsFooter from "../simpleFooterDocs";
