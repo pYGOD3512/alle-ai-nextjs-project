@@ -1588,14 +1588,14 @@ export const mainUserGuides: mainGuides[] = [
             id: "pricing",
             title: "Pricing",
           },
-          {
-            id: "models",
-            title: "Models",
-          },
-          {
-            id: "best-practise",
-            title: "Best Practices",
-          },
+          // {
+          //   id: "models",
+          //   title: "Models",
+          // },
+          // {
+          //   id: "best-practise",
+          //   title: "Best Practices",
+          // },
         ],
       },
     ],
