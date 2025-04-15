@@ -79,17 +79,6 @@ export default function ImageGeneration() {
         <h2 className="text-2xl font-semibold mb-4">
           Getting Started with Image Generation on Alle-AI
         </h2>
-        <p className="text-muted-foreground mb-4">
-          This guide walks you through generating images on our platform,
-          focusing on image-specific features. For basics like model selection
-          or voice input, see our{" "}
-          <span className="text-blue-600 dark:text-blue-400 font-bold">
-            <Link href={"/docs/user-guides/chat#walkthrough"}>
-              Platform Interface
-            </Link>
-          </span>{" "}
-          guide.
-        </p>
 
         {/* Video Walkthrough */}
         <aside className="mb-8 flex justify-center">
@@ -223,13 +212,13 @@ export default function ImageGeneration() {
         <h3 className="text-xl font-semibold mb-2">Contact Support</h3>
         <p className="text-muted-foreground">
           Need help? Visit our{" "}
-          <span className="text-blue-600 dark:text-blue-400 font-bold">
+          <span className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
             <Link href={"/collection"}>Help Center</Link>
           </span>{" "}
           or contact{" "}
           <button
             onClick={handleContactSupport}
-            className="text-blue-600 dark:text-blue-400 font-bold hover:underline"
+            className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
           >
             support@alle-ai.com
           </button>

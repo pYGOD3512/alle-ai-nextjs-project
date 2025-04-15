@@ -30,12 +30,12 @@ const ImageGenerationShowcase: React.FC = () => {
   ];
 
   return (
-    <section className="mb-10">
+    <section className="mb-12">
       <div className="container mx-auto px-4">
         {/* Prompt Section */}
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold  mb-2">Prompt:</h2>
-          <p className="text-lg  italic">{`${prompt}`}</p>
+          <p className="text-lg text-muted-foreground  italic">{`${prompt}`}</p>
         </div>
 
         {/* Grid of Images */}
@@ -68,7 +68,7 @@ const ImageGenerationShowcase: React.FC = () => {
         </motion.div>
 
         {/* Call-to-Action Button */}
-        <div className="text-center mt-6">
+        {/* <div className="text-center mt-6">
           <Link
             href={"/image"}
             target="_blank"
@@ -76,7 +76,7 @@ const ImageGenerationShowcase: React.FC = () => {
           >
             Try Image Generation
           </Link>
-        </div>
+        </div> */}
       </div>
     </section>
   );

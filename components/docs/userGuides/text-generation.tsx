@@ -139,7 +139,7 @@ const TextGenerationPlatform = () => {
                   find the ones that best suit your project. For a deeper dive
                   into each available model, including their strengths,
                   weaknesses, and more,&nbsp;
-                  <span className="underline text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 font-bold">
+                  <span className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold">
                     <Link target="_blank" href={"/modal-gloassary"}>
                       check out this dedicated documentation page.
                     </Link>
