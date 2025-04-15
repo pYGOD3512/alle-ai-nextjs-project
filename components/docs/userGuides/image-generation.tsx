@@ -11,38 +11,100 @@ export default function ImageGeneration() {
   const { resolvedTheme } = useTheme();
 
   // FAQ data with an additional question
-  const faqData = [
-    {
-      id: "1",
-      question: "What types of images can I generate with ALLE-AI?",
-      answer:
-        "You can generate a wide variety of images, including realistic scenes, artistic visuals, and abstract designs. The platform supports multiple AI models to cater to different creative needs.",
-    },
-    {
-      id: "2",
-      question: "How do I ensure the best results from image generation?",
-      answer:
-        "Provide detailed and specific prompts, including subject, style, composition, lighting, mood, and color palette. Experiment with combinations and refine based on results.",
-    },
-    {
-      id: "3",
-      question: "Can I download the generated images?",
-      answer:
-        "Yes, you can download images in formats like JPEG and PNG. Hover over the image and click the download icon.",
-    },
-    {
-      id: "4",
-      question: "Is there a limit to the number of images I can generate?",
-      answer:
-        "Limits depend on your subscription plan. Free users have restrictions, while premium users enjoy higher quotas and extra features.",
-    },
-    {
-      id: "5",
-      question: "Why is my generated image blurry?",
-      answer:
-        "Blurry images may result from vague prompts or low-resolution settings. Try specifying 'high resolution' or 'sharp details' in your prompt and check your model settings.",
-    },
-  ];
+const faqData = [
+  {
+    id: "1",
+    question: "Why are my generated images blurry?",
+    answer:
+      "Blurry images are often due to vague or short prompts. Try providing more detailed prompts, such as specifying 'high resolution' or 'sharp details'. You can also check your model settings to ensure you're generating images in a higher resolution.",
+  },
+  {
+    id: "2",
+    question: "Why aren't my images generated after I submitted a prompt?",
+    answer:
+      "If your images aren't being generated, it could be due to an issue with the server or the AI model processing the request. Try submitting again after a few minutes. If the issue persists, check your internet connection or contact support.",
+  },
+  {
+    id: "3",
+    question: "Can I download the images in different formats?",
+    answer:
+      "Currently, you can download images in JPEG and PNG formats. If you need other formats, keep an eye out for upcoming updates or use external tools for conversion.",
+  },
+  {
+    id: "4",
+    question: "Why is there a delay in receiving my generated images?",
+    answer:
+      "Delays can happen due to high demand on the models or heavy server traffic. Premium users typically experience faster generation times. You can try again later or consider upgrading for quicker results.",
+  },
+  {
+    id: "5",
+    question: "Why are some of my model results drastically different?",
+    answer:
+      "Different AI models have unique strengths and interpretations. If you're getting widely varying results, try refining your prompt to be more specific or experiment with different model selections for better consistency.",
+  },
+  {
+    id: "6",
+    question: "How do I fix an error with selecting multiple models?",
+    answer:
+      "If you're unable to select multiple models or receiving errors, try refreshing your page or clearing your browser cache. Ensure you're using a compatible browser, and contact support if the issue continues.",
+  },
+  {
+    id: "7",
+    question: "Can I cancel or undo an image generation?",
+    answer:
+      "Once an image generation is in progress, it cannot be canceled. However, you can submit a new prompt with any modifications you'd like. We recommend refining the prompt before submitting to avoid unnecessary generations.",
+  },
+  {
+    id: "8",
+    question: "What if my image doesn't match my prompt?",
+    answer:
+      "If the result doesn't match your expectations, review your prompt and make sure it’s clear and specific. Adjusting terms related to style, composition, and mood can significantly improve results. If issues persist, try switching models for better alignment.",
+  },
+  {
+    id: "9",
+    question:
+      "Why am I getting a '404 Error' when trying to generate an image?",
+    answer:
+      "A '404 Error' typically occurs when there's a broken link or incorrect URL request. Refresh the page or check if the platform is experiencing downtime. If it persists, reach out to support for assistance.",
+  },
+  {
+    id: "10",
+    question: "Why are my images not high resolution?",
+    answer:
+      "If your images appear low resolution, make sure you’ve specified 'high resolution' or 'detailed' in your prompt. Some models default to lower quality images to save processing time. Try selecting a higher-quality model or upgrading to a premium plan.",
+  },
+  {
+    id: "11",
+    question: "Can I adjust the output size of my generated image?",
+    answer:
+      "Currently, image size is set by the model defaults. You can request larger sizes through higher resolution settings or by using an external tool to resize the output image.",
+  },
+  {
+    id: "12",
+    question: "Why do some models take longer than others?",
+    answer:
+      "Each model has different processing power and complexity. More advanced models may take longer to generate images, especially during high traffic periods. Premium users typically experience faster processing times.",
+  },
+  {
+    id: "13",
+    question: "Why can't I download images after generation?",
+    answer:
+      "If you're unable to download images, check your internet connection and ensure your browser supports downloads. Try clearing your cache or using a different browser. If the issue persists, contact support for further troubleshooting.",
+  },
+  {
+    id: "14",
+    question: "How do I change my model selection after submitting a prompt?",
+    answer:
+      "Unfortunately, once a prompt is submitted, the model selection cannot be changed. However, you can cancel the current generation and submit a new prompt with your preferred model selection.",
+  },
+  {
+    id: "15",
+    question: "How do I report a bug or issue with the platform?",
+    answer:
+      "If you encounter a bug or technical issue, please contact support through our help section or send a message detailing the problem. We’ll investigate and get back to you as quickly as possible.",
+  },
+];
+
 
   const handleContactSupport = () => {
     const email = "support@alle-ai.com";
@@ -80,17 +142,16 @@ export default function ImageGeneration() {
           Getting Started with Image Generation on Alle-AI
         </h2>
 
-        {/* Video Walkthrough */}
-        <aside className="mb-8 flex justify-center">
-          <div className="w-full max-w-4xl">
-            <iframe
-              src="https://www.youtube.com/embed/8g7kHVMFxlE"
-              width="100%"
-              height="315"
-              className="rounded"
-              allowFullScreen
-            ></iframe>
-            {/* TODO: Replace with actual image generation tutorial video */}
+        {/* Video Walkthrough Placeholder */}
+        <aside id="walkthrough" className="mb-8 flex justify-center w-full">
+          <div className="w-full">
+            <div className="relative w-full pb-[56.25%]">
+              <iframe
+                src="https://www.youtube.com/embed/8g7kHVMFxlE"
+                className="absolute top-0 left-0 w-full h-full rounded"
+                allowFullScreen
+              ></iframe>
+            </div>
           </div>
         </aside>
       </section>

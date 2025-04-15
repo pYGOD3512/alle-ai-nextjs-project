@@ -1,8 +1,8 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
+import { X } from "lucide-react";
 
 const ImageGenerationShowcase: React.FC = () => {
   const prompt = "A futuristic cityscape at night with neon lights";
@@ -29,13 +29,74 @@ const ImageGenerationShowcase: React.FC = () => {
     },
   ];
 
+  // State to manage modal visibility and selected image index
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
+
+  // Get selected image based on index
+  const selectedImage =
+    selectedImageIndex !== null ? imageExamples[selectedImageIndex] : null;
+
+  // Function to open modal with selected image
+  const openModal = (index: number) => {
+    setSelectedImageIndex(index);
+    setIsModalOpen(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImageIndex(null);
+  };
+
+  // Navigate to next/previous image
+  const goToNextImage = useCallback(() => {
+    if (selectedImageIndex !== null) {
+      setSelectedImageIndex((prev) =>
+        prev === imageExamples.length - 1 ? 0 : prev! + 1
+      );
+    }
+  }, [selectedImageIndex, imageExamples.length]);
+
+  const goToPreviousImage = useCallback(() => {
+    if (selectedImageIndex !== null) {
+      setSelectedImageIndex((prev) =>
+        prev === 0 ? imageExamples.length - 1 : prev! - 1
+      );
+    }
+  }, [selectedImageIndex, imageExamples.length]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isModalOpen) return;
+
+      switch (event.key) {
+        case "Escape":
+          closeModal();
+          break;
+        case "ArrowRight":
+          goToNextImage();
+          break;
+        case "ArrowLeft":
+          goToPreviousImage();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen, goToNextImage, goToPreviousImage]);
+
   return (
     <section className="mb-12">
       <div className="container mx-auto px-4">
         {/* Prompt Section */}
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold  mb-2">Prompt:</h2>
-          <p className="text-lg text-muted-foreground  italic">{`${prompt}`}</p>
+          <h2 className="text-2xl font-bold mb-2">Prompt:</h2>
+          <p className="text-lg text-muted-foreground italic">{`${prompt}`}</p>
         </div>
 
         {/* Grid of Images */}
@@ -48,9 +109,10 @@ const ImageGenerationShowcase: React.FC = () => {
           {imageExamples.map((image, index) => (
             <motion.div
               key={index}
-              className="relative aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-200"
+              className="relative aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
+              onClick={() => openModal(index)}
             >
               <Image
                 src={image.url}
@@ -66,6 +128,68 @@ const ImageGenerationShowcase: React.FC = () => {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Modal for Enlarged Image */}
+        {isModalOpen && selectedImage && selectedImageIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={closeModal}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="relative bg-background rounded-lg shadow-2xl max-w-2xl w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+                aria-label="Close modal"
+              >
+                <X size={24} />
+              </button>
+
+              {/* Enlarged Image */}
+              <div className="relative w-full h-[400px] mb-4">
+                <Image
+                  src={selectedImage.url}
+                  alt={selectedImage.alt}
+                  fill
+                  className="object-contain rounded-lg"
+                />
+              </div>
+
+              {/* Image Info */}
+              <div className="text-center mb-4">
+                <p className="text-lg font-semibold">{selectedImage.alt}</p>
+                <p className="text-sm text-muted-foreground">
+                  Generated by <strong>{selectedImage.model}</strong>
+                </p>
+              </div>
+
+              {/* Carousel Dots */}
+              <div className="flex justify-center space-x-2">
+                {imageExamples.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`w-3 h-3 rounded-full transition-colors duration-200 ${
+                      index === selectedImageIndex
+                        ? "bg-blue-600"
+                        : "bg-gray-300 hover:bg-gray-400"
+                    }`}
+                    onClick={() => setSelectedImageIndex(index)}
+                    aria-label={`View image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Call-to-Action Button */}
         {/* <div className="text-center mt-6">

@@ -11,33 +11,70 @@ const faqData = [
     id: "1",
     question: "AI response delay",
     answer:
-      "If you're experiencing delays in AI responses, please check your internet connection for stability. A slow or interrupted network can affect response times. Try refreshing the page or reconnecting to the internet before attempting again.",
+      "If you're experiencing delays in AI responses, check your internet connection for stability. Slow or interrupted networks can affect response times. Try refreshing the page or switching to a more stable connection. If delays persist, server load may be high—please wait a few moments and try again.",
   },
   {
     id: "2",
     question: "File upload failure",
     answer:
-      "Make sure the file you're trying to upload is in a supported format (e.g., PDF, PNG, JPG). Also, check that the file size doesn't exceed the maximum limit. If the issue persists, try renaming the file and re-uploading.",
+      "Ensure the file you're uploading is in a supported format (e.g., PDF, PNG, JPG, DOCX) and within the size limit. Try renaming the file if you continue to experience issues. Also, check your internet connection or try using a different browser.",
   },
   {
     id: "3",
     question: "Voice input not working",
     answer:
-      "Voice input may not work if microphone permissions are not granted. Check your browser settings to ensure microphone access is enabled. Also, verify that your microphone is connected and functioning properly.",
+      "Voice input requires microphone access. Go to your browser settings and make sure microphone permissions are enabled for this site. Also confirm that your device’s microphone is connected and functioning correctly. Reload the page after granting access.",
   },
   {
     id: "4",
     question: "Error message while processing",
     answer:
-      "If an error message appears during processing, it might be due to temporary data issues or a system glitch. Try clearing your browser's cache and cookies, then refresh the page and attempt the action again.",
+      "An error during processing may occur due to a system timeout, invalid input, or a temporary glitch. Try clearing your browser’s cache, rephrasing your prompt, or refreshing the page. If the issue continues, contact support with a screenshot of the error.",
   },
   {
     id: "5",
     question: "Slow application performance",
     answer:
-      "Performance may slow down if your device is running too many applications at once. Try closing unused programs or browser tabs. Restarting the app or your device can also help improve responsiveness.",
+      "App performance may lag due to high memory usage on your device or heavy background processes. Try closing other applications and browser tabs, and consider restarting your device or browser to free up resources.",
+  },
+  {
+    id: "6",
+    question: "Generated response seems inaccurate or off-topic",
+    answer:
+      "This could be due to an unclear or overly broad prompt. Try rephrasing your request with more specific details or context. Avoid using vague terms and break complex instructions into smaller parts.",
+  },
+  {
+    id: "7",
+    question: "The AI stopped mid-response",
+    answer:
+      "Sometimes long responses can get cut off due to system limits or a timeout. Try shortening your prompt or breaking it into smaller chunks. You can also type 'continue' to let the AI pick up from where it left off.",
+  },
+  {
+    id: "8",
+    question: "AI keeps repeating the same phrase",
+    answer:
+      "This can happen if the AI misinterprets the prompt or gets stuck in a loop. Rephrase your prompt to include variation or a different structure. If the repetition continues, refresh the chat or start a new session.",
+  },
+  {
+    id: "9",
+    question: "Can’t copy or select the AI response text",
+    answer:
+      "If you're unable to copy text, it may be due to a browser setting or disabled selection style. Try switching browsers or right-clicking to use the ‘Inspect’ option and manually select text from the HTML structure as a temporary workaround.",
+  },
+  {
+    id: "10",
+    question: "Chat history not loading or disappearing",
+    answer:
+      "Chat history may fail to load due to browser cache issues or temporary server sync delays. Try refreshing the page or clearing your browser cache. If you're logged in, ensure your session hasn’t expired. For persistent issues, log out and back in.",
+  },
+  {
+    id: "11",
+    question: "Prompt not submitting after pressing Enter",
+    answer:
+      "If the prompt doesn't submit, make sure you're not in multiline mode (Shift + Enter). Also, check your keyboard input settings or try submitting using the on-screen button. Reload the app if the issue persists.",
   },
 ];
+
 
 const handleContactSupport = () => {
   const email = "support@alle.com";
