@@ -45,21 +45,7 @@ export default function Page() {
   return (
     <div className="flex-1 w-full flex-col ">
       {title === "Platform overview" ? (
-        <div className="mb-5 py-4 ">
-          <h1 className="text-xl  text-muted-foreground mb-3 ">Get started</h1>
-          <h2 id="get_started" className="font-bold text-4xl mb-3">
-            Alle-AI
-          </h2>
-          <section className="text-muted-foreground">
-            <p>
-              Alle-AI is the ultimate AI integration platform, seamlessly
-              combining the power of leading AI models like ChatGPT, Claude,
-              Gemini, and many more. We empower users with a unified experience
-              across multiple AI technologies, enabling seamless interaction
-              through chat, audio, video, and image generation.
-            </p>
-          </section>
-        </div>
+        <div className="mb-5 py-4 "></div>
       ) : (
         <div>
           <h1 className="font-semibold text-xl mb-3 text-muted-foreground">
@@ -71,6 +57,8 @@ export default function Page() {
                 ? " One Platform for Every AI Task"
                 : title === "Quickstart"
                 ? "User interface"
+                : title === "Pricing"
+                ? "Alle-AI Developer API Pricing"
                 : title}
             </h2>
           </div>

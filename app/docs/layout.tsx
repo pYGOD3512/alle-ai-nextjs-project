@@ -36,6 +36,8 @@ export default function Layout({ children }) {
           </main>
           {pathname === "/docs/user-guides/platform-overview" ? (
             <div></div>
+          // ) : pathname === "/docs/user-guides/pricing" ? (
+          //   <div></div>
           ) : (
             <aside className="hidden xl:block w-[250px] shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] bg-background/90 border-l border-border/40">
               <OnThisPage pathname={pathname} sections={[]} />

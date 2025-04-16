@@ -3,6 +3,7 @@ import React from "react";
 import { Sparkles, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 //  components
 const NewChat = () => (
@@ -121,14 +122,18 @@ const InfoCards = () => {
               Some features require a paid plan. Check out our  
               <a
                 href="#"
-                className="text-blue-500 underline hover:text-blue-400 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
               >
                 feature limitations
               </a>
                 or consider  
               <a
                 href="#"
-                className="text-blue-500 underline hover:text-blue-400 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
               >
                 upgrading your plan
               </a>
@@ -147,7 +152,9 @@ const InfoCards = () => {
               To access our Help Center and resources, click  
               <a
                 href="#"
-                className="text-blue-500 underline hover:text-blue-400 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
               >
                 Help Center
               </a>
