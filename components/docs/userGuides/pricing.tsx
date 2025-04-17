@@ -74,16 +74,16 @@ const pricingTiers = [
 ];
 
 const PricingPage = () => {
-  const scrollToCalculator = (e) => {
+  const scrollToCalculator = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const calculatorSection = document.getElementById("calculator");
-    calculatorSection.scrollIntoView({ behavior: "smooth" });
+    calculatorSection?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const scrollToPricing = (e) => {
+  const scrollToPricing = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const pricingSection = document.getElementById("pricing-tiers");
-    pricingSection.scrollIntoView({ behavior: "smooth" });
+    pricingSection?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -162,7 +162,7 @@ const PricingPage = () => {
               could run between 2 to 3.5 credits all within the same video
               endpoint call. This unified credit system keeps pricing
               predictable, and combining models in a single-type request reduces
-              overhead compared to multiple separate calls.
+              overhead compared to multiple separate calls.{" "}
               <a
                 href="#calculator"
                 onClick={scrollToCalculator}
@@ -259,30 +259,35 @@ const PricingPage = () => {
           <div className="rounded-xl border border-borderColorPrimary p-8 bg-background">
             <div className="text-center mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                Credit Calculator
+                Credit Tools
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-                Estimate your API costs based on the models and request types
-                you plan to use.
+                Explore available models and estimate your API credit usage with
+                our simple tools.
               </p>
             </div>
 
-            <Card className="bg-background border border-borderColorPrimary rounded-lg hover:shadow-lg transition-all duration-200 group">
-              <CardContent className="p-10 text-center">
-                <div className="flex flex-col items-center">
-                  <div className="p-3 border-black border-2 dark:border-gray-500 rounded-lg mb-4 group-hover:bg-gray-100 dark:group-hover:bg-zinc-800 transition-colors">
-                    <Calculator className="w-6 h-6 text-black dark:text-white" />
-                  </div>
-                  <h3 className="text-xl font-normal text-gray-800 dark:text-gray-100 mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                    Interactive Calculator Coming Soon
-                  </h3>
-                  <p className="text-base text-muted-foreground max-w-md">
-                    Our interactive calculator will help you estimate your
-                    credit usage based on your specific needs and models.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+              <button
+                onClick={() => {
+                  // TODO: handle "View Available Models" click
+                }}
+                className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold transition-transform transform hover:scale-105"
+              >
+                View Available Models
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </button>
+
+              <button
+                onClick={() => {
+                  // TODO: handle "Credit Calculator" click
+                }}
+                className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold transition-transform transform hover:scale-105"
+              >
+                Credit Calculator
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </button>
+            </div>
           </div>
         </section>
 
