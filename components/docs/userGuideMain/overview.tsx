@@ -18,8 +18,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import ArticleFeedback from "../articleFeedback";
-import DocsFooter from "../simpleFooterDocs";
+
 
 const resourceCards = [
   {
@@ -136,7 +135,7 @@ export default function PlatformOverview() {
           </h2>
           <Link
             href="/model-glossary"
-            className="text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 flex items-center text-sm font-medium transition-colors duration-200"
+            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold transition-transform transform hover:scale-105"
           >
             All Models{" "}
             <ChevronRight className="w-4 h-4 ml-1 text-gray-500 dark:text-gray-400" />
@@ -223,7 +222,7 @@ export default function PlatformOverview() {
           <div className="mt-6 text-center">
             <Link
               href="/docs/api-reference"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
+              className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold transition-transform transform hover:scale-105"
             >
               Explore All APIs{" "}
               <ChevronRight className="w-4 h-4 inline text-gray-500 dark:text-gray-400" />

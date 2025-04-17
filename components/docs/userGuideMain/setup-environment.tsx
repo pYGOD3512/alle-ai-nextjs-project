@@ -192,7 +192,7 @@ client = AlleAIClient(api_key=os.getenv("ALLEAI_API_KEY", "your_secret_key"))`}
               <span>
                 <Link
                   href={"/docs/user-guides/first-request"}
-                  className=" text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
+                  className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold transition-transform transform hover:scale-105"
                 >
                   Proceed to First Request →
                 </Link>

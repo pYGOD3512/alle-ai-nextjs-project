@@ -266,16 +266,16 @@ export default function FirstRequest() {
         {/* deeper topics */}
         <div className="mt-6 mb-6">
           <h2 className="font-bold text-muted-foreground">
-            Dive deeper:{" "}
+            Dive deeper:&nbsp;
             <span>
               <Link
                 href={"/docs/api-reference/introduction"}
-                className=" text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold"
+                className=" inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold transition-transform transform hover:scale-105"
               >
-                API Reference →
+                &nbsp; API Reference → &nbsp;
               </Link>
             </span>
-            (streaming, advanced parameters)...
+            &nbsp; (streaming, advanced parameters)...
           </h2>
         </div>
       </section>
@@ -285,7 +285,7 @@ export default function FirstRequest() {
           <ArticleFeedback />
         </div>
         <div>
-            <DocsFooter/>
+          <DocsFooter />
         </div>
       </section>
     </main>
