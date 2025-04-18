@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { apiReference, mainUserGuides, tutorial } from "@/lib/constants/docs";
+import { apiReference, mainUserGuides } from "@/lib/constants/docs";
 
 export const useNavigation = () => {
   const pathname = usePathname();
@@ -143,6 +143,5 @@ export const useNavigation = () => {
     isActive,
     apiReference,
     mainUserGuides,
-    tutorial,
   };
 };

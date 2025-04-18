@@ -51,7 +51,7 @@ const faqComponents = {
   "image-generation": dynamic(
     () => import("@/components/docs/userGuides/image-generation")
   ),
-  limits: dynamic(() => import("@/components/docs/userGuides/limits")),
+  "usage-tiers": dynamic(() => import("@/components/docs/userGuides/usage-tiers")),
   "audio-generation": dynamic(
     () => import("@/components/docs/userGuides/audio-generation")
   ),
