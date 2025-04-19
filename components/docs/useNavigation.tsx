@@ -83,7 +83,13 @@ export const useNavigation = () => {
     e.preventDefault();
     if (!sectionHref) return;
 
-    const specialSections = ["rate-limits", "changelogs", "faq"];
+    const specialSections = [
+      "rate-limits",
+      "changelogs",
+      "faq",
+      "upload-files",
+      "error-handling",
+    ];
     const currentPath = pathname || "";
 
     const isInSpecialSection = specialSections.some((section) =>

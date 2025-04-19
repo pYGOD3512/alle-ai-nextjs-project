@@ -59,6 +59,8 @@ export default function Page() {
                 ? "User interface"
                 : title === "Pricing"
                 ? "Alle-AI Developer API Pricing"
+                : title === "Limits & Tiers"
+                ? "Rate Limits and Usage Tiers"
                 : title}
             </h2>
           </div>

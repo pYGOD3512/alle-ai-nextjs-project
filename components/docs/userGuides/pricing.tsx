@@ -2,7 +2,7 @@ import { useState } from "react";
 import { modelBasicInfo } from "@/lib/modelPricing";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import NavigationContainer from "@/components/NavigationContainer";
-
+import Link from "next/link";
 // Define the Model interfaces based on our pricing types
 type BaseModel = {
   id: string;
@@ -47,7 +47,9 @@ const PricingPage: React.FC = () => {
     {}
   );
 
-  const [expandedTypes, setExpandedTypes] = useState<Record<string, boolean>>({});
+  const [expandedTypes, setExpandedTypes] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const handleExpand = (type: string): void => {
     setExpandedTypes((prev) => ({
@@ -86,12 +88,15 @@ const PricingPage: React.FC = () => {
 
     return (
       <div key={type} className="mb-12">
-        <h2 className="text-xl font-bold mb-4 capitalize">{type} Models</h2>
+        <h2 className="text-xl font-bold mb-3 capitalize">{type} Models</h2>
         <p className="text-muted-foreground mb-6">
           {type === "chat" && "Pricing for chat-based language models"}
-          {type === "image" && "Pricing for image generation and editing models"}
-          {type === "audio" && "Pricing for audio processing and generation models"}
-          {type === "video" && "Pricing for video generation and editing models"}
+          {type === "image" &&
+            "Pricing for image generation and editing models"}
+          {type === "audio" &&
+            "Pricing for audio processing and generation models"}
+          {type === "video" &&
+            "Pricing for video generation and editing models"}
           {type === "multimodal" && "Pricing for multimodal AI models"}
         </p>
         <table className="w-full border-collapse">
@@ -267,13 +272,6 @@ const PricingPage: React.FC = () => {
 
   const ChatModelsSection = () => (
     <section className="mb-16">
-      <h2 className="text-2xl font-bold mb-6">Chat Models</h2>
-      <div className="text-muted-foreground mb-8">
-        <p>
-          Our chat models offer state-of-the-art natural language processing capabilities.
-          Pricing is based on input and output tokens, with competitive rates for high-volume usage.
-        </p>
-      </div>
       {/* Add any chat-specific content here */}
       {renderModelTable("chat")}
     </section>
@@ -281,13 +279,6 @@ const PricingPage: React.FC = () => {
 
   const ImageModelsSection = () => (
     <section className="mb-16">
-      <h2 className="text-2xl font-bold mb-6">Image Models</h2>
-      <div className="text-muted-foreground mb-8">
-        <p>
-          Transform your ideas into stunning visuals with our image generation and editing models.
-          Choose from various capabilities including image generation and editing features.
-        </p>
-      </div>
       {/* Add any image-specific content here */}
       {renderModelTable("image")}
     </section>
@@ -295,13 +286,6 @@ const PricingPage: React.FC = () => {
 
   const AudioModelsSection = () => (
     <section className="mb-16">
-      <h2 className="text-2xl font-bold mb-6">Audio Models</h2>
-      <div className="text-muted-foreground mb-8">
-        <p>
-          Process and generate audio with our advanced audio models.
-          Features include speech-to-text, text-to-speech, and audio generation capabilities.
-        </p>
-      </div>
       {/* Add any audio-specific content here */}
       {renderModelTable("audio")}
     </section>
@@ -309,13 +293,6 @@ const PricingPage: React.FC = () => {
 
   const VideoModelsSection = () => (
     <section className="mb-16">
-      <h2 className="text-2xl font-bold mb-6">Video Models</h2>
-      <div className="text-muted-foreground mb-8">
-        <p>
-          Create and edit videos using our cutting-edge video models.
-          Generate videos from text or edit existing videos with advanced AI capabilities.
-        </p>
-      </div>
       {/* Add any video-specific content here */}
       {renderModelTable("video")}
     </section>
@@ -326,12 +303,18 @@ const PricingPage: React.FC = () => {
       {/* Header */}
       <div className="text-muted-foreground max-w-3xl mb-12">
         <p>
-          AlleAI unites the world's best AI models for chat, image, audio, and
-          video into a single, powerful API. Our credit-based system makes
-          accessing these diverse capabilities simple, transparent, and
-          cost-effective. With one API request, you can combine multiple models
-          to generate or edit text, visuals, audio, or videos, tailored to your
-          project's needs.
+          AlleAI provides a unified API that lets you access a wide range of AI
+          capabilities across chat, image, audio, and video models from leading
+          providers. We offer transparent, per-request pricing based on the
+          individual rates of each model, allowing you to seamlessly integrate
+          multiple AI services in a single call. Simply go to{" "}
+          <span className=" font-bold capitalize text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 ">
+            <Link href={"#"}>API settings</Link>
+          </span>
+          &nbsp; to purchase or load your prepaid credits, and each API request
+          will be billed against your balance. As you make requests, your
+          credits will be consumed accordingly, offering flexibility and control
+          over your usage
         </p>
       </div>
 
